@@ -1,0 +1,38 @@
+[% USE HTML %]
+
+[% PROCESS site/navbar.tt %]
+
+<form method="post">
+<table><tr><td>
+<table style="width: 100%;" class="outlined">
+<tr><td class="heading-bar" colspan="2">general settings</td></tr>
+<tr><td class="label0">key</td><td class="field0">[% HTML.escape(current_site.key) %]</td></tr>
+<tr><td class="label1">name</td><td class="field1"><input type="text" name="name" size="50" maxlength="256" value="[% HTML.escape(current_site.name) %]" /></td></tr>
+<tr><td class="label0">email</td><td class="field0"><input type="text" name="email" size="50" maxlength="256" value="[% HTML.escape(current_site.email) %]" /></td></tr>
+<tr><td class="label1">proxy prefix</td><td class="field1"><input type="text" name="proxy_prefix" size="50" maxlength="256" value="[% HTML.escape(current_site.proxy_prefix) %]" /></td></tr>
+<tr><td class="label0">proxy prefix alternate</td><td class="field0"><input type="text" name="proxy_prefix_alternate" size="50" maxlength="256" value="[% HTML.escape(current_site.proxy_prefix_alternate) %]" /></td></tr>
+<tr><td class="label1">show resource ERM</td><td class="field1"><select name="show_ERM"><option value="1" [% 'selected="selected"' IF current_site.show_ERM %]>Yes</option><option value="0" [% 'selected="selected"' UNLESS current_site.show_ERM %]>No</option></td></tr>
+</table>
+</td></tr>
+<tr><td><br /></td></tr>
+<tr><td>
+<table style="width: 100%;" class="outlined">
+<tr><td class="heading-bar">domains</td><td  style="text-align: right; width: 10%; background: white;"><a href="[% base_url%]/site/ips">edit</a>&nbsp;&nbsp;</tr>
+[% FOREACH domain IN current_site.domains %]
+	<tr><td class="field[% loop.count % 2 %]" colspan="2">[% domain.domain %]</td></tr>
+[% END %]
+</table>
+</td></tr>
+<tr><td><br /></td></tr>
+<tr><td>
+<table style="width: 100%;" class="outlined"> 
+<tr><td class="heading-bar">IP networks</td><td style="text-align: right; width: 10%; background: white;"><a href="[% base_url%]/site/ips">edit</a>&nbsp;&nbsp;</td></tr>
+[% FOREACH ip IN current_site.ips %]
+	<tr><td class="field[% loop.count % 2 %]" colspan="2">[% ip.network %]</td></tr>
+[% END %]
+</table>
+</td></tr>
+<tr><td><br /><input type="submit" value="submit" name="submit" /> <input type="submit" name="cancel" value="cancel" /></td></tr>
+</table>
+
+</form>

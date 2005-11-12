@@ -1,0 +1,3 @@
+<table id="page_header" cellspacing="0" cellpadding="0">
+<tr><td width="153" height="82"><img width="153" height="82" src="[% image_dir %]cufts_logo.jpg" /></td><td width="547" height="82"><img src="[% image_dir %]cufts_top_main.jpg" width="547" height="82" /></td><td align="right" height="82" width="100%" background="[% image_dir %]cufts_top_tile.gif" /><img height="82" src="[% image_dir %]titles/[% header_image OR 'spacer.gif' %]" /></td></tr>
+</table>

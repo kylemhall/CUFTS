@@ -1,0 +1,26 @@
+<form>
+<table><tr><td>
+<table style="width: 100%;" class="outlined">
+<tr><td class="heading-bar">site domains</td></tr>
+[% FOREACH domain IN current_site.domains.sort('domain') %]
+ <tr><td><input type="text" name="domain[% domain.id %]" VALUE="[% domain.domain %]"></td></tr>
+[% END %]
+
+<tr><td><input type="text" name="domainnew" value=""></td></tr>
+</table>
+</td></tr>
+<tr><td><br /></td></tr>
+<tr><td>
+<table class="outlined" style="width: 100%">
+<tr><td class="heading-bar">site IPs networks</td></tr>
+[% FOREACH ip IN current_site.ips.sort('network') %]
+ <tr><td><input type="text" name="ip[% ip.id %]" value="[% ip.network %]"></td></tr>
+[% END %]
+<tr><td><input type="text" name="ipnew" value=""></td></tr>
+</table>
+</td></tr>
+
+<tr><td><br />
+<input type="submit" name="submit" value="submit"> <input type="submit" name="cancel" value="cancel">
+</table>
+</form>

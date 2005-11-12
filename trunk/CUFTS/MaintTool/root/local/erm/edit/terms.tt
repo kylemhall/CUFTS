@@ -1,0 +1,22 @@
+[% USE HTML %]
+
+<div style="padding-bottom: .5em"><span class="heading">[% local_resource.name || global_resource.name %]</span></div>
+
+[% PROCESS local/erm/edit/menu.tt %]
+
+<form>
+<table class="outlined">
+<tr><td class="heading-bar" colspan="2">Terms</td></tr>
+<tr><td class="label0">simultaneous users</td><td class="field0"><input type="text" name="erm_terms_simultaneous_users" size="50" maxlength="256" value="[% HTML.escape(local_resource.erm_terms_simultaneous_users) %]"></td></tr>
+<tr><td class="label1">allows ILL</td><td class="field1"><select name="erm_terms_allows_ill"><option value=""></option><option value="1" [% IF local_resource.erm_terms_allows_ill == '1' %]selected="selected"[% END %]>Yes</option><option value="0" [% IF local_resource.erm_terms_allows_ill == '0' %]selected="selected"[% END %]>No</option></select></td></tr>
+<tr><td class="label0">ILL notes</td><td class="field0"><textarea name="erm_terms_ill_notes" cols="80" rows="5">[% HTML.escape(local_resource.erm_terms_ill_notes) %]</textarea></td></tr>
+<tr><td class="label1">allows e-reserves</td><td class="field1"><select name="erm_terms_allows_ereserves"><option value=""></option><option value="1" [% IF local_resource.erm_terms_allows_ereserves == '1' %]selected="selected" [% END %]>Yes</option><option value="0" [% IF local_resource.erm_terms_allows_ereserves == '0' %]selected="selected"[% END %]>No</option></select></td></tr>
+<tr><td class="label0">e-reserves notes</td><td class="field0"><textarea name="erm_terms_ereserves_notes" cols="80" rows="5">[% HTML.escape(local_resource.erm_terms_ereserves_notes) %]</textarea></td></tr>
+<tr><td class="label1">allows coursepacks</td><td class="field1"><select name="erm_terms_allows_coursepacks"><option value=""></option><option value="1" [% IF local_resource.erm_terms_allows_coursepacks == '1' %]selected="selected"[% END %]>Yes</option><option value="0" [% IF local_resource.erm_terms_allows_coursepacks == '0' %]selected="selected"[% END %]>No</option></select></td></tr>
+<tr><td class="label0">coursepacks notes</td><td class="field0"><textarea name="erm_terms_coursepacks_notes" cols="80" rows="5">[% HTML.escape(local_resource.erm_terms_coursepacks_notes) %]</textarea></td></tr>
+<tr><td class="label1">notes</td><td class="field1"><textarea name="erm_terms_notes" cols="80" rows="5">[% HTML.escape(local_resource.erm_terms_notes) %]</textarea></td></tr>
+</table>
+<br />
+<input type="submit" name="submit" value="submit"> <input type="submit" name="cancel" value="cancel">
+</form>
+
