@@ -1,0 +1,58 @@
+[% USE HTML %]
+
+ <div id="availability" class="details">
+ <div id="availability-heading" class="details-headings">Availability</div>
+ [% FOREACH link IN journal.links.sort('rank').reverse %]
+  [% SET local_resource = link.resource %]
+  <!-- local_resource.id : [% local_resource.id %]-->
+  [% IF local_resource.id %]
+   [% NEXT UNLESS local_resource.active %]
+  [% END %]
+
+  <div class="availability-resource">[% link.name %]</div>
+
+  [% IF link.print_coverage %]
+   <div class="availability-label">Print Coverage:</div>
+   <div class="availability-data">[% HTML.escape(link.print_coverage).replace("\n", "<br />\n") %]</div>
+  [% END %]
+
+  [% IF link.citation_coverage AND site.cjdb_show_citations == 'true' %]
+   <div class="availability-label">Citation Coverage:</div>
+   <div class="availability-data">[% HTML.escape(link.citation_coverage) %]</div>
+  [% END %]
+
+  [% IF link.fulltext_coverage %]
+   <div class="availability-label">Fulltext Coverage:</div>
+   <div class="availability-data">[% HTML.escape(link.fulltext_coverage) %]</div>
+  [% END %]
+
+  [% IF link.embargo %]
+   <div class="availability-label">Embargo Period:</div>
+   <div class="availability-data">[% HTML.escape(link.embargo) %]</div>
+  [% END %]
+
+  <div class="availability-label">Link:</div>
+  <div class="availability-data"><a href="[% link.URL %]">[% link.link_label | html %]</a></div>
+
+  [% SET journal_note = link.local_journal_cjdb_note %]
+  [% IF journal_note %]
+   <div class="availability-journal-note">
+    <div class="availability-label">Journal Note:</div>
+    <div class="availability-data">
+     [% journal_note | html %]
+    </div>
+   </div>
+  [% END %]
+
+  [% SET resource_note = local_resource.cjdb_note %]
+  [% IF resource_note %]
+   <div class="availability-resource-note">
+    <div class="availability-label">Resource Note:</div>
+    <div class="availability-data">
+     [% resource_note | html %]
+    </div>
+   </div>
+  [% END %]
+
+ [% END %]
+ </div> <!-- availability -->

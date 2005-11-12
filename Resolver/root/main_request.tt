@@ -1,0 +1,39 @@
+<div id="request">
+<div class="request-label">title</div>
+<div class="request-field">
+[% IF request.atitle.defined %]
+ [% request.atitle %]
+[% ELSE %]
+ [% UNLESS request.issn.defined || request.eissn.defined %]
+  [% request.title || request.stitle %]
+ [% END %]
+[% END %]
+</div>
+
+<div class="request-label">source</div>
+<div class="request-field">
+[% IF request.issn.defined || request.eissn.defined %]
+ [% request.title || request.stitle %]
+[% END %]
+
+[% IF request.issn.defined %][[% request.issn %]][% END %]
+[% IF request.eissn.defined %][[% request.eissn %] (e-issn)][% END %]
+[% IF request.isbn.defined %][[% request.isbn %]][% END %]
+
+
+<br />
+ 
+[% IF request.volume.defined %]volume: [% request.volume %][% END %]
+[% IF request.issue.defined %]issue: [% request.issue %][% END %]
+[% IF request.pages.defined %]
+ pages: [% request.pages %]
+[% ELSIF request.spage.defined && request.epage.defined %]
+ pages: [% request.spage %]-[% request.epage %]
+[% ELSIF request.spage.defined %]
+ start page: [% request.spage %]
+[% END %]
+[% IF request.date.defined %]date: [% request.date %][% END %]
+</div>
+[% IF request.doi.defined %]<div class="request-label">doi</div><div class="request-field">[% request.doi %]</div>[% END %]
+[% IF request.oai.defined %]<div class="request-label">doi</div><div class="request-field">[% request.oai %]</div>[% END %]
+</div>

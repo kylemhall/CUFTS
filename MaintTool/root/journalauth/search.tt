@@ -1,0 +1,34 @@
+[% USE HTML %]
+[% USE url %]
+
+<div>
+<form method="post">
+Search:
+<input type="text" name="string" value="" size="30" maxlength="128" />
+in
+<select name="field"><option value="official_title">official title</option><option value="title">titles</option><option value="issn">ISSNs</option></select>
+<input type="submit" name="search" value="search">
+<input type="submit" name="cancel" value="cancel">
+</div>
+
+<div style="margin-top: 1em;">
+
+[% FOREACH journal_auth IN journal_auths %]
+ <div>
+ <span class="heading">[% journal_auth.title %]</span> [% FOREACH issn IN journal_auth.issns %]([% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %]) [% END %]
+ <a href="[% url("$url_base/journalauth/edit_marc/$journal_auth.id") %]">edit MARC</a><br />
+ [% FOREACH title IN journal_auth.titles %]
+  [% title.title | html %]<br />
+ [% END %]
+ <div id="journal-auth-marc-[% journal_auth.id %]" class="journal-auth-marc-dump">
+  [% IF journal_auth.marc %]
+   <pre>[% journal_auth.marc_object.as_formatted %]</pre>
+  [% ELSE %]
+   No MARC data
+  [% END %]
+ </div>
+ </div>
+[% END %]
+
+</div>
+</form>

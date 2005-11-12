@@ -1,0 +1,30 @@
+[% USE url %]
+
+[% INCLUDE page_title.tt %]
+
+[% search_details.count %] [% INCLUDE browse_search_description.tt browse_type = browse_type, search_type = search_type, search_terms = search_terms, browse_field = browse_field %]
+
+[% INCLUDE paging.tt browse_field=browse_field, search_field=search_field, browse_type=browse_type, search_details=search_details %]
+
+[%# "USE url" goes here because paging also uses URL and sets a base URL.  This re-sets it to nothing. %]
+[% USE url %]
+
+[% FOREACH record = records %]
+
+ [% # if the record set is titles, we should use the matched title to display, otherwise use the real journal title %]
+ [% IF browse_type == 'titles' %]
+  [% SET journal = record.journal %]
+  [% SET title = record.title %]
+ [% ELSE %]
+  [% SET journal = record %]
+  [% SET title = journal.title %]
+ [% END %]
+
+ <div class="unified-journal">
+  <span class="unified-title"><a href="[% url("$url_base/journal/$journal.id") %]">[% title | html %]</a></span>
+  <span class="unified-issn">[% FOREACH issn IN journal.issns %][% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %][% ',' UNLESS loop.last %][% END %]</span>
+  <br />
+
+  [% IF show_unified %][% INCLUDE browse_journals_unified_data.tt journal=journal, current_site=current_site %][% END %]
+ </div>
+[% END %]

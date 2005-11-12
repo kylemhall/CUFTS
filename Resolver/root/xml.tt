@@ -1,0 +1,27 @@
+[%- CALL c.response.content_type('text/xml') -%]
+<?xml version="1.0" ?>
+<CUFTS>
+[% FOREACH compiled_result IN results %]
+	[% SET resource = compiled_result.resource %]
+	[% SET resource_name = resource.name %]
+	<resource name="[% resource_name | html %]" rank="[% resource.rank || '0' %]" provider="[% resource.provider | html %]">
+	[% FOREACH service_name IN compiled_result.services.keys.sort %]
+		[% SET service = compiled_result.services.$service_name.service %]
+		<service name="[% service_name | html %]">
+		[% FOREACH result IN compiled_result.services.$service_name.results %]
+			<result>
+				<url>[% result.url | html %]</url>
+				[% IF result.atitle.defined %]<title>[% result.atitle | html %]</title>[% END %]
+				[% SET record = result.record %]
+				[% IF record.defined %]
+					[% IF record.ft_start_date.defined %]<ft_start_date>[% record.ft_start_date | html %]</ft_start_date>[% END %]
+					[% IF record.ft_end_date.defined %]<ft_end_date>[% record.ft_end_date | html %]</ft_end_date>[% END %]
+				[% END %]
+			</result>
+		[% END %]
+		</service>
+	[% END %]
+	<site>[% compiled_result.resource.site.key %]</site>
+	</resource>
+[% END %]
+</CUFTS>
