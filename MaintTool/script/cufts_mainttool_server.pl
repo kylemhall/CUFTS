@@ -2,7 +2,7 @@
 
 BEGIN { 
     $ENV{CATALYST_ENGINE} ||= 'HTTP';
-    $ENV{CATALYST_SCRIPT_GEN} = 10;
+    $ENV{CATALYST_SCRIPT_GEN} = 11;
 }  
 
 use strict;
@@ -11,6 +11,7 @@ use Pod::Usage;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
+my $debug         = 0;
 my $fork          = 0;
 my $help          = 0;
 my $host          = undef;
@@ -22,6 +23,7 @@ my $restart_regex = '\.yml$|\.yaml$|\.pm$';
 my @argv = @ARGV;
 
 GetOptions(
+    'debug|d'           => \$debug,
     'fork'              => \$fork,
     'help|?'            => \$help,
     'host=s'            => \$host,
@@ -35,6 +37,9 @@ pod2usage(1) if $help;
 
 if ( $restart ) {
     $ENV{CATALYST_ENGINE} = 'HTTP::Restarter';
+}
+if ( $debug ) {
+    $ENV{CATALYST_DEBUG} = 1;
 }
 
 require CUFTS::MaintTool;
@@ -58,6 +63,7 @@ cufts_mainttool_server.pl - Catalyst Testserver
 cufts_mainttool_server.pl [options]
 
  Options:
+   -d -debug          force debug mode
    -f -fork           handle each request in a new process
                       (defaults to false)
    -? -help           display this help and exits
