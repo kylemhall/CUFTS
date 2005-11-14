@@ -2,8 +2,7 @@ package CUFTS::Resolver;
 
 use strict;
 
-#use Catalyst qw/Static::Simple/;
-use Catalyst qw/-Debug Static::Simple/;
+use Catalyst qw/Static::Simple/;
 use lib '../lib';
 use CUFTS::Config;
 

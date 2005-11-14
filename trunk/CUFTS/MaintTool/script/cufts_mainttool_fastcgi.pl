@@ -30,7 +30,7 @@ cufts_mainttool_fastcgi.pl - Catalyst FastCGI
 
 =head1 SYNOPSIS
 
-cufts_mainttool_server.pl [options]
+cufts_mainttool_fastcgi.pl [options]
  
  Options:
    -? -help      display this help and exits

@@ -1,7 +1,7 @@
 package CUFTS::MaintTool;
 
 use strict;
-use Catalyst qw/-Debug Session::FastMmap Static::Simple FormValidator CUFTS::MaintTool::FillInForm/;
+use Catalyst qw/Session::FastMmap Static::Simple FormValidator CUFTS::MaintTool::FillInForm/;
 use lib '../lib';
 use CUFTS::Config;
 

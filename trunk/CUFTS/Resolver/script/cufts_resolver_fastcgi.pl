@@ -30,7 +30,7 @@ cufts_resolver_fastcgi.pl - Catalyst FastCGI
 
 =head1 SYNOPSIS
 
-cufts_resolver_server.pl [options]
+cufts_resolver_fastcgi.pl [options]
  
  Options:
    -? -help      display this help and exits

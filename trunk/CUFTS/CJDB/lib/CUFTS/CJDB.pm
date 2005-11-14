@@ -1,7 +1,7 @@
 package CUFTS::CJDB;
 
 use strict;
-use Catalyst qw/Session::FastMmap Static::Simple FormValidator FillInForm -Debug/;
+use Catalyst qw/Session::FastMmap Static::Simple FormValidator FillInForm/;
 use lib '../lib';
 use CUFTS::Config;
 use CUFTS::CJDB::Util;
