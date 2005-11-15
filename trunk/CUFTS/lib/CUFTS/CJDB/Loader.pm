@@ -149,11 +149,25 @@ sub load_titles {
 
     my @search_titles;
 
+    # Add the main journal record title to the titles table
+
     my $title               = $journal->title;
     my $sort_title          = $journal->sort_title;
     my $stripped_sort_title = $journal->stripped_sort_title;
 
     push @search_titles, [ $stripped_sort_title, $sort_title, 1 ];
+
+    # Add the print title if it's different than the main title.
+    # This happens if a second print record matches an earlier loaded
+    # print record.
+
+    my $record_sort_title = $self->get_sort_title($record);
+    my $record_stripped_sort_title = $self->strip_title($record_sort_title);
+    if ($record_stripped_sort_title ne $stripped_sort_title) {
+            push @search_titles, [$record_stripped_sort_title, $record_sort_title, 0];
+    }
+
+    # Add alternate titles
 
     push @search_titles, $self->get_alt_titles($record);
 
