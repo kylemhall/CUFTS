@@ -27,6 +27,8 @@ CREATE TABLE local_journals (
 	embargo_months	INTEGER,		/* Number of months title is embargoed */
 	embargo_days	INTEGER,		/* Number of days title is embargoed */
 
+    journal_auth    INTEGER,
+
 	created		TIMESTAMP NOT NULL DEFAULT NOW(),
 	scanned		TIMESTAMP NOT NULL DEFAULT NOW(),
 	modified	TIMESTAMP NOT NULL DEFAULT NOW()
