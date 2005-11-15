@@ -88,9 +88,8 @@ sub process_record {
 	my ($record) = @_;
 
 	my $journal = $loader->load_journal($record);
-	defined($journal) or
-		next;
-
+	return if !defined($journal);
+	
 	$loader->load_titles($record, $journal);
 
 	$loader->load_MARC_subjects($record, $journal);
