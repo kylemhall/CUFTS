@@ -48,11 +48,12 @@ table.grid {
 
 table.grid td {
 	border: 1px solid #004997;
+	padding: 3px 5px 1px 5px;
 }
 
 table.grid td.heading {
 	background: #001457;
-	color: white;
+//	color: white;
 }
 
 
@@ -190,7 +191,7 @@ td.field1 {
 
 td.active-field0 {
 	padding-right: 5px;
-	padding-left: 5px;
+	padding-left: 25px;
 	background: white;
 	color: black;
 }

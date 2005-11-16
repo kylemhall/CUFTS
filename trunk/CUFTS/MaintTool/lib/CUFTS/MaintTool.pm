@@ -15,7 +15,6 @@ CUFTS::MaintTool->config(
 #	url_base => 'http://proxy2.lib.sfu.ca:8033/CUFTS/maint',
 	url_base => 'http://localhost:3000',
 	default_display_per_page => 50,
-	root     => '/usr/local/devel/CUFTS/MaintTool/root/',
 );
 
 
