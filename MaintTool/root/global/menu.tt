@@ -12,7 +12,7 @@
 [% FOREACH resource IN resources.sort('name') %]
  [% SET class = (resource.active ? 'active-field' : 'inactive-field') _ (loop.count % 2) %]
  <tr>
- <td class="[% class %]">
+ <td class="[% class %]" style="white-space: nowrap;">
   <a href="[% url_base %]/global/view/[% resource.id %]">view</a> | 
   <a href="[% url_base %]/global/edit/[% resource.id %]">edit</a> | 
   <a href="[% url_base %]/global/delete/[% resource.id %]" onClick="return confirmDelete()">delete</a>
