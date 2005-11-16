@@ -775,9 +775,6 @@ sub _match_on {
 		}
 	}
 
-	use Data::Dumper;
-	warn(Dumper($search));
-
 	my @matches = $module->search_where($search);
 
 	return \@matches;
