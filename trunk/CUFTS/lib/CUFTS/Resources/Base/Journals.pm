@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -35,578 +35,635 @@ use SQL::Abstract;
 ##
 
 sub global_db_module {
-	return 'CUFTS::DB::Journals';
+    return 'CUFTS::DB::Journals';
 }
 
 sub active_global_db_module {
-	return 'CUFTS::DB::JournalsActive';
+    return 'CUFTS::DB::JournalsActive';
 }
 
 sub local_db_module {
-	return 'CUFTS::DB::LocalJournals';
+    return 'CUFTS::DB::LocalJournals';
 }
 
 sub has_title_list {
-	return 1;
+    return 1;
 }
 
 sub global_resource_details {
-	return [qw(database_url notes_for_local)];
+    return [qw(database_url notes_for_local)];
 }
 
 sub local_resource_details {
-	return [qw(database_url cjdb_note)];
+    return [qw(database_url cjdb_note)];
 }
 
 sub overridable_resource_details {
-	return [qw(database_url cjdb_note)];
+    return [qw(database_url cjdb_note)];
 }
 
 sub resource_details_help {
-	return {
-		%{$_[0]->SUPER::resource_details_help},
-		'database_url' => "URL linking to the resource at a database level.\nOnly necessary when linking to local resource or gateway.",
-		'notes_for_local' => "Notes which will be displayed when editing the\nlocal resource.",
-	}
-};
-
-sub help_template {
-	return 'help/journals_common';
+    return {
+        %{ $_[0]->SUPER::resource_details_help },
+        'database_url' =>
+            "URL linking to the resource at a database level.\nOnly necessary when linking to local resource or gateway.",
+        'notes_for_local' =>
+            "Notes which will be displayed when editing the\nlocal resource.",
+    };
 }
 
+sub help_template {
+    return 'help/journals_common';
+}
 
 # Ordered field list for setting up display, editting, and export tables
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		e_issn
-		ft_start_date
-		ft_end_date
-		embargo_months
-		embargo_days
-		vol_ft_start
-		vol_ft_end
-		iss_ft_start
-		iss_ft_end
-		
-		cit_start_date
-		cit_end_date
-		vol_cit_start
-		vol_cit_end
-		iss_cit_start
-		iss_cit_end
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            e_issn
+            ft_start_date
+            ft_end_date
+            embargo_months
+            embargo_days
+            vol_ft_start
+            vol_ft_end
+            iss_ft_start
+            iss_ft_end
+
+            cit_start_date
+            cit_end_date
+            vol_cit_start
+            vol_cit_end
+            iss_cit_start
+            iss_cit_end
+            )
+    ];
 }
 
 sub overridable_title_list_fields {
-	return [qw(
-		ft_start_date
-		ft_end_date
-		vol_ft_start
-		vol_ft_end
-		iss_ft_start
-		iss_ft_end
-		embargo_months
-		embargo_days
-		current_months
+    return [
+        qw(
+            ft_start_date
+            ft_end_date
+            vol_ft_start
+            vol_ft_end
+            iss_ft_start
+            iss_ft_end
+            embargo_months
+            embargo_days
+            current_months
 
-		cit_start_date
-		cit_end_date
-		vol_cit_start
-		iss_cit_start
-		vol_cit_end
-		iss_cit_end		
+            cit_start_date
+            cit_end_date
+            vol_cit_start
+            iss_cit_start
+            vol_cit_end
+            iss_cit_end
 
-		cjdb_note
-	)];
+            cjdb_note
+            )
+    ];
 }
 
-sub title_list_field_map {  
-        return {
-                'title'                 => 'title',
-                'issn'                  => 'issn',
-                'e_issn'                => 'e_issn',
-                'ft_start_date'         => 'ft_start_date',
-                'ft_end_date'           => 'ft_end_date',
-                'cit_start_date'        => 'cit_start_date',
-                'cit_end_date'          => 'cit_end_date',
-                'vol_ft_start'          => 'vol_ft_start',
-                'vol_ft_end',           => 'vol_ft_end',
-                'iss_ft_start'          => 'iss_ft_start',
-                'iss_ft_end'            => 'iss_ft_end',
-                'db_identifier'         => 'db_identifier',
-                'journal_url'           => 'journal_url',
-                'embargo_days'          => 'embargo_days',
-                'embargo_months'        => 'embargo_months',
-                'publisher'		=> 'publisher',
-                'abbreviation'		=> 'abbreviation',
-                'current_months'	=> 'current_months',
-                'cjdb_note'		=> 'cjdb_note',
-        };
+sub title_list_field_map {
+    return {
+        'title'          => 'title',
+        'issn'           => 'issn',
+        'e_issn'         => 'e_issn',
+        'ft_start_date'  => 'ft_start_date',
+        'ft_end_date'    => 'ft_end_date',
+        'cit_start_date' => 'cit_start_date',
+        'cit_end_date'   => 'cit_end_date',
+        'vol_ft_start'   => 'vol_ft_start',
+        'vol_ft_end',    => 'vol_ft_end',
+        'iss_ft_start'   => 'iss_ft_start',
+        'iss_ft_end'     => 'iss_ft_end',
+        'db_identifier'  => 'db_identifier',
+        'journal_url'    => 'journal_url',
+        'embargo_days'   => 'embargo_days',
+        'embargo_months' => 'embargo_months',
+        'publisher'      => 'publisher',
+        'abbreviation'   => 'abbreviation',
+        'current_months' => 'current_months',
+        'cjdb_note'      => 'cjdb_note',
+    };
 }
 
 sub local_matchable_on_columns {
-	return ['', 'issn', 'title', 'issn,title'];
+    return [ '', 'issn', 'title', 'issn,title' ];
 }
 
 sub local_to_global_field {
-	return 'journal';
+    return 'journal';
 }
 
 # Returns an array ref for plugging into Abstract::SQL for filtering
-# records for display.  Done here so we can optimize ISSN search, 
+# records for display.  Done here so we can optimize ISSN search,
 # remove ISSNs from search if they'll never match, etc.
 
 sub filter_on {
-	my ($class, $string) = @_;
-	
-	if ($string =~ s/^(\d{4})-?(\d{3}[\dxX])$/$1$2/) {
-		$string = uc($string);
-		return ['issn' => $string, 'e_issn' => $string ];
-	} elsif ($string =~ /[^-0-9xX]/) {
-		return ['title' => {ilike => "\%$string\%"}];
-	} else {
-		return [
-			'title'  => {ilike => "\%$string\%"},
-			'issn'   => {ilike => "\%$string\%"}, 
-			'e_issn' => {ilike => "\%$string\%"}
-		       ];
-	}
+    my ( $class, $string ) = @_;
+
+    if ( $string =~ s/^(\d{4})-?(\d{3}[\dxX])$/$1$2/ ) {
+        $string = uc($string);
+        return [ 'issn' => $string, 'e_issn' => $string ];
+    }
+    elsif ( $string =~ /[^-0-9xX]/ ) {
+        return [ 'title' => { ilike => "\%$string\%" } ];
+    }
+    else {
+        return [
+            'title'  => { ilike => "\%$string\%" },
+            'issn'   => { ilike => "\%$string\%" },
+            'e_issn' => { ilike => "\%$string\%" }
+        ];
+    }
 }
 
-
 sub clean_data {
-	my ($class, $record) = @_;
-	
-	my @errors;	
+    my ( $class, $record ) = @_;
 
-	# Validate ISSN
+    my @errors;
 
-	if (defined($record->{'issn'})) {
-		if ($record->{'issn'} =~ /(\d{4})[-\s]?(\d{3}[\dxX])/) {
-			$record->{'issn'} = uc("$1$2");
-		} else {
-			push @errors, 'ISSN is not valid: ' . $record->{'issn'};
-		}
-	}
+    # Validate ISSN
 
-	# Validate e-ISSN
+    if ( defined( $record->{'issn'} ) ) {
+        if ( $record->{'issn'} =~ / (\d{4}) [-\s]? (\d{3}[\dxX]) /xsm ) {
+            $record->{'issn'} = uc("$1$2");
+        }
+        else {
+            push @errors, 'ISSN is not valid: ' . $record->{'issn'};
+        }
+    }
 
-	if (defined($record->{'e_issn'})) {
-		if ($record->{'e_issn'} =~ /(\d{4})[-\s]?(\d{3}[\dxX])/) {
-			$record->{'e_issn'} = uc("$1$2");
-		} else {
-			push @errors, 'e-ISSN is not valid: ' . $record->{'e_issn'};
-		}
-	}
+    # Validate e-ISSN
 
-	# Remove extra spaces from titles
-	
-	$record->{'title'} =~ s/^\s+//;
-	$record->{'title'} =~ s/\s+$//;
+    if ( defined( $record->{'e_issn'} ) ) {
+        if ( $record->{'e_issn'} =~ / (\d{4}) [-\s]? (\d{3}[\dxX]) /xsm ) {
+            $record->{'e_issn'} = uc("$1$2");
+        }
+        else {
+            push @errors, 'e-ISSN is not valid: ' . $record->{'e_issn'};
+        }
+    }
 
-	# Check to make sure there's an (e-)ISSN or title
+    # Remove extra spaces from titles
 
-	unless ( (defined($record->{'issn'}) && $record->{'issn'} ne '') ||
-	         (defined($record->{'e_issn'}) && $record->{'e_issn'} ne '') ||
-	         (defined($record->{'title'}) && $record->{'title'} ne '') ) {
-		push @errors, 'Neither ISSN or title are defined';
-	}
+    $record->{'title'} =~ s/^\s+//;
+    $record->{'title'} =~ s/\s+$//;
 
-	push @errors, @{$class->clean_data_dates($record)};
+    # Check to make sure there's an (e-)ISSN or title
 
-	push @errors, @{$class->SUPER::clean_data($record)};
+    unless ( ( defined( $record->{'issn'} ) && $record->{'issn'} ne '' )
+          || ( defined( $record->{'e_issn'} ) && $record->{'e_issn'} ne '' )
+          || ( defined( $record->{'title'} )  && $record->{'title'}  ne '' ) )
+    {
+        push @errors, 'Neither ISSN or title are defined';
+    }
 
-	return \@errors;
+    push @errors, @{ $class->clean_data_dates($record) };
+    push @errors, @{ $class->SUPER::clean_data($record) };
+
+    return \@errors;
 }
 
 sub duplicate_for_loading_fields {
-	return ['issn', 'e_issn', 'title'];
+    return [ 'issn', 'e_issn', 'title' ];
 }
 
 sub clean_data_dates {
-	my ($class, $record) = @_;
+    my ( $class, $record ) = @_;
 
-	my @end = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
-	
-	# Set incomplete start date fields to -01 or -01-01
+    my @end = ( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
 
-	foreach my $field (keys %$record) {
-		next unless $field =~ /start_date$/;
-		next unless assert_ne($record->{$field});
-		
-		if ($record->{$field} =~ /^(\d{4})-(\d{2})$/) {
-			$record->{$field} = "$1-$2-01";
-		} elsif ($record->{$field} =~ /^(\d{4})$/) {
-			$record->{$field} = "$1-01-01";
-		}
-	}
+    # Set incomplete start date fields to -01 or -01-01
 
-	foreach my $field (keys %$record) {
-		next unless $field =~ /end_date$/;
-		next unless assert_ne($record->{$field});
-		
-		if ($record->{$field} =~ /^(\d{4})-(\d{2})$/) {
-			$record->{$field} = "$1-$2-" . $end[$2 - 1];
-		} elsif ($record->{$field} =~ /^(\d{4})$/) {
-			$record->{$field} = "$1-12-31";
-		}
-	}
-	
-	return [];
+    foreach my $field ( keys %$record ) {
+        next unless $field =~ /start_date$/;
+        next unless assert_ne( $record->{$field} );
+
+        if ( $record->{$field} =~ /^(\d{4})-(\d{2})$/ ) {
+            $record->{$field} = "$1-$2-01";
+        }
+        elsif ( $record->{$field} =~ /^(\d{4})$/ ) {
+            $record->{$field} = "$1-01-01";
+        }
+    }
+
+    foreach my $field ( keys %$record ) {
+        next unless $field =~ /end_date$/;
+        next unless assert_ne( $record->{$field} );
+
+        if ( $record->{$field} =~ /^(\d{4})-(\d{2})$/ ) {
+            $record->{$field} = "$1-$2-" . $end[ $2 - 1 ];
+        }
+        elsif ( $record->{$field} =~ /^(\d{4})$/ ) {
+            $record->{$field} = "$1-12-31";
+        }
+    }
+
+    return [];
 }
 
-
 sub _find_existing_title {
-	my ($class, $resource_id, $record, $local) = @_;
+    my ( $class, $resource_id, $record, $local ) = @_;
 
-	$^W=0;
-	$local = ($local == 1 || $local eq 'local') ? 'local' : 'global';
-	$^W=1;
+    $^W    = 0;
+    $local = ( $local == 1 || $local eq 'local' ) ? 'local' : 'global';
+    $^W    = 1;
 
-	no strict 'refs';
+    no strict 'refs';
 
-	my $method = "${local}_db_module";
-	my $module = $class->$method or
-		CUFTS::Exception::App->throw("resource does not have an associated database module for loading title lists");
-		
+    my $method = "${local}_db_module";
+    my $module = $class->$method
+        or CUFTS::Exception::App->throw(
+        "resource does not have an associated database module for loading title lists"
+        );
 
-	my $search = {'resource' => $resource_id};
-	$search->{'issn'} = $record->{'issn'} if defined($record->{'issn'}) && $record->{'issn'} ne '';
-	$search->{'title'} = $record->{'title'} if defined($record->{'title'}) && $record->{'title'} ne '';
+    my $search = { 'resource' => $resource_id };
+    $search->{'issn'} = $record->{'issn'}
+        if defined( $record->{'issn'} ) && $record->{'issn'} ne '';
+    $search->{'title'} = $record->{'title'}
+        if defined( $record->{'title'} ) && $record->{'title'} ne '';
 
-	my @titles = $module->search($search);
+    my @titles = $module->search($search);
 
 #	warn('No matched titles on issn/title search: ' . $record->{'issn'} . ' - ' . $record->{'title'}) unless scalar(@titles) > 0;
-		
-	my @matched_titles;
 
-	# Run through all the columns because there may be a column removed from the new
-	# record which would cause it to match otherwise
+    my @matched_titles;
 
-	$^W = 0;  # Turn off warnings because of the large number of eq matches against undef fields below.
+# Run through all the columns because there may be a column removed from the new
+# record which would cause it to match otherwise
+
+    $^W = 0
+        ; # Turn off warnings because of the large number of eq matches against undef fields below.
 
 TITLE:
-	foreach my $title (@titles) {
-		# Check normal columns, skip date/id ones, and resource id
+    foreach my $title (@titles) {
 
-		foreach my $column ($title->columns) {
-			next if grep {$column eq $_} ('id', 'created', 'modified', 'scanned', 'resource', 'active');
+        # Check normal columns, skip date/id ones, and resource id
 
-#			print STDERR $title->$column . ' -- ' . $record->{$column} . "\n";
-			next TITLE unless 
-				$title->$column eq $record->{$column};
-		}
+        foreach my $column ( $title->columns ) {
+            next
+                if grep { $column eq $_ } (
+                'id',       'created', 'modified', 'scanned',
+                'resource', 'active'
+                );
 
-		# Check detail columns
-		foreach my $column ($title->details->columns) {
+        #			print STDERR $title->$column . ' -- ' . $record->{$column} . "\n";
+            next TITLE
+                unless $title->$column eq $record->{$column};
+        }
+
+        # Check detail columns
+        foreach my $column ( $title->details->columns ) {
+
 #			print STDERR $title->details->$column . ' -- ' . $record->{$column} . "\n";
-			next TITLE unless
-				  $title->details->$column eq $record->{$column};
-		}
-		push @matched_titles, $title;
-	}
+            next TITLE
+                unless $title->details->$column eq $record->{$column};
+        }
+        push @matched_titles, $title;
+    }
 
-	$^W = 1;
+    $^W = 1;
 
-	scalar(@matched_titles) > 1 and
-		CUFTS::Exception::App->throw('Multiple matching title rows found while updating.');	
-	
-	my $title;
-	$title = $matched_titles[0] if scalar(@matched_titles) == 1;
+    scalar(@matched_titles) > 1
+        and CUFTS::Exception::App->throw('Multiple matching title rows found while updating.');
 
-	return $title;
+    my $title;
+    $title = $matched_titles[0] if scalar(@matched_titles) == 1;
+
+    return $title;
 }
 
 sub _find_partial_match {
-	my ($class, $resource_id, $record, $local) = @_;
+    my ( $class, $resource_id, $record, $local ) = @_;
 
-	$^W=0;
-	$local = ($local == 1 || $local eq 'local') ? 'local' : 'global';
-	$^W=1;
+    $^W    = 0;
+    $local = ( $local == 1 || $local eq 'local' ) ? 'local' : 'global';
+    $^W    = 1;
 
-	no strict 'refs';
+    no strict 'refs';
 
-	my $method = "${local}_db_module";
-	my $module = $class->$method or
-		CUFTS::Exception::App->throw("resource does not have an associated database module for loading title lists");
-		
+    my $method = "${local}_db_module";
+    my $module = $class->$method
+        or CUFTS::Exception::App->throw(
+        "resource does not have an associated database module for loading title lists"
+        );
 
-	my $search = {'resource' => $resource_id};
-	$search->{'issn'} = $record->{'issn'} if defined($record->{'issn'}) && $record->{'issn'} ne '';
-	$search->{'eissn'} = $record->{'eissn'} if !defined($search->{'issn'}) && defined($record->{'eissn'}) && $record->{'eissn'} ne '';
-	$search->{'title'} = $record->{'title'} if !defined($search->{'issn'}) && defined($record->{'title'}) && $record->{'title'} ne '';
+    my $search = { 'resource' => $resource_id };
+    $search->{'issn'} = $record->{'issn'}
+        if defined( $record->{'issn'} ) && $record->{'issn'} ne '';
+    $search->{'eissn'} = $record->{'eissn'}
+        if !defined( $search->{'issn'} )
+        && defined( $record->{'eissn'} )
+        && $record->{'eissn'} ne '';
+    $search->{'title'} = $record->{'title'}
+        if !defined( $search->{'issn'} )
+        && defined( $record->{'title'} )
+        && $record->{'title'} ne '';
 
-	my @titles = $module->search($search);
+    my @titles = $module->search($search);
 
-	return scalar(@titles) == 1 ? $titles[0] : undef;
+    return scalar(@titles) == 1 ? $titles[0] : undef;
 }
-
 
 sub _modify_record {
-	my ($class, $resource, $new_record, $old_record, $timestamp, $local) = @_;
+    my ( $class, $resource, $new_record, $old_record, $timestamp, $local )
+        = @_;
 
-	$class->log_modified_title($resource, $old_record, $new_record, $timestamp, $local);
+    $class->log_modified_title( $resource, $old_record, $new_record,
+        $timestamp, $local );
 
-	$^W = 0;  # Turn off warnings because of the large number of eq matches against undef fields below.
+    $^W = 0
+        ; # Turn off warnings because of the large number of eq matches against undef fields below.
 
-	my @columns = $old_record->columns;
-	foreach my $details ($old_record->details_columns) {
-		push @columns, $old_record->$details->columns;
-	}
+    my @columns = $old_record->columns;
+    foreach my $details ( $old_record->details_columns ) {
+        push @columns, $old_record->$details->columns;
+    }
 
-	foreach my $column (@columns) {
-		next if grep {$column eq $_} ('id', 'created', 'modified', 'scanned', 'resource', 'active');
+    foreach my $column (@columns) {
+        next
+            if grep { $column eq $_ }
+            ( 'id', 'created', 'modified', 'scanned', 'resource', 'active' );
 
-		if ($old_record->$column ne $new_record->{$column}) {
-			if (assert_ne($new_record->{$column})) {
-				$old_record->set($column, $new_record->{$column});
-			} else {
-				$old_record->set($column, undef);
-			}
-		}
-	}
+        if ( $old_record->$column ne $new_record->{$column} ) {
+            if ( assert_ne( $new_record->{$column} ) ) {
+                $old_record->set( $column, $new_record->{$column} );
+            }
+            else {
+                $old_record->set( $column, undef );
+            }
+        }
+    }
 
-	$^W = 1;
+    $^W = 1;
 
-	$old_record->modified($timestamp);
-	$old_record->scanned($timestamp);
-	$old_record->update;
+    $old_record->modified($timestamp);
+    $old_record->scanned($timestamp);
+    $old_record->update;
 
-
-	return;
+    return;
 }
 
-
 sub can_getFulltext {
-	my ($class, $request) = @_;
+    my ( $class, $request ) = @_;
 
-	if ( defined($request->genre) && ($request->genre eq 'article' || $request->genre eq 'journal') &&
-	     (assert_ne($request->issn) || assert_ne($request->title)) || assert_ne($request->eissn) ) {
-	    	return 1;
-	} else {
-		return 0;
-	}
+    if (   defined( $request->genre )
+        && ( $request->genre eq 'article' || $request->genre eq 'journal' )
+        && ( assert_ne( $request->issn ) || assert_ne( $request->title ) )
+        || assert_ne( $request->eissn ) )
+    {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 sub can_getTOC {
-	my ($class, $request) = @_;
+    my ( $class, $request ) = @_;
 
-	if ( defined($request->genre) && ($request->genre eq 'article' || $request->genre eq 'journal') &&
-	     (assert_ne($request->issn) || assert_ne($request->title)) || assert_ne($request->eissn) ) {
-	    	return 1;
-	} else {
-		return 0;
-	}
+    if (   defined( $request->genre )
+        && ( $request->genre eq 'article' || $request->genre eq 'journal' )
+        && ( assert_ne( $request->issn ) || assert_ne( $request->title ) )
+        || assert_ne( $request->eissn ) )
+    {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 
 }
 
 sub can_getJournal {
-	my ($class, $request) = @_;
-	
-	if ( defined($request->genre) && ($request->genre eq 'article' || $request->genre eq 'journal') &&
-	      (assert_ne($request->issn) || assert_ne($request->title)) || assert_ne($request->eissn) ) {
-		return 1;
-	} else {
-		return 0;
-	}
+    my ( $class, $request ) = @_;
+
+    if (   defined( $request->genre )
+        && ( $request->genre eq 'article' || $request->genre eq 'journal' )
+        && ( assert_ne( $request->issn ) || assert_ne( $request->title ) )
+        || assert_ne( $request->eissn ) )
+    {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 sub can_getDatabase {
-	my ($class, $request) = @_;
-	
-	return 1;
+    my ( $class, $request ) = @_;
+
+    return 1;
 }
 
 sub get_records {
-	my ($class, $resource, $site, $request) = @_;
+    my ( $class, $resource, $site, $request ) = @_;
 
-	my $active = $class->_search_active($resource, $site, $request);
+    my $active = $class->_search_active( $resource, $site, $request );
 
-	# Do date range check, embargo, etc...
-	
-	$active = $class->filter_fulltext($active, $resource, $site, $request);
+    # Do date range check, embargo, etc...
 
-	return $active;
-}	
+    $active = $class->filter_fulltext( $active, $resource, $site, $request );
 
+    return $active;
+}
 
 sub search_getFulltext {
-	my ($class, $resource, $site, $request) = @_;
+    my ( $class, $resource, $site, $request ) = @_;
 
-	my $active = $class->_search_active($resource, $site, $request);
+    my $active = $class->_search_active( $resource, $site, $request );
 
-	# Do date range check, embargo, etc...
-	
-	$active = $class->filter_fulltext($active, $resource, $site, $request);
+    # Do date range check, embargo, etc...
 
-	$class->can('build_linkFulltext') or
-		CUFTS::Exception::App->throw("No build_linkFulltext method defined for class: $class");
+    $active = $class->filter_fulltext( $active, $resource, $site, $request );
 
-	if (defined($active) && scalar(@$active) > 0) {
-		return $class->build_linkFulltext($active, $resource, $site, $request);
-	} else { 
-		return undef;
-	}
+    $class->can('build_linkFulltext')
+        or CUFTS::Exception::App->throw(
+        "No build_linkFulltext method defined for class: $class");
+
+    if ( defined($active) && scalar(@$active) > 0 ) {
+        return $class->build_linkFulltext( $active, $resource, $site,
+            $request );
+    }
+    else {
+        return undef;
+    }
 }
 
 sub search_getJournal {
-	my ($class, $resource, $site, $request) = @_;
+    my ( $class, $resource, $site, $request ) = @_;
 
-	my $active = $class->_search_active($resource, $site, $request);
+    my $active = $class->_search_active( $resource, $site, $request );
 
-	# Do date range check, embargo, etc...
+    # Do date range check, embargo, etc...
 
-	$active = $class->filter_fulltext($active, $resource, $site, $request);
+    $active = $class->filter_fulltext( $active, $resource, $site, $request );
 
-	$class->can('build_linkJournal') or
-		CUFTS::Exception::App->throw("No build_linkJournal method defined for class: $class");
+    $class->can('build_linkJournal')
+        or CUFTS::Exception::App->throw(
+        "No build_linkJournal method defined for class: $class");
 
-	if (defined($active) && scalar(@$active) > 0) {
-		return $class->build_linkJournal($active, $resource, $site, $request);
-	} else {
-		return undef;
-	}
+    if ( defined($active) && scalar(@$active) > 0 ) {
+        return $class->build_linkJournal( $active, $resource, $site,
+            $request );
+    }
+    else {
+        return undef;
+    }
 }
 
 sub search_getTOC {
-	my ($class, $resource, $site, $request) = @_;
+    my ( $class, $resource, $site, $request ) = @_;
 
-	my $active = $class->_search_active($resource, $site, $request);
+    my $active = $class->_search_active( $resource, $site, $request );
 
-	# Do date range check, embargo, etc...
-	
-	$active = $class->filter_fulltext($active, $resource, $site, $request);
+    # Do date range check, embargo, etc...
 
-	$class->can('build_linkTOC') or
-		CUFTS::Exception::App->throw("No build_linkTOC method defined for class: $class");
+    $active = $class->filter_fulltext( $active, $resource, $site, $request );
 
-	if (defined($active) && scalar(@$active) > 0) {
-		return $class->build_linkTOC($active, $resource, $site, $request);
-	} else {
-		return undef;
-	}
+    $class->can('build_linkTOC')
+        or CUFTS::Exception::App->throw(
+        "No build_linkTOC method defined for class: $class");
+
+    if ( defined($active) && scalar(@$active) > 0 ) {
+        return $class->build_linkTOC( $active, $resource, $site, $request );
+    }
+    else {
+        return undef;
+    }
 }
-	
 
 sub search_getDatabase {
-	my ($class, $resource, $site, $request) = @_;
-	 
-	my $active = $class->_search_active($resource, $site, $request);
+    my ( $class, $resource, $site, $request ) = @_;
 
-	# Do date range check, embargo, etc...
-	
-	$active = $class->filter_fulltext($active, $resource, $site, $request);
+    my $active = $class->_search_active( $resource, $site, $request );
 
-	$class->can('build_linkDatabase') or
-		CUFTS::Exception::App->throw("No build_linkDatabase method defined for class: $class");
+    # Do date range check, embargo, etc...
 
-	if (defined($active) && scalar(@$active) > 0) {
-		return $class->build_linkDatabase($active, $resource, $site, $request);
-	} else {
-		return undef;
-	}
+    $active = $class->filter_fulltext( $active, $resource, $site, $request );
+
+    $class->can('build_linkDatabase')
+        or CUFTS::Exception::App->throw(
+        "No build_linkDatabase method defined for class: $class");
+
+    if ( defined($active) && scalar(@$active) > 0 ) {
+        return $class->build_linkDatabase( $active, $resource, $site,
+            $request );
+    }
+    else {
+        return undef;
+    }
 }
-
 
 sub build_linkDatabase {
-	my ($class, $records, $resource, $site, $request) = @_;
-	assert_ne($resource->database_url) or return [];
+    my ( $class, $records, $resource, $site, $request ) = @_;
+    assert_ne( $resource->database_url ) or return [];
 
-	my @results;
-	foreach my $record (@$records) {
-		my $result = new CUFTS::Result;
-	
-		my $url = $resource->database_url;
+    my @results;
+    foreach my $record (@$records) {
+        my $result = new CUFTS::Result;
 
-		$result->url($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}	
-	
-	return \@results;
+        my $url = $resource->database_url;
+
+        $result->url($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
-
-
-
 
 sub _search_active {
-	my ($class, $resource, $site, $request) = @_;
+    my ( $class, $resource, $site, $request ) = @_;
 
-	my $global_module = $class->global_db_module if defined($class->global_db_module);
-	my $local_module = $class->local_db_module if defined($class->local_db_module);
-	$class->__require($global_module) if defined($global_module);
-	$class->__require($local_module) if defined($local_module);
+    my $global_module = $class->global_db_module
+        if defined( $class->global_db_module );
+    my $local_module = $class->local_db_module
+        if defined( $class->local_db_module );
+    $class->__require($global_module) if defined($global_module);
+    $class->__require($local_module)  if defined($local_module);
 
-	my $global = defined($resource->resource) ? 1 : 0;
-	my $search_module = $global ? $global_module : $local_module;
+    my $global = defined( $resource->resource ) ? 1 : 0;
+    my $search_module = $global ? $global_module : $local_module;
 
-	my %search_terms = ( 'resource' => $global ? $resource->resource->id : $resource->id );
-	if (assert_ne($request->issn) || assert_ne($request->eissn)) {
-		my @issn_search = ('-or');
-		push @issn_search, ({"issn", $request->issn}, {"e_issn" ,$request->issn}) if assert_ne($request->issn);
-		push @issn_search, ({"issn", $request->eissn}, {"e_issn" ,$request->eissn}) if assert_ne($request->eissn);
-		$search_terms{'-nest'} = \@issn_search;
-	} elsif (assert_ne($request->title)) {
-		search_terms{'title'} = {'ilike', $request->title};
-	} else {
-		return [];
-	}
-		
-	my @matches = $search_module->search_where(\%search_terms);
+    my %search_terms = ( 'resource' => $global ? $resource->resource->id : $resource->id );
+    if ( assert_ne( $request->issn ) || assert_ne( $request->eissn ) ) {
+        my @issn_search = ('-or');
+        push @issn_search,
+            ( { "issn", $request->issn }, { "e_issn", $request->issn } )
+            if assert_ne( $request->issn );
+        push @issn_search,
+            ( { "issn", $request->eissn }, { "e_issn", $request->eissn } )
+            if assert_ne( $request->eissn );
+        $search_terms{'-nest'} = \@issn_search;
+    }
+    elsif ( assert_ne( $request->title ) ) {
+        search_terms {'title'} = { 'ilike', $request->title };
+    }
+    else {
+        return [];
+    }
 
-	# Check for active flag
+    my @matches = $search_module->search_where( \%search_terms );
 
-	my @active;
-	foreach my $match (@matches) {
-		
-		if ($global) {
-			my @local = $local_module->search('journal' => $match->id, 'resource' => $resource->id);
-			if (scalar(@local) > 0) {
-				if ($local[0]->active) {
-					my $local_journal = $local[0];
-					$class->overlay_global_title_data($local_journal, $match);
-					push @active, $local_journal;
-				}
-			}
-		} else {
-			push @active, $match if $match->active;
-		}
-	}
+    # Check for active flag
 
-	return \@active;
+    my @active;
+    foreach my $match (@matches) {
+
+        if ($global) {
+            my @local = $local_module->search(
+                'journal'  => $match->id,
+                'resource' => $resource->id
+            );
+            
+            if ( scalar(@local) > 0 ) {
+                if ( $local[0]->active ) {
+                    my $local_journal = $local[0];
+                    $class->overlay_global_title_data( $local_journal, $match );
+                    push @active, $local_journal;
+                }
+            }
+        }
+        else {
+            push @active, $match if $match->active;
+        }
+    }
+
+    return \@active;
 }
-
-
-
 
 # Filters out records which should be excluded due to things like
 # date ranges, embargo, etc.
 sub filter_fulltext {
-	my ($class, $records, $resource, $site, $request) = @_;
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @valid;
-	foreach my $record (@$records) {
-		$class->has_fulltext($record, $resource, $site, $request) or
-			next;
-		$class->check_fulltext_dates($record, $resource, $site, $request) or
-			next;
-		$class->check_fulltext_embargo($record, $resource, $site, $request) or
-			next;
-		$class->check_fulltext_current_months($record, $resource, $site, $request) or
-			next;
-		$class->check_fulltext_vol_iss($record, $resource, $site, $request) or
-			next;
+    my @valid;
+    foreach my $record (@$records) {
+        $class->has_fulltext( $record, $resource, $site, $request )
+            or next;
+        $class->check_fulltext_dates( $record, $resource, $site, $request )
+            or next;
+        $class->check_fulltext_embargo( $record, $resource, $site, $request )
+            or next;
+        $class->check_fulltext_current_months( $record, $resource, $site,
+            $request )
+            or next;
+        $class->check_fulltext_vol_iss( $record, $resource, $site, $request )
+            or next;
 
-		push @valid, $record;
-	}
-	
-	return \@valid;
+        push @valid, $record;
+    }
+
+    return \@valid;
 }
 
 # Returns 1 if the title has any fulltext at all.  This should be overridden
@@ -614,274 +671,316 @@ sub filter_fulltext {
 # no coverage information
 
 sub has_fulltext {
-	my ($class, $record, $resource, $site, $request) = @_;
+    my ( $class, $record, $resource, $site, $request ) = @_;
 
-	assert_ne($record->ft_start_date) or
-	assert_ne($record->ft_end_date) or
-	assert_ne($record->vol_ft_start) or
-	assert_ne($record->vol_ft_end) or
-	assert_ne($record->iss_ft_start) or
-	assert_ne($record->iss_ft_end) or
-		return 0;
-	
-	return 1;
+           assert_ne( $record->ft_start_date )
+        or assert_ne( $record->ft_end_date )
+        or assert_ne( $record->vol_ft_start )
+        or assert_ne( $record->vol_ft_end )
+        or assert_ne( $record->iss_ft_start )
+        or assert_ne( $record->iss_ft_end )
+        or return 0;
+
+    return 1;
 }
 
 sub check_fulltext_vol_iss {
-	my ($class, $record, $resource, $site, $request) = @_;
+    my ( $class, $record, $resource, $site, $request ) = @_;
 
-	# requested volume is after end volume
-	
-	return 0 if assert_ne($request->volume) && assert_ne($record->vol_ft_end) &&
-	            int($request->volume) > int($record->vol_ft_end);
+    # requested volume is after end volume
 
-	# requested volume is before start volume
+    return 0
+        if assert_ne( $request->volume )
+        && assert_ne( $record->vol_ft_end )
+        && int( $request->volume ) > int( $record->vol_ft_end );
 
-	return 0 if assert_ne($request->volume) && assert_ne($record->vol_ft_start) &&
-	            int($request->volume) < int($record->vol_ft_start);
+    # requested volume is before start volume
 
-	# requested issue matches start volume and is before start issue
+    return 0
+        if assert_ne( $request->volume )
+        && assert_ne( $record->vol_ft_start )
+        && int( $request->volume ) < int( $record->vol_ft_start );
 
-	return 0 if assert_ne($request->volume) && assert_ne($record->vol_ft_start) &&
-	            assert_ne($request->issue) && assert_ne($record->iss_ft_start) &&
-	            int($request->volume) == int($record->vol_ft_start) &&
-	            int($request->issue) < int($record->iss_ft_start);
-	            
-	# requested issue matches end volume and is after end issue
+    # requested issue matches start volume and is before start issue
 
-	return 0 if assert_ne($request->volume) && assert_ne($record->vol_ft_end) &&
-	            assert_ne($request->issue) && assert_ne($record->iss_ft_end) &&
-	            int($request->volume) == int($record->vol_ft_end) &&
-	            int($request->issue) > int($record->iss_ft_end);
+    return 0
+        if assert_ne( $request->volume )
+        && assert_ne( $record->vol_ft_start )
+        && assert_ne( $request->issue )
+        && assert_ne( $record->iss_ft_start )
+        && int( $request->volume ) == int( $record->vol_ft_start )
+        && int( $request->issue ) < int( $record->iss_ft_start );
 
-	return 1;	
+    # requested issue matches end volume and is after end issue
+
+    return 0
+        if assert_ne( $request->volume )
+        && assert_ne( $record->vol_ft_end )
+        && assert_ne( $request->issue )
+        && assert_ne( $record->iss_ft_end )
+        && int( $request->volume ) == int( $record->vol_ft_end )
+        && int( $request->issue ) > int( $record->iss_ft_end );
+
+    return 1;
 }
-
-
 
 # Check a record against a request for fulltext date range
 sub check_fulltext_dates {
-	my ($class, $record, $resource, $site, $request) = @_;
+    my ( $class, $record, $resource, $site, $request ) = @_;
 
-	my ($year, $month, $day) = ($request->year, $request->month, $request->day);
-	return 0 unless $class->_check_date_range($year, $month, $day, $record->ft_start_date, $record->ft_end_date);	
-	
-	return 1;
+    my ( $year, $month, $day )
+        = ( $request->year, $request->month, $request->day );
+    return 0
+        unless $class->_check_date_range( $year, $month, $day,
+        $record->ft_start_date, $record->ft_end_date );
+
+    return 1;
 }
 
 # Check a record against a request for embargo period
 sub check_fulltext_embargo {
-	my ($class, $record, $resource, $site, $request) = @_;
+    my ( $class, $record, $resource, $site, $request ) = @_;
 
-	my ($year, $month, $day) = ($request->year, $request->month, $request->day);	
-	return $class->_check_embargo($year, $month, $day, $record->embargo_months, $record->embargo_days);
+    my ( $year, $month, $day )
+        = ( $request->year, $request->month, $request->day );
+    return $class->_check_embargo( $year, $month, $day,
+        $record->embargo_months, $record->embargo_days );
 }
 
 # Check a record against a request for embargo period
 sub check_fulltext_current_months {
-	my ($class, $record, $resource, $site, $request) = @_;
+    my ( $class, $record, $resource, $site, $request ) = @_;
 
-	my ($year, $month, $day) = ($request->year, $request->month, $request->day);	
-	return $class->_check_current_months($year, $month, $day, $record->current_months);
+    my ( $year, $month, $day )
+        = ( $request->year, $request->month, $request->day );
+    return $class->_check_current_months( $year, $month, $day,
+        $record->current_months );
 }
-
-
 
 # $start and $end must be in YYYY-MM-DD format
 sub _check_date_range {
-	my ($class, $year, $month, $day, $start, $end) = @_;
+    my ( $class, $year, $month, $day, $start, $end ) = @_;
 
-	my $start_check = $class->_check_start_date($year, $month, $day, $start);
-	my $end_check = $class->_check_end_date($year, $month, $day, $end);
-	
-	return $start_check && $end_check;
+    my $start_check
+        = $class->_check_start_date( $year, $month, $day, $start );
+    my $end_check = $class->_check_end_date( $year, $month, $day, $end );
+
+    return $start_check && $end_check;
 }
 
 # $start must be in YYYY-MM-DD format
 sub _check_start_date {
-	my ($class, $year, $month, $day, $start) = @_;
-	return 1 unless assert_ne($start);
-	return 1 unless assert_ne($year);
+    my ( $class, $year, $month, $day, $start ) = @_;
+    return 1 unless assert_ne($start);
+    return 1 unless assert_ne($year);
 
-	if ($start =~ /^(\d{4})-(\d{2})-(\d{2})/) {
-		my $start_stamp = int($1 . $2 . $3);
+    if ( $start =~ /^(\d{4})-(\d{2})-(\d{2})/ ) {
+        my $start_stamp = int( $1 . $2 . $3 );
 
-		my $wanted_stamp;
-		if ($year =~ /(\d{4})/) {
-			$wanted_stamp .= $1;
-		}
-		
-		if (assert_ne($month) && $month =~ /(\d{2})/) {
-			$wanted_stamp .= sprintf("%02i", int($1));
-		} else {
-			$wanted_stamp .= '13';		# above 12
-		}		
+        my $wanted_stamp;
+        if ( $year =~ /(\d{4})/ ) {
+            $wanted_stamp .= $1;
+        }
 
-		if (assert_ne($day) && $day =~ /(\d{2})/) {
-			$wanted_stamp .= sprintf("%02i", int($1));
-		} else {
-			$wanted_stamp .= '32';		# above 31
-		}		
+        if ( assert_ne($month) && $month =~ /(\d{2})/ ) {
+            $wanted_stamp .= sprintf( "%02i", int($1) );
+        }
+        else {
+            $wanted_stamp .= '13';    # above 12
+        }
 
-		if (int($wanted_stamp) < int($start_stamp)) {
-			 return 0;
-		}
-	} else {
-		warn("Invalid start date: $start");
-	}
+        if ( assert_ne($day) && $day =~ /(\d{2})/ ) {
+            $wanted_stamp .= sprintf( "%02i", int($1) );
+        }
+        else {
+            $wanted_stamp .= '32';    # above 31
+        }
 
-	return 1;
+        if ( int($wanted_stamp) < int($start_stamp) ) {
+            return 0;
+        }
+    }
+    else {
+        warn("Invalid start date: $start");
+    }
+
+    return 1;
 }
-
 
 # $end must be in YYYY-MM-DD format
 sub _check_end_date {
-	my ($class, $year, $month, $day, $end) = @_;
-	return 1 unless assert_ne($end);
-	return 1 unless assert_ne($year);
+    my ( $class, $year, $month, $day, $end ) = @_;
+    return 1 unless assert_ne($end);
+    return 1 unless assert_ne($year);
 
-	if ($end =~ /^(\d{4})-(\d{2})-(\d{2})/) {
-		my $end_stamp = int($1 . $2 . $3);
+    if ( $end =~ /^(\d{4})-(\d{2})-(\d{2})/ ) {
+        my $end_stamp = int( $1 . $2 . $3 );
 
-		my $wanted_stamp;
-		if ($year =~ /(\d{4})/) {
-			$wanted_stamp .= $1;
-		}
-		
-		if (assert_ne($month) && $month =~ /(\d{2})/) {
-			$wanted_stamp .= sprintf("%02i", int($1));
-		} else {
-			$wanted_stamp .= '00';		# below 01
-		}		
+        my $wanted_stamp;
+        if ( $year =~ /(\d{4})/ ) {
+            $wanted_stamp .= $1;
+        }
 
-		if (assert_ne($day) && $day =~ /(\d{2})/) {
-			$wanted_stamp .= sprintf("%02i", int($1));
-		} else {
-			$wanted_stamp .= '00'; 		# below 01
-		}		
+        if ( assert_ne($month) && $month =~ /(\d{2})/ ) {
+            $wanted_stamp .= sprintf( "%02i", int($1) );
+        }
+        else {
+            $wanted_stamp .= '00';    # below 01
+        }
 
-		if (int($wanted_stamp) > int($end_stamp)) {
-			 return 0;
-		}
-	} else {
-		warn("Invalid end date: $end");
-	}
+        if ( assert_ne($day) && $day =~ /(\d{2})/ ) {
+            $wanted_stamp .= sprintf( "%02i", int($1) );
+        }
+        else {
+            $wanted_stamp .= '00';    # below 01
+        }
 
-	return 1;
+        if ( int($wanted_stamp) > int($end_stamp) ) {
+            return 0;
+        }
+    }
+    else {
+        warn("Invalid end date: $end");
+    }
+
+    return 1;
 }
 
 sub _check_embargo {
-	my ($class, $year, $month, $day, $embargo_months, $embargo_days) = @_;
-	
-	if ((defined($month) || defined($year)) && 
-	    (defined($embargo_months) && int($embargo_months) > 0) ||
-	    (defined($embargo_days) && int($embargo_days) > 0)) {
+    my ( $class, $year, $month, $day, $embargo_months, $embargo_days ) = @_;
 
-		$embargo_months = defined($embargo_months) ? (0-int($embargo_months)) : 0;
-		$embargo_days = defined($embargo_days) ? (0-int($embargo_days)) : 0;
+    if (   ( defined($month) || defined($year) )
+        && ( defined($embargo_months) && int($embargo_months) > 0 )
+        || ( defined($embargo_days) && int($embargo_days) > 0 ) )
+    {
 
-		use Date::Calc;
-		if (assert_ne($embargo_months)) {
-			my ($e_year, $e_month, $e_day) = Date::Calc::Add_Delta_YMD(Date::Calc::Today, 0, $embargo_months, $embargo_days);
+        $embargo_months
+            = defined($embargo_months) ? ( 0 - int($embargo_months) ) : 0;
+        $embargo_days
+            = defined($embargo_days) ? ( 0 - int($embargo_days) ) : 0;
 
-			return $class->_check_end_date($year, $month, $day, sprintf("%04d-%02d-%02d", $e_year, $e_month, $e_day));
-		}
-	}
+        use Date::Calc;
+        if ( assert_ne($embargo_months) ) {
+            my ( $e_year, $e_month, $e_day )
+                = Date::Calc::Add_Delta_YMD( Date::Calc::Today, 0,
+                $embargo_months, $embargo_days );
 
-	return 1;
+            return $class->_check_end_date( $year, $month, $day,
+                sprintf( "%04d-%02d-%02d", $e_year, $e_month, $e_day ) );
+        }
+    }
+
+    return 1;
 }
 
 sub _check_current_months {
-	my ($class, $year, $month, $day, $current_months) = @_;
-	
-	if ((defined($month) || defined($year)) && 
-	    (defined($current_months) && int($current_months) > 0)) {
+    my ( $class, $year, $month, $day, $current_months ) = @_;
 
-		$current_months = 0 - int($current_months);
+    if (   ( defined($month) || defined($year) )
+        && ( defined($current_months) && int($current_months) > 0 ) )
+    {
 
-		use Date::Calc;
-		if (assert_ne($current_months)) {
-			my ($e_year, $e_month, $e_day) = Date::Calc::Add_Delta_YMD(Date::Calc::Today, 0, $current_months, 0);
+        $current_months = 0 - int($current_months);
 
-			return $class->_check_start_date($year, $month, $day, sprintf("%04d-%02d-%02d", $e_year, $e_month, $e_day));
-		}
-	}
+        use Date::Calc;
+        if ( assert_ne($current_months) ) {
+            my ( $e_year, $e_month, $e_day )
+                = Date::Calc::Add_Delta_YMD( Date::Calc::Today, 0,
+                $current_months, 0 );
 
-	return 1;
+            return $class->_check_start_date( $year, $month, $day,
+                sprintf( "%04d-%02d-%02d", $e_year, $e_month, $e_day ) );
+        }
+    }
+
+    return 1;
 }
-
 
 sub activate_all {
-	my ($class, $global_resource, $commit) = @_;
+    my ( $class, $global_resource, $commit ) = @_;
 
-	defined($global_resource) or
-		CUFTS::Exception::App::CGI->throw("No global_resource found in activate_all");
-	
-	unless (ref($global_resource)) {
-		my $global_resource = CUFTS::DB::Resources->retrieve($global_resource) or
-			CUFTS::Exception::App::CGI->throw("Unable to load global resource id: $global_resource in activate_all");
-	}
+    defined($global_resource)
+        or CUFTS::Exception::App::CGI->throw(
+        "No global_resource found in activate_all");
 
-	my $resource_id = $global_resource->id;
+    unless ( ref($global_resource) ) {
+        my $global_resource = CUFTS::DB::Resources->retrieve($global_resource)
+            or CUFTS::Exception::App::CGI->throw(
+            "Unable to load global resource id: $global_resource in activate_all"
+            );
+    }
 
-	my @local_resources = CUFTS::DB::LocalResources->search('resource' => $resource_id, 'auto_activate' => 'true');
+    my $resource_id = $global_resource->id;
 
-	foreach my $local_resource (@local_resources) {
+    my @local_resources = CUFTS::DB::LocalResources->search(
+        'resource'      => $resource_id,
+        'auto_activate' => 'true'
+    );
 
-		my $global_titles_module = $class->global_db_module or
-			CUFTS::Exception::App::CGI->throw("Attempt to view local title list for resource type without global list module.  Resource id: $resource_id");
-		$class->__require($global_titles_module);
+    foreach my $local_resource (@local_resources) {
 
-		my $local_titles_module = $class->local_db_module or
-			CUFTS::Exception::App::CGI->throw("Attempt to view local title list for resource type without local list module.  Resource id: $resource_id");
-		$class->__require($local_titles_module);
+        my $global_titles_module = $class->global_db_module
+            or CUFTS::Exception::App::CGI->throw(
+            "Attempt to view local title list for resource type without global list module.  Resource id: $resource_id"
+            );
+        $class->__require($global_titles_module);
 
-		my $global_titles = $global_titles_module->search('resource' => $resource_id);
-		my $local_to_global_field = $class->local_to_global_field;
+        my $local_titles_module = $class->local_db_module
+            or CUFTS::Exception::App::CGI->throw(
+            "Attempt to view local title list for resource type without local list module.  Resource id: $resource_id"
+            );
+        $class->__require($local_titles_module);
 
-		local $local_titles_module->db_Main->{ AutoCommit };
+        my $global_titles
+            = $global_titles_module->search( 'resource' => $resource_id );
+        my $local_to_global_field = $class->local_to_global_field;
 
-		eval {
-			while (my $global_title = $global_titles->next) {
-				# Check for existing local title record, create it if it does not exist.
-		
-				my @local_titles = $local_titles_module->search('resource' => $local_resource->id, $local_to_global_field => $global_title->id);
-				if (scalar(@local_titles) == 0) {
-					my $record = {
-						'active' => 'true',
-						'resource' => $local_resource->id,
-						$local_to_global_field => $global_title->id,
-					};
-					$local_titles_module->create($record);
-				} elsif (scalar(@local_titles) == 1) {
-					$local_titles[0]->active('true');
-					$local_titles[0]->update;
-				} else {
-					CUFTS::Exception::App::CGI->throw("Multiple local title matches for global resource $resource_id, title " . $global_title->id);
-				}			
-			}
-		};
-		if ($@) {
-			$local_titles_module->dbi_rollback;
-			if (ref($@) && $@->can('rethrow')) {
-				$@->rethrow;
-			} else {
-				die($@);
-			}
-		}
+        local $local_titles_module->db_Main->{AutoCommit};
 
-		$commit and $local_titles_module->dbi_commit;
-	}
-	
-	
-	return scalar(@local_resources);
+        eval {
+            while ( my $global_title = $global_titles->next )
+            {
+
+      # Check for existing local title record, create it if it does not exist.
+
+                my @local_titles = $local_titles_module->search(
+                    'resource'             => $local_resource->id,
+                    $local_to_global_field => $global_title->id
+                );
+                if ( scalar(@local_titles) == 0 ) {
+                    my $record = {
+                        'active'               => 'true',
+                        'resource'             => $local_resource->id,
+                        $local_to_global_field => $global_title->id,
+                    };
+                    $local_titles_module->create($record);
+                }
+                elsif ( scalar(@local_titles) == 1 ) {
+                    $local_titles[0]->active('true');
+                    $local_titles[0]->update;
+                }
+                else {
+                    CUFTS::Exception::App::CGI->throw(
+                        "Multiple local title matches for global resource $resource_id, title "
+                            . $global_title->id );
+                }
+            }
+        };
+        if ($@) {
+            $local_titles_module->dbi_rollback;
+            if ( ref($@) && $@->can('rethrow') ) {
+                $@->rethrow;
+            }
+            else {
+                die($@);
+            }
+        }
+
+        $commit and $local_titles_module->dbi_commit;
+    }
+
+    return scalar(@local_resources);
 }
-
-
-
-
-
-
 
 # -------------------------
 
@@ -890,23 +989,26 @@ sub activate_all {
 ##
 
 sub overlay_global_title_data {
-	my ($class, $local, $global) = @_;
+    my ( $class, $local, $global ) = @_;
 
-	defined($local) or
-		return undef;
-		
-	defined($global) or
-		$global = $local->journal;
-		
-	defined($global) or 
-		return $local;
+    defined($local)
+        or return undef;
 
-	foreach my $column (qw(title issn e_issn vol_cit_start vol_cit_end iss_cit_start iss_cit_end vol_ft_start vol_ft_end iss_ft_start iss_ft_end cit_start_date cit_end_date ft_start_date ft_end_date embargo_months embargo_days urlbase db_identifier journal_url toc_url publisher abbreviation current_months journal_auth)) {
-		$local->$column($global->$column) unless defined($local->$column);
-	}
+    defined($global)
+        or $global = $local->journal;
 
-	$local->ignore_changes;
-	return $local;
+    defined($global)
+        or return $local;
+
+    foreach my $column (
+        qw(title issn e_issn vol_cit_start vol_cit_end iss_cit_start iss_cit_end vol_ft_start vol_ft_end iss_ft_start iss_ft_end cit_start_date cit_end_date ft_start_date ft_end_date embargo_months embargo_days urlbase db_identifier journal_url toc_url publisher abbreviation current_months journal_auth)
+        )
+    {
+        $local->$column( $global->$column ) unless defined( $local->$column );
+    }
+
+    $local->ignore_changes;
+    return $local;
 }
 
 1;
