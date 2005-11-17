@@ -16,13 +16,12 @@ CUFTS::CJDB->config(
     regex_base           => '',
     default_max_columns  => 20,
     default_min_per_page => 50,
-    root                 => '/usr/local/devel/CUFTS/CJDB/root/',
 );
 
 CUFTS::CJDB->config->{session} = {
     expires => 36000,
     rewrite => 0,
-    storage => '/tmp/CJDB_sessions',
+    storage => '/tmp/CUFTS_CJDB_sessions',
 };
 
 CUFTS::CJDB->setup;
