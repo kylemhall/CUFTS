@@ -27,14 +27,14 @@ use vars qw(
 
 $CUFTS_BASE_DIR = '/usr/local/devel/CUFTS';
 
-$CUFTS_DB = 'CUFTS_2';
+$CUFTS_DB = 'CUFTS2';
 $CUFTS_USER = 'tholbroo';
 $CUFTS_PASSWORD = '';
 
 $CUFTS_SMTP_HOST = 'localhost';
 $CUFTS_MAIL_FROM = 'tholbroo@sfu.ca';
 
-$CJDB_DB = 'CJDB_2';
+$CJDB_DB = 'CJDB2';
 $CJDB_USER = 'tholbroo';
 $CJDB_PASSWORD = '';
 
