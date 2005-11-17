@@ -78,6 +78,7 @@ __PACKAGE__->details_columns(qw/
 	auth_passwd
 	url_base
 	cjdb_note
+	proxy_suffix
 	
 	erm_basic_name
 	erm_basic_vendor
