@@ -27,7 +27,7 @@ sub do : Local {
 
     my $params = $c->req->params;
     my $url    = $c->stash->{real_base};
-
+    
     # add site key ("BVAS", "ONN") to the path if in query
     if ( !is_empty_string( $params->{'_site'} ) ) {
         $url .= 'site/' . $params->{'_site'};

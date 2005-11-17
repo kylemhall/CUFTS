@@ -37,7 +37,7 @@ sub prepare_path {
         # Stringify c->req->base - otherwise it's a URI object
         $c->stash->{real_base} = $c->config->{url_base}
             || q{} . $c->req->base;
-
+            
         $c->req->base->path( $c->req->base->path . "${strip_base}${site_key}" );
         $c->req->path($path);
 
@@ -48,8 +48,12 @@ sub prepare_path {
 
     }
     else {
+        $c->stash->{url_base} =
+            $c->config->{url_base}
+            ? $c->config->{url_base}
+            : q{} . $c->req->base;
 
-        #		die("Site not found in URL");
+        $c->stash->{real_base} = $c->stash->{url_base};
     }
 
     return 1;
