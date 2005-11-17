@@ -30,7 +30,7 @@ sub do : Local {
 
     # add site key ("BVAS", "ONN") to the path if in query
     if ( !is_empty_string( $params->{'_site'} ) ) {
-        $url .= '/site/' . $params->{'_site'};
+        $url .= 'site/' . $params->{'_site'};
     }
 
     $url .= '/resolve/openurl';
