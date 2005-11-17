@@ -41,11 +41,6 @@ use vars qw(
 
 	$CUFTS_TEMPLATE_DIR
 
-	$CUFTS_SESSION_TYPE
-	$CUFTS_SESSION_CONFIG
-	$CUFTS_SESSION_DIR
-	$CUFTS_INSTALLATION_NAME
-
 	$CJDB_BASE_DIR
 
 	$CJDB_DB_ATTR
@@ -78,11 +73,6 @@ $CUFTS_REQUEST_LOG = "${CUFTS_LOG_DIR}/requests_log";
 
 $CUFTS_TEMPLATE_DIR = "${CUFTS_BASE_DIR}/templates";
 
-$CUFTS_SESSION_TYPE = 'Apache::Session::File';
-$CUFTS_SESSION_CONFIG = undef;
-$CUFTS_SESSION_DIR = "${CUFTS::Config::CUFTS_BASE_DIR}/sessions";
-$CUFTS_INSTALLATION_NAME = 'CUFTS';
-
 $CJDB_DB_STRING = "dbi:Pg:dbname=${CJDB_DB};host=localhost;port=5432";
 $CJDB_DB_ATTR = { 'PrintError' => 0, 'RaiseError' => 0, 'HandleError' => Exception::Class::DBI->handler() };
 @CJDB_DB_CONNECT = ($CJDB_DB_STRING, $CJDB_USER, $CJDB_PASSWORD, $CJDB_DB_ATTR);
@@ -96,6 +86,5 @@ $CJDB_CSS_DIR = "${CJDB_BASE_DIR}/root/static/css";
 $CJDB_SITE_CSS_DIR = "${CJDB_CSS_DIR}/sites";
 
 $CJDB_SITE_DATA_DIR = "${CUFTS_BASE_DIR}/data/sites";
-
 
 1;
