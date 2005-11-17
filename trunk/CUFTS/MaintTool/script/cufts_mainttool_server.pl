@@ -2,7 +2,7 @@
 
 BEGIN { 
     $ENV{CATALYST_ENGINE} ||= 'HTTP';
-    $ENV{CATALYST_SCRIPT_GEN} = 11;
+    $ENV{CATALYST_SCRIPT_GEN} = 12;
 }  
 
 use strict;

@@ -10,17 +10,23 @@ use lib "$FindBin::Bin/../lib";
 use CUFTS::MaintTool;
 
 my $help = 0;
-my ( $listen, $nproc );
+my ( $listen, $nproc, $pidfile );
  
 GetOptions(
-    'help|?'     => \$help,
-    'listen|l=s' => \$listen,
-    'nproc|n=i'  => \$nproc,
+    'help|?'      => \$help,
+    'listen|l=s'  => \$listen,
+    'nproc|n=i'   => \$nproc,
+    'pidfile|p=s' => \$pidfile,
 );
 
 pod2usage(1) if $help;
 
-CUFTS::MaintTool->run( $listen, { nproc => $nproc } );
+CUFTS::MaintTool->run( 
+    $listen, 
+    {   nproc   => $nproc,
+        pidfile => $pidfile, 
+    }
+);
 
 1;
 
@@ -39,7 +45,10 @@ cufts_mainttool_fastcgi.pl [options]
                  can be HOST:PORT, :PORT or a
                  filesystem path
    -n -nproc     specify number of processes to keep
-                 to serve requests (defaults to 1)
+                 to serve requests (defaults to 1,
+                 requires -listen)
+   -p -pidfile   specify filename for pid file
+                 (requires -listen)
 
 =head1 DESCRIPTION
 
