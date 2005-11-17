@@ -68,6 +68,7 @@ __PACKAGE__->details_columns(qw/
 	url_base
 	notes_for_local
 	cjdb_note
+	proxy_suffix
 /);
 
 __PACKAGE__->add_trigger('before_delete' => \&delete_titles);
