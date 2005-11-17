@@ -1,5 +1,5 @@
 [% USE HTML %]
 
-[% PROCESS site/navbar %]
+[% PROCESS site/navbar.tt %]
 
 There are no site level ERM settings at this time.
