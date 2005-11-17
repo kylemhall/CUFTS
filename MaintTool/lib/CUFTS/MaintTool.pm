@@ -89,6 +89,11 @@ sub login : Global {
 
 	$c->form({'required' => ['login_key', 'login_password', 'submit'], 'filters' => ['trim']});
 
+	$c->session->{current_account_id} = undef;
+	$c->session->{current_site_id} = undef;
+	$c->stash->{current_account} = undef;
+	$c->stash->{current_site} = undef;
+
 	if (defined($c->form->{valid}->{login_key})) {
 		my ($key, $password) = ($c->form->{valid}->{login_key}, $c->form->{valid}->{login_password});
 
@@ -120,13 +125,13 @@ sub login : Global {
 
 sub logout : Global {
 	my ($self, $c) = @_;
-	
-	$c->session->{current_account_id} = undef;
-	$c->session->{current_site_id} = undef;
-
 	$c->redirect('/login');
 }
-	
+
+sub default : Private {
+    my ($self, $c) = @_;
+    $c->redirect('/login');
+}	
 	
 
 ##
