@@ -178,41 +178,37 @@ td.field {
 }
 
 td.field0 {
-	padding: 2px 5px;
+	padding: 4px 5px 1px 5px;
 	color: black;
 	background: white;
 }
 
 td.field1 {
-	padding: 2px 5px;
+	padding: 4px 5px 1px 5px;
 	background: #D0DEED;
 	color: black;
 }
 
 td.active-field0 {
-	padding-right: 5px;
-	padding-left: 25px;
+	padding: 4px 5px 1px 5px;
 	background: white;
 	color: black;
 }
 
 td.active-field1 {
-	padding-right: 5px;
-	padding-left: 5px;
+	padding: 4px 5px 1px 5px;
 	background: #D0DEED;
 	color: black;
 }
 
 td.inactive-field0 {
-	padding-right: 5px;
-	padding-left: 5px;
+	padding: 4px 5px 1px 5px;
 	background: white;
 	color: #666666;
 }
 
 td.inactive-field1 {
-	padding-right: 5px;
-	padding-left: 5px;
+	padding: 2px 5px;
 	background: #D0DEED;
 	color: #666666;
 }
