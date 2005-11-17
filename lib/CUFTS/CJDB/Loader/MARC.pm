@@ -6,6 +6,7 @@ use Business::ISSN;
 use MARC::Record;
 use MARC::Batch;
 use CUFTS::CJDB::Util;
+use CUFTS::Util::Simple;
 
 use strict;
 
