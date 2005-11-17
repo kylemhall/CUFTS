@@ -21,7 +21,7 @@ CUFTS::MaintTool->config(
 CUFTS::MaintTool->config->{session} = {
 	expires => 36000,
 	rewrite => 0,
-	storage => '/tmp/CUFTS_sessions',
+	storage => '/tmp/CUFTS_MaintTool_sessions',
 };
 
 CUFTS::MaintTool->setup;
