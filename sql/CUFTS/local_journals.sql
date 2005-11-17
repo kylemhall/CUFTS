@@ -37,5 +37,5 @@ CREATE TABLE local_journals (
 CREATE INDEX local_journals_issn_idx ON local_journals (issn);
 CREATE INDEX local_journals_title_idx ON local_journals (title);
 CREATE INDEX local_journals_e_issn_idx ON local_journals (e_issn);
-CREATE INDEX local_journals_r_idx ON local_journals (resource) WHERE journal IS NULL;
+CREATE INDEX local_journals_r_idx ON local_journals (resource);
 CREATE UNIQUE INDEX local_journals_r_j_idx ON local_journals (resource, journal) WHERE journal IS NOT NULL;
