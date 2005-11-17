@@ -85,6 +85,21 @@ sub search_by_issns {
 	return @results;
 }	
 
+sub search_by_title_with_no_issns {
+	my ($class, $title) = @_;
+	
+	my $sql = 'SELECT journals_auth.* FROM journals_auth LEFT OUTER JOIN journals_auth_issns ON (journals_auth.id = journals_auth_issns.journal_auth) WHERE journals_auth_issns.issn IS NULL AND journals_auth.title ilike ?';
+
+	my $dbh = $class->db_Main();
+	my $sth = $dbh->prepare_cached($sql);
+	$sth->execute($title);
+	
+	my @results = $class->sth_to_objects($sth);	
+
+	return @results;
+}	
+
+
 __PACKAGE__->set_sql('by_title' => qq{
 	SELECT DISTINCT ON (journals_auth.id) journals_auth.* FROM journals_auth JOIN journals_auth_titles ON (journals_auth_titles.journal_auth = journals_auth.id) WHERE journals_auth_titles.title ILIKE ?
 });	
@@ -103,54 +118,3 @@ sub marc_object {
 
 __END__
 
-Original code before Catalyst and new JournalsAuth rewrite
-
-
-
-
-sub normalize_column_values {
-	my ($self, $values) = @_;
-	
-	# Check ISSNs for dashes and strip them out
-
-	if (exists($values->{'issn'}) && defined($values->{'issn'}) && $values->{'issn'} ne '') {
-			$self->_croak('issn is not valid: ' . $values->{'issn'});
-	}
-
-	if (exists($values->{'e_issn'}) && defined($values->{'e_issn'}) && $values->{'e_issn'} ne '') {
-		$values->{'e_issn'} = uc($values->{'e_issn'});
-		$values->{'e_issn'} =~ s/(\d{4})\-?(\d{3}[\dxX])/$1$2/ or
-			$self->_croak('e_issn is not valid: ' . $values->{'e_issn'});
-	}
-
-	return 1;   # ???
-}
-
-
-
-
-__PACKAGE__->set_sql('active_site' => qq{
-	SELECT DISTINCT ON (journals_auth.title, journals_auth.id) journals_auth.id,journals_auth.title,journals_auth.issn,journals_auth.e_issn,journals_auth.created,journals_auth.modified FROM journals_auth
-	JOIN journals ON (journals.journal_auth = journals_auth.id)
-	JOIN local_journals ON (journals.id = local_journals.journal)
-	JOIN local_resources ON (local_journals.resource = local_resources.id)
-	WHERE local_journals.active = true AND
-	      local_resources.active = true AND
-	      local_resources.site = ? AND
-	      journals_auth.title like ?
-	ORDER BY journals_auth.title, journals_auth.id
-});
-
-__PACKAGE__->set_sql('all_active_site' => qq{
-	SELECT DISTINCT ON (journals_auth.title, journals_auth.id) journals_auth.id,journals_auth.title,journals_auth.issn,journals_auth.e_issn,journals_auth.created,journals_auth.modified FROM journals_auth
-	JOIN journals ON (journals.journal_auth = journals_auth.id)
-	JOIN local_journals ON (journals.id = local_journals.journal)
-	JOIN local_resources ON (local_journals.resource = local_resources.id)
-	WHERE local_journals.active = true AND
-	      local_resources.active = true AND
-	      local_resources.site = ?
-	ORDER BY journals_auth.title, journals_auth.id
-});
-
-
-1;
