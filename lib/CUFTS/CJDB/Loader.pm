@@ -8,6 +8,7 @@ use CJDB::DB::Journals;
 use CJDB::DB::LCCSubjects;
 
 use CUFTS::CJDB::Util;
+use CUFTS::Util::Simple;
 
 use Data::Dumper;
 
