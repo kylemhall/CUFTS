@@ -1,7 +1,7 @@
 CREATE TABLE links (
     id                SERIAL PRIMARY KEY,
     journal           INTEGER NOT NULL,
-    local_journal     INTEGER NOT NULL,
+    local_journal     INTEGER,
     name              VARCHAR(1024) NOT NULL,
     print_coverage    VARCHAR(2048),
     citation_coverage VARCHAR(2048),
