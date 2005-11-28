@@ -163,6 +163,20 @@ sub get_MARC_subjects {
     return @subjects;
 }
 
+sub get_call_numbers {
+    my ( $self, $record ) = @_;
+
+    my @call_numbers;
+
+    my @call_number_fields = $record->field('050');
+
+    foreach my $call_number_field (@call_number_fields) {
+        push @call_numbers, uc( $call_number_field->subfield('a') );
+    }
+
+    return \@call_numbers;
+}
+
 sub get_associations {
     my ( $self, $record ) = @_;
 
