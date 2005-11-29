@@ -126,9 +126,8 @@ sub load_journal {
         }
     );
 
-    defined($journal)
-        or
-        CJDB::Exception::App->throw('Unable to create new journal record.');
+    CJDB::Exception::App->throw('Unable to create new journal record.') 
+        if !defined($journal);
 
     foreach my $issn (@issns) {
         CJDB::DB::ISSNs->find_or_create(
@@ -177,7 +176,6 @@ sub load_titles {
         next if   is_empty_string($title->[0])
                || is_empty_string($title->[1]);
         
-
         my $record = {
             'journal'      => $journal->id,
             'site'         => $site_id,
