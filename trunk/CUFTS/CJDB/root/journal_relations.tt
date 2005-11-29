@@ -6,9 +6,9 @@
    <div class="relation">
    [% SWITCH relation.relation %]
     [% CASE 'preceeding' %]
-     Continued by
-    [% CASE 'succeeding' %]
      Continues
+    [% CASE 'succeeding' %]
+     Continued by
     [% END %]
     <a href="[% url("$url_base/browse/show", browse_field='title', search_type='startswith', search_terms=relation.title) %]">[% relation.title | html %]</a>
     [% IF relation.issn %]
