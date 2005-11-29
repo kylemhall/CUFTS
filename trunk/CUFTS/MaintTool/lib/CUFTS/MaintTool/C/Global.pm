@@ -200,9 +200,16 @@ sub titles : Local {
 	my $order_by = 'title';  # Hardcode for now, allow for other sorts later?
 	my $display_per_page = $c->form->{valid}->{display_per_page} || $c->config->{default_display_per_page};
 
-	my $pager = $titles_module->pager($search, $order_by, $display_per_page, $page);
+	my ( $pager, $iterator ) = $titles_module->pager($search, 
+	                                                 { order_by => $order_by,
+	                                                   rows     => $display_per_page,
+	                                                   page     => $page }
+	                                                );
 
-	my @titles = $pager->search_where;
+    my @titles;
+    while (my $title = $iterator->next) {
+        push @titles, $title;
+    }
 	my $count = $pager->total_entries;
 
 	##
