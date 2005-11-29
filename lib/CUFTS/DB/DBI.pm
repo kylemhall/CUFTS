@@ -20,14 +20,12 @@
 
 package CUFTS::DB::DBI;
 
-use base 'Class::DBI';
+use base 'Class::DBI::Sweet';
 use Exception::Class::DBI;
 use CUFTS::Exceptions;
 use CUFTS::Config;
 use SQL::Abstract;
 use Class::DBI::AbstractSearch;
-use Class::DBI::Plugin::AbstractCount;
-use Class::DBI::Plugin::Pager;
 use Class::DBI::Iterator;
 use Class::DBI::Plugin::CountSearch;
 use Class::DBI::Plugin::Type;

@@ -188,16 +188,28 @@ sub manage_global : Private {
 	my $order_by = 'title';  # Hardcode for now, allow for other sorts later?
 	my $display_per_page = $c->form->{valid}->{display_per_page} || $c->config->{default_display_per_page};
 
-	my $pager;
+	my ( $pager, $iterator );
 	if (defined($local_resource) && !$local_resource->auto_activate && $active) {
 		$search->{local_resource} = $local_resource->id;
-		$pager = $global_resource->do_module('active_global_db_module')->pager($search, $order_by, $display_per_page, $page);
+		($pager, $iterator) = $global_resource->do_module('active_global_db_module')
+		                         ->pager($search,
+		                                 { order_by => $order_by,
+		                                   rows => $display_per_page,
+		                                   page => $page}
+		                                );
 	} else {
-		$pager = $global_titles_module->pager($search, $order_by, $display_per_page, $page);
+		($pager, $iterator) = $global_titles_module->pager($search, 
+                                         { order_by => $order_by,
+		                                   rows => $display_per_page,
+		                                   page => $page}
+		                                );
 	}
 
-	my @titles = $pager->search_where;
 	my $count = $pager->total_entries;
+    my @titles;
+    while (my $title = $iterator->next) {
+        push @titles, $title;
+    }
 
 	##
 	## Get matching local titles if available
@@ -284,9 +296,16 @@ sub manage_local : Private {
 	my $order_by = 'title';  # Hardcode for now, allow for other sorts later?
 	my $display_per_page = $c->form->{valid}->{display_per_page} || $c->config->{default_display_per_page};
 
-	my $pager = $local_titles_module->pager($search, $order_by, $display_per_page, $page);
-
-	my @titles = $pager->search_where;
+	my ($pager, $iterator) = $local_titles_module->pager($search, 
+	                                                     { order_by => $order_by,
+	                                                       rows => $display_per_page,
+	                                                       page => $page, }
+	                                                    );
+        
+    my @titles;
+    while (my $title = $iterator->next) {
+        push @titles, $title;
+    }
 	my $count = $pager->total_entries;
 
 	##
