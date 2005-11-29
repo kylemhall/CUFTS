@@ -94,10 +94,7 @@ ALT_TITLE:
             $title .= ' ' . $alt_title->subfield('p');
         }
 
-        # Remove extra whitespace
-
-        $title =~ s/^ \s+ //xsm;
-        $title =~ s/ \s+ $//xsm;
+        $title = trim_string( $title );
 
         # Drop articles
 
@@ -115,8 +112,8 @@ ALT_TITLE:
 
         # Make sure we have a non-empty title
 
-        next ALT_TITLE if    not_empty_string($title)
-                          || not_empty_string($stripped_title);
+        next ALT_TITLE if    is_empty_string($title)
+                          || is_empty_string($stripped_title);
 
         # Skip weird titles like "Membership..."
 
