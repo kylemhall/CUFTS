@@ -171,6 +171,15 @@ sub get_call_numbers {
         push @call_numbers, uc( $call_number_field->subfield('a') );
     }
 
+    # Try the Canadian specific call number field
+    
+    if ( !scalar(@call_numbers) ) {
+        @call_number_fields = $record->field('055');
+        foreach my $call_number_field (@call_number_fields) {
+            push @call_numbers, uc( $call_number_field->subfield('a') );
+        }
+    }
+
     return \@call_numbers;
 }
 
