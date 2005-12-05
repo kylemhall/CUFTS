@@ -11,11 +11,11 @@
 		[% FOREACH result IN compiled_result.services.$service_name.results %]
 			<result>
 				<url>[% result.url | html %]</url>
-				[% IF result.atitle.defined %]<title>[% result.atitle | html %]</title>[% END %]
+				[% IF result.atitle %]<title>[% result.atitle | html %]</title>[% END %]
 				[% SET record = result.record %]
 				[% IF record.defined %]
-					[% IF record.ft_start_date.defined %]<ft_start_date>[% record.ft_start_date | html %]</ft_start_date>[% END %]
-					[% IF record.ft_end_date.defined %]<ft_end_date>[% record.ft_end_date | html %]</ft_end_date>[% END %]
+					[% IF record.ft_start_date %]<ft_start_date>[% record.ft_start_date | html %]</ft_start_date>[% END %]
+					[% IF record.ft_end_date %]<ft_end_date>[% record.ft_end_date | html %]</ft_end_date>[% END %]
 				[% END %]
 			</result>
 		[% END %]
