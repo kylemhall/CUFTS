@@ -1,4 +1,3 @@
-[% USE dumper %]
 [% SET services_in_order = ['fulltext', 'table of contents', 'journal', 'database', 'holdings', 'web search'] %]
 
 <div id="results">
