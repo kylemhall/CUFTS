@@ -5,20 +5,17 @@ use Getopt::Long;
 use Pod::Usage;
 use Catalyst::Helper;
 
-my $help = 0;
-my $nonew = 0;
-my $short = 0;
+my $force = 0;
+my $help  = 0;
 
 GetOptions(
-    'help|?' => \$help,
-    'nonew'  => \$nonew,
-    'short'  => \$short
+    'nonew|force' => \$force,
+    'help|?'      => \$help
  );
 
 pod2usage(1) if ( $help || !$ARGV[0] );
 
-my $helper =
-    Catalyst::Helper->new( { '.newfiles' => !$nonew, short => $short } );
+my $helper = Catalyst::Helper->new( { '.newfiles' => !$force } );
 
 pod2usage(1) unless $helper->mk_component( 'CUFTS::MaintTool', @ARGV );
 
@@ -33,9 +30,8 @@ cufts_mainttool_create.pl - Create a new Catalyst Component
 cufts_mainttool_create.pl [options] model|view|controller name [helper] [options]
 
  Options:
+   -force    don't create a .new file where a file to be created exists
    -help     display this help and exits
-   -nonew    don't create a .new file where a file to be created exists
-   -short    use short types, like C instead of Controller...
 
  Examples:
    cufts_mainttool_create.pl controller My::Controller
@@ -56,11 +52,11 @@ Create a new Catalyst Component.
 
 Existing component files are not overwritten.  If any of the component files
 to be created already exist the file will be written with a '.new' suffix.
-This behavior can be suppressed with the C<-nonew> option.
+This behavior can be suppressed with the C<-force> option.
 
 =head1 AUTHOR
 
-Sebastian Riedel, C<sri\@oook.de>
+Sebastian Riedel, C<sri@oook.de>
 
 =head1 COPYRIGHT
 
