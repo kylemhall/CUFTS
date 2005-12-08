@@ -167,14 +167,18 @@ sub manage_global : Private {
 	##
 
 	my $filter = $c->form->{valid}->{filter};
-	if ($filter ne ($c->session->{local_titles_filter} || '')) {
+	if (    $c->form->{valid}->{apply_filter}
+	     && $filter ne ($c->session->{local_titles_filter} || '')
+	   ) {
+
 		$c->form->{valid}->{page} = 1;
 		$c->session->{local_titles_filter} = $filter;
+
 	} else {
 		$filter = $c->session->{local_titles_filter};
 	}
 
-	if (defined($filter) && $filter ne '') {
+	if ( defined($filter) && $filter ne '' ) {
 		$filter =~ s/([%_])/\\$1/g;
 		$filter =~ s#\\#\\\\\\\\#;
 		$search->{-nest} = $global_resource->do_module('filter_on', $filter);
@@ -275,9 +279,13 @@ sub manage_local : Private {
 	##
 
 	my $filter = $c->form->{valid}->{filter};
-	if ($filter ne ($c->session->{local_titles_filter} || '')) {
+	if (    $c->form->{valid}->{apply_filter} 
+	     && $filter ne ($c->session->{local_titles_filter} || '')
+	   ) {
+	       
 		$c->form->{valid}->{page} = 1;
 		$c->session->{local_titles_filter} = $filter;
+		
 	} else {
 		$filter = $c->session->{local_titles_filter};
 	}
