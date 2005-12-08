@@ -20,7 +20,7 @@
 
 package CUFTS::Resources::Gale_CWI;
 
-use base qw(CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::GenericJournal);
 
 use CUFTS::Exceptions qw(assert_ne);
 
