@@ -47,7 +47,6 @@ sub _croak {
 
 
 __PACKAGE__->set_db('Main', @CUFTS::Config::CUFTS_DB_CONNECT);
-#__PACKAGE__->set_db('Main', 'dbi:Pg:dbname=CUFTS', 'tholbroo', '', { 'PrintError' => 0, 'RaiseError' => 0, 'HandleError' => Exception::Class::DBI->handler});
 
 ##
 ## Experimental and untested

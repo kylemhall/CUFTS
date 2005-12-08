@@ -20,7 +20,7 @@
 
 package CJDB::DB::DBI;
 
-use base 'Class::DBI';
+use base 'Class::DBI::Sweet';
 use Exception::Class::DBI;
 use CUFTS::Exceptions;
 use CUFTS::Config;
@@ -59,153 +59,6 @@ sub retrieve_all_limit {
 	return $class->retrieve_from_sql($sql); 
 }
 
-
-##
-## Try to implement a has_details() type system
-##
-
-__PACKAGE__->mk_classdata('__details');
-
-sub has_details {
-	my ($class, $accessor, $f_class, $f_key, $map_local, $args) = @_;
-	return $class->_croak("has_details needs an accessor name") unless $accessor;
-	return $class->_croak("has_details needs a foreign class")  unless $f_class;
-	$class->can($accessor)
-		and return $class->_carp("$accessor method already exists in $class\n");
-
-	my @f_method = ();
-	if (ref $f_class eq "ARRAY") {
-		($f_class, @f_method) = @$f_class;
-	}
-	_require_class($f_class);
-
-	if (ref $f_key eq "HASH") {    # didn't supply f_key, this is really $args
-		$args  = $f_key;
-		$f_key = "";
-	}
-
-	$f_key ||= $class->table_alias;
-
-	if (ref $f_key eq "ARRAY") {
-		return $class->_croak("Multiple foreign keys not implemented")
-			if @$f_key > 1;
-		$f_key = $f_key->[0];
-	}
-
-	$class->_extend_class_data(__details => $accessor => $f_class);
-
-	{
-		no strict 'refs';
-		
-		*{"$class\::$accessor"} = sub {
-			my($self) = shift;
-			if (ref($self->{_details}->{$accessor})) {
-				return $self->{_details}->{$accessor};
-			} else {
-				$self->{_details}->{$accessor} = $f_class->new($f_key, $self->id());
-				return $self->{_details}->{$accessor};
-			}
-		}
-
-	}
-
-	$class->add_trigger(before_update => _details_update($accessor));
-	$class->add_trigger(before_delete => _details_delete($accessor));
-
-	# Map details columns to local accessor methods
-
-	if ($map_local) {
-		foreach my $method ($f_class->columns) {
-			next if !defined($method) || $method eq 'id';
-			$class->can($method) and
-				return $class->_carp("$method already exists in base object while mapping details methods");
-			
-			{
-				no strict 'refs';
-				*{"$class\::$method"} = sub {return shift->$accessor->$method(@_);};
-			}
-		}	
-	}
-
-	return $class;
-}
-                        	
-sub details_columns {
-	my $proto = shift;
-	my $class = ref $proto || $proto;
-	return undef unless defined($class->__details);
-	return keys %{$class->__details};
-}
-
-sub has_details_column {
-	my ($proto, $col) = @_;
-	my $class = ref $proto || $proto;
-	return 0 unless defined($class->__details);
-	return exists $class->__details->{$col};
-}	
-
-sub details_module {
-	my ($proto, $col) = @_;
-	my $class = ref $proto || $proto;
-	return undef unless defined($class->__details);
-	return $class->__details->{$col};
-}
-
-sub _details_update {
-	my $col = shift;
-	return sub {shift->$col->_update};
-}
-
-sub _details_delete {
-	my $col = shift;
-	return sub {shift->$col->_delete};
-}
-
-sub set {
-	my ($self) = shift;
-	my $column_values = {@_};
-
-	my @local_cols;
-	while (my ($column, $value) = each %$column_values) {
-		if (my $col = $self->find_column($column)) {
-			push @local_cols, $column, $value;
-		} else {
-			my $set = 0;
-			foreach my $details ($self->details_columns) {
-				if (grep {$_ eq $column} $self->$details->columns) {
-					if (defined($value)) {
-						$self->$details->set($column, $value);
-					} else {
-						my $method = "delete_$column";
-						$self->$details->$method;
-					}
-					$set = 1;
-				}		
-			}
-			$set or
-				$self->_croak('Unable to find matching column in object: ' . $column);
-		}
-	}
-	scalar(@local_cols) and
-		$self->SUPER::set(@local_cols);
-}
-
-
-sub _require_class {
-	my $class = shift;
-
-	# return quickly if class already exists
-	no strict 'refs';
-	return if exists ${"$class\::"}{ISA};
-	return if eval "require $class";
-
-	# Only ignore "Can't locate" errors from our eval require.
-	# Other fatal errors (syntax etc) must be reported (as per base.pm).
-	return if $@ =~ /^Can't locate .*? at \(eval /;
-	chomp $@;
-	Carp::croak($@);
-}
-
 __PACKAGE__->set_sql('now' => 'SELECT NOW()');
 
 sub get_now {
@@ -227,5 +80,24 @@ sub get_now {
 	return $val;
 }
 
+# override default to avoid using Ima::DBI closure
+sub db_Main {
+    my $dbh;
+    if ( $ENV{'MOD_PERL'} and !$Apache::ServerStarting ) {
+        $dbh = Apache->request()->pnotes('dbh');
+    }
+    if ( !$dbh ) {
+        # $config is my config object. replace with your own settings...
+        $dbh = DBI->connect_cached(
+            $CUFTS::Config::CJDB_DB_STRING,  $CUFTS::Config::CJDB_USER,
+            $CUFTS::Config::CJDB_PASSWORD, $CUFTS::Config::CJDB_DB_ATTR
+        );
+        __PACKAGE__->_remember_handle('Main'); # so dbi_commit works
+        if ( $ENV{'MOD_PERL'} and !$Apache::ServerStarting ) {
+            Apache->request()->pnotes( 'dbh', $dbh );
+        }
+    }
+    return $dbh;
+}
 
 1;

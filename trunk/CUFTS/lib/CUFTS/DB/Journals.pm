@@ -80,6 +80,7 @@ __PACKAGE__->details_columns(qw/
 	publisher
 	abbreviation
 	current_months
+	current_years
 	cjdb_note
 /);
 
