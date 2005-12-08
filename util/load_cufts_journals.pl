@@ -122,8 +122,9 @@ sub load_site_ejournals {
 			$request->title($local_journal->title);
 			$request->genre('journal');
 			$request->pid({});
+			
 			my @links;
-			if ($module->can_getJournal($request) && $module->can('build_linkJournal')) {
+			if ( $module->can_getJournal($request) ) {
 					
 				my $results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
 				foreach my $result (@$results) {
@@ -135,7 +136,9 @@ sub load_site_ejournals {
 					push @links, \%temp_hash;
 				}
 
-			} elsif ($module->can_getDatabase($request) && $module->can('build_linkDatabase')) {
+			}
+			elsif ( $module->can_getDatabase($request) ) {
+
 				my $results = $module->build_linkDatabase([$local_journal], $local_resource, $site, $request);
 				foreach my $result (@$results) {
 					$module->prepend_proxy($result, $local_resource, $site, $request);
@@ -145,6 +148,7 @@ sub load_site_ejournals {
 					my %temp_hash = %{$new_link};
 					push @links, \%temp_hash;
 				}
+
 			}
 				
 			if (scalar(@links) > 0) {
@@ -295,11 +299,9 @@ sub build_basic_record {
 	$record->{'site'} = $site->id;
 	$record->{'journals_auth'} = $journal_auth->id;
 	
-#	warn(Dumper($journal_auth));
-
 	my $journal = CJDB::DB::Journals->create($record);
 	my $journal_id = $journal->id;
-		
+
 	CJDB::DB::Titles->create({
 		'journal' => $journal_id,
 		'site' => $site->id,
