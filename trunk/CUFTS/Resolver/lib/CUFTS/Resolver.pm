@@ -44,7 +44,7 @@ sub prepare_path {
         $c->stash->{url_base} =
             $c->config->{url_base}
             ? ( $c->config->{url_base} . "${strip_base}${site_key}" )
-            : $c->req->base;
+            : ( q{} . $c->req->base );
 
     }
     else {
@@ -55,6 +55,8 @@ sub prepare_path {
 
         $c->stash->{real_base} = $c->stash->{url_base};
     }
+
+    $c->stash->{url_base} =~ s{/$}{};  # Remove trailing slash
 
     return 1;
 }

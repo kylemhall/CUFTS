@@ -10,9 +10,6 @@ our $VERSION = '2.00.00';
 
 CUFTS::CJDB->config(
     name     => 'CUFTS::CJDB',
-    url_base => 'http://localhost:3000/',
-
-    #	url_base => 'http://proxy2.lib.sfu.ca:3000/CJDB',
     regex_base           => '',
     default_max_columns  => 20,
     default_min_per_page => 50,
@@ -51,6 +48,8 @@ sub prepare_path {
     else {
         die("Site not found in URL");
     }
+
+    $c->stash->{url_base} =~ s{/$}{};  # Remove trailing slash
 }
 
 ##
