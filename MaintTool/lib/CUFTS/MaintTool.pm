@@ -12,8 +12,6 @@ our $VERSION = '2.00.00';
 
 CUFTS::MaintTool->config( 
 	name     => 'CUFTS::MaintTool',
-#	url_base => 'http://proxy2.lib.sfu.ca:8033/CUFTS/maint',
-	url_base => 'http://localhost:3000',
 	default_display_per_page => 50,
 );
 
@@ -35,7 +33,12 @@ sub begin : Private {
 
 	# Set up basic template vars
 	
-	$c->stash->{url_base}  = $c->config->{url_base};
+    $c->stash->{url_base} =
+        $c->config->{url_base}
+        ? $c->config->{url_base}
+        : q{} . $c->req->base;
+        
+    $c->stash->{url_base} =~ s{/$}{};  # Remove trailing slash
 
 	# For a live setup, change these so that Catalyst isn't handling them.
 
