@@ -155,8 +155,8 @@ sub redirect {
 	$location =~ m#^/# or
 		die("Attempting to redirect to relative location: $location");
 
-	if ($c->config->{url_base}) {
-		$location = $c->config->{url_base} . $location;
+	if ($c->stash->{url_base}) {
+		$location = $c->stash->{url_base} . $location;
 	}
 	
 	$c->res->redirect($location);
