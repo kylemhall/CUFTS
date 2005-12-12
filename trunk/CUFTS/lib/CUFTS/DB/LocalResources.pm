@@ -171,14 +171,26 @@ sub _tivate_titles {
 			die("No global title module for resource when attempting bulk activation");
 		eval "use $global_titles_module";
 		die if $@;
-		
-		my $global_titles = $global_titles_module->search('resource' => $global_resource->id);
+
+		my $global_titles = $global_titles_module->search( resource => $global_resource->id );
 		my $local_to_global_field = $module->local_to_global_field;
 
+        # Check to see if we already have completely (de-)activated records so we're not doing extra work.
+
+        my $local_count = $local_titles_module->count_search( resource => $self->id, active => 'true' );
+        if ($flag eq 'true') {
+            return 1 if $local_count == $global_titles->count;
+        }
+        elsif ($flag eq 'false') {
+            return 1 if $local_count == 0;
+        }
+        
+        # Updates are needed
+        
 		while (my $global_title = $global_titles->next) {
 			# Check for existing local title record, create it if it does not exist.
 		
-			my @local_titles = $local_titles_module->search('resource' => $self->id, $local_to_global_field => $global_title->id);
+			my @local_titles = $local_titles_module->search( resource => $self->id, $local_to_global_field => $global_title->id);
 			if (scalar(@local_titles) == 0) {
 				my $record = {
 					'active' => $flag,
@@ -187,16 +199,14 @@ sub _tivate_titles {
 				};
 				$local_titles_module->create($record);
 			} elsif (scalar(@local_titles) == 1) {
-				unless ($local_titles[0]->active) {
 					$local_titles[0]->active($flag);
 					$local_titles[0]->update;
-				}
 			} else {
 				die("Multiple local title matches for global title " . $global_title->id);
 			}			
 		}
 	} else {
-		my $titles = $local_titles_module->search('resource' => $self->id);
+		my $titles = $local_titles_module->search( resource => $self->id);
 
 		while (my $title = $titles->next) {
 			$title->active($flag);

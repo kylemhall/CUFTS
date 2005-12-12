@@ -160,7 +160,7 @@ sub edit : Local {
 		return $c->redirect('/local/menu');
 
 	my $global_resource = $c->stash->{global_resource};
-	my $local_resource = $c->stash->{local_resource};
+	my $local_resource  = $c->stash->{local_resource};
 
 	if ($c->req->params->{submit}) {
 
