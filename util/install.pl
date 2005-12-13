@@ -380,7 +380,6 @@ sub verify_cwd {
 	
 	my @files = qw(
 		util/install.pl
-		Class/DBI/Details.pm
 		CUFTS/Resources.pm
 		CUFTS/Resolve.pm
 		CUFTS/Maint/CGI.pm
