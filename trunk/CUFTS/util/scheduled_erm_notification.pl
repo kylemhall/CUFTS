@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 ##
 ## This script checks all CUFTS sites for files that are

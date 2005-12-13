@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 ##
 ## NOTE: This must be run from the base CUFTS directory using a relative

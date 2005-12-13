@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 ##
 ## CUFTS installation script.
@@ -30,10 +30,38 @@ my $no_DBI = 0;
 my $no_psql = 0;
 my $skip_db = 0;
 
-my @write_to_directories = qw(uploads logs sessions sessions/lock);
+my @write_to_directories = qw(
+    uploads
+    logs
+    data
+    CJDB/root/sites
+    Resolver/root/sites
+);
 
-my @modules = qw(Class::DBI Class::DBI::Details Class::DBI::AbstractSearch Class::Accessor Class::Data::Inheritable Exception::Class Exception::Class::DBI SQL::Abstract CGI CGI::Cookie URI::Escape Apache::Session Text::Template Net::SMTP LWP::UserAgent Class::DBI::Plugin::CountSearch Date::Calc Unicode::String Text::CSV MIME::Lite);
-my @optional_modules = qw(Apache::Registry Apache::DBI);
+my @modules = qw(
+    Business::ISSN
+    Class::Accessor
+    Class::DBI
+    Class::DBI::AbstractSearch
+    Class::DBI::Plugin::CountSearch
+    Class::DBI::Sweet
+    Date::Calc
+    Exception::Class
+    Exception::Class::DBI
+    Getopt::Long
+    HTML::Entities
+    LWP::UserAgent
+    MARC::Record
+    MIME::Lite
+    Net::SMTP
+    SQL::Abstract
+    Template
+    Term::Readline
+    Text::CSV
+    URI::Escape
+);
+
+my @optional_modules = qw(Apache::DBI);
 
 if (grep {$_ eq '-m'} @ARGV) {
 	check_modules(@modules);
@@ -112,7 +140,7 @@ print "Installing CUFTS in: $base_dir\n";
 $config->{'CUFTS_BASE_DIR'} = $base_dir;
 
 if ($copy_files) {
-	print "Do you want to copy the CUFTS tree to $base_dir?\n";
+    print "Do you want to copy the CUFTS tree to $base_dir?\n";
 	my $input = $term->readline('[Y/n]: ');
 	unless ($input =~ /^\s*n/i) {
 		copy_files($base_dir);
@@ -172,16 +200,16 @@ GET_USERNAME:
 ## Web tree
 ##
 
-setup_web_tree($config);
+setup_web_apps($config);
 
 ##
 ## Ask about database configuration
 ##
 
 if ($no_psql) {
-	print "Database cannot be installed due to missing PostgreSQL\nbinaries. You will have to install the database by hand or\nfix your PostgreSQL installation and re-run this script.\n";
+	print "Databases cannot be installed due to missing PostgreSQL\nbinaries. You will have to install the database by hand or\nfix your PostgreSQL installation and re-run this script.\n";
 } else {
-	print "Directory installation complete. Would you like to install the database?\n";
+	print "Directory installation complete. Would you like to install the databases?\n";
 	my $input = $term->readline("[Y/n]: ");
 	$input =~ /^\s*n/i and
 		$skip_db = 1;
@@ -204,7 +232,7 @@ if ($no_psql) {
 				my $input = $term->readline("[y/N]: ");
 		
 				if ($input =~ /^\s*y/i) {
-					drop_database($config);
+					drop_databases($config);
 				} else {
 					$db_exists = 1;
 				}
@@ -216,10 +244,17 @@ if ($no_psql) {
 		##
 
 		unless ($db_exists) {
-			print "Creating database. If you have entered a password above, you will be asked to enter it again.\n";
+			print "Creating CUFTS database. If you have entered a password above, you will be asked to enter it again.\n";
 			my $pw = defined($config->{'CUFTS_PASSWORD'}) && $config->{'CUFTS_PASSWORD'} ne '' ? '--password' : '';
 			my $result = `createdb --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
 			if ($result !~ /CREATE\sDATABASE/) {
+				die("Error creating database: $result\n\nIf the above error is something like FATAL: IDENT auth failed,\nyou are trying to create the database as a user other than\nthe one you are currently logged in as, and PostgreSQL is set\nto use 'ident' authentication. See the pg_hba.conf PostgreSQL config file.\n");
+			}
+
+			print "Creating CJDB database. If you have entered a password above, you will be asked to enter it again.\n";
+			my $cjdb_pw = defined($config->{'CJDB_PASSWORD'}) && $config->{'CJDB_PASSWORD'} ne '' ? '--password' : '';
+			my $cjdb_result = `createdb --username=$config->{'CJDB_USER'} $cjdb_pw $config->{'CJDB_DB'}`;
+			if ($cjdb_result !~ /CREATE\sDATABASE/) {
 				die("Error creating database: $result\n\nIf the above error is something like FATAL: IDENT auth failed,\nyou are trying to create the database as a user other than\nthe one you are currently logged in as, and PostgreSQL is set\nto use 'ident' authentication. See the pg_hba.conf PostgreSQL config file.\n");
 			}
 
@@ -229,8 +264,15 @@ if ($no_psql) {
 			## Create tables
 			##
 		
-			print "Creating database tables and seeding database. Ignore the NOTICE: lines.\nYou may be asked for the password again.\n";
+			print "Creating CUFTS database tables and seeding database. Ignore the NOTICE: lines.\nYou may be asked for the password again.\n";
 			$result = `cat sql/CUFTS/*.sql sql/CUFTS/views/*.sql sql/CUFTS/init/*.sql | psql -q --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
+			if ($result =~ /ERROR/) {
+				die("Error creating/seeding database: $result");
+			}
+			print "\n\nDone with basic database setup.\n";
+
+			print "Creating CJDB database tables and seeding database. Ignore the NOTICE: lines.\nYou may be asked for the password again.\n";
+			$result = `cat sql/CJDB/*.sql | psql -q --username=$config->{'CJDB_USER'} $pw $config->{'CJDB_DB'}`;
 			if ($result =~ /ERROR/) {
 				die("Error creating/seeding database: $result");
 			}
@@ -344,9 +386,9 @@ sub verify_cwd {
 		CUFTS/Maint/CGI.pm
 		CUFTS/DB/DBI.pm
 		sql/CUFTS/services.sql
-		htdocs/CUFTS/maint.cgi
-		templates/main
-		templates/maint/main_layout
+        Resolver/lib/CUFTS/Resolver.pm
+        CJDB/lib/CUFTS/CJDB.pm
+        MaintTool/lib/CUFTS/MaintTool.pm
 	);
 
 	foreach my $file (@files) {
@@ -408,6 +450,10 @@ use vars qw(
 
 	\$CUFTS_SMTP_HOST
 	\$CUFTS_MAIL_FROM
+
+	\$CJDB_DB
+	\$CJDB_USER
+	\$CJDB_PASSWORD
 );
 
 \$CUFTS_BASE_DIR = '$config->{'CUFTS_BASE_DIR'}';
@@ -418,6 +464,10 @@ use vars qw(
 
 \$CUFTS_SMTP_HOST = '$config->{'CUFTS_SMTP_HOST'}';
 \$CUFTS_MAIL_FROM = '$config->{'CUFTS_MAIL_FROM'}';
+
+\$CJDB_DB = '$config->{'CJDB_DB'}';
+\$CJDB_USER = '$config->{'CJDB_USER'}';
+\$CJDB_PASSWORD = '$config->{'CJDB_PASSWORD'}';
 
 1;
 
@@ -437,18 +487,21 @@ sub get_existing_config {
 		$config->{'CUFTS_PASSWORD'}   = $CUFTS::Config::CUFTS_PASSWORD;
 		$config->{'CUFTS_SMTP_HOST'}  = $CUFTS::Config::CUFTS_SMTP_HOST;
 		$config->{'CUFTS_MAIL_FROM'}  = $CUFTS::Config::CUFTS_MAIL_FROM;
+		$config->{'CJDB_DB'}          = $CUFTS::Config::CJDB_DB || 'CJDB';
+		$config->{'CJDB_USER'}        = $CUFTS::Config::CJDB_USER || scalar(getpwent);
+		$config->{'CJDB_PASSWORD'}    = $CUFTS::Config::CJDB_PASSWORD;
 	}
 }
 
 sub get_new_config {
 	my ($config) = @_;
 	
-	print "Database name: $config->{'CUFTS_DB'}\n";
+	print "CUFTS Database name: $config->{'CUFTS_DB'}\n";
 	my $input_cufts_db = $term->readline("[$config->{'CUFTS_DB'}]: ");
 	defined($input_cufts_db) && $input_cufts_db ne '' and
 		$config->{'CUFTS_DB'} = $input_cufts_db; 
 
-	print "Database user: $config->{'CUFTS_USER'}\n";
+	print "CUFTS Database user: $config->{'CUFTS_USER'}\n";
 	if ($config->{'CUFTS_USER'} eq 'root') {
 		print "** You should probably not use root as the database owner. **\n";
 	}
@@ -456,10 +509,28 @@ sub get_new_config {
 	defined($input_cufts_user) && $input_cufts_user ne '' and
 		$config->{'CUFTS_USER'} = $input_cufts_user;
 
-	print "Database password: $config->{'CUFTS_PASSWORD'}\n";
+	print "CUFTS Database password: $config->{'CUFTS_PASSWORD'}\n";
 	my $input_cufts_password = $term->readline("[$config->{'CUFTS_PASSWORD'}]: ");
 	defined($input_cufts_password) && $input_cufts_password ne '' and
 		$config->{'CUFTS_PASSWORD'} = $input_cufts_password;
+
+    print "CJDB Database name: $config->{'CJDB_DB'}\n";
+    my $input_cjdb_db = $term->readline("[$config->{'CJDB_DB'}]: ");
+    defined($input_cjdb_db) && $input_cjdb_db ne '' and
+    	$config->{'CJDB_DB'} = $input_cjdb_db; 
+
+	print "CJDB Database user: $config->{'CJDB_USER'}\n";
+    if ($config->{'CJDB_USER'} eq 'root') {
+    	print "** You should probably not use root as the database owner. **\n";
+    }
+    my $input_cjdb_user = $term->readline("[$config->{'CJDB_USER'}]: ");
+    defined($input_cjdb_user) && $input_cjdb_user ne '' and
+    	$config->{'CJDB_USER'} = $input_cjdb_user;
+
+	print "CJDB Database password: $config->{'CJDB_PASSWORD'}\n";
+    my $input_cjdb_password = $term->readline("[$config->{'CJDB_PASSWORD'}]: ");
+    defined($input_cjdb_password) && $input_cjdb_password ne '' and
+    	$config->{'CJDB_PASSWORD'} = $input_cjdb_password;
 
 	print "Mail host for outgoing CUFTS mail: $config->{'CUFTS_SMTP_HOST'}\n";
 	my $input_cufts_smtp_host = $term->readline("[$config->{'CUFTS_SMTP_HOST'}]: ");
@@ -499,16 +570,24 @@ sub db_exists {
 }	
 
 
-sub drop_database {
+sub drop_databases {
 	my ($config) = @_;
 
-	print "Dropping database. If you have entered a password above, you will be asked to enter it again.\n";
+	print "Dropping CUFTS database. If you have entered a password above, you will be asked to enter it again.\n";
 	my $pw = defined($config->{'CUFTS_PASSWORD'}) && $config->{'CUFTS_PASSWORD'} ne '' ? '--password' : '';
 	my $result = `dropdb --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
 	if ($result !~ /DROP\sDATABASE/) {
 		die("Error dropping database: $result");
 	}
-	
+
+	print "Dropping CJDB database. If you have entered a password above, you will be asked to enter it again.\n";
+	my $cjdb_pw = defined($config->{'CJDB_PASSWORD'}) && $config->{'CJDB_PASSWORD'} ne '' ? '--password' : '';
+	my $cjdb_result = `dropdb --username=$config->{'CJDB_USER'} $cjdb_pw $config->{'CJDB_DB'}`;
+	if ($cjdb_result !~ /DROP\sDATABASE/) {
+		die("Error dropping database: $result");
+	}
+
+	return 1;
 }
 
 sub show_notes {
@@ -555,41 +634,13 @@ sub set_owner {
 }
 
 
-sub setup_web_tree {
+sub setup_web_apps {
 	my ($config) = @_;
 	
-	print "\nDo you want to configure the web tree?\n";
+	print "\nDo you want to configure the web applications?\n";
 	return if $term->readline('[Y/n]: ') =~ /^\s*n/i;
 	
-	print "Enter the full path for where the CUFTS CGI files will be\nlocated. It should be under the web tree in something\nlike /var/www/CUFTS/ and the directory must be able to execute\nCGI scripts:\n";
-	my $input = $term->readline('[]: ');
-	while ($input eq '' || -d $input || -e $input) {
-		-d $input and
-			print "The directory you wish to locate CUFTS in should not exist.\nIt will be symlinked from the CUFTS installation. Please\ndelete the existing directory or enter a new directory which\ndoes not exist:\n";
-		$input = $term->readline('[]: ');
-	}
-
-	$input =~ s#/$##;
-	(my $dir = $input) =~ s#/[^/]+$##;
-	
-	unless (-d $dir) {
-		print "Creating directory for link... ";
-		my $result = `mkdir -p $dir 2>&1`;
-		if ($result =~ /^mkdir:\scannot/) {
-			die("Unable to create directory:\n$result\n");
-		}
-		print "done.\n";
-	}
-
-	print "Linking CUFTS into web tree... ";
-	my $result = `ln -s $config->{'CUFTS_BASE_DIR'}/htdocs/CUFTS/ $input 2>&1`;
-	if ($result =~ /ln:\s+/) {
-		die("Unable to create link into web tree.\n");
-	}
-	print "done.\n";
-	
-	create_apache_config_block($config, $input);
-	
+	create_apache_config_block($config);
 }
 
 
@@ -602,24 +653,24 @@ sub create_apache_config_block {
 	if ($input =~ /^\s*n/i) {
 		create_apache_config_no($config, $directory);
 	} else {
-		print "\nIs your web server running mod_perl?\n";
+		print "\nIs your web server running Apache 1.3.x w/ mod_perl?\n";
 		my $input = $term->readline('[Y/n]: ');
 		if ($input =~ /^\s*n/i) {
-			print "\nIs your web server running mod_env?\n";
+			print "\nIs your web server running Apache 2.0.x w/ mod_perl 2.x?\n";
 			my $input = $term->readline('[Y/n]: ');
 			if ($input =~ /^\s*n/i) {
 				create_apache_config_no($config, $directory);
 			} else {
-				create_apache_config_env($config, $directory);
+				create_apache_config_modperl2($config, $directory);
 			}
 		} else {
-			create_apache_config_modperl($config, $directory);
+			create_apache_config_modperl1($config, $directory);
 		}
 	}
 }
 			
 
-sub create_apache_config_modperl {
+sub create_apache_config_modperl2 {
 	my ($config, $directory) = @_;
 	
 	open CONF, ">$config->{'CUFTS_BASE_DIR'}/util/httpd.conf" or
@@ -627,19 +678,28 @@ sub create_apache_config_modperl {
 		
 	print CONF <<EOF;
 
-PerlRequire $config->{'CUFTS_BASE_DIR'}/util/startup.pl   
-PerlModule Apache::Registry
-<Directory $directory>
-	Options FollowSymLinks
-        <FilesMatch "\\.cgi\$">
-                PerlSetEnv PERL5LIB $config->{'CUFTS_BASE_DIR'}
-                SetHandler perl-script
-                PerlHandler Apache::Registry
-                Options ExecCGI
-                PerlSendHeader off
-        </FilesMatch>
-</Directory>
+    PerlRequire $config->{'CUFTS_BASE_DIR'}/util/startup.pl
+    PerlSwitches -I$config->{'CUFTS_BASE_DIR'}/lib -I$config->{'CUFTS_BASE_DIR'}/MaintTool/lib -I$config->{'CUFTS_BASE_DIR'}/Resolver/lib -I$config->{'CUFTS_BASE_DIR'}/CJDB/lib
+    PerlLoadModule CUFTS::MaintTool
+    PerlLoadModule CUFTS::Resolver
+    PerlLoadModule CUFTS::CJDB
+    PerlTransHandler Apache2::Const::OK
 
+    <Location /CUFTS/MaintTool>
+            SetHandler modperl
+            PerlResponseHandler CUFTS::MaintTool
+    </Location>
+
+
+    <Location /CUFTS/Resolver>
+            SetHandler modperl
+            PerlResponseHandler CUFTS::Resolver
+    </Location>
+
+    <Location /CJDB>
+            SetHandler modperl
+            PerlResponseHandler CUFTS::CJDB
+    </Location>
 EOF
 
 	close CONF;
@@ -647,7 +707,7 @@ EOF
 	print "\nhttpd.conf file created. Copy the following line into your\nApache config file:\n\nInclude $config->{'CUFTS_BASE_DIR'}/util/httpd.conf\n\nIf you do NOT have Apache::DBI installed, you should comment out\nthe 'use Apache::DBI' line from $config->{'CUFTS_BASE_DIR'}/util/startup.pl\n\n";
 }
 
-sub create_apache_config_env {
+sub create_apache_config_modperl1 {
 	my ($config, $directory) = @_;
 	
 	open CONF, ">$config->{'CUFTS_BASE_DIR'}/util/httpd.conf" or
@@ -655,26 +715,40 @@ sub create_apache_config_env {
 		
 	print CONF <<EOF;
 
-<Directory $directory>
-	Options FollowSymLinks
-        <FilesMatch "\\.cgi\$">
-                SetEnv PERL5LIB $config->{'CUFTS_BASE_DIR'}
-                Options ExecCGI
-        </FilesMatch>
-</Directory>
+    PerlRequire $config->{'CUFTS_BASE_DIR'}/util/startup.pl
+    <Perl>
+            use lib qw[$config->{'CUFTS_BASE_DIR'}/lib $config->{'CUFTS_BASE_DIR'}/MaintTool/lib $config->{'CUFTS_BASE_DIR'}/CJDB/lib $config->{'CUFTS_BASE_DIR'}/Resolver/lib];
+    </Perl>
+    <Location /MaintTool>
+            PerlModule CUFTS::MaintTool
+            SetHandler perl-script
+            PerlHandler CUFTS::MaintTool
+    </Location>
+
+    <Location /Resolver>
+            PerlModule CUFTS::Resolver
+            SetHandler perl-script
+            PerlHandler CUFTS::Resolver
+    </Location>
+
+    <Location /CJDB>
+            PerlModule CUFTS::CJDB
+            SetHandler perl-script
+            PerlHandler CUFTS::CJDB
+    </Location>
 
 EOF
 
 	close CONF;
 
-	print "\nhttpd.conf file created. Copy the following line into your\nApache config file:\nInclude $config->{'CUFTS_BASE_DIR'}/util/httpd.conf\n\nMake sure you have enabled the CGI handlers by uncommenting the\n'AddHandler cgi-script .cgi' line from your Apache config file.\n\n";
+	print "\nhttpd.conf file created. Copy the following line into your\nApache config file:\n\nInclude $config->{'CUFTS_BASE_DIR'}/util/httpd.conf\n\nIf you do NOT have Apache::DBI installed, you should comment out\nthe 'use Apache::DBI' line from $config->{'CUFTS_BASE_DIR'}/util/startup.pl\n\n";
 }
 	
 		
 sub create_apache_config_no {
 	my ($config, $directory) = @_;
 
-	print "\nIf you do not have access to the Apache config file,\nyou may have to further modify the web tree directory to\nplace the .cgi files into a directory that will execute them.\nYou will also likely have to add a line to each .cgi file to\nset the Perl library path to see the CUFTS modules:\nuse lib qw($config->{'CUFTS_BASE_DIR'})\n\n";
+	print "\nIf you do not have access to the Apache config file,\nyou will have to run the web applications as CGIs.  This setup\nis NOT recommended and as such no support is included here.\nInformation about running Catalyst (which CUFTS uses as a web\nframework) through CGI can be found at the Catalyst web site.\n";
 }	
 	
 

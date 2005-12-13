@@ -1,5 +1,5 @@
-#!/usr/bin/perl
-
+#!/usr/local/bin/perl
+# 
 use lib qw(lib);
 
 ##
