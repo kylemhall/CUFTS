@@ -1,10 +1,10 @@
-[% USE HTML %]
+[% USE url %]
 
 <div id="global-menu-new"><a href="[% url_base %]/global/edit">New Resource</a></div>
 
 <div id="global-menu-control" style="margin: .5em 0;">
 <form action="[% url_base %]/global/menu"><input style="margin-right: 2em;" type="submit" name="show" value="[% show == 'show all' ? 'show active' : 'show all' %]"></form>
-<form action="[% url_base %]/global/menu">Filter: <input type="text" name="filter" value="[% HTML.escape(filter) %]"> <input type="submit" name="apply_filter" value="filter"></form>
+<form action="[% url_base %]/global/menu">Filter: <input type="text" name="filter" value="[% filter | html %]"> <input type="submit" name="apply_filter" value="filter"></form>
 </div>
 
 <table class="grid">
@@ -13,20 +13,20 @@
  [% SET class = (resource.active ? 'active-field' : 'inactive-field') _ (loop.count % 2) %]
  <tr>
  <td class="[% class %]" style="white-space: nowrap;">
-  <a href="[% url_base %]/global/view/[% resource.id %]">view</a> | 
-  <a href="[% url_base %]/global/edit/[% resource.id %]">edit</a> | 
-  <a href="[% url_base %]/global/delete/[% resource.id %]" onClick="return confirmDelete()">delete</a>
+  <a href="[% url("$url_base/global/view/$resource.id") %]">view</a> | 
+  <a href="[% url("$url_base/global/edit/$resource.id") %]">edit</a> | 
+  <a href="[% url("$url_base/global/delete/$resource.id") %]" onClick="return confirmDelete()">delete</a>
  </td>
 
- <td class="[% class %]">[% resource.name %]</td>
+ <td class="[% class %]">[% resource.name | html %]</td>
 
- <td class="[% class %]">[% resource.provider %]</td>
+ <td class="[% class %]">[% resource.provider | html %]</td>
 
- <td class="[% class %]">[% resource.resource_type.type %]</td>
+ <td class="[% class %]">[% resource.resource_type.type | html %]</td>
 
  <td class="[% class %]">
   [% IF resource.do_module('has_title_list') %]
-   <a href="[% url_base %]/global/titles/[% resource.id %]">[% resource.title_count %]</a> (<a href="[% url_base %]/global/bulk/[% resource.id %]">bulk</a>)
+   <a href="[% url("$url_base/global/titles/$resource.id") %]">[% resource.title_count %]</a> (<a href="[% url("$url_base/global/bulk/$resource.id") %]">bulk</a>)
   [% ELSE %]
    N/A
   [% END %]

@@ -1,4 +1,4 @@
-<form>
+<form method="post">
 <table><tr><td>
 <table style="width: 100%;" class="outlined">
 <tr><td class="heading-bar">site domains</td></tr>

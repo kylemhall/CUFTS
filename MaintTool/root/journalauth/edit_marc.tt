@@ -1,4 +1,3 @@
-[% USE HTML %]
 [% USE url %]
 
 [% SET journal_auth_id = journal_auth.id %]
@@ -65,11 +64,11 @@
   [% SET field_index = loop.index %]
   [% SET max_field = field_index %]
   <div class="row[% loop.count % 2 %]">
-   <input style="width: 1.1em;" type="text" name="[% field_index %]-[% field_type %]-1" value="[% HTML.escape(field.indicator(1)) %]" size="1" maxlength="1" />
-   <input style="width: 1.1em;" type="text" name="[% field_index %]-[% field_type %]-2" value="[% HTML.escape(field.indicator(2)) %]" size="1" maxlength="1" />
+   <input style="width: 1.1em;" type="text" name="[% field_index %]-[% field_type %]-1" value="[% field.indicator(1) | html %]" size="1" maxlength="1" />
+   <input style="width: 1.1em;" type="text" name="[% field_index %]-[% field_type %]-2" value="[% field.indicator(2) | html %]" size="1" maxlength="1" />
    [% FOREACH subfield IN marc_fields.$field_type.subfields %]
     [% SET loop_index = loop.index %]
-    [% subfield %] <input type="text" name="[% field_index %]-[% field_type %][% subfield %]" value="[% HTML.escape(field.subfield(subfield)) %]" size="[% marc_fields.$field_type.size.$loop_index %]" />
+    [% subfield %] <input type="text" name="[% field_index %]-[% field_type %][% subfield %]" value="[% field.subfield(subfield) | html %]" size="[% marc_fields.$field_type.size.$loop_index %]" />
    [% END %]
    <input type="hidden" name="[% field_index %]-[% field_type %]-exists" value="1" />
    <input style="background: #D0DEED; margin-left: 10px;" type="submit" name="clear" value="clear" onClick="return clear_field('[% field_index %]', '[% field_type %]', 'journal_auth');" />

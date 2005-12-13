@@ -1,5 +1,3 @@
-[% USE HTML %]
-
 [% PROCESS site/navbar.tt %]
 
 <form method="post">

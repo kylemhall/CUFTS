@@ -17,7 +17,7 @@
   <a href="[% url_base %]/local/view/[% resource.local ? 'l' _ resource.local.id : 'g' _ resource.global.id %]">view</a> | 
   <a href="[% url_base %]/local/edit/[% resource.local ? 'l' _ resource.local.id : 'g' _ resource.global.id %]">edit</a> | 
   [% IF resource.local %]
-   <a href="[% url_base %]/local/delete/l[% resource.local.id %]" onClick="return confirmDelete()">delete</a>
+   <a href="[% url_base %]/local/delete/l[% resource.local.id %]" onClick="return confirmDelete('Deleting resources with a large number of titles may take up to a couple of minutes.  Please be patient.')">delete</a>
   [% ELSE %]
    <span class="inactive-field">delete</span>
   [% END %]

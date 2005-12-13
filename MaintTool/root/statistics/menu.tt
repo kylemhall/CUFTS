@@ -1,4 +1,4 @@
-<form>
+<form method="post">
 <table class="outlined">
 <tr><td colspan="2" class="heading-bar">statistics reports</td></tr>
 <tr><td class="label0">report type</td><td class="field0"><select name="statistics_type">
