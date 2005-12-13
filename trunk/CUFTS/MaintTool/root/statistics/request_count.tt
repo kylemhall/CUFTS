@@ -1,6 +1,6 @@
 [% USE String %]
 
-<span class="heading">number of requests for [% time %]</span>
+<span class="heading">number of requests for [% time | html %]</span>
 <table class="outlined">
 <tr><td class="label0">total requests</td><td class="field0">[% statistics.total_requests %]</td></tr>
 <tr><td class="label1">requests with fulltext</td><td class="field1">[% statistics.requests_with_fulltext %]</td></tr>

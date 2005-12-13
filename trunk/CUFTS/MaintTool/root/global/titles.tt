@@ -1,11 +1,11 @@
-[% USE HTML %]
+[% USE url %]
 
 [% SET columns = resource.do_module('title_list_fields') %]
 [% SET paging_url = url_base _ '/global/titles/' _ resource.id _ '?page=' %]
 [% paging_text = BLOCK %][% PROCESS paging.tt %][% END %]
 <div><span class="heading">[% resource.name %]</span></div>
 
-<form action="[% url_base %]/global/titles/[% resource.id %]">
+<form action="[% url("$url_base/global/titles/$resource.id") %]">
 
 <div style="margin-top: 1em;">
 Filter: <input type="text" name="filter" value="[% filter %]"> <input type="submit" name="apply_filter" value="filter">
@@ -16,7 +16,7 @@ Filter: <input type="text" name="filter" value="[% filter %]"> <input type="subm
 <tr><td colspan="[% columns.size %]" class="paging">[% paging_text %]</td></tr>
 <tr>
 [% FOREACH col IN columns %]
- <td class="heading">[% col.replace('_', ' ') %]</td>
+ <td class="heading">[% col.replace('_', ' ') | html %]</td>
 [% END %]
 </tr>
 [% FOREACH title IN titles %]
@@ -24,7 +24,7 @@ Filter: <input type="text" name="filter" value="[% filter %]"> <input type="subm
  <tr>
   [% FOREACH col IN columns %]
    <td class="[% class %]">
-    [% HTML.escape(title.$col) || '&nbsp;' %]
+    [% title.$col || '&nbsp;' | html %]
    </td>
   [% END %]
  </tr>

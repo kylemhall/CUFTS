@@ -1,4 +1,4 @@
-[% USE HTML %]
+[% USE url %]
 
 [% PROCESS site/navbar.tt %]
 

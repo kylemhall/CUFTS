@@ -38,8 +38,8 @@ function MM_swapImage() { //v3.0
 
 }
 
-function confirmDelete() {
-	var agree = confirm("Delete record(s)?");
+function confirmDelete(message) {
+	var agree = confirm("Delete record(s)? " + message);
 	if (agree) 
 		return true;
 	else 

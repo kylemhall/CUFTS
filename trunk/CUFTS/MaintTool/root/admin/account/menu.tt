@@ -1,5 +1,6 @@
+[% USE url %]
 <div>
-<a href="[% url_base %]/admin/account/edit">New Account</a> |
+<a href="[% url("$url_base/admin/account/edit") %]">New Account</a> |
 </div>
 
 <div style="margin-top: 1em;">
@@ -9,9 +10,9 @@
  [% SET class = (account.active ? 'active-field' : 'inactive-field') _ (loop.count % 2) %]
  <tr>
   <td class="[% class %]">
-   <a href="[% url_base %]/admin/account/view/[% account.id %]">view</a> |
-   <a href="[% url_base %]/admin/account/edit/[% account.id %]">edit</a> |
-   <a href="[% url_base %]/admin/account/delete/[% account.id %]" onClick="return confirmDelete()">delete</a>
+   <a href="[% url("$url_base/admin/account/view/$account.id") %]">view</a> |
+   <a href="[% url("$url_base/admin/account/edit/$account.id") %]">edit</a> |
+   <a href="[% url("$url_base/admin/account/delete/$account.id") %]" onClick="return confirmDelete()">delete</a>
   </td>
   <td class="[% class %]">[% account.key  | html %]</td>
   <td class="[% class %]">[% account.name | html %]</td>

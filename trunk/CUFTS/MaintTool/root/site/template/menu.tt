@@ -1,4 +1,4 @@
-[% USE HTML %]
+[% USE url %]
 
 [% PROCESS site/navbar.tt %]
 
@@ -30,13 +30,13 @@
   
   <td class="[% class %]" style="text-align: center;">
     [% IF active %]
-     <a href="[% url_base %]/site/template/view/cjdb_template/[% cjdb_template %]/active"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/view/cjdb_template/$cjdb_template/active") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
     [% END %]
 
     [% IF active %]
-     <a href="[% url_base %]/site/template/delete/cjdb_template/[% cjdb_template %]/active"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/delete/cjdb_template/$cjdb_template/active") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
     [% END %]
@@ -44,7 +44,7 @@
    <td class="[% class %]" style="text-align: center;">
 
     [% IF sandbox %]
-     <a href="[% url_base %]/site/template/transfer/cjdb_template/[% cjdb_template %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/transfer/cjdb_template/$cjdb_template") %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]transfer-button-inactive.gif" alt="transfer (inactive)" title="transfer (inactive)" width="12" height="12" border="0">
     [% END %]
@@ -53,15 +53,15 @@
     <td class="[% class %]" style="text-align: center;">
 
     [% IF sandbox %]
-     <a href="[% url_base %]/site/template/view/cjdb_template/[% cjdb_template %]/sandbox"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/view/cjdb_template/$cjdb_template/sandbox") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
     [% ELSE %]         
      <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
     [% END %]
 
-    <a href="[% url_base %]/site/template/edit/cjdb_template/[% cjdb_template %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
+    <a href="[% url("$url_base/site/template/edit/cjdb_template/$cjdb_template") %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
 
     [% IF sandbox %]
-     <a href="[% url_base %]/site/template/delete/cjdb_template/[% cjdb_template %]/sandbox"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/delete/cjdb_template/$cjdb_template/sandbox") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
     [% END %]
@@ -91,13 +91,13 @@
   
   <td class="[% class %]" style="text-align: center;">
     [% IF active %]
-     <a href="[% url_base %]/site/template/view/css/[% css %]/active"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/view/css/$css/active") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
     [% END %]
 
     [% IF active %]
-     <a href="[% url_base %]/site/template/delete/css/[% css %]/active"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/delete/css/$css/active") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
     [% END %]
@@ -105,7 +105,7 @@
    <td class="[% class %]" style="text-align: center;">
 
     [% IF sandbox %]
-     <a href="[% url_base %]/site/template/transfer/css/[% css %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/transfer/css/$css") %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]transfer-button-inactive.gif" alt="transfer (inactive)" title="transfer (inactive)" width="12" height="12" border="0">
     [% END %]
@@ -114,15 +114,15 @@
     <td class="[% class %]" style="text-align: center;">
 
     [% IF sandbox %]
-     <a href="[% url_base %]/site/template/view/css/[% css %]/sandbox"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/view/css/$css/sandbox") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
     [% ELSE %]         
      <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
     [% END %]
 
-    <a href="[% url_base %]/site/template/edit/css/[% css %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
+    <a href="[% url("$url_base/site/template/edit/css/$css") %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
 
     [% IF sandbox %]
-     <a href="[% url_base %]/site/template/delete/css/[% css %]/sandbox"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/delete/css/$css/sandbox") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
     [% END %]

@@ -6,7 +6,7 @@
 
 [% PROCESS site/navbar.tt %]
 
-<div style="margin-bottom: .5em;"><span class="heading">[% template_name %]</span></div>
+<div style="margin-bottom: .5em;"><span class="heading">[% template_name | html %]</span></div>
 
 <table class="outlined">
 <tr><td class="heading-bar">view template</td></tr>
