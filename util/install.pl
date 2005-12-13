@@ -380,10 +380,9 @@ sub verify_cwd {
 	
 	my @files = qw(
 		util/install.pl
-		CUFTS/Resources.pm
-		CUFTS/Resolve.pm
-		CUFTS/Maint/CGI.pm
-		CUFTS/DB/DBI.pm
+		lib/CUFTS/Resources.pm
+		lib/CUFTS/Resolve.pm
+		lib/CUFTS/DB/DBI.pm
 		sql/CUFTS/services.sql
         Resolver/lib/CUFTS/Resolver.pm
         CJDB/lib/CUFTS/CJDB.pm
