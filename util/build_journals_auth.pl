@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 use lib qw(lib);
 
@@ -10,7 +10,7 @@ use SQL::Abstract;
 use Data::Dumper;
 
 use CUFTS::Config;
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Util::Simple;
 
 use CUFTS::DB::Journals;
 use CUFTS::DB::JournalsAuthTitles;
@@ -181,7 +181,7 @@ sub process_journal {
     my ( $journal, $stats ) = @_;
 
     # Skip journal if resource is not active
-
+    
     return undef if !$journal->resource->active;
 
     $stats->{'count'}++;
@@ -190,11 +190,12 @@ sub process_journal {
 
     my @issn_search;
 
-    $journal->issn
-        and push @issn_search, $journal->issn;
-    $journal->e_issn
-        and !grep $journal->e_issn, @issn_search
-        and push @issn_search, $journal->e_issn;
+    if ( not_empty_string($journal->issn) ) {
+        push @issn_search, $journal->issn;
+    }
+    if ( not_empty_string($journal->e_issn) && !grep $journal->e_issn, @issn_search ) {
+        push @issn_search, $journal->e_issn;
+    }
 
     my @journal_auths;
 
@@ -204,6 +205,8 @@ sub process_journal {
     else {
         @journal_auths = CUFTS::DB::JournalsAuth->search_where(
             title => { 'ilike' => $journal->title } );
+            
+        warn('title search: ' . scalar(@journal_auths));
     }
 
     if ( scalar(@journal_auths) > 1 ) {

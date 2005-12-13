@@ -1,3 +1,5 @@
+#!/usr/local/bin/perl
+
 use MARC::File::USMARC;
 use constant MAX => 9999999;
 my %counts;
