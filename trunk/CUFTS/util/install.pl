@@ -40,25 +40,31 @@ my @write_to_directories = qw(
 
 my @modules = qw(
     Business::ISSN
+    Catalyst
+    Catalyst::Plugin::FillInForm
     Class::Accessor
     Class::DBI
     Class::DBI::AbstractSearch
     Class::DBI::Plugin::CountSearch
+    Class::DBI::Plugin::Type
     Class::DBI::Sweet
     Date::Calc
     Exception::Class
     Exception::Class::DBI
     Getopt::Long
     HTML::Entities
+    HTML::FillInForm
     LWP::UserAgent
     MARC::Record
     MIME::Lite
     Net::SMTP
     SQL::Abstract
+    String::Approx
     Template
-    Term::Readline
+    Term::ReadLine
     Text::CSV
     URI::Escape
+    URI::OpenURL
 );
 
 my @optional_modules = qw(Apache::DBI);
@@ -164,7 +170,7 @@ get_new_config($config);  		# Overwrites $config with entered options
 print "Do you want to update the configuration file with the new settings?\n";
 $input = $term->readline('[Y/n]: ');
 unless ($input =~ /^\s*n/i) {
-	write_config_file("CUFTS/BasicConfig.pm", $config);
+	write_config_file("lib/CUFTS/BasicConfig.pm", $config);
 }
 
 ##
