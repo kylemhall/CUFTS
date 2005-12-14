@@ -80,7 +80,6 @@
     <td class="heading-bar2" style="text-align: center;">active</td>
     <td class="heading-bar2" style="text-align: center;">transfer</td>
     <td class="heading-bar2-right" style="text-align: center;">sandbox</td></tr>
-
 [% FOREACH css IN csses %]
  [% SET active = active_csses.in(css) %]
  [% SET sandbox = sandbox_csses.in(css) %]
