@@ -36,18 +36,18 @@ sub prepare_path {
 
     my $regex_base = $c->config->{regex_base};
     if ( $path =~ s{^ ${regex_base} (\w+) / (active/|sandbox/)? }{}oxsm ) {
-        my $site_key = $1;
-        my $template_dir_type = $2 || 'active';
-        $c->stash->{current_site_key}  = $site_key;
+        my $site_key      = $c->stash->{current_site_key} = $1;
+        my $template_type = $c->stash->{template_type}    = $2 || 'active';
         
         # Get the site from the database based on the site key
         
-        $c->stash->{current_site} = CUFTS::DB::Sites->search( key => $c->stash->{current_site_key} )->first;
+        $c->stash->{current_site} = CUFTS::DB::Sites->search( key => $site_key )->first;
         if (!defined($c->stash->{current_site})) {
-            die( "Unable to find site matching key: " . $c->stash->{current_site_key} );
+            die( "Unable to find site matching key: $site_key" );
         }
         
-        $c->stash->{site_template_dir} = '/sites/' . $c->stash->{current_site}->id . "/${template_dir_type}";
+        $c->stash->{site_template_dir} = '/sites/' . $c->stash->{current_site}->id . "/${template_type}";
+        
         $c->req->base->path( $c->req->base->path . "${regex_base}${site_key}" );
         $c->req->path($path);
         $c->stash->{url_base} = defined($c->config->{url_base})
@@ -78,6 +78,16 @@ sub begin : Private {
     $c->stash->{css_dir}   = $c->stash->{url_base} . '/static/css/';
     $c->stash->{js_dir}    = $c->stash->{url_base} . '/static/js/';
     $c->stash->{self_url}  = $c->req->{base} . $c->req->{path};
+
+    # Set up site specific CSS file if it exists
+    
+    my $site_css = 'sites/' . $c->stash->{current_site}->id 
+                   . '/' . $c->stash->{template_type} 
+                   . '/cjdb.css';
+                  
+    if ( -e ($c->config->{root} . '/static/css/' . $site_css) ) {
+        $c->stash->{site_css_file} = $c->stash->{css_dir} . $site_css;
+    }
 
     # Get the current user for the stash if they have logged in
 

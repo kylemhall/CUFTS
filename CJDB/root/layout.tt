@@ -1,6 +1,9 @@
 <html>
 <head>
 <title>CJDB</title>
+[% IF site_css_file %]
+ <link rel="StyleSheet" href="[% site_css_file %]" type="text/css" media="screen, print" />
+[% END %]
 <link rel="StyleSheet" href="[% css_dir %]cjdb.css" type="text/css" media="screen, print" />
 <script src="[% js_dir %]cjdb.js" type="text/javascript"></script>
 [% IF include_javascript %]<script type="text/javascript">[% include_javascript %]</script>[% END %]
