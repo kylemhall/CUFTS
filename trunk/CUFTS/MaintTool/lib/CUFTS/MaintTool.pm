@@ -1,7 +1,7 @@
 package CUFTS::MaintTool;
 
 use strict;
-use Catalyst qw/Session::FastMmap Static::Simple FormValidator CUFTS::MaintTool::FillInForm/;
+use Catalyst qw/Session Session::Store::FastMmap Session::State::Cookie FormValidator CUFTS::MaintTool::FillInForm Static::Simple/;
 use lib '../lib';
 use CUFTS::Config;
 
@@ -93,9 +93,9 @@ sub login : Global {
 	$c->form({'required' => ['login_key', 'login_password', 'submit'], 'filters' => ['trim']});
 
 	$c->session->{current_account_id} = undef;
-	$c->session->{current_site_id} = undef;
-	$c->stash->{current_account} = undef;
-	$c->stash->{current_site} = undef;
+	$c->session->{current_site_id}    = undef;
+	$c->stash->{current_account}      = undef;
+	$c->stash->{current_site}         = undef;
 
 	if (defined($c->form->{valid}->{login_key})) {
 		my ($key, $password) = ($c->form->{valid}->{login_key}, $c->form->{valid}->{login_password});
