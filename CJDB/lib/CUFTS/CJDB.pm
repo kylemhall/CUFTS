@@ -35,10 +35,19 @@ sub prepare_path {
     # for static objects that don't need database setup.
 
     my $regex_base = $c->config->{regex_base};
-    if ( $path =~ s{^ ${regex_base} (\w+) / }{}oxsm ) {
+    if ( $path =~ s{^ ${regex_base} (\w+) / (active/|sandbox/)? }{}oxsm ) {
         my $site_key = $1;
+        my $template_dir_type = $2 || 'active';
         $c->stash->{current_site_key}  = $site_key;
-        $c->stash->{site_template_dir} = "root/sites/${site_key}";
+        
+        # Get the site from the database based on the site key
+        
+        $c->stash->{current_site} = CUFTS::DB::Sites->search( key => $c->stash->{current_site_key} )->first;
+        if (!defined($c->stash->{current_site})) {
+            die( "Unable to find site matching key: " . $c->stash->{current_site_key} );
+        }
+        
+        $c->stash->{site_template_dir} = '/sites/' . $c->stash->{current_site}->id . "/${template_dir_type}";
         $c->req->base->path( $c->req->base->path . "${regex_base}${site_key}" );
         $c->req->path($path);
         $c->stash->{url_base} = defined($c->config->{url_base})
@@ -62,14 +71,6 @@ sub begin : Private {
     # Skip setting up stash information for static items
 
     return 1 if ( $c->req->{path} =~ /^static/ );
-
-    # Get the site from the database based on the site key
-    # set in prepare_path()
-
-    $c->stash->{current_site} = CUFTS::DB::Sites->search( key => $c->stash->{current_site_key} )->first;
-    if (!defined($c->stash->{current_site})) {
-        die( "Unable to find site matching key: " . $c->stash->{current_site_key} );
-    }
 
     # Set up basic template vars
 

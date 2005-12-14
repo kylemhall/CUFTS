@@ -85,7 +85,7 @@ sub process {
 
 	my $root = $c->config->{root};
 
-	$self->template->context->load_templates->[0]->include_path([ $c->stash->{site_template_dir}, $root, "$root/base"]);
+	$self->template->context->load_templates->[0]->include_path([ $root . $c->stash->{site_template_dir}, $root, "$root/base"]);
 
     my $template = $c->stash->{template} || $c->request->match;
 
@@ -94,6 +94,7 @@ sub process {
         return 0;
     }
 
+    $c->log->debug('Template include path: ' . join(',', @{$self->template->context->load_templates->[0]->include_path}));
     $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
     
     my $output;
