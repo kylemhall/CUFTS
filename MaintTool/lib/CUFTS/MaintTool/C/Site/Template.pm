@@ -129,7 +129,7 @@ sub menu : Local {
     $c->stash->{cjdb_templates}         = \@cjdb_template_list;
 
     $c->stash->{csses}         = \@css_list;
-    $c->stash->{active_cesses} = \@active_css;
+    $c->stash->{active_csses} = \@active_css;
     $c->stash->{sandbox_csses} = \@sandbox_css;
 
     $c->stash->{template} = 'site/template/menu.tt';
