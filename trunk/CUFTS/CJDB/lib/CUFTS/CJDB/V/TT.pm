@@ -94,8 +94,10 @@ sub process {
         return 0;
     }
 
-    $c->log->debug('Template include path: ' . join(',', @{$self->template->context->load_templates->[0]->include_path}));
-    $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
+    if ($c->debug) {
+        $c->log->debug('Template include path: ' . join(',', @{$self->template->context->load_templates->[0]->include_path}));
+        $c->log->debug(qq/Rendering template "$template"/);
+    }
     
     my $output;
 
