@@ -12,7 +12,7 @@
 
 <div class="request-label">source</div>
 <div class="request-field">
-[% IF request.issn || request.eissn %]
+[% IF request.issn || request.eissn || request.genre == 'journal' || request.genre == 'article' %]
  [% request.title || request.stitle %]
 [% END %]
 
