@@ -26,6 +26,9 @@ use strict;
 use CUFTS::DB::Journals;
 use CUFTS::DB::Resources;
 use CUFTS::DB::LocalResources;
+use CUFTS::Util::Simple;
+
+use Date::Calc;
 
 use CUFTS::Exceptions qw(assert_ne);
 use SQL::Abstract;
@@ -606,7 +609,7 @@ sub _search_active {
         $search_terms{'-nest'} = \@issn_search;
     }
     elsif ( assert_ne( $request->title ) ) {
-        search_terms {'title'} = { 'ilike', $request->title };
+        $search_terms{'title'} = { 'ilike', $request->title };
     }
     else {
         return [];
@@ -654,8 +657,9 @@ sub filter_fulltext {
             or next;
         $class->check_fulltext_embargo( $record, $resource, $site, $request )
             or next;
-        $class->check_fulltext_current_months( $record, $resource, $site,
-            $request )
+        $class->check_fulltext_current_months( $record, $resource, $site, $request )
+            or next;
+        $class->check_fulltext_current_years( $record, $resource, $site, $request )
             or next;
         $class->check_fulltext_vol_iss( $record, $resource, $site, $request )
             or next;
@@ -747,7 +751,7 @@ sub check_fulltext_embargo {
         $record->embargo_months, $record->embargo_days );
 }
 
-# Check a record against a request for embargo period
+# Check a record against a request for a moving wall
 sub check_fulltext_current_months {
     my ( $class, $record, $resource, $site, $request ) = @_;
 
@@ -756,6 +760,16 @@ sub check_fulltext_current_months {
     return $class->_check_current_months( $year, $month, $day,
         $record->current_months );
 }
+
+# Check a record against a request for a moving wall
+sub check_fulltext_current_years {
+    my ( $class, $record, $resource, $site, $request ) = @_;
+
+    my ( $year, $month, $day )
+        = ( $request->year, $request->month, $request->day );
+    return $class->_check_current_years( $year, $month, $day, $record->current_years );
+}
+
 
 # $start and $end must be in YYYY-MM-DD format
 sub _check_date_range {
@@ -859,11 +873,9 @@ sub _check_embargo {
         $embargo_days
             = defined($embargo_days) ? ( 0 - int($embargo_days) ) : 0;
 
-        use Date::Calc;
         if ( assert_ne($embargo_months) ) {
             my ( $e_year, $e_month, $e_day )
-                = Date::Calc::Add_Delta_YMD( Date::Calc::Today, 0,
-                $embargo_months, $embargo_days );
+                = Date::Calc::Add_Delta_YMD( Date::Calc::Today, 0, $embargo_months, $embargo_days );
 
             return $class->_check_end_date( $year, $month, $day,
                 sprintf( "%04d-%02d-%02d", $e_year, $e_month, $e_day ) );
@@ -882,14 +894,33 @@ sub _check_current_months {
 
         $current_months = 0 - int($current_months);
 
-        use Date::Calc;
         if ( assert_ne($current_months) ) {
             my ( $e_year, $e_month, $e_day )
-                = Date::Calc::Add_Delta_YMD( Date::Calc::Today, 0,
-                $current_months, 0 );
+                = Date::Calc::Add_Delta_YMD( Date::Calc::Today, 0, $current_months, 0 );
 
             return $class->_check_start_date( $year, $month, $day,
                 sprintf( "%04d-%02d-%02d", $e_year, $e_month, $e_day ) );
+        }
+    }
+
+    return 1;
+}
+
+sub _check_current_years {
+    my ( $class, $year, $month, $day, $current_years ) = @_;
+
+    if (   ( defined($month) || defined($year) )
+        && ( defined($current_years) && int($current_years) > 0 ) )
+    {
+
+        $current_years = 0 - int($current_years);
+
+        if ( assert_ne($current_years) ) {
+            my ( $e_year, $e_month, $e_day )
+                = Date::Calc::Add_Delta_YMD( Date::Calc::Today, $current_years, 0, 0 );
+
+            return $class->_check_start_date( $year, $month, $day,
+                 sprintf( "%04d-%02d-%02d", $e_year, $e_month, $e_day ) );
         }
     }
 
