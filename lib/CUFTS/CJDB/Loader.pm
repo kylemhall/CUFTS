@@ -105,7 +105,7 @@ sub load_journal {
     }
 
     if ( $self->merge_by_issns ) {
-        my @journals = CJDB::DB::Journals->search( journals_auth => $journals_auth_id );
+        my @journals = CJDB::DB::Journals->search( journals_auth => $journals_auth_id, site => $site_id );
 
         return $journals[0] if scalar(@journals);
     }
