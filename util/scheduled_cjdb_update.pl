@@ -59,8 +59,8 @@ while (my $site = $site_iter->next) {
 		print `util/load_cufts_journals.pl --site_id=${site_id} --clear`;
 	}
 
-	$site->details->set('rebuild_cjdb', undef);
-	$site->details->set('rebuild_ejournals_only', undef);
+	$site->rebuild_cjdb(undef);
+	$site->rebuild_ejournals_only(undef);
 	$site->update;
 	$site->dbi_commit;
 
