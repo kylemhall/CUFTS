@@ -1,4 +1,5 @@
 [% USE HTML %]
+[% USE url %]
 
 <div style="padding-bottom: .5em;"><span class="heading">[% local_resource.name %]</span></div>
 <table><tr><td>
@@ -19,8 +20,8 @@
 <tr>
  <td class="label0">upload title list</td>
  <td class="field0" style="white-space: nowrap;">
-  <form action="[% base_url %]/local/titles/bulk_local/l[% local_resource.id %]" method="post" enctype="multipart/form-data">
-   <input type="file" name="file" /> <input type="submit" name="upload" value="upload" /> [% PROCESS form_results frf='file' %]
+  <form action="[% url_base %]/local/titles/bulk_local/l[% local_resource.id %]" method="post" enctype="multipart/form-data">
+   <input type="file" name="file" /> <input type="submit" name="upload" value="upload" /> [% PROCESS form_results.tt frf='file' %]
   </form>
  </td>
 </tr>
