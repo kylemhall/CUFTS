@@ -6,8 +6,6 @@ use lib '../lib';
 
 use CUFTS::Config;
 
-use Data::Dumper;
-
 our $VERSION = '2.00.00';
 
 CUFTS::MaintTool->config(
@@ -32,32 +30,24 @@ sub begin : Private {
 
     # Set up basic template vars
 
-    $c->stash->{url_base} =
-          $c->config->{url_base}
-        ? $c->config->{url_base}
-        : q{} . $c->req->base;
+    my $url_base = $c->config->{url_base} || (q{} . $c->req->base);
+    $url_base =~ s{/$}{};    # Remove trailing slash
+    $c->stash->{url_base}  = $url_base;
+    $c->stash->{image_dir} = "${url_base}/static/images/";
+    $c->stash->{css_dir}   = "${url_base}/static/css/";
+    $c->stash->{js_dir}    = "${url_base}/static/js/";
 
-    $c->stash->{url_base} =~ s{/$}{};    # Remove trailing slash
-
-    # For a live setup, change these so that Catalyst isn't handling them.
-
-    $c->stash->{image_dir} = $c->stash->{url_base} . '/static/images/';
-    $c->stash->{css_dir}   = $c->stash->{url_base} . '/static/css/';
-    $c->stash->{js_dir}    = $c->stash->{url_base} . '/static/js/';
-
-    # don't force login on static content
+    # Don't force login on static content
     return 1 if ( $c->req->{path} =~ /^static/ );
 
     # Set up current user and site info in the stash
 
-    if ( defined( $c->session->{current_account_id} ) ) {
-        $c->stash->{current_account} = CUFTS::DB::Accounts->retrieve(
-            $c->session->{current_account_id} );
+    if ( my $account_id = $c->session->{current_account_id} ) {
+        $c->stash->{current_account} = CUFTS::DB::Accounts->retrieve($account_id);
 
-        if ( defined( $c->session->{current_site_id} ) ) {
-            $c->stash->{current_site} = CUFTS::DB::Sites->retrieve( $c->session->{current_site_id} );
+        if ( my $site_id = $c->session->{current_site_id} ) {
+            $c->stash->{current_site} = CUFTS::DB::Sites->retrieve($site_id);
         }
-
     }
     elsif ( $c->req->action ne 'login' ) {
 
@@ -88,7 +78,7 @@ sub end : Private {
 }
 
 ##
-## login - Show the login screen
+## login - Show the login screen and 
 ##
 
 sub login : Global {
@@ -100,22 +90,27 @@ sub login : Global {
         }
     );
 
+    # Clear stash and session
+
     $c->session->{current_account_id} = undef;
     $c->session->{current_site_id}    = undef;
     $c->stash->{current_account}      = undef;
     $c->stash->{current_site}         = undef;
 
+    # If there's a form submission, try to log in, checking the password
+
     if ( defined( $c->form->{valid}->{login_key} ) ) {
-        my ( $key, $password ) = (
-            $c->form->{valid}->{login_key},
-            $c->form->{valid}->{login_password}
-        );
+        my $key      = $c->form->{valid}->{login_key};
+        my $password = $c->form->{valid}->{login_password};
 
         my $crypted_pass = crypt( $password, $key );
         my @accounts = CUFTS::DB::Accounts->search(
-            'key'      => $key,
-            'password' => $crypted_pass
+            key      => $key,
+            password => $crypted_pass
         );
+
+        # If we have a matching record, stuff the id in the session
+        # and redirect to main, otherwise show an error and the form again
 
         if ( scalar(@accounts) == 1 ) {
             $c->session->{current_account_id} = $accounts[0]->id;
@@ -125,7 +120,7 @@ sub login : Global {
                 $c->session->{current_site_id} = $sites[0]->id;
             }
 
-            $c->redirect('/main');
+            return $c->redirect('/main');
         }
         else {
             $c->stash->{errors} = [
@@ -147,11 +142,6 @@ sub logout : Global {
     $c->redirect('/login');
 }
 
-sub default : Private {
-    my ( $self, $c ) = @_;
-    $c->redirect('/login');
-}
-
 ##
 ## main - Display the main screen
 ##
@@ -163,6 +153,20 @@ sub main : Global {
     $c->stash->{header_image} = 'home.jpg';
 }
 
+##
+## default - Redirect to the login screen
+##
+
+sub default : Private {
+    my ( $self, $c ) = @_;
+    $c->redirect('/login');
+}
+
+##
+## redirect - helper for redirecting.  Prepends the url_base if
+##            it's missing and there's no "http.."
+##
+
 sub redirect {
     my ( $c, $location ) = @_;
     $location =~ m#^/#
@@ -172,7 +176,7 @@ sub redirect {
         $location = $c->stash->{url_base} . $location;
     }
 
-    $c->res->redirect($location);
+    return $c->res->redirect($location);
 }
 
 =head1 NAME

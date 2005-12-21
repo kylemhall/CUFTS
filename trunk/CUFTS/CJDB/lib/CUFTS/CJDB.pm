@@ -9,7 +9,7 @@ use CUFTS::CJDB::Util;
 our $VERSION = '2.00.00';
 
 CUFTS::CJDB->config(
-    name     => 'CUFTS::CJDB',
+    name                 => 'CUFTS::CJDB',
     regex_base           => '',
     default_max_columns  => 20,
     default_min_per_page => 50,
