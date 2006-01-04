@@ -376,19 +376,13 @@ sub _find_partial_match {
 }
 
 sub _modify_record {
-    my ( $class, $resource, $new_record, $old_record, $timestamp, $local )
-        = @_;
+    my ( $class, $resource, $new_record, $old_record, $timestamp, $local ) = @_;
 
-    $class->log_modified_title( $resource, $old_record, $new_record,
-        $timestamp, $local );
+    $class->log_modified_title( $resource, $old_record, $new_record, $timestamp, $local );
 
-    $^W = 0
-        ; # Turn off warnings because of the large number of eq matches against undef fields below.
+    my @columns = ( $old_record->columns, $old_record->details_columns );
 
-    my @columns = $old_record->columns;
-    foreach my $details ( $old_record->details_columns ) {
-        push @columns, $old_record->$details->columns;
-    }
+    $^W = 0; # Turn off warnings because of the large number of eq matches against undef fields below.
 
     foreach my $column (@columns) {
         next
