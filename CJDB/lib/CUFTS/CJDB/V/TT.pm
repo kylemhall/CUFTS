@@ -12,9 +12,7 @@ __PACKAGE__->mk_accessors('template');
 
 
 __PACKAGE__->config->{WRAPPER} = 'layout.tt';
-#__PACKAGE__->config->{COMPILE_DIR} = '/tmp/template_cache';
-
-use Template::Stash;
+#__PACKAGE__->config->{COMPILE_DIR} = '/tmp/CJDB_template_cache';
 
 $Template::Stash::LIST_OPS->{ in } = sub {
 	my ($list, $val, $field) = @_;
@@ -69,9 +67,9 @@ sub new {
         %{ $self->config() }
     );
 
-    if ( $c->debug && not exists $config{CONTEXT} ) {
-       $config{CONTEXT} = Template::Timer->new(%config);
-    }
+#    if ( $c->debug && not exists $config{CONTEXT} ) {
+#       $config{CONTEXT} = Template::Timer->new(%config);
+#    }
 
     $self->template( Template->new( \%config ) );    
 

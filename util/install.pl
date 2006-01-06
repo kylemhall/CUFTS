@@ -214,9 +214,9 @@ setup_web_apps($config);
 ##
 
 if ($no_psql) {
-	print "Databases cannot be installed due to missing PostgreSQL\nbinaries. You will have to install the database by hand or\nfix your PostgreSQL installation and re-run this script.\n";
+	print "The database cannot be installed due to missing PostgreSQL\nbinaries. You will have to install the database by hand or\nfix your PostgreSQL installation and re-run this script.\n";
 } else {
-	print "Directory installation complete. Would you like to install the databases?\n";
+	print "Directory installation complete. Would you like to install the database?\n";
 	my $input = $term->readline("[Y/n]: ");
 	$input =~ /^\s*n/i and
 		$skip_db = 1;
@@ -258,13 +258,6 @@ if ($no_psql) {
 				die("Error creating database: $result\n\nIf the above error is something like FATAL: IDENT auth failed,\nyou are trying to create the database as a user other than\nthe one you are currently logged in as, and PostgreSQL is set\nto use 'ident' authentication. See the pg_hba.conf PostgreSQL config file.\n");
 			}
 
-			print "Creating CJDB database. If you have entered a password above, you will be asked to enter it again.\n";
-			my $cjdb_pw = defined($config->{'CJDB_PASSWORD'}) && $config->{'CJDB_PASSWORD'} ne '' ? '--password' : '';
-			my $cjdb_result = `createdb --username=$config->{'CJDB_USER'} $cjdb_pw $config->{'CJDB_DB'}`;
-			if ($cjdb_result !~ /CREATE\sDATABASE/) {
-				die("Error creating database: $result\n\nIf the above error is something like FATAL: IDENT auth failed,\nyou are trying to create the database as a user other than\nthe one you are currently logged in as, and PostgreSQL is set\nto use 'ident' authentication. See the pg_hba.conf PostgreSQL config file.\n");
-			}
-
 			print "Database created.\n\n";
 
 			##
@@ -272,14 +265,7 @@ if ($no_psql) {
 			##
 		
 			print "Creating CUFTS database tables and seeding database. Ignore the NOTICE: lines.\nYou may be asked for the password again.\n";
-			$result = `cat sql/CUFTS/*.sql sql/CUFTS/views/*.sql sql/CUFTS/init/*.sql | psql -q --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
-			if ($result =~ /ERROR/) {
-				die("Error creating/seeding database: $result");
-			}
-			print "\n\nDone with basic database setup.\n";
-
-			print "Creating CJDB database tables and seeding database. Ignore the NOTICE: lines.\nYou may be asked for the password again.\n";
-			$result = `cat sql/CJDB/*.sql | psql -q --username=$config->{'CJDB_USER'} $pw $config->{'CJDB_DB'}`;
+			$result = `cat sql/CUFTS/*.sql sql/CUFTS/views/*.sql sql/CUFTS/init/*.sql sql/CJDB/*.sql | psql -q --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
 			if ($result =~ /ERROR/) {
 				die("Error creating/seeding database: $result");
 			}
@@ -455,10 +441,6 @@ use vars qw(
 
 	\$CUFTS_SMTP_HOST
 	\$CUFTS_MAIL_FROM
-
-	\$CJDB_DB
-	\$CJDB_USER
-	\$CJDB_PASSWORD
 );
 
 \$CUFTS_BASE_DIR = '$config->{'CUFTS_BASE_DIR'}';
@@ -469,10 +451,6 @@ use vars qw(
 
 \$CUFTS_SMTP_HOST = '$config->{'CUFTS_SMTP_HOST'}';
 \$CUFTS_MAIL_FROM = '$config->{'CUFTS_MAIL_FROM'}';
-
-\$CJDB_DB = '$config->{'CJDB_DB'}';
-\$CJDB_USER = '$config->{'CJDB_USER'}';
-\$CJDB_PASSWORD = '$config->{'CJDB_PASSWORD'}';
 
 1;
 
@@ -492,9 +470,6 @@ sub get_existing_config {
 		$config->{'CUFTS_PASSWORD'}   = $CUFTS::Config::CUFTS_PASSWORD;
 		$config->{'CUFTS_SMTP_HOST'}  = $CUFTS::Config::CUFTS_SMTP_HOST;
 		$config->{'CUFTS_MAIL_FROM'}  = $CUFTS::Config::CUFTS_MAIL_FROM;
-		$config->{'CJDB_DB'}          = $CUFTS::Config::CJDB_DB || 'CJDB';
-		$config->{'CJDB_USER'}        = $CUFTS::Config::CJDB_USER || scalar(getpwent);
-		$config->{'CJDB_PASSWORD'}    = $CUFTS::Config::CJDB_PASSWORD;
 	}
 }
 
@@ -518,24 +493,6 @@ sub get_new_config {
 	my $input_cufts_password = $term->readline("[$config->{'CUFTS_PASSWORD'}]: ");
 	defined($input_cufts_password) && $input_cufts_password ne '' and
 		$config->{'CUFTS_PASSWORD'} = $input_cufts_password;
-
-    print "CJDB Database name: $config->{'CJDB_DB'}\n";
-    my $input_cjdb_db = $term->readline("[$config->{'CJDB_DB'}]: ");
-    defined($input_cjdb_db) && $input_cjdb_db ne '' and
-    	$config->{'CJDB_DB'} = $input_cjdb_db; 
-
-	print "CJDB Database user: $config->{'CJDB_USER'}\n";
-    if ($config->{'CJDB_USER'} eq 'root') {
-    	print "** You should probably not use root as the database owner. **\n";
-    }
-    my $input_cjdb_user = $term->readline("[$config->{'CJDB_USER'}]: ");
-    defined($input_cjdb_user) && $input_cjdb_user ne '' and
-    	$config->{'CJDB_USER'} = $input_cjdb_user;
-
-	print "CJDB Database password: $config->{'CJDB_PASSWORD'}\n";
-    my $input_cjdb_password = $term->readline("[$config->{'CJDB_PASSWORD'}]: ");
-    defined($input_cjdb_password) && $input_cjdb_password ne '' and
-    	$config->{'CJDB_PASSWORD'} = $input_cjdb_password;
 
 	print "Mail host for outgoing CUFTS mail: $config->{'CUFTS_SMTP_HOST'}\n";
 	my $input_cufts_smtp_host = $term->readline("[$config->{'CUFTS_SMTP_HOST'}]: ");
@@ -582,13 +539,6 @@ sub drop_databases {
 	my $pw = defined($config->{'CUFTS_PASSWORD'}) && $config->{'CUFTS_PASSWORD'} ne '' ? '--password' : '';
 	my $result = `dropdb --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
 	if ($result !~ /DROP\sDATABASE/) {
-		die("Error dropping database: $result");
-	}
-
-	print "Dropping CJDB database. If you have entered a password above, you will be asked to enter it again.\n";
-	my $cjdb_pw = defined($config->{'CJDB_PASSWORD'}) && $config->{'CJDB_PASSWORD'} ne '' ? '--password' : '';
-	my $cjdb_result = `dropdb --username=$config->{'CJDB_USER'} $cjdb_pw $config->{'CJDB_DB'}`;
-	if ($cjdb_result !~ /DROP\sDATABASE/) {
 		die("Error dropping database: $result");
 	}
 

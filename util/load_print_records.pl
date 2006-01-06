@@ -164,7 +164,7 @@ sub clear_site {
 	# being called.
 
 	my $dbh = CJDB::DB::DBI->db_Main;
-	foreach my $table (qw(associations journals links subjects titles issns relations)) {
+	foreach my $table (qw(cjdb_associations cjdb_journals cjdb_links cjdb_subjects cjdb_titles cjdb_issns cjdb_relations)) {
 		print "Deleting from table $table... ";
 		$dbh->do("DELETE FROM $table WHERE site=$site_id");
 		print "done\n";

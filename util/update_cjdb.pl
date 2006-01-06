@@ -1,19 +1,26 @@
 #!/usr/local/bin/perl
 
-use lib qw(lib);
+##
+## This script checks all CUFTS sites for files that are
+## marked for reloading and then loads the print/CUFTS records
+## if required.
+##
 
 use Data::Dumper;
 
-use strict;
+use lib qw(lib);
 
-use CUFTS::DB::Accounts;
+use CUFTS::Exceptions;
+use CUFTS::Config;
+use CUFTS::CJDB::Util;
+
+use CJDB::DB::DBI;
+use CUFTS::DB::DBI;
+
 use CUFTS::DB::Sites;
-
 use CUFTS::DB::Resources;
-
 use CUFTS::DB::Journals;
 use CUFTS::DB::JournalsActive;
-
 use CUFTS::DB::Stats;
 
 use CJDB::DB::Journals;
@@ -29,36 +36,202 @@ use CUFTS::Resolve;
 
 use Getopt::Long;
 
-# Read command line arguments
+use strict;
 
 my %options;
-GetOptions(\%options, 'site_key=s', 'site_id=i', 'clear');
+GetOptions(\%options, 'site_key=s', 'site_id=i', 'append', 'module=s', 'print_only', 'cufts_only');
 my @files = @ARGV;
 
-# Check for necessary arguments
-
-if ((!defined($options{'site_key'}) && !defined($options{'site_id'}))) {
-	usage();
-	exit;
+if ($options{site_key} || $options{site_id}) {
+    my $site = get_site();
+    load_site($site, @files);
+} else {
+    load_all_sites();
 }
 
-# Get CUFTS site id
+sub load_all_sites {
+    my $site_iter = CUFTS::DB::Sites->retrieve_all;
 
-my $site = get_site();
-defined($site) or
-	die("Unable to load site.");
+SITE:
+    while (my $site = $site_iter->next) {
+    	my $site_id = $site->id;	
 
-if ($options{'clear'}) {
-	clear_site($site);
+    	print "Checking " . $site->name . "\n";
+	
+    	next if  !defined($site->rebuild_cjdb) || $site->rebuild_cjdb eq ''
+              || !defined($site->rebuild_ejournals_only) || $site->rebuild_ejournals_only ne '1';
+
+    	print " * Found files marked for rebuild.\n";
+	
+    	# First load any LCC subject files.
+
+    	if (-e "${CUFTS::Config::CJDB_SITE_DATA_DIR}/${site_id}/lccn_subjects") {
+            # eval this, since it shouldn't be fatal if this fails.
+        
+            eval {
+    		    `util/load_lcc_subjects.pl --site_id=${site_id}  ${CUFTS::Config::CJDB_SITE_DATA_DIR}/${site_id}/lccn_subjects`;
+    		    `util/create_subject_browse.pl --site_id=${site_id}`;
+    		}
+    	}
+
+        clear_site($site_id);
+        if (!$options{cufts_only}) {
+        	my @files = split /\|/, $site->rebuild_cjdb;
+            foreach my $file (@files) {
+        		$file = $CUFTS::Config::CJDB_SITE_DATA_DIR . '/' . $site_id . '/' .$file;
+        	}
+            eval {
+                load_print($site, \@files);
+            };
+            if ($@) {
+                    print("* Error found while loading print records.  Skipping remaining processing for this site.\n");
+                    CUFTS::DB::DBI->dbi_rollback;
+                    CJDB::DB::DBI->dbi_rollback;
+                    next SITE;
+            }
+        }
+			
+        if (!$options{print_only}) {
+    		print " * Loading CUFTS journals records\n";
+            eval {
+                load_cufts($site);
+            };
+            if ($@) {
+                    print("* Error found while loading CUFTS records.  Skipping remaining processing for this site.\n");
+                    CUFTS::DB::DBI->dbi_rollback;
+                    CJDB::DB::DBI->dbi_rollback;
+                    next SITE;
+            }
+        }
+
+    	$site->rebuild_cjdb(undef);
+    	$site->rebuild_ejournals_only(undef);
+    	$site->update;
+    	CUFTS::DB::DBI->dbi_commit;
+    	CJDB::DB::DBI->dbi_commit;
+
+    	print "Finished ", $site->name,  "\n";
+    }	
 }
 
-load_site_ejournals($site);
+sub load_site {
+    my ($site, @files) = @_;
 
-sub load_site_ejournals {
+	my $site_id = $site->id;	
+
+    clear_site($site_id);
+    if (!$options{cufts_only}) {
+		print " * Loading print journals records\n";
+        load_print($site, \@files);
+    }
+			
+    if (!$options{print_only}) {
+		print " * Loading CUFTS journals records\n";
+        load_cufts($site);
+    }
+
+	CUFTS::DB::DBI->dbi_commit;
+	CJDB::DB::DBI->dbi_commit;
+
+    return 1;
+}
+
+
+sub load_print {
+    my ($site, $files) = @_;
+    # Some loaders might need a first pass at the data to do thing like combine
+    # holdings records with bib records.  This returns a new list of processed
+    # files (probably "tmp" files now) or the original list if no pre-processing
+    # was done.
+
+    my $loader = load_print_module($site);
+    $loader->site_id($site->id);
+    my @files = $loader->pre_process(@$files);
+
+    # Do a first pass at loading.  If we're merging on ISSN, we have to do two passes, one
+    # on records with multiple ISSNs, and then a second pass on records with only one
+    # ISSN.  This avoids having multiple single ISSN records that would have to be merged
+    # later.
+
+    my $batch = $loader->get_batch(@files);
+    $batch->strict_off;
+
+    while (my $record = $batch->next()) {
+    	next if $loader->skip_record($record);
+
+    	if ($loader->merge_by_issns) {
+    		my @issns = $loader->get_issns($record);
+    		next unless scalar(@issns) > 1;
+    	}
+
+    	process_print_record($record, $loader);
+    }
+
+    # Second pass if we're merging
+
+    if ($loader->merge_by_issns) {
+    	$batch = $loader->get_batch(@files);
+    	$batch->strict_off;
+
+    	while (my $record = $batch->next()) {
+    	    next if $loader->skip_record($record);
+
+    		process_print_record($record, $loader);
+        }
+    }
+}
+
+
+sub load_print_module {
+	my ($site) = @_;
+	my $site_key = $site->key;
+
+	my $module_name = 'CUFTS::CJDB::Loader::MARC::';
+	if ($options{'module'}) {
+		$module_name .= $options{'module'};
+	} elsif (defined($site_key)) {
+		$module_name .= $site_key;
+	} else {
+		die("Unable to determine module name");
+	}
+
+	eval "require $module_name";
+	if ($@) {
+		die("Unable to require $module_name: $@");
+	}
+	
+	my $module = $module_name->new;
+	defined($module) or
+		die("Failed to create new loading object from module: $module_name");
+		
+	return $module;
+}
+
+
+sub process_print_record {
+	my ($record, $loader) = @_;
+
+	my $journal = $loader->load_journal($record);
+	return if !defined($journal);
+	
+	$loader->load_titles($record, $journal);
+
+	$loader->load_MARC_subjects($record, $journal);
+
+	$loader->load_LCC_subjects($record, $journal);
+		
+	$loader->load_associations($record, $journal);
+
+	$loader->load_relations($record, $journal);
+
+	$loader->load_link($record, $journal);
+}	
+
+
+sub load_cufts {
 	my ($site) = @_;
 
 	my $local_resources_iter = CUFTS::DB::LocalResources->search('active' => 'true', 'site' => $site->id);
-#	my $local_resources_iter = CUFTS::DB::LocalResources->search('id' => 44, 'active' => 'true', 'site' => $site->id);
 
 	while (my $local_resource = $local_resources_iter->next) {
 		if (defined($local_resource->resource) and !$local_resource->resource->active) {
@@ -82,17 +255,12 @@ sub load_site_ejournals {
 			}
 
 			my $new_link = {
-				'resource' => $local_resource->id,
-				'rank' => $local_resource->rank,
-				'site' => $site->id,
-				'local_journal' => $local_journal->id,
+				resource      => $local_resource->id,
+				rank          => $local_resource->rank,
+				site          => $site->id,
+				local_journal => $local_journal->id,
 			};
 			
-			if ($site->cjdb_display_db_name_only) {
-				$new_link->{'name'} = $local_resource->name;
-			} else {
-				$new_link->{'name'} = $local_resource->name . ' - ' . $local_resource->provider;
-			}
 			my $ft_coverage = get_cufts_ft_coverage($local_journal);
 			defined($ft_coverage) and
 				$new_link->{'fulltext_coverage'} = $ft_coverage;
@@ -109,8 +277,7 @@ sub load_site_ejournals {
 				$new_link->{'embargo'} = $local_journal->embargo_months . ' months';
 			}
 
-
-			# Skip if citations are turned off
+			# Skip if citations are turned off and we have no fulltext coverage data
 				
 			next if !defined($new_link->{'fulltext_coverage'}) && !$site->cjdb_show_citations;
 
@@ -122,16 +289,15 @@ sub load_site_ejournals {
 			$request->title($local_journal->title);
 			$request->genre('journal');
 			$request->pid({});
-			
+
 			my @links;
 			if ( $module->can_getJournal($request) ) {
 					
 				my $results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
 				foreach my $result (@$results) {
 					$module->prepend_proxy($result, $local_resource, $site, $request);
-					$new_link->{'URL'} = $result->url;
-					$new_link->{'link_label'} = 'Link to journal';
-					$new_link->{'_resource_name'} = $local_resource->name;
+					$new_link->{URL} = $result->url;
+					$new_link->{link_type} = 1;
 					my %temp_hash = %{$new_link};
 					push @links, \%temp_hash;
 				}
@@ -144,7 +310,7 @@ sub load_site_ejournals {
 					$module->prepend_proxy($result, $local_resource, $site, $request);
 					$new_link->{'URL'} = $result->url;
 					$new_link->{'link_label'} = 'Link to journal';
-					$new_link->{'_resource_name'} = $local_resource->name;
+					$new_link->{link_type} = 2;
 					my %temp_hash = %{$new_link};
 					push @links, \%temp_hash;
 				}
@@ -175,13 +341,11 @@ sub load_site_ejournals {
 						
 						CJDB::DB::Associations->find_or_create({
 							'journal'            => $CJDB_record->id,
-							'association'        => $temp_link{'_resource_name'},
-							'search_association' => CUFTS::CJDB::Util::strip_title($temp_link{'_resource_name'}),
+							'association'        => $local_resource->name,
+							'search_association' => CUFTS::CJDB::Util::strip_title($local_resource->name),
 							'site'               => $site->id,
 						});
 					
-						delete $temp_link{'_resource_name'};
-
 						# Create links
 
 						$temp_link{'journal'} = $CJDB_record->id;
@@ -364,33 +528,30 @@ sub get_site {
 	return $sites[0];
 }
 
-sub clear_site {
-	my ($site) = @_;
 
-	defined($site) or 
-		die("Site not defined in clear_site");
+sub clear_site {
+	my ($site_id) = @_;
+
+    return 0 if $options{append};
+
+	defined($site_id) && $site_id ne '' && int($site_id) > 0 or
+		die("Site id not properly defined in clear_site: $site_id");
+
+	$site_id = int($site_id);
 
 	# Make raw database calls to speed up this process.  Since we're deleting
 	# everything for a site from all tables, we don't need Class::DBI triggers
 	# being called.
 
 	my $dbh = CJDB::DB::DBI->db_Main;
-	foreach my $table (qw(cjdb_associations cjdb_journals cjdb_links cjdb_subjects cjdb_titles)) {
+	foreach my $table (qw(cjdb_associations cjdb_journals cjdb_links cjdb_subjects cjdb_titles cjdb_issns cjdb_relations)) {
 		print "Deleting from table $table... ";
-		$dbh->do("DELETE FROM $table WHERE site=" . $site->id);
+		$dbh->do("DELETE FROM $table WHERE site=$site_id");
 		print "done\n";
 	}
 
 	return 1;
 }	
 
-sub usage {
-	print <<EOF;
-	
-load_cufts_records - load CUFTS records from a CUFTS database into CJDB
 
- site_key=XXX - CUFTS site key (example: BVAS)
- site_id=111  - CUFTS site id (example: 23)
- clear        - Delete all existing records before loading 
-EOF
-}
+

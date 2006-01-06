@@ -24,7 +24,7 @@ use strict;
 use base 'CJDB::DB::DBI';
 use CJDB::DB::Journals;
 
-__PACKAGE__->table('relations');
+__PACKAGE__->table('cjdb_relations');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -37,7 +37,7 @@ __PACKAGE__->columns(All => qw(
 	site
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('relations_id_seq');
+__PACKAGE__->sequence('cjdb_relations_id_seq');
 __PACKAGE__->has_a('journal' => 'CJDB::DB::Journals');
 
 

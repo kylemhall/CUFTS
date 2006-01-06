@@ -24,7 +24,7 @@ use strict;
 use base 'CJDB::DB::DBI';
 
 
-__PACKAGE__->table('accounts');
+__PACKAGE__->table('cjdb_accounts');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -43,6 +43,6 @@ __PACKAGE__->columns(All => qw(
 	modified
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('accounts_id_seq');
+__PACKAGE__->sequence('cjdb_accounts_id_seq');
 
 1;

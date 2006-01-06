@@ -24,7 +24,7 @@ use strict;
 use base 'CJDB::DB::DBI';
 use CJDB::DB::Journals;
 
-__PACKAGE__->table('titles');
+__PACKAGE__->table('cjdb_titles');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -39,7 +39,7 @@ __PACKAGE__->columns(All => qw(
 	main
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('titles_id_seq');
+__PACKAGE__->sequence('cjdb_titles_id_seq');
 
 __PACKAGE__->has_a('journal' => 'CJDB::DB::Journals');
 
@@ -50,7 +50,7 @@ sub search_distinct_by_journal_main {
 	$limit ||= 'ALL';
 	$offset ||= 0;
 	
-	my $sql = "SELECT * FROM (SELECT DISTINCT on (journal) * FROM titles WHERE titles.site = ? AND titles.search_title LIKE ? ORDER BY journal, main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
+	my $sql = "SELECT * FROM (SELECT DISTINCT on (journal) * FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title LIKE ? ORDER BY journal, main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
 	my $dbh = $class->db_Main();
         my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
 	
@@ -65,7 +65,7 @@ sub search_re_distinct_by_journal_main {
 	$limit ||= 'ALL';
 	$offset ||= 0;
 	
-	my $sql = "SELECT * FROM (SELECT DISTINCT on (journal) * FROM titles WHERE titles.site = ? AND titles.search_title ~ ? ORDER BY journal, main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
+	my $sql = "SELECT * FROM (SELECT DISTINCT on (journal) * FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title ~ ? ORDER BY journal, main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
 	my $dbh = $class->db_Main();
         my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
 	
@@ -94,7 +94,7 @@ sub search_distinct_by_journal_main_combined {
 		$search->[$x] = '\m' . $search->[$x] . '\M';
 	}
 
-	my $search_string = 'SELECT * FROM titles WHERE titles.site = ? AND titles.search_title ~ ?';
+	my $search_string = 'SELECT * FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title ~ ?';
 
 	my $sql = 'SELECT * FROM (SELECT DISTINCT ON (journal) * FROM (';
 	

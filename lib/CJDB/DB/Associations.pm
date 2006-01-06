@@ -24,7 +24,7 @@ use strict;
 use base 'CJDB::DB::DBI';
 use CJDB::DB::Journals;
 
-__PACKAGE__->table('associations');
+__PACKAGE__->table('cjdb_associations');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -36,11 +36,11 @@ __PACKAGE__->columns(All => qw(
 	site
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('associations_id_seq');
+__PACKAGE__->sequence('cjdb_associations_id_seq');
 __PACKAGE__->has_a('journal' => 'CJDB::DB::Journals');
 
 __PACKAGE__->set_sql('distinct' => qq{
-	SELECT DISTINCT ON (search_association) associations.* FROM associations
+	SELECT DISTINCT ON (search_association) cjdb_associations.* FROM cjdb_associations
 	WHERE site = ? AND search_association LIKE ?
 	ORDER BY search_association
 });
@@ -57,7 +57,7 @@ sub search_distinct_combined {
 	scalar(@search) == 0 and
 		return [];
 
-	my $search_string = 'SELECT * FROM associations WHERE associations.site = ? AND associations.search_association ~ ?';
+	my $search_string = 'SELECT * FROM cjdb_associations WHERE cjdb_associations.site = ? AND cjdb_associations.search_association ~ ?';
 
 	my $sql = 'SELECT DISTINCT ON (search_association) * FROM (';
 	

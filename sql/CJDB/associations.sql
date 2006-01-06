@@ -1,4 +1,4 @@
-CREATE TABLE associations (
+CREATE TABLE cjdb_associations (
 	id			SERIAL PRIMARY KEY,
 	journal			INTEGER NOT NULL,
 	association		VARCHAR(512) NOT NULL,
@@ -6,4 +6,4 @@ CREATE TABLE associations (
 	site			INTEGER NOT NULL
 );
 
-CREATE INDEX associations_journal ON associations (journal);
+CREATE INDEX cjdb_assc_journal ON cjdb_associations (journal);

@@ -24,14 +24,13 @@ use strict;
 use base 'CJDB::DB::DBI';
 use CUFTS::DB::LocalResources;
 
-__PACKAGE__->table('links');
+__PACKAGE__->table('cjdb_links');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
 
 	journal
 	
-	name
 	resource
 	local_journal
 	
@@ -41,17 +40,15 @@ __PACKAGE__->columns(All => qw(
 	embargo
 
 	URL
-	link_label
+	link_type
 	rank
 	
 	site
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->columns(TEMP => qw( cjdb_note ));
-__PACKAGE__->sequence('links_id_seq');
+__PACKAGE__->columns(TEMP => qw( journal_cjdb_note ));
+__PACKAGE__->sequence('cjdb_links_id_seq');
 __PACKAGE__->has_a('journal' => 'CJDB::DB::Journals');
-__PACKAGE__->has_a('resource' => 'CUFTS::DB::LocalResources');
-#__PACKAGE__->has_a('local_journal' => 'CUFTS::DB::LocalJournals');
 
 
 sub local_resource {
@@ -66,24 +63,17 @@ sub local_resource {
 	my @local_resources = CUFTS::DB::LocalResources->search('site' => $site_id, 'resource' => $resource_id);
 
 	if (scalar(@local_resources) == 1) {
-		warn('!');
 		return $local_resources[0];
 	} else {
 		return undef;
 	}
 }
 
-##
-## We really only link to the local_journal to grab a cjdb_note.  Do it this way rather than
-## the has_a relationship above because it cuts down the number of searches that have to be
-## done if we're iterating through a large result set.
-##
-
-sub local_journal_cjdb_note {
-	my ($self) = @_;
-
-	my $ljd = CUFTS::DB::LocalJournalDetails->search( 'local_journal' => $self->get('local_journal'), 'field' => 'cjdb_note')->first;
-	return defined($ljd) ? $ljd->value : undef;
-}
+__PACKAGE__->set_sql(display => qq{
+    select cjdb_links.*, local_journal_details.value as journal_cjdb_note from cjdb_links 
+    left outer join local_journal_details on (cjdb_links.local_journal = local_journal_details.local_journal)
+    where cjdb_links.journal = ? 
+    and (local_journal_details.field = 'cjdb_note' OR local_journal_details.field IS NULL);
+});
 
 1;

@@ -30,7 +30,7 @@ use CJDB::DB::Associations;
 use CJDB::DB::ISSNs;
 use CUFTS::DB::JournalsAuth;
 
-__PACKAGE__->table('journals');
+__PACKAGE__->table('cjdb_journals');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -48,7 +48,7 @@ __PACKAGE__->columns(All => qw(
 	created
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('journals_id_seq');
+__PACKAGE__->sequence('cjdb_journals_id_seq');
 
 __PACKAGE__->has_many('titles', 'CJDB::DB::Titles' => 'journal');
 __PACKAGE__->has_many('links', 'CJDB::DB::Links' => 'journal');
@@ -69,21 +69,21 @@ sub search_distinct_by_exact_subjects {
 	$offset ||= 0;
 
 	my @bind = ($site);	
-	my $sql = "SELECT DISTINCT ON (journals.stripped_sort_title, journals.id) journals.* FROM journals ";
-	my $where = " WHERE journals.site = ? ";
+	my $sql = "SELECT DISTINCT ON (cjdb_journals.stripped_sort_title, cjdb_journals.id) cjdb_journals.* FROM cjdb_journals ";
+	my $where = " WHERE cjdb_journals.site = ? ";
 
 	my $count = 0;
 	foreach my $search (@$search) {
 		$count++;
 
-		$sql .= " JOIN subjects AS subjects${count} ON (subjects${count}.journal = journals.id) ";
+		$sql .= " JOIN cjdb_subjects AS subjects${count} ON (subjects${count}.journal = cjdb_journals.id) ";
 		$where .= " AND subjects${count}.search_subject = ? ";
 		
 		push @bind, $search;
 	}
 
 	$sql .= $where;
-	$sql .= " ORDER BY journals.stripped_sort_title, journals.id LIMIT $limit OFFSET $offset";
+	$sql .= " ORDER BY cjdb_journals.stripped_sort_title, cjdb_journals.id LIMIT $limit OFFSET $offset";
 
 	my $dbh = $class->db_Main();
         my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
@@ -103,21 +103,21 @@ sub search_distinct_by_exact_associations {
 	$offset ||= 0;
 
 	my @bind = ($site);	
-	my $sql = "SELECT DISTINCT ON (journals.stripped_sort_title, journals.id) journals.* FROM journals ";
-	my $where = " WHERE journals.site = ? ";
+	my $sql = "SELECT DISTINCT ON (cjdb_journals.stripped_sort_title, cjdb_journals.id) cjdb_journals.* FROM cjdb_journals ";
+	my $where = " WHERE cjdb_journals.site = ? ";
 
 	my $count = 0;
 	foreach my $search (@$search) {
 		$count++;
 
-		$sql .= " JOIN associations AS associations${count} ON (associations${count}.journal = journals.id) ";
-		$where .= " AND associations${count}.search_association = ? ";
+		$sql .= " JOIN cjdb_associations AS cjdb_associations${count} ON (cjdb_associations${count}.journal = cjdb_journals.id) ";
+		$where .= " AND cjdb_associations${count}.search_association = ? ";
 		
 		push @bind, $search;
 	}
 
 	$sql .= $where;
-	$sql .= " ORDER BY journals.stripped_sort_title, journals.id LIMIT $limit OFFSET $offset";
+	$sql .= " ORDER BY cjdb_journals.stripped_sort_title, cjdb_journals.id LIMIT $limit OFFSET $offset";
 
 	my $dbh = $class->db_Main();
         my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
@@ -143,10 +143,10 @@ sub search_by_issn {
 	$issn =~ s/[^0-9X]//g;
 
 	my $sql = <<"";
-SELECT DISTINCT ON (journals.stripped_sort_title, journals.id) journals.* FROM journals
-JOIN issns ON (journals.id = issns.journal) 
-WHERE issns.issn $search_type ? AND journals.site = ?
-ORDER BY journals.stripped_sort_title, journals.id
+SELECT DISTINCT ON (cjdb_journals.stripped_sort_title, cjdb_journals.id) cjdb_journals.* FROM cjdb_journals
+JOIN cjdb_issns ON (cjdb_journals.id = cjdb_issns.journal) 
+WHERE cjdb_issns.issn $search_type ? AND cjdb_journals.site = ?
+ORDER BY cjdb_journals.stripped_sort_title, cjdb_journals.id
 LIMIT $limit OFFSET $offset;
 
 	my $dbh = $class->db_Main();
@@ -171,32 +171,32 @@ sub search_distinct_by_tags {
 
 	my @search;
 	foreach my $tag (@$tags) {
-		my $search_sql = '(SELECT journals.* FROM journals JOIN tags ON (journals.journals_auth = tags.journals_auth) WHERE tag = ?';
-		push @bind, $tag;
+		my $search_sql = '(SELECT cjdb_journals.* FROM cjdb_journals JOIN cjdb_tags ON (cjdb_journals.journals_auth = cjdb_tags.journals_auth) WHERE tag = ? AND cjdb_journals.site = ?';
+		push @bind, $tag, $site;
 
 		# Full on public search.
 		
 		if ($viewing == 0) {
-			$search_sql .= ' AND tags.viewing = ? ';
+			$search_sql .= ' AND cjdb_tags.viewing = ? ';
 			push @bind, 0;
 		} elsif ($viewing == 1) {
-			$search_sql .= ' AND tags.viewing = ? AND tags.site = ? ';
+			$search_sql .= ' AND cjdb_tags.viewing = ? AND cjdb_tags.site = ? ';
 			push @bind, 1, $site;
 		} elsif ($viewing == 2) {
-			$search_sql .= ' AND tags.viewing = ? AND tags.site = ?	';
+			$search_sql .= ' AND cjdb_tags.viewing = ? AND cjdb_tags.site = ?	';
 			push @bind, 2, $site;
 		} elsif ($viewing == 3) {
-			$search_sql .= ' AND (tags.viewing = ? OR (tags.viewing = ? AND tags.site = ?)) ';
+			$search_sql .= ' AND (cjdb_tags.viewing = ? OR (cjdb_tags.viewing = ? AND cjdb_tags.site = ?)) ';
 			push @bind, 1, 2, $site;
 		}
 
 		if ($level) {
-			$search_sql .= ' AND tags.level >= ?';
+			$search_sql .= ' AND cjdb_tags.level >= ?';
 			push @bind, $level;
 		}
 
 		if ($account) {
-			$search_sql .= ' AND tags.account = ?';
+			$search_sql .= ' AND cjdb_tags.account = ?';
 			push @bind, $account;
 		}
 
@@ -218,7 +218,10 @@ sub search_distinct_by_tags {
 
 
 
-
+sub display_links {
+    my ($self) = @_;
+    return CJDB::DB::Links->search_display($self->id);
+}
 
 
 
@@ -227,10 +230,10 @@ sub search_distinct_by_tags {
 
 
 __PACKAGE__->set_sql('distinct_by_title' => qq{
-	SELECT DISTINCT journals.*
-	FROM journals JOIN titles ON (journals.id = titles.journal)
-	WHERE journals.site = ? AND titles.search_title LIKE ?
-	ORDER BY journals.sort_title
+	SELECT DISTINCT cjdb_journals.*
+	FROM cjdb_journals JOIN cjdb_titles ON (cjdb_journals.id = cjdb_titles.journal)
+	WHERE cjdb_journals.site = ? AND cjdb_titles.search_title LIKE ?
+	ORDER BY cjdb_journals.sort_title
 });
 
 

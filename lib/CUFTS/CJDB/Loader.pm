@@ -362,21 +362,18 @@ sub load_link {
 
     my $coverage = $self->get_coverage($record);
     my $link     = $self->get_link($record);
-    my $label    = $self->get_link_label($record);
-    my $name     = $self->get_link_name($record);
     my $rank     = $self->get_rank();
 
-    defined($coverage) && defined($link) && defined($label) && defined($name)
+    defined($coverage) && defined($link)
         or return 0;
 
     CJDB::DB::Links->find_or_create(
-        {   'journal'        => $journal->id,
-            'name'           => $name,
-            'link_label'     => $label,
-            'url'            => $link,
-            'print_coverage' => $coverage || 'unknown',
-            'site'           => $site_id,
-            'rank'           => $rank,
+        {   journal        => $journal->id,
+            link_type      => 0,
+            url            => $link,
+            print_coverage => $coverage || 'unknown',
+            site           => $site_id,
+            rank           => $rank,
         }
     );
 

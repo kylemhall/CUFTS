@@ -23,7 +23,7 @@ package CJDB::DB::LCCSubjects;
 use strict;
 use base 'CJDB::DB::DBI';
 
-__PACKAGE__->table('lcc_subjects');
+__PACKAGE__->table('cjdb_lcc_subjects');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -41,7 +41,7 @@ __PACKAGE__->columns(All => qw(
 	site
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('lcc_subjects_id_seq');
+__PACKAGE__->sequence('cjdb_lcc_subjects_id_seq');
 
 
 

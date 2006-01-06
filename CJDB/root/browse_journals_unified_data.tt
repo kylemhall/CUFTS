@@ -1,14 +1,14 @@
 [% USE HTML %]
 
 <div class="unified-availability-group">
- [% FOREACH link IN journal.links.sort('rank').reverse %]
-  [% SET local_resource = link.resource %]
-  <!-- local_resource.id : [% local_resource.id %]-->
-  [% IF local_resource.id %]
-   [% NEXT UNLESS local_resource.active %]
+ [% FOREACH link IN journal.display_links.nsort('rank').reverse %]
+  [% IF link.link_type > 0 %]
+   [% SET resource_id = link.resource %]
+   [% SET resource = resources_display.$resource_id %]
+   [% NEXT UNLESS resource %]
   [% END %]
   <div class="unified-availability">
-   <a href="[% link.URL %]">[% link.name | html %]</a>: 
+   <a href="[% link.URL %]">[%- PROCESS journals_link_name.tt -%]</a>: 
 
    [% IF link.print_coverage %]
     <span class="unified-print">in print [% HTML.escape(link.print_coverage).replace("\n", "<br />\n") %]</span>
@@ -19,7 +19,13 @@
    [% END %]
 
    [% IF link.embargo %]
-    <span class="unified-embargo">([% link.embargo | html %] embargo)</span>
+    <span class="unified-embargo">
+     [%- IF link.fulltext_coverage -%]
+      ([% link.embargo | html %] embargo)
+     [%- ELSE -%]
+      fullext with [% link.embargo | html %] embargo
+     [%- END -%]
+     </span>
    [% END %]
 
    [% IF link.citation_coverage && current_site.cjdb_show_citations && !(link.embargo || link.fulltext_coverage) %]
@@ -27,22 +33,20 @@
    <span class="unified-citation">citation [% link.citation_coverage | html %]</span>
    [% END %]
 
-  [% SET journal_note = link.local_journal_cjdb_note %]
-  [% IF journal_note %]
+  [% IF link.journal_cjdb_note %]
    <div class="availability-journal-note">
     <div class="availability-label">Journal Note:</div>
     <div class="availability-data">
-     [% journal_note | html %]
+     [% link.journal_cjdb_note | html %]
     </div>
    </div>
   [% END %]
 
-  [% SET resource_note = local_resource.cjdb_note %]
-  [% IF resource_note %]
+  [% IF resource.cjdb_note %]
    <div class="availability-resource-note">
     <div class="availability-label">Resource Note:</div>
     <div class="availability-data">
-     [% resource_note | html %]
+     [% resource.cjdb_note | html %]
     </div>
    </div>
   [% END %]
