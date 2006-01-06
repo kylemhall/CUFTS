@@ -1,4 +1,4 @@
-CREATE TABLE accounts (
+CREATE TABLE cjdb_accounts (
 	id		SERIAL PRIMARY KEY,
 	
 	name		VARCHAR(512),

@@ -24,7 +24,7 @@ use strict;
 use base 'CJDB::DB::DBI';
 use CJDB::DB::Journals;
 
-__PACKAGE__->table('issns');
+__PACKAGE__->table('cjdb_issns');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -35,7 +35,7 @@ __PACKAGE__->columns(All => qw(
 	site
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('issns_id_seq');
+__PACKAGE__->sequence('cjdb_issns_id_seq');
 __PACKAGE__->has_a('journal' => 'CJDB::DB::Journals');
 
 sub normalize_column_values {

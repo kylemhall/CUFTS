@@ -1,4 +1,4 @@
-CREATE TABLE lcc_subjects (
+CREATE TABLE cjdb_lcc_subjects (
 	id	SERIAL PRIMARY KEY,
 	class_low	VARCHAR(3),
 	class_high	VARCHAR(3),

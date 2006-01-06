@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -30,42 +30,48 @@ use CUFTS::DB::SiteDomains;
 
 __PACKAGE__->table('sites');
 
-__PACKAGE__->columns(Primary => 'id');
-__PACKAGE__->columns(All => qw(
-	id
+__PACKAGE__->columns( Primary => 'id' );
+__PACKAGE__->columns(
+    All => qw(
+        id
 
-	key
-	name
+        key
+        name
 
-	proxy_prefix
-	proxy_prefix_alternate
-	email
+        proxy_prefix
+        proxy_prefix_alternate
+        email
 
-	active
+        active
 
-	created
-	modified
-));                                                                                                        
-__PACKAGE__->columns(Essential => __PACKAGE__->columns);
+        created
+        modified
+        )
+);
+__PACKAGE__->columns( Essential => __PACKAGE__->columns );
 
 __PACKAGE__->sequence('sites_id_seq');
 
-__PACKAGE__->has_many('accounts', ['CUFTS::DB::Accounts_Sites' => 'account'], 'site');
-__PACKAGE__->has_many('ips' => 'CUFTS::DB::SiteIPs');
-__PACKAGE__->has_many('domains' => 'CUFTS::DB::SiteDomains');
+__PACKAGE__->has_many( 'accounts', [ 'CUFTS::DB::Accounts_Sites' => 'account' ], 'site' );
+__PACKAGE__->has_many( 'ips'     => 'CUFTS::DB::SiteIPs' );
+__PACKAGE__->has_many( 'domains' => 'CUFTS::DB::SiteDomains' );
 
-__PACKAGE__->has_details('details', 'CUFTS::DB::SiteDetails' => 'site');
-__PACKAGE__->details_columns(qw/
+__PACKAGE__->has_details( 'details', 'CUFTS::DB::SiteDetails' => 'site' );
+__PACKAGE__->details_columns(
+    qw(
         cjdb_results_per_page
         cjdb_unified_journal_list
         cjdb_show_citations
         cjdb_hide_citation_coverage
-	cjdb_display_db_name_only
+        cjdb_display_db_name_only
+        cjdb_print_name
+        cjdb_print_link_label
 
         rebuild_cjdb
         rebuild_ejournals_only
         show_ERM
         test_MARC_file
-/);
+    )
+);
 
 1;

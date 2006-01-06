@@ -24,7 +24,7 @@ use strict;
 use base 'CJDB::DB::DBI';
 use CJDB::DB::Journals;
 
-__PACKAGE__->table('subjects');
+__PACKAGE__->table('cjdb_subjects');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -39,11 +39,11 @@ __PACKAGE__->columns(All => qw(
 	site
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('subjects_id_seq');
+__PACKAGE__->sequence('cjdb_subjects_id_seq');
 __PACKAGE__->has_a('journal' => 'CJDB::DB::Journals');
 
 __PACKAGE__->set_sql('distinct' => qq{
-	SELECT DISTINCT ON (search_subject) subjects.* FROM subjects
+	SELECT DISTINCT ON (search_subject) cjdb_subjects.* FROM cjdb_subjects
 	WHERE site = ? AND search_subject LIKE ?
 	ORDER BY search_subject
 });
@@ -60,7 +60,7 @@ sub search_distinct_combined {
 	scalar(@search) == 0 and
 		return [];
 
-	my $search_string = 'SELECT * FROM subjects WHERE subjects.site = ? AND subjects.search_subject ~ ?';
+	my $search_string = 'SELECT * FROM cjdb_subjects WHERE cjdb_subjects.site = ? AND cjdb_subjects.search_subject ~ ?';
 
 	my $sql = 'SELECT DISTINCT ON (search_subject) * FROM (';
 	

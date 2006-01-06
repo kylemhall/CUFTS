@@ -8,7 +8,13 @@ my @valid_types = ('css', 'cjdb_template');
 
 my $form_display_validate = {
 	optional => ['submit', 'cancel'],
-	required => ['cjdb_unified_journal_list','cjdb_show_citations','cjdb_display_db_name_only'],
+	required => [qw{
+	    cjdb_unified_journal_list
+	    cjdb_show_citations
+	    cjdb_display_db_name_only
+	    cjdb_print_name
+	    cjdb_print_link_label
+	}],
 	filters  => ['trim'],
 };
 

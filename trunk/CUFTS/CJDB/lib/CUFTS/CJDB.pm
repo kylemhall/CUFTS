@@ -6,6 +6,9 @@ use lib '../lib';
 use CUFTS::Config;
 use CUFTS::CJDB::Util;
 
+#use CUFTS::DB::LocalResources;
+use CUFTS::Resolve;
+
 our $VERSION = '2.00.00';
 
 CUFTS::CJDB->config(
@@ -105,6 +108,35 @@ sub begin : Private {
         $c->session->{prev_params}    = $c->req->params;
     }
 }
+
+
+sub auto : Private {
+    my ($self, $c) = @_;
+    
+    # Build and store information about CUFTS resources such
+    # as whether they are active, display names, any notes, etc.
+
+    if (!($c->stash->{resources_display} = $c->session->{resources_display})) {
+        my %resources_display;
+        my $resources_iter = CUFTS::DB::LocalResources->search('site' => $c->stash->{current_site}->id, 'active' => 't');
+
+        while (my $resource = $resources_iter->next) {
+            CUFTS::Resolve->overlay_global_resource_data($resource);
+            my $resource_id = $resource->id;
+            $resources_display{$resource_id}->{cjdb_note} = $resource->cjdb_note;
+            $resources_display{$resource_id}->{name} = $resource->name;
+            if (!$c->stash->{current_site}->cjdb_display_db_name_only) {
+                $resources_display{$resource_id}->{name} .= ' - ' . $resource->provider;
+            }
+        }
+        
+        $c->stash->{resources_display}   = \%resources_display;
+        $c->session->{resources_display} = \%resources_display;
+    }
+    
+    return 1;
+}
+
 
 ##
 ## end - Forward requests to the TT view for rendering

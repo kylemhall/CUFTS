@@ -27,7 +27,7 @@ use CUFTS::DB::JournalsAuth;
 use CUFTS::DB::Sites;
 use CJDB::DB::Accounts;
 
-__PACKAGE__->table('tags');
+__PACKAGE__->table('cjdb_tags');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -45,7 +45,7 @@ __PACKAGE__->columns(All => qw(
 	created
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('tags_id_seq');
+__PACKAGE__->sequence('cjdb_tags_id_seq');
 
 __PACKAGE__->has_a('account' => 'CJDB::DB::Accounts');
 __PACKAGE__->has_a('journals_auth' => 'CUFTS::DB::JournalsAuth');

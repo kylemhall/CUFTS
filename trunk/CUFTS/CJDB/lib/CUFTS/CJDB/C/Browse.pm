@@ -3,11 +3,28 @@ package CUFTS::CJDB::C::Browse;
 use strict;
 use base 'Catalyst::Base';
 
+
 sub browse : Local {
 	my ($self, $c) = @_;
 
 	$c->stash->{template} = 'browse.tt';
 }
+
+
+sub mytags : Local {
+	my ($self, $c, @tags) = @_;
+
+	# If user is not logged in (clicked logout on this screen), bump them back to /browse
+	
+	return $c->redirect('/browse') if !defined($c->stash->{current_account});
+
+	# Add account to the parameters so that /browse/bytags will search on only that account
+	
+	$c->req->params->{account} = $c->stash->{current_account}->id;
+	
+	$c->forward('/browse/bytags', \@tags);
+}
+
 
 sub bytags : Local {
 	my ($self, $c, @tags) = @_;
@@ -16,21 +33,6 @@ sub bytags : Local {
 	$c->req->params->{browse_field} = 'tag';
 	
 	$c->forward('/browse/journals');
-}
-
-sub mytags : Local {
-	my ($self, $c, @tags) = @_;
-
-	# If user is not logged in (clicked logout on this screen), bump them back to /browse
-	
-	defined($c->stash->{current_account}) or
-		return $c->redirect('/browse');
-
-	# Add account to the parameters so that /browse/bytags will search on only that account
-	
-	$c->req->params->{account} = $c->stash->{current_account}->id;
-	
-	$c->forward('/browse/bytags', \@tags);
 }
 
 
@@ -217,9 +219,9 @@ sub subjects : Local {
 		die("Unrecognized subject search type: $search_type");
 	}
 
-	$c->stash->{subjects} = \@subjects;
+	$c->stash->{subjects}     = \@subjects;
 	$c->stash->{search_terms} = $c->req->params->{search_terms};
-	$c->stash->{search_type} = $c->req->params->{search_type};
+	$c->stash->{search_type}  = $c->req->params->{search_type};
 
 	$c->stash->{template} = 'browse_subjects.tt';
 }
@@ -252,8 +254,8 @@ sub associations : Local {
 	
 	$c->stash->{associations} = \@associations;
 	$c->stash->{search_terms} = $c->req->params->{search_terms};
-	$c->stash->{search_type} = $c->req->params->{search_type};
-	$c->stash->{template} = 'browse_associations.tt';
+	$c->stash->{search_type}  = $c->req->params->{search_type};
+	$c->stash->{template}     = 'browse_associations.tt';
 }
 
 
