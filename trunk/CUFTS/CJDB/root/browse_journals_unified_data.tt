@@ -2,6 +2,7 @@
 
 <div class="unified-availability-group">
  [% FOREACH link IN journal.display_links.nsort('rank').reverse %]
+  [% SET resource = undef %]
   [% IF link.link_type > 0 %]
    [% SET resource_id = link.resource %]
    [% SET resource = resources_display.$resource_id %]
