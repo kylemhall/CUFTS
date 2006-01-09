@@ -1,4 +1,4 @@
-CREATE TABLE relations (
+CREATE TABLE cjdb_relations (
 	id          SERIAL PRIMARY KEY,
 	journal     INTEGER NOT NULL,
 	relation    VARCHAR(512) NOT NULL,
