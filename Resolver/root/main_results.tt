@@ -42,11 +42,11 @@
     [% FOREACH result IN service.results %]
      <li>
       <a href="[% result.url %]">
-      [%- IF result.atitle.defined -%]
+      [%- IF result.atitle -%]
        [% result.atitle %]
-      [%- ELSIF request.atitle.defined -%]
+      [%- ELSIF request.atitle -%]
        [% request.atitle %]
-      [%- ELSIF request.title.defined -%]
+      [%- ELSIF request.title -%]
        [% request.title %]
       [%- ELSE %]
        link to result
