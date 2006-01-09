@@ -1,6 +1,7 @@
 [% USE HTML %]
 
 <div class="unified-availability-group">
+ [% SET count = 0 %]
  [% FOREACH link IN journal.display_links.nsort('rank').reverse %]
   [% SET resource = undef %]
   [% IF link.link_type > 0 %]
@@ -8,6 +9,7 @@
    [% SET resource = resources_display.$resource_id %]
    [% NEXT UNLESS resource %]
   [% END %]
+  [% SET count = count + 1 %]
   <div class="unified-availability">
    <a href="[% link.URL %]">[%- PROCESS journals_link_name.tt -%]</a>: 
 
@@ -53,5 +55,8 @@
   [% END %]
 
   </div>
+ [% END %]
+ [% IF count == 0 %]
+  No links are currently available for this journal.
  [% END %]
 </div>
