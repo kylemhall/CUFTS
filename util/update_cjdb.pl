@@ -57,9 +57,9 @@ SITE:
     	my $site_id = $site->id;	
 
     	print "Checking " . $site->name . "\n";
-	
-    	next if  !defined($site->rebuild_cjdb) || $site->rebuild_cjdb eq ''
-              || !defined($site->rebuild_ejournals_only) || $site->rebuild_ejournals_only ne '1';
+
+    	next if    ( !defined($site->rebuild_cjdb) || $site->rebuild_cjdb eq '' )
+    	        && ( !defined($site->rebuild_ejournals_only) || $site->rebuild_ejournals_only ne '1' );
 
     	print " * Found files marked for rebuild.\n";
 	

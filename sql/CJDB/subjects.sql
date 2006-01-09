@@ -1,4 +1,4 @@
-CREATE TABLE subjects (
+CREATE TABLE cjdb_subjects (
 	id              SERIAL PRIMARY KEY,
 	journal         INTEGER NOT NULL,
 	subject         VARCHAR(512) NOT NULL,
