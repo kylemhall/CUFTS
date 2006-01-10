@@ -20,6 +20,7 @@
 
 package CUFTS::DB::LocalResources;
 
+use CUFTS::DB::LocalJournals;
 use CUFTS::DB::LocalResourceDetails;
 use CUFTS::DB::HiddenFields;
 use CUFTS::DB::LocalResources_Services;
@@ -67,6 +68,7 @@ __PACKAGE__->has_a('site' => 'CUFTS::DB::Sites');
 
 __PACKAGE__->has_many('services', ['CUFTS::DB::LocalResources_Services' => 'service'], 'local_resource');
 __PACKAGE__->has_many('hidden_fields', ['CUFTS::DB::HiddenFields' => 'field'], 'resource');
+__PACKAGE__->has_many('local_journals' => 'CUFTS::DB::LocalJournals');
 
 __PACKAGE__->add_trigger('before_delete' => \&delete_titles);
 
