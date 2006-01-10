@@ -25,6 +25,7 @@ use base 'CUFTS::DB::DBI';
 
 use CUFTS::DB::LocalJournalDetails;
 use CUFTS::DB::Journals;
+use CUFTS::DB::LocalResources;
 
 __PACKAGE__->table('local_journals');
 __PACKAGE__->columns(Primary => 'id');

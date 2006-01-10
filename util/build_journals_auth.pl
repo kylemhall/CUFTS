@@ -12,6 +12,7 @@ use Data::Dumper;
 use CUFTS::Config;
 use CUFTS::Util::Simple;
 
+use CUFTS::DB::LocalJournals;
 use CUFTS::DB::Journals;
 use CUFTS::DB::JournalsAuthTitles;
 use CUFTS::DB::JournalsAuth;
@@ -23,10 +24,11 @@ use Getopt::Long;
 # Read command line arguments
 
 my %options;
-GetOptions( \%options, 'local' );
+GetOptions( \%options, 'local', 'site_key=s', 'site_id=i' );
 
 if ( $options{'local'} ) {
-    load_local_journals();
+    my $site_id = get_site_id();
+    load_local_journals($site_id);
 }
 else {
     load_journals();
@@ -126,7 +128,8 @@ sub load_journals_no_issn {
 }
 
 sub load_local_journals {
-
+    my ($site_id) = @_;
+    
     my $stats = {};
 
 # First load up all the titles with both ISSNs and eISSNs.  By processing those first, we
@@ -135,11 +138,20 @@ sub load_local_journals {
 
     print "\n-=- Processing local journals with both ISSN and eISSNs -=-\n\n";
 
-    my $journals = CUFTS::DB::LocalJournals->search_where(
-        'issn'         => { '!=', undef },
-        'e_issn'       => { '!='  => undef },
-        'journal_auth' => undef,
-        'journal'      => undef
+    my @basic_search = (
+        'journal_auth', undef,
+        'journal', undef
+    );
+    if (defined($site_id)) {
+        push @basic_search, 'resource.site', $site_id;
+    }
+
+    my $journals = CUFTS::DB::LocalJournals->search(
+        {
+            'issn'         => { '!=', undef },
+            'e_issn'       => { '!='  => undef },
+            @basic_search
+        }
     );
 
     while ( my $journal = $journals->next ) {
@@ -148,11 +160,12 @@ sub load_local_journals {
 
     print "\n\n-=- Processing local journals with only ISSNs -=-\n\n";
 
-    $journals = CUFTS::DB::LocalJournals->search_where(
-        'issn'         => { '!=', undef },
-        'e_issn'       => undef,
-        'journal_auth' => undef,
-        'journal'      => undef
+    $journals = CUFTS::DB::LocalJournals->search(
+        {
+            'issn'         => { '!=', undef },
+            'e_issn'       => undef,
+            @basic_search
+        }
     );
 
     while ( my $journal = $journals->next ) {
@@ -161,11 +174,12 @@ sub load_local_journals {
 
     print "\n\n-=- Processing local journals with only eISSNs -=-\n\n";
 
-    $journals = CUFTS::DB::LocalJournals->search_where(
-        'e_issn'       => { '!=', undef },
-        'issn'         => undef,
-        'journal_auth' => undef,
-        'journal'      => undef
+    $journals = CUFTS::DB::LocalJournals->search(
+        {
+            'e_issn'       => { '!=', undef },
+            'issn'         => undef,
+            @basic_search
+        }
     );
 
     while ( my $journal = $journals->next ) {
@@ -173,6 +187,8 @@ sub load_local_journals {
     }
 
     print Dumper($stats);
+
+    print "\n\n -=- Committing changes -=- \n\n";
 
     CUFTS::DB::DBI->dbi_commit;
 }
@@ -373,4 +389,18 @@ sub create_MARC_records {
 
     CUFTS::DB::DBI->dbi_commit;
 }
+
+
+sub get_site_id {
+	return $options{'site_id'} if defined($options{'site_id'});
+    return undef if !defined($options{'site_key'});
+
+	my @sites = CUFTS::DB::Sites->search('key' => $options{'site_key'});
+	
+	scalar(@sites) == 1 or
+		die('Could not get CUFTS site for key: ' . $options{'site_key'});
+		
+	return $sites[0]->id;
+}
+
 
