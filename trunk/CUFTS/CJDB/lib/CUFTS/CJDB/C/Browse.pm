@@ -94,7 +94,8 @@ sub journals : Local {
 			$x += $search_details->{per_page};
 		}
 
-		@$journals = @$journals[$start_record .. ($start_record + $search_details->{per_page} - 1)];
+		my $slice_max = min($#$journals, ($start_record + $search_details->{per_page} - 1));
+		@$journals = @$journals[$start_record .. $slice_max];
 
 		$c->session->{search_details}->{$c->stash->{current_site}->id}->{$browse_field}->{join '+', $search} = $search_details;
 	}
@@ -176,7 +177,8 @@ sub titles : Local {
 			$x += $search_details->{per_page};
 		}
 
-		@$titles = @$titles[$start_record .. ($start_record + $search_details->{per_page} - 1)];
+		my $slice_max = min($#$titles, ($start_record + $search_details->{per_page} - 1));		
+		@$titles = @$titles[$start_record .. $slice_max];
 
 		$c->session->{search_details}->{$c->stash->{current_site}->id}->{title}->{$search_type}->{$search_term} = $search_details;
 	}
