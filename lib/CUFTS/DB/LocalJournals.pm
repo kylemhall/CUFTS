@@ -61,7 +61,7 @@ __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 
 __PACKAGE__->sequence('local_journals_id_seq');
 
-__PACKAGE__->has_a('resource', 'CUFTS::DB::Resources');
+__PACKAGE__->has_a('resource', 'CUFTS::DB::LocalResources');
 __PACKAGE__->has_a('journal', 'CUFTS::DB::Journals');
 __PACKAGE__->has_details('details', 'CUFTS::DB::LocalJournalDetails' => 'local_journal');
 __PACKAGE__->details_columns(qw/
