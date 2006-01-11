@@ -78,7 +78,7 @@ SITE:
     
         eval {
 		    `util/build_journals_auth.pl --site_id=${site_id} --local`;
-		}
+		};
 
         clear_site($site_id);
         if (!$options{cufts_only}) {
