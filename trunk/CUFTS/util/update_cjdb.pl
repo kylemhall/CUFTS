@@ -74,6 +74,12 @@ SITE:
     		}
     	}
 
+        # eval this, since it shouldn't be fatal if this fails.
+    
+        eval {
+		    `util/build_journals_auth.pl --site_id=${site_id} --local`;
+		}
+
         clear_site($site_id);
         if (!$options{cufts_only}) {
         	my @files = split /\|/, $site->rebuild_cjdb;
