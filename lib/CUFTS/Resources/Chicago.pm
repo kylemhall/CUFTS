@@ -20,13 +20,9 @@
 
 package CUFTS::Resources::Chicago;
 
-use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
-
-use CUFTS::Exceptions qw(assert_ne);
+use base qw(CUFTS::Resources::GenericJournalDOI);
 
 use strict;
-
-my $urlbase = 'http://www.journals.uchicago.edu/';
 
 sub title_list_fields {
 	return [qw(
@@ -42,52 +38,5 @@ sub title_list_fields {
 		journal_url
 	)];
 }
-
-
-## -------------------------------------------------------------------------------------------
-                
-## can_get* - Control whether or not an attempt to create a link is built.  This is run
-## before the database is searched for possible title matches, so catching requests without
-## enough data, etc. early (here) cuts down on database hits
-
-
-sub build_linkJournal {
-        my ($class, $records, $resource, $site, $request) = @_;
-         
-        defined($records) && scalar(@$records) > 0 or
-                return [];
-        defined($resource) or
-                CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-        defined($site) or
-                CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-        defined($request) or
-                CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-                
-        my @results;
-        
-        foreach my $record (@$records) {
-		
-		my $url;
-        
-                if($record->db_identifier) {
-                        $url .= $urlbase . $record->db_identifier . '/';
-                }
-                elsif ($record->journal_url) {
-			$url .= '/' unless (substr($record->journal_url,-1) eq '/');
-                        $url .= $record->journal_url;
-                }
-                else {  
-                        next;
-                }
-
-               my $result = new CUFTS::Result($url);
-               $result->record($record);
-                
-               push @results, $result;
-        }
-         
-        return \@results;
-}
-
 
 1;
