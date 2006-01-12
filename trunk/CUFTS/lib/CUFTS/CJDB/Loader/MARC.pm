@@ -20,7 +20,6 @@ sub get_title {
     my ( $self, $record ) = @_;
 
     my $title = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_title( $record->title ) );
-
     return $title;
 }
 

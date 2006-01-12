@@ -38,6 +38,7 @@ else {
 }
 
 update_titles($timestamp);
+update_MARC_records($timestamp);
 create_MARC_records($timestamp);
 
 CUFTS::DB::DBI->dbi_commit;
@@ -80,7 +81,7 @@ sub load_journals_dual_issn {
 }
 
 sub load_journals_issn {
-    my ($stats) = @_;
+    my ($stats, $timestamp) = @_;
 
     print "\n\n-=- Processing journals with only ISSNs -=-\n\n";
 
@@ -98,7 +99,7 @@ sub load_journals_issn {
 }
 
 sub load_journals_e_issn {
-    my ($stats) = @_;
+    my ($stats, $timestamp) = @_;
 
     print "\n-=- Processing journals with only eISSNs -=-\n\n";
 
@@ -116,7 +117,7 @@ sub load_journals_e_issn {
 }
 
 sub load_journals_no_issn {
-    my ($stats) = @_;
+    my ($stats, $timestamp) = @_;
 
     print "\n-=- Processing journals without ISSNs -=-\n\n";
 
@@ -187,6 +188,18 @@ sub load_local_journals {
             'issn'         => undef,
             @basic_search
         }
+    );
+
+    while ( my $journal = $journals->next ) {
+        process_journal( $journal, $stats, $timestamp );
+    }
+
+    print "\n-=- Processing journals without ISSNs -=-\n\n";
+
+    my $journals = CUFTS::DB::LocalJournals->search(
+        'e_issn'       => undef,
+        'issn'         => undef,
+        @basic_search
     );
 
     while ( my $journal = $journals->next ) {
@@ -351,7 +364,7 @@ sub update_MARC_records {
         
         my $MARC = MARC::File::USMARC::decode($auth->MARC);
 
-        my @title_fields = MARC->field('246');
+        my @title_fields = $MARC->field('246');
         my @existing_titles = map { $_->subfield('a') } @title_fields;
 
 ALT_TITLE:
@@ -396,6 +409,8 @@ sub create_MARC_records {
     while ( my $auth = $auths->next ) {
         next if $auth->MARC;
 
+        print '.';
+
         my $MARC = MARC::Record->new();
 
         $MARC->append_fields( $time_field, $field_006, $field_007, $field_008 );
@@ -436,6 +451,8 @@ sub create_MARC_records {
         $auth->MARC( $MARC->as_usmarc );
         $auth->update;
     }
+
+    print "\n";
 }
 
 

@@ -61,7 +61,7 @@ sub load_journal {
         or die("No site id set for loader.");
 
     my $title = $self->get_title($record);
-    return undef if !defined($title) || $title == 0;
+    return undef if !defined($title) || $title eq '0';
 
     my $sort_title          = $self->get_sort_title($record);
     my $stripped_sort_title = $self->strip_title($sort_title);
