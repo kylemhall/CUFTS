@@ -25,6 +25,7 @@ use base 'CUFTS::DB::DBI';
 
 use CUFTS::DB::LocalJournalDetails;
 use CUFTS::DB::Journals;
+use CUFTS::DB::JournalsAuth;
 use CUFTS::DB::LocalResources;
 
 __PACKAGE__->table('local_journals');
@@ -64,6 +65,8 @@ __PACKAGE__->sequence('local_journals_id_seq');
 
 __PACKAGE__->has_a('resource', 'CUFTS::DB::LocalResources');
 __PACKAGE__->has_a('journal', 'CUFTS::DB::Journals');
+__PACKAGE__->has_a('journal_auth', 'CUFTS::DB::JournalsAuth');
+
 __PACKAGE__->has_details('details', 'CUFTS::DB::LocalJournalDetails' => 'local_journal');
 __PACKAGE__->details_columns(qw/
 	db_identifier	
