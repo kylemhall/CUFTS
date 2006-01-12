@@ -70,10 +70,12 @@ sub local_resource {
 }
 
 __PACKAGE__->set_sql(display => qq{
-    select cjdb_links.*, local_journal_details.value as journal_cjdb_note from cjdb_links 
-    left outer join local_journal_details on (cjdb_links.local_journal = local_journal_details.local_journal)
-    where cjdb_links.journal = ? 
-    and (local_journal_details.field = 'cjdb_note' OR local_journal_details.field IS NULL);
+    SELECT * FROM cjdb_links
+    LEFT OUTER JOIN (
+        SELECT local_journal, value AS journal_cjdb_note FROM local_journal_details WHERE field = 'cjdb_note'
+    ) AS lj
+    ON cjdb_links.local_journal = lj.local_journal
+    WHERE cjdb_links.journal = ?;
 });
 
 1;
