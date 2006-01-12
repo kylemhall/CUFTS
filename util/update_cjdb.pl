@@ -30,7 +30,7 @@ use MARC::File::USMARC;
 use MARC::Record;
 
 use CUFTS::CJDB::Util;
-use CUFTS::CJDB::Loader::MARC::MARCStore;
+use CUFTS::CJDB::Loader::MARC::JournalsAuth;
 
 use CUFTS::Resolve;
 
@@ -61,12 +61,19 @@ SITE:
     	next if    ( !defined($site->rebuild_cjdb) || $site->rebuild_cjdb eq '' )
     	        && ( !defined($site->rebuild_ejournals_only) || $site->rebuild_ejournals_only ne '1' );
 
-    	print " * Found files marked for rebuild.\n";
+        my $cufts_only = 0;
+        if ( defined($site->rebuild_ejournals_only) && $site->rebuild_ejournals_only eq '1' ) {
+            $cufts_only = 1;
+        }
+
+    	print " * Site marked for rebuild.\n";
 	
     	# First load any LCC subject files.
 
     	if (-e "${CUFTS::Config::CJDB_SITE_DATA_DIR}/${site_id}/lccn_subjects") {
             # eval this, since it shouldn't be fatal if this fails.
+
+        	print " * Loading LCC subjects.\n";
         
             eval {
     		    `util/load_lcc_subjects.pl --site_id=${site_id}  ${CUFTS::Config::CJDB_SITE_DATA_DIR}/${site_id}/lccn_subjects`;
@@ -75,13 +82,19 @@ SITE:
     	}
 
         # eval this, since it shouldn't be fatal if this fails.
+
+    	print " * Building journal auth records for local resources.\n";
     
         eval {
-		    `util/build_journals_auth.pl --site_id=${site_id} --local`;
+		   `util/build_journals_auth.pl --site_id=${site_id} --local`;
 		};
 
+    	print " * Done with journal auth records.\n";
+
         clear_site($site_id);
-        if (!$options{cufts_only}) {
+        if (!$options{cufts_only} && !$cufts_only ) {
+            print " * Loading print journal records\n";
+    		
         	my @files = split /\|/, $site->rebuild_cjdb;
             foreach my $file (@files) {
         		$file = $CUFTS::Config::CJDB_SITE_DATA_DIR . '/' . $site_id . '/' .$file;
@@ -98,7 +111,7 @@ SITE:
         }
 			
         if (!$options{print_only}) {
-    		print " * Loading CUFTS journals records\n";
+    		print " * Loading CUFTS journal records\n";
             eval {
                 load_cufts($site);
             };
@@ -298,7 +311,7 @@ sub load_cufts {
 
 			my @links;
 			if ( $module->can_getJournal($request) ) {
-					
+	        	
 				my $results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
 				foreach my $result (@$results) {
 					$module->prepend_proxy($result, $local_resource, $site, $request);
@@ -499,13 +512,13 @@ sub get_MARC_data {
 		return undef;
 	my $record = MARC::File::USMARC::decode($journal_auth->MARC);
 
-
-	my $loader = CUFTS::CJDB::Loader::MARC::MARCStore->new();
+	my $loader = CUFTS::CJDB::Loader::MARC::JournalsAuth->new()
+	    or die("Unable to create JournalsAuth loader");
 	$loader->site_id($site->id);
 
 	my $journal = $loader->load_journal($record, $journal_auth->id);
 	defined($journal) or 
-		next;
+		return undef;
 	
 	$loader->load_titles($record, $journal);
 	
