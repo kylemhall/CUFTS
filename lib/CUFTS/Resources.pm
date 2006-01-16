@@ -23,7 +23,8 @@ package CUFTS::Resources;
 
 use CUFTS::DB::Resources;
 use CUFTS::Result;
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 use SQL::Abstract;
 
 use strict;
@@ -146,7 +147,7 @@ sub load_title_list {
 
 	$local = ($local eq 'local' || $local == 1) ? 'local' : 'global';
 
-	assert_ne($title_list) or 
+	not_empty_string($title_list) or 
 		CUFTS::Exception::App->throw("No title list passed into load_title_list");
 
 	defined($resource) or
@@ -172,8 +173,6 @@ sub load_title_list {
 		CUFTS::Exception::App->throw("title_list_get_field_headings did not return an array ref or did not contain any fields");
 
 	my $duplicate_records = $class->find_duplicates_for_loading(*IN, $field_headings);
-
-	local $module->db_Main->{ AutoCommit };
 
 	my $timestamp = CUFTS::DB::DBI->get_now;
 
@@ -206,7 +205,6 @@ sub load_title_list {
 			# errors and roll back the update.
 
 			eval {
-
 				if (my $existing_titles = $class->_find_existing_title($resource->id, $record, $local)) {
 					$class->_update_record($resource->id, $record, $existing_titles, $timestamp, $local);
 				} else {
@@ -218,7 +216,7 @@ sub load_title_list {
 						$class->_modify_record($resource, $record, $partial_match, $timestamp, $local);
 						$modified_count++;
 					} else {
-						$class->_load_record($resource, $record, $timestamp, $local);
+					    $class->_load_record($resource, $record, $timestamp, $local);
 						$new_count++;
 					}
 				}
@@ -409,7 +407,7 @@ sub title_list_split_row {
 
 	my $delimiter = $class->title_list_column_delimiter;
 	my @row = split /$delimiter/, $row;
-	@row = map {$_ =~ s/^\s*(.+)\s*$/$1/; $_} @row;    # Strip leading/trailing spaces
+	@row = map { trim_string($_) } @row;    # Strip leading/trailing spaces
 	return \@row;
 }	
 	
@@ -430,10 +428,8 @@ sub title_list_build_record {
 		next unless defined($field);
 		next unless defined($value);
 		
-		$value =~ s/^\s*//;
-		$value =~ s/\s*$//;
-		$field =~ s/^\s*//;
-		$field =~ s/\s*$//;
+		$value = trim_string($value);
+		$field = trim_string($field);
 		
 		next if $value eq '';
 		next if $field eq '';
@@ -478,7 +474,6 @@ sub _load_record {
 	}
 
 	$db_record->scanned($timestamp);
-
 	$db_record->update;
 
 	$class->log_new_title($resource, $db_record, $timestamp);
@@ -493,6 +488,7 @@ sub find_duplicates_for_loading {
 	my $duplicates = {};
 	my $duplicate_for_loading_fields = $class->duplicate_for_loading_fields();
 	
+ROW:
 	while (my $row = $class->title_list_parse_row($IN)) {
 		my $record = $class->title_list_build_record($field_headings, $row);			
 		my $data_errors = $class->clean_data($record);
@@ -501,16 +497,17 @@ sub find_duplicates_for_loading {
 		        scalar(@$data_errors) > 0;
 
 		my $identifier;
+FIELD:
 		foreach my $field (@$duplicate_for_loading_fields) {
 			if (defined($record->{$field})) {
 				$identifier = $record->{$field};
-				last;
+				last FIELD;
 			}
 		}
 
         if ( !defined($identifier) ) {
 			warn('NO IDENTIFIER');
-			next;
+			next ROW;
 		}
 		
 		$duplicates->{$identifier}++;
@@ -535,7 +532,7 @@ sub is_duplicate {
 		}
 	}
 
-	return 0 unless defined($identifier);
+	return 0 if !defined($identifier);
 	
 	return $duplicates->{$identifier} > 1 ? 1 : 0;
 }
@@ -567,10 +564,10 @@ sub delete_title_list {
 sub activation_title_list {
 	my ($class, $local_resource, $title_list, $match_on, $deactivate) = @_;
 
-	assert_ne($title_list) or 
+	not_empty_string($title_list) or 
 		CUFTS::Exception::App->throw('No title list passed into activation_title_list');
 
-	assert_ne($match_on) or
+	not_empty_string($match_on) or
 		CUFTS::Exception::App->throw('No fields to match for activation passed into activation_title_list');
 
 	defined($local_resource) or
@@ -593,8 +590,6 @@ sub activation_title_list {
 
 
 	my @match_on = split /,/, $match_on;
-
-	local $local_module->db_Main->{ AutoCommit };
 
 	my $timestamp = CUFTS::DB::DBI->get_now;
 
@@ -653,10 +648,10 @@ sub activation_title_list {
 sub overlay_title_list {
 	my ($class, $local_resource, $title_list, $match_on, $deactivate) = @_;
 
-	assert_ne($title_list) or 
+	not_empty_string($title_list) or 
 		CUFTS::Exception::App->throw('No title list passed into activation_title_list');
 
-	assert_ne($match_on) or
+	not_empty_string($match_on) or
 		CUFTS::Exception::App->throw('No fields to match for activation passed into activation_title_list');
 
 	defined($local_resource) or
@@ -679,8 +674,6 @@ sub overlay_title_list {
 
 
 	my @match_on = split /,/, $match_on;
-
-	local $local_module->db_Main->{ AutoCommit };
 
 	my $timestamp = CUFTS::DB::DBI->get_now;
 
@@ -754,10 +747,10 @@ sub overlay_title_list {
 sub _match_on {
 	my ($class, $resource_id, $module, $fields, $data) = @_;
 	
-	assert_ne($resource_id) or
+	not_empty_string($resource_id) or
 		CUFTS::Exception::App->throw('No resource_id passed into _match_on');
 		
-	assert_ne($module) or
+	not_empty_string($module) or
 		CUFTS::Exception::App->throw('No database module passed into _match_on');
 		
 	defined($fields) && ref($fields) eq 'ARRAY' && scalar(@$fields) > 0 or
@@ -1006,7 +999,7 @@ sub activate_all {
 sub prepend_proxy {
 	my ($class, $result, $resource, $site, $request) = @_;
 	
-	return unless defined($result->url);
+	return if !defined($result->url);
 
 	# There's two checks for proxy_prefix_alternate below.  The second is useless because it wont get hit
 	# due to the first one.  This is there so that the first one could be easily pulled out so Exceptions
@@ -1019,8 +1012,14 @@ sub prepend_proxy {
 			
 			$result->url($site->proxy_prefix_alternate . $result->url);
 		} else {
-			assert_ne($site->proxy_prefix) and 
+			if ( not_empty_string($site->proxy_prefix) ) {
 				$result->url($site->proxy_prefix . $result->url);
+			} elsif ( not_empty_string($site->proxy_WAM) ) {
+			    my $url = $result->url;
+			    my $wam = $site->proxy_WAM;
+			    $url =~ s{ http:// ([^/]+) / }{http://0-$1.$wam/}xsm;
+			    $result->url($url);
+			}
 		}
 	}
 	

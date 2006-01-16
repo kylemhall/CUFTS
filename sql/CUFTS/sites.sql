@@ -4,6 +4,7 @@ CREATE TABLE sites (
 	name		VARCHAR(256),
 
 	proxy_prefix	VARCHAR(512),
+	proxy_WAM   	VARCHAR(512),
 	proxy_prefix_alternate	VARCHAR(512),
 	email		VARCHAR(1024),
 

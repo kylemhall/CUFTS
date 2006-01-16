@@ -200,6 +200,7 @@ sub clean_data {
         }
         else {
             push @errors, 'ISSN is not valid: ' . $record->{'issn'};
+            delete $record->{'issn'};
         }
     }
 
@@ -211,19 +212,19 @@ sub clean_data {
         }
         else {
             push @errors, 'e-ISSN is not valid: ' . $record->{'e_issn'};
+            delete $record->{'e_issn'};
         }
     }
 
     # Remove extra spaces from titles
 
-    $record->{'title'} =~ s/^\s+//;
-    $record->{'title'} =~ s/\s+$//;
+    $record->{'title'} = trim_string($record->{'title'});
 
     # Check to make sure there's an (e-)ISSN or title
 
-    unless ( ( defined( $record->{'issn'} ) && $record->{'issn'} ne '' )
-          || ( defined( $record->{'e_issn'} ) && $record->{'e_issn'} ne '' )
-          || ( defined( $record->{'title'} )  && $record->{'title'}  ne '' ) )
+    if (    is_empty_string( $record->{'issn'} )
+         && is_empty_string( $record->{'e_issn'} ) 
+         && is_empty_string( $record->{'title'} )  )
     {
         push @errors, 'Neither ISSN or title are defined';
     }
@@ -283,15 +284,19 @@ sub _find_existing_title {
 
     my $method = "${local}_db_module";
     my $module = $class->$method
-        or CUFTS::Exception::App->throw(
-        "resource does not have an associated database module for loading title lists"
-        );
+        or CUFTS::Exception::App->throw("resource does not have an associated database module for loading title lists");
 
     my $search = { 'resource' => $resource_id };
-    $search->{'issn'} = $record->{'issn'}
-        if defined( $record->{'issn'} ) && $record->{'issn'} ne '';
-    $search->{'title'} = $record->{'title'}
-        if defined( $record->{'title'} ) && $record->{'title'} ne '';
+    
+    if ( not_empty_string($record->{'issn'}) ) {
+        $search->{'issn'} = $record->{'issn'};
+    }
+    if ( not_empty_string($search->{'eissn'}) ) {
+        $search->{'eissn'} = $record->{'eissn'};
+    }
+    if ( !exists($search->{'issn'}) && !exists($search->{'eissn'}) ) {
+        $search->{'title'} = $record->{'title'};
+    }
 
     my @titles = $module->search($search);
 
@@ -299,11 +304,12 @@ sub _find_existing_title {
 
     my @matched_titles;
 
-# Run through all the columns because there may be a column removed from the new
-# record which would cause it to match otherwise
+    # Run through all the columns because there may be a column removed from the new
+    # record which would cause it to match otherwise
 
-    $^W = 0
-        ; # Turn off warnings because of the large number of eq matches against undef fields below.
+    # Turn off warnings because of the large number of eq matches against undef fields below.
+
+    $^W = 0;
 
 TITLE:
     foreach my $title (@titles) {
@@ -354,21 +360,19 @@ sub _find_partial_match {
 
     my $method = "${local}_db_module";
     my $module = $class->$method
-        or CUFTS::Exception::App->throw(
-        "resource does not have an associated database module for loading title lists"
-        );
+        or CUFTS::Exception::App->throw("resource does not have an associated database module for loading title lists");
 
     my $search = { 'resource' => $resource_id };
-    $search->{'issn'} = $record->{'issn'}
-        if defined( $record->{'issn'} ) && $record->{'issn'} ne '';
-    $search->{'eissn'} = $record->{'eissn'}
-        if !defined( $search->{'issn'} )
-        && defined( $record->{'eissn'} )
-        && $record->{'eissn'} ne '';
-    $search->{'title'} = $record->{'title'}
-        if !defined( $search->{'issn'} )
-        && defined( $record->{'title'} )
-        && $record->{'title'} ne '';
+
+    if ( not_empty_string($record->{'issn'}) ) {
+        $search->{'issn'} = $record->{'issn'};
+    }
+    if ( not_empty_string($search->{'eissn'}) ) {
+        $search->{'eissn'} = $record->{'eissn'};
+    }
+    if ( !exists($search->{'issn'}) && !exists($search->{'eissn'}) ) {
+        $search->{'title'} = $record->{'title'};
+    }
 
     my @titles = $module->search($search);
 
@@ -391,10 +395,10 @@ sub _modify_record {
 
         if ( $old_record->$column ne $new_record->{$column} ) {
             if ( assert_ne( $new_record->{$column} ) ) {
-                $old_record->set( $column, $new_record->{$column} );
+                $old_record->$column( $new_record->{$column} );
             }
             else {
-                $old_record->set( $column, undef );
+                $old_record->$column( undef );
             }
         }
     }

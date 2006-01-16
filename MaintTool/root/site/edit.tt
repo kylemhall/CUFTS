@@ -11,7 +11,8 @@
 <tr><td class="label0">email</td><td class="field0"><input type="text" name="email" size="50" maxlength="256" value="[% current_site.email | html %]" /></td></tr>
 <tr><td class="label1">proxy prefix</td><td class="field1"><input type="text" name="proxy_prefix" size="50" maxlength="256" value="[% current_site.proxy_prefix | html %]" /></td></tr>
 <tr><td class="label0">proxy prefix alternate</td><td class="field0"><input type="text" name="proxy_prefix_alternate" size="50" maxlength="256" value="[% current_site.proxy_prefix_alternate | html %]" /></td></tr>
-<tr><td class="label1">show resource ERM</td><td class="field1"><select name="show_ERM"><option value="1" [% 'selected="selected"' IF current_site.show_ERM %]>Yes</option><option value="0" [% 'selected="selected"' UNLESS current_site.show_ERM %]>No</option></td></tr>
+<tr><td class="label1">WAM proxy server</td><td class="field1"><input type="text" name="proxy_WAM" size="50" maxlength="256" value="[% current_site.proxy_WAM | html %]" /></td></tr>
+<tr><td class="label0">show resource ERM</td><td class="field0"><select name="show_ERM"><option value="1" [% 'selected="selected"' IF current_site.show_ERM %]>Yes</option><option value="0" [% 'selected="selected"' UNLESS current_site.show_ERM %]>No</option></td></tr>
 </table>
 </td></tr>
 <tr><td><br /></td></tr>
