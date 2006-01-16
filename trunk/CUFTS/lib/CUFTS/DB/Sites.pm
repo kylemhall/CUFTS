@@ -40,6 +40,7 @@ __PACKAGE__->columns(
 
         proxy_prefix
         proxy_prefix_alternate
+        proxy_WAM
         email
 
         active
