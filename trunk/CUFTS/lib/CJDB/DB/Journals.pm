@@ -86,7 +86,7 @@ sub search_distinct_by_exact_subjects {
 	$sql .= " ORDER BY cjdb_journals.stripped_sort_title, cjdb_journals.id LIMIT $limit OFFSET $offset";
 
 	my $dbh = $class->db_Main();
-        my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
+    my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
 	
 	$sth->execute(@bind);
 	my @results = $class->sth_to_objects($sth);
