@@ -22,7 +22,6 @@ package CUFTS::DB::Journals;
 
 use CUFTS::DB::JournalDetails;
 use CUFTS::DB::LocalJournals;
-use CUFTS::DB::JournalsAuth;
 use CUFTS::DB::Resources;
 
 use strict;

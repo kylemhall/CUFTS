@@ -442,8 +442,19 @@ sub get_journals_auth {
     else {
 
         # Try for strictly title matching
+        
+        if ( scalar(@$issns) ) {
+            @journals_auths = CUFTS::DB::JournalsAuth->search_by_title($title);
+        } else {
+            @journals_auths = CUFTS::DB::JournalsAuth->search_by_exact_title_with_no_issns($title);
+            if ( !scalar(@journals_auths) ){ 
+                @journals_auths = CUFTS::DB::JournalsAuth->search_by_title_with_no_issns($title);
+            }
+            if ( !scalar(@journals_auths) ){ 
+                @journals_auths = CUFTS::DB::JournalsAuth->search_by_title($title);
+            }
+        }
 
-        my @journals_auths = CUFTS::DB::JournalsAuth->search_by_title($title);
         if ( scalar(@journals_auths) > 1 ) {
             print(
                 "Could not find unambiguous main title match for $title -- ",
@@ -467,8 +478,7 @@ sub get_journals_auth {
                 )
             {
                 my $alt_title = $title_arr->[1];
-                my @temp_journals_auth
-                    = CUFTS::DB::JournalsAuth->search_by_title($alt_title);
+                my @temp_journals_auth = CUFTS::DB::JournalsAuth->search_by_title($alt_title);
                 foreach my $temp_journal (@temp_journals_auth) {
                     grep { $_->id == $temp_journal->id } @journals_auths
                         or push @journals_auths, $temp_journal;

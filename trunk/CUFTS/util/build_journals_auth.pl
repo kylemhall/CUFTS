@@ -165,7 +165,7 @@ sub process_journal {
         @journal_auths = CUFTS::DB::JournalsAuth->search_by_issns(@issn_search);
     }
     else {
-        @journal_auths = CUFTS::DB::JournalsAuth->search_by_title_with_no_issns($journal->title);
+        @journal_auths = CUFTS::DB::JournalsAuth->search_by_exact_title_with_no_issns($journal->title);
     }
 
     if ( scalar(@journal_auths) > 1 ) {
