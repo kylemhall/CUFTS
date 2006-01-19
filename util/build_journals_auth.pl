@@ -4,9 +4,10 @@ use lib qw(lib);
 
 $| = 1;
 
+my $PROGRESS = 1;
+
 use strict;
 
-use SQL::Abstract;
 use Data::Dumper;
 
 use CUFTS::Config;
@@ -16,205 +17,133 @@ use CUFTS::DB::LocalJournals;
 use CUFTS::DB::Journals;
 use CUFTS::DB::JournalsAuthTitles;
 use CUFTS::DB::JournalsAuth;
+use CUFTS::JournalsAuth;
+
+use Getopt::Long;
 use MARC::Record;
 use MARC::Field;
 use MARC::File::USMARC;
+use Term::ReadLine;
 
-use Getopt::Long;
 
 # Read command line arguments
 
 my %options;
-GetOptions( \%options, 'local', 'site_key=s', 'site_id=i' );
+GetOptions( \%options, 'report', 'progress', 'local', 'interactive', 'site_key=s', 'site_id=i' );
 
-my $timestamp = CUFTS::DB::DBI->get_now();
+my $searches = {
+    issns => {
+        issn         => { '!=' => undef },
+        e_issn       => { '!=' => undef },
+        journal_auth => undef,
+    },
+    issn => {
+        issn         => { '!=' => undef },
+        e_issn       => undef,
+        journal_auth => undef,
+    },
+    e_issn => {
+        issn         => undef,
+        e_issn       => { '!=' => undef },
+        journal_auth => undef,
+    },
+    no_issn => {
+        issn         => undef,
+        e_issn       => undef,
+        journal_auth => undef,
+    },
+    
+};
 
-if ( $options{'local'} ) {
-    my $site_id = get_site_id();
-    load_local_journals($timestamp, $site_id);
+main();
+
+sub main {
+   my $timestamp = CUFTS::DB::DBI->get_now();
+   my $term;
+   if ($options{'interactive'}) {
+       my $term = new Term::ReadLine 'CUFTS Installation';
+   }
+
+    if ( $options{'local'} ) {
+        my $site_id = get_site_id();
+        load_journals( 'local', $timestamp, $site_id, $term );
+    }
+    else {
+        load_journals( 'global', $timestamp, $term );
+    }
+    
+    CUFTS::DB::DBI->dbi_commit();
+
+    return 1;
 }
-else {
-    load_journals($timestamp);
-}
 
-update_titles($timestamp);
-update_MARC_records($timestamp);
-create_MARC_records($timestamp);
-
-CUFTS::DB::DBI->dbi_commit;
 
 sub load_journals {
-    my ($timestamp) = @_;
-
-
+    my ($flag, $timestamp, $site_id, $term) = @_;
     my $stats = {};
 
-# First load up all the titles with both ISSNs and eISSNs.  By processing those first, we
-# should help cut down the problem of two records, each with a ISSN/eISSN and then having
-# to merge them.
+    my $search_extra = {};
+    my $search_module; 
 
-    load_journals_dual_issn($stats, $timestamp);
-    load_journals_issn($stats, $timestamp);
-    load_journals_e_issn($stats, $timestamp);
-    load_journals_no_issn($stats, $timestamp);
+    # Add extra search information if we're doing a local resource build
 
-    print Dumper($stats);
+    if ($flag eq 'local') {
+        $search_extra = { 'journal' => undef };
+        $search_module = 'CUFTS::DB::LocalJournals';
+        
+        if ($site_id) {
+            $search_extra->{'basic_search'}->{'resource.site'} = $site_id;
+            $search_extra->{'basic_search'}->{'resource.active'} = 't';
+        }
 
-}
-
-sub load_journals_dual_issn {
-    my ($stats) = @_;
-
-    print "\n-=- Processing journals with both ISSN and eISSNs -=-\n\n";
-
-    my $journals = CUFTS::DB::Journals->search_where(
-        'issn'         => { '!=', undef },
-        'e_issn'       => { '!='  => undef },
-        'journal_auth' => undef
-    );
-
-    while ( my $journal = $journals->next ) {
-        process_journal( $journal, $stats, $timestamp );
+    } else {
+        $search_module = 'CUFTS::DB::Journals';
     }
 
-    return 1;
-}
+    $PROGRESS && print "\n-=- Processing journals with both ISSN and eISSNs -=-\n\n";
 
-sub load_journals_issn {
-    my ($stats, $timestamp) = @_;
-
-    print "\n\n-=- Processing journals with only ISSNs -=-\n\n";
-
-    my $journals = CUFTS::DB::Journals->search_where(
-        'issn'         => { '!=', undef },
-        'e_issn'       => undef,
-        'journal_auth' => undef
-    );
-
+    my $journals = $search_module->search( { %{$searches->{issns}}, %{$search_extra} } );
     while ( my $journal = $journals->next ) {
-        process_journal( $journal, $stats, $timestamp );
+        process_journal( $journal, $stats, $timestamp, $term );
+#        last if $stats->{count} % 100 == 99;
     }
 
-    return 1;
-}
+    $PROGRESS && print "\n\n-=- Processing journals with only ISSNs -=-\n\n";
 
-sub load_journals_e_issn {
-    my ($stats, $timestamp) = @_;
-
-    print "\n-=- Processing journals with only eISSNs -=-\n\n";
-
-    my $journals = CUFTS::DB::Journals->search_where(
-        'e_issn'       => { '!=', undef },
-        'issn'         => undef,
-        'journal_auth' => undef
-    );
-
+    $journals = $search_module->search( { %{$searches->{issn}}, %{$search_extra} } );
     while ( my $journal = $journals->next ) {
-        process_journal( $journal, $stats, $timestamp );
+        process_journal( $journal, $stats, $timestamp, $term );
+#        last if $stats->{count} % 100 == 99;
     }
 
-    return 1;
-}
+    $PROGRESS && print "\n-=- Processing journals with only eISSNs -=-\n\n";
 
-sub load_journals_no_issn {
-    my ($stats, $timestamp) = @_;
-
-    print "\n-=- Processing journals without ISSNs -=-\n\n";
-
-    my $journals = CUFTS::DB::Journals->search_where(
-        'e_issn'       => undef,
-        'issn'         => undef,
-        'journal_auth' => undef
-    );
-
+    $journals = $search_module->search( { %{$searches->{e_issn}}, %{$search_extra} } );
     while ( my $journal = $journals->next ) {
-        process_journal( $journal, $stats, $timestamp );
+        process_journal( $journal, $stats, $timestamp, $term );
+#        last if $stats->{count} % 100 == 99;
     }
 
-    return 1;
-}
+    $PROGRESS && print "\n-=- Processing journals with no ISSNs -=-\n\n";
 
-sub load_local_journals {
-    my ($timestamp, $site_id) = @_;
+    $journals = $search_module->search( { %{$searches->{no_issn}}, %{$search_extra} } );
+    while ( my $journal = $journals->next ) {
+        process_journal( $journal, $stats, $timestamp, $term );
+#        last if $stats->{count} % 100 == 99;
+    }
     
-    my $stats = {};
-
-# First load up all the titles with both ISSNs and eISSNs.  By processing those first, we
-# should help cut down the problem of two records, each with a ISSN/eISSN and then having
-# to merge them.
-
-    print "\n-=- Processing local journals with both ISSN and eISSNs -=-\n\n";
-
-    my @basic_search = (
-        'journal_auth', undef,
-        'journal', undef
-    );
-    if (defined($site_id)) {
-        push @basic_search, 'resource.site', $site_id;
-        push @basic_search, 'resource.active', 't';
-    }
-
-    my $journals = CUFTS::DB::LocalJournals->search(
-        {
-            'issn'         => { '!=', undef },
-            'e_issn'       => { '!='  => undef },
-            @basic_search
-        }
-    );
-
-    while ( my $journal = $journals->next ) {
-        process_journal( $journal, $stats, $timestamp );
-    }
-
-    print "\n-=- Processing local journals with only ISSNs -=-\n\n";
-
-    $journals = CUFTS::DB::LocalJournals->search(
-        {
-            'issn'         => { '!=', undef },
-            'e_issn'       => undef,
-            @basic_search
-        }
-    );
-
-    while ( my $journal = $journals->next ) {
-        process_journal( $journal, $stats, $timestamp );
-    }
-
-    print "\n-=- Processing local journals with only eISSNs -=-\n\n";
-
-    $journals = CUFTS::DB::LocalJournals->search(
-        {
-            'e_issn'       => { '!=', undef },
-            'issn'         => undef,
-            @basic_search
-        }
-    );
-
-    while ( my $journal = $journals->next ) {
-        process_journal( $journal, $stats, $timestamp );
-    }
-
-    print "\n-=- Processing journals without ISSNs -=-\n\n";
-
-    my $journals = CUFTS::DB::LocalJournals->search(
-        'e_issn'       => undef,
-        'issn'         => undef,
-        @basic_search
-    );
-
-    while ( my $journal = $journals->next ) {
-        process_journal( $journal, $stats, $timestamp );
-    }
-
-    print Dumper($stats);
+    display_stats($stats);
+    return 1;
 }
+
 
 sub process_journal {
-    my ( $journal, $stats, $timestamp ) = @_;
+    my ( $journal, $stats, $timestamp, $term ) = @_;
 
-    # Skip journal if resource is not active
-    
+    # Skip journal if resource and journal is not active
+
     return undef if !$journal->resource->active;
+    return undef if $journal->can('active') && !$journal->active;
 
     $stats->{'count'}++;
 
@@ -222,239 +151,219 @@ sub process_journal {
 
     my @issn_search;
 
-    if ( not_empty_string($journal->issn) ) {
+    if ( not_empty_string( $journal->issn ) ) {
         push @issn_search, $journal->issn;
     }
-    if ( not_empty_string($journal->e_issn) && !grep $journal->e_issn, @issn_search ) {
+    if ( not_empty_string( $journal->e_issn ) && !grep $journal->e_issn, @issn_search ) {
         push @issn_search, $journal->e_issn;
     }
 
     my @journal_auths;
+    my $journal_auth;
 
     if ( scalar(@issn_search) ) {
         @journal_auths = CUFTS::DB::JournalsAuth->search_by_issns(@issn_search);
     }
     else {
-        @journal_auths = CUFTS::DB::JournalsAuth->search_where(
-            title => { 'ilike' => $journal->title } );
-            
-        warn('title search: ' . scalar(@journal_auths));
+        @journal_auths = CUFTS::DB::JournalsAuth->search_by_title_with_no_issns($journal->title);
     }
 
     if ( scalar(@journal_auths) > 1 ) {
-        print Dumper($journal), "\n";
-        print Dumper( \@journal_auths ), "\n";
+        if (defined($term)) {
+            # Interactive
+            
+            display_journal($journal);
+            foreach my $ja (@journal_auths) {
+                display_journal_auth($ja);
+            }
+            
+INPUT:
+            while (1) {
+                print "[S]kip record, [c]reate new journal_auth, [m]erge all journal_auths, or enter journal_auth ids.\n";
+                my $input = $term->readline('[S/c/m/ids]: ');
 
-        warn(
-            "Multiple journal_auth matches for ISSN.  This should not happen during the original build"
-        );
+        	    if ( $input =~ /^[cC]/ ) {
+        	        $journal_auth = create_ja_record($journal, \@issn_search, $timestamp, $stats);
+        	        last INPUT;
+        	    } elsif ( $input =~ /^[mM]/ ) {
+        	        $journal_auth = CUFTS::JournalsAuth->merge( map {$_->id} @journal_auths );
+        	        last INPUT;
+        	    } elsif ( $input =~ /^[sS]/ || $input eq '' ) {
+        	        return undef;
+        	    } elsif ( $input =~ /^[\d ]+$/ ) {
+
+        	        my @merge_ids = split /\s+/, $input;
+        	        foreach my $merge_id (@merge_ids) {
+        	            if ( !grep {int($merge_id) == $_->id} @journal_auths ) {
+        	                print "id input does not match possible merge targets: $merge_id\n";
+        	                next INPUT;
+        	            }
+        	            $journal_auth = CUFTS::JournalsAuth->merge(@merge_ids);
+        	            last INPUT;
+        	        }
+
+        	    }
+        	}
+        }
+        else {
+            
+            $stats->{multiple_matches} = {
+                'title' => $journal->title,
+                'issns' => join ',', @issn_search,
+            };
+            $journal_auth = create_ja_record($journal, \@issn_search, $timestamp, $stats);
+            
+        }
     }
     elsif ( scalar(@journal_auths) == 1 ) {
-
-        my $journal_auth = $journal_auths[0];
-
-        # Check for title match in alternate titles, add if not found.
-
-        $journal->journal_auth( $journal_auth->id );
-        $journal->update;
-
-        my $title = $journal->title;
-        $title =~ s/^\s+//;
-        $title =~ s/\s+$//;
-
-        my $title_rec = CUFTS::DB::JournalsAuthTitles->find_or_create(
-            { 'title' => $title, 'journal_auth' => $journal_auth->id } );
-        $title_rec->title_count( $title_rec->title_count + 1 );
-        $title_rec->update;
-
-        my @journal_auth_issns = map { $_->issn } $journal_auth->issns;
-
-        foreach my $issn (@issn_search) {
-            if ( !grep { $issn eq $_ } @journal_auth_issns ) {
-                $journal_auth->add_to_issns(
-                    { issn => $issn, info => 'CUFTS (initial load)' } );
-            }
-        }
-
-        $journal_auth->modified($timestamp);
-        $journal_auth->update;
-        
-        $stats->{match}++;
-
-        print "1";
-
+        $journal_auth = update_ja_record($journal_auths[0], $journal, \@issn_search, $timestamp, $stats);
     }
     else {
-
-        # Add new records
-
-        my $title = $journal->title;
-        $title =~ s/^\s+//;
-        $title =~ s/\s+$//;
-
-        # Create a record with a blank title.. we're going to search for blank title records
-        # later and promote a JournalAuthTitles record to the official title.
-
-        my $journal_auth = CUFTS::DB::JournalsAuth->create(
-            {
-                title    => $title,
-                created  => $timestamp,
-                modified => $timestamp,
-             }
-        );
-
-        CUFTS::DB::JournalsAuthTitles->create(
-            {   'journal_auth' => $journal_auth->id,
-                'title'        => $title,
-                'title_count'  => 1
-            }
-        );
-
-        $journal->journal_auth( $journal_auth->id );
-        $journal->update;
-
-        foreach my $issn (@issn_search) {
-            $journal_auth->add_to_issns(
-                { issn => $issn, info => 'CUFTS (initial load)' } );
-        }
-
-        $stats->{'new_record'}++;
-
-        print "!";
+        $journal_auth = create_ja_record($journal, \@issn_search, $timestamp, $stats);
     }
 
-    $stats->{'count'} % 80 == 0
-        and print "\n$stats->{'count'}\n";
+    if ( $PROGRESS && $stats->{'count'} % 100 == 0 ) {
+        print "\n$stats->{'count'}\n";
+    }
 
+    return $journal_auth;
 }
 
-# Set up "official titles" based on number of title matches
-
-sub update_titles {
-    my ($timestamp) = @_;
+sub display_journal {
+    my ($journal) = @_;
     
-    my $auths = CUFTS::DB::JournalsAuth->search( 'modified' => $timestamp );
-
-    print "\n-=- Promoting titles to create official journal_auth title -=-\n";
-
-    while ( my $auth = $auths->next ) {
-        my @titles = $auth->titles;
-        next unless @titles > 1;
-
-        @titles = sort { $b->title_count <=> $a->title_count } @titles;
-
-        if ( $titles[0]->title ne $auth->title ) {
-            $auth->title( $titles[0]->title );
-            $auth->update;
-        }
+    print "New journal record\n--------------\n";
+    print $journal->title, "\n";
+    if ($journal->issn) {
+        print $journal->issn, "\n";
     }
+    if ($journal->e_issn) {
+        print $journal->e_issn, "\n";
+    }
+    print $journal->resource->name, ' - ', $journal->resource->provider, "\n";
+    print "-------------------\n";
+    
+    return 1;
 }
 
-# Create stub MARC records based on existing data
-
-sub update_MARC_records {
-    my ($timestamp) = @_;
+sub display_journal_auth {
+    my ($ja) = @_;
     
-    print "\n-=- Updating titles on existing MARC records -=-\n";
-    
-    my $auths = CUFTS::DB::JournalsAuth->search( 'modified' => $timestamp );
-
-    while ( my $auth = $auths->next ) {
-        next if !defined($auth->marc);
-        
-        my $MARC = MARC::File::USMARC::decode($auth->MARC);
-
-        my @title_fields = $MARC->field('246');
-        my @existing_titles = map { $_->subfield('a') } @title_fields;
-
-ALT_TITLE:
-        foreach my $alt_title ( map { $_->title } $auth->titles ) {
-            next ALT_TITLE if grep { $_ eq $alt_title } @existing_titles;
-            my $alt_field = MARC::Field->new( 246, 2, 3, 'a' => $alt_title );
-            $MARC->append_fields($alt_field);
-        }
-
-        $auth->MARC( $MARC->as_usmarc );
-        $auth->update;
+    print "Existing JournalAuth record\n-------------------\n";
+    print "ID: ", $ja->id, "\n";
+    print $ja->title, "\n";
+    if ($ja->issns) {
+        print join ' ', map {$_->issn} $ja->issns;
     }
+    foreach my $title ($ja->titles) {
+        print $title, "\n";
+    }
+    print "-------------------\n";
 
     return 1;
 }
-    
-# Create stub MARC records based on existing data
 
-sub create_MARC_records {
-    my ($timestamp) = @_;
-    
-    print "\n-=- Creating simple MARC records -=-\n";
 
-    my (@articles) = (
-        'An\s+',  'The\s+', 'La\s+', 'Le\s+', 'Les\s+', 'L\'',
-        'Der\s+', 'Das\s+', 'Die\s+',
-    );
+sub create_ja_record {
+    my ($journal, $issns, $timestamp, $stats) = @_;
 
-    my ( $sec, $min, $hour, $day, $mon, $year ) = localtime;
-    my $MARC_timestamp = sprintf(
-        "%i4%i2%i2%i2%i2%i2\.0",
-        $year + 1900,
-        $mon + 1, $day, $hour, $min, $sec
-    );
-    my $time_field = MARC::Field->new( '005', $MARC_timestamp );
-    my $field_006  = MARC::Field->new( '006', 'm        d        ' );
-    my $field_007  = MARC::Field->new( '007', 'cr u||||||||||' );
-    my $field_008  = MARC::Field->new( '008', '050706||||||||||||||||||||d|||||||||||||' );
+    my $title = trim_string($journal->title);
 
-    my $auths = CUFTS::DB::JournalsAuth->search( marc => undef );
-
-    while ( my $auth = $auths->next ) {
-        next if $auth->MARC;
-
-        print '.';
-
-        my $MARC = MARC::Record->new();
-
-        $MARC->append_fields( $time_field, $field_006, $field_007, $field_008 );
-
-        # Set ISSN fields
-
-        foreach my $issn ( map { $_->issn } $auth->issns ) {
-            substr( $issn, 4, 0 ) = '-';
-            my $issn_field
-                = MARC::Field->new( '022', '#', '#', 'a' => $issn );
-            $MARC->append_fields($issn_field);
+    my $journal_auth = CUFTS::DB::JournalsAuth->create(
+        {   
+            title    => $title,
+            created  => $timestamp,
+            modified => $timestamp,
         }
+    );
 
-        my $title = $auth->title;
+    CUFTS::DB::JournalsAuthTitles->create(
+        {   
+            'journal_auth' => $journal_auth->id,
+            'title'        => $title,
+            'title_count'  => 1
+        }
+    );
 
-        # Check for article so we can set the 245 indicator
+    $journal->journal_auth( $journal_auth->id );
+    $journal->update;
 
-        my $lead_chars = 0;
-        foreach my $article (@articles) {
-            if ( $title =~ /^(${article})/ ) {
-                $lead_chars = length($1);
-                last;
+    foreach my $issn (@$issns) {
+        $journal_auth->add_to_issns(
+            {
+                issn => $issn,
+                info => 'CUFTS (initial load)',
             }
-        }
-
-        # Create main title field
-
-        my $title_field
-            = MARC::Field->new( 245, 0, $lead_chars, 'a' => $title );
-
-        $MARC->append_fields($title_field);
-
-        foreach my $alt_title ( map { $_->title } $auth->titles ) {
-            my $alt_field = MARC::Field->new( 246, 2, 3, 'a' => $alt_title );
-            $MARC->append_fields($alt_field);
-        }
-
-        $auth->MARC( $MARC->as_usmarc );
-        $auth->update;
+        );
     }
 
-    print "\n";
+    $stats->{new_record}++;
+
+    $PROGRESS and print "!";
+    
+    return $journal_auth;
 }
 
+sub update_ja_record {
+    my ($journal_auth, $journal, $issns, $timestamp, $stats) = @_;
+
+    $journal->journal_auth( $journal_auth->id );
+    $journal->update;
+
+    my $title = trim_string($journal->title);
+
+    my $title_rec = CUFTS::DB::JournalsAuthTitles->find_or_create(
+        {
+            'title' => $title,
+            'journal_auth' => $journal_auth->id
+        }
+    );
+    $title_rec->title_count( $title_rec->title_count + 1 );
+    $title_rec->update;
+
+    my @journal_auth_issns = map { $_->issn } $journal_auth->issns;
+
+    foreach my $issn (@$issns) {
+        if ( !grep { $issn eq $_ } @journal_auth_issns ) {
+
+            $journal_auth->add_to_issns(
+                {
+                    issn => $issn,
+                    info => 'CUFTS (initial load)'
+                }
+            );
+
+        }
+    }
+
+    $journal_auth->modified($timestamp);
+    $journal_auth->update;
+    
+    $stats->{match}++;
+
+    $PROGRESS and print "1";
+    
+    return $journal_auth;
+}
+
+sub show_report {
+    # slow, but easy
+    
+    my $journal_auths = CUFTS::DB::JournalsAuth->retrieve_all;
+    while (my $journal_auth = $journal_auths->next) {
+        my @titles = $journal_auth->titles;
+        next if scalar(@titles) == 1;
+        
+        my @issns = $journal_auth->issns;
+        my $issn_string = join ',', map {substr($_->issn,0,4) . '-' . substr($_->issn,4)} @issns;
+
+        print $issn_string, "\n";
+        foreach my $title (@titles) {
+            print $title->title, "\n";
+        }
+        print "\n";
+    }
+}
 
 sub get_site_id {
 	return $options{'site_id'} if defined($options{'site_id'});
@@ -468,4 +377,7 @@ sub get_site_id {
 	return $sites[0]->id;
 }
 
-
+sub display_stats {
+    my ($stats) = @_;
+    
+}
