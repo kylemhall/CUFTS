@@ -2,15 +2,17 @@
 
 use lib 'lib';
 
-use CUFTS::DB::JournalsAuth;
-use CUFTS::DB::Journals;
+
 use CUFTS::DB::LocalJournals;
+use CUFTS::DB::Journals;
+use CUFTS::DB::JournalsAuth;
 use CJDB::DB::Journals;
+use CJDB::DB::Tags;
+use CUFTS::Util::Simple;
 
 
 while (my $title = <>) {
-	$title =~ s/^\s+//;
-	$title =~ s/\s+$//;
+	$title = trim_string($title);
 
 	my @journal_auths = CUFTS::DB::JournalsAuth->search('title' => $title);
 	scalar(@journal_auths) > 1 or next;
@@ -44,12 +46,17 @@ while (my $title = <>) {
 			$journal->journal_auth($new_journal_auth->id);
 			$journal->update;
 		}
-		my @journals = CUFTS::DB::LocalJournals->search('journal_auth' => $journal_auth->id);
+		@journals = CUFTS::DB::LocalJournals->search('journal_auth' => $journal_auth->id);
 		foreach my $journal (@journals) {
 			$journal->journal_auth($new_journal_auth->id);
 			$journal->update;
 		}
-		my @journals = CJDB::DB::Journals->search('journals_auth' => $journal_auth->id);
+		@journals = CJDB::DB::Journals->search('journals_auth' => $journal_auth->id);
+		foreach my $journal (@journals) {
+			$journal->journals_auth($new_journal_auth->id);
+			$journal->update;
+		}
+		@journals = CJDB::DB::Tags->search('journals_auth' => $journal_auth->id);
 		foreach my $journal (@journals) {
 			$journal->journals_auth($new_journal_auth->id);
 			$journal->update;
@@ -65,4 +72,3 @@ while (my $title = <>) {
 
 		
 CUFTS::DB::DBI->dbi_commit;
-CJDB::DB::DBI->dbi_commit;
