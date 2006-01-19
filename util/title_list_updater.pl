@@ -35,7 +35,7 @@ use CUFTS::DB::LocalResources;
 use CUFTS::DB::Accounts;
 use CUFTS::DB::ResourceTypes;
 use CUFTS::DB::Sites;
-use CUFTS::Utile::Simple;
+use CUFTS::Util::Simple;
 
 use CUFTS::Resources;
 
