@@ -24,7 +24,7 @@ Filter: <input type="text" name="filter" value="[% filter %]"> <input type="subm
  <tr>
   [% FOREACH col IN columns %]
    <td class="[% class %]">
-    [% title.$col || '&nbsp;' | html %]
+    [% title.$col | html %]
    </td>
   [% END %]
  </tr>
