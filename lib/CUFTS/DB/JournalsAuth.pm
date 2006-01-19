@@ -25,6 +25,8 @@ use base 'CUFTS::DB::DBI';
 
 use CUFTS::DB::JournalsAuthTitles;
 use CUFTS::DB::JournalsAuthISSNs;
+use CUFTS::DB::Journals;
+use CUFTS::DB::LocalJournals;
 use MARC::Record;
 
 __PACKAGE__->table('journals_auth');
@@ -46,7 +48,11 @@ __PACKAGE__->columns(Essential => qw(
 __PACKAGE__->sequence('journals_auth_id_seq');
 
 __PACKAGE__->has_many('titles', 'CUFTS::DB::JournalsAuthTitles' => 'journal_auth');
-__PACKAGE__->has_many('issns', 'CUFTS::DB::JournalsAuthISSNs' => 'journal_auth');
+__PACKAGE__->has_many('issns',  'CUFTS::DB::JournalsAuthISSNs'  => 'journal_auth');
+
+__PACKAGE__->has_many('local_journals',  'CUFTS::DB::LocalJournals' => 'journal_auth');
+__PACKAGE__->has_many('global_journals' => 'CUFTS::DB::Journals');
+
 
 1;
 
@@ -85,10 +91,25 @@ sub search_by_issns {
 	return @results;
 }	
 
-sub search_by_title_with_no_issns {
+sub search_by_exact_title_with_no_issns {
 	my ($class, $title) = @_;
 	
 	my $sql = 'SELECT journals_auth.* FROM journals_auth LEFT OUTER JOIN journals_auth_issns ON (journals_auth.id = journals_auth_issns.journal_auth) WHERE journals_auth_issns.issn IS NULL AND journals_auth.title ilike ?';
+
+	my $dbh = $class->db_Main();
+	my $sth = $dbh->prepare_cached($sql);
+	$sth->execute($title);
+	
+	my @results = $class->sth_to_objects($sth);	
+
+	return @results;
+}	
+
+
+sub search_by_title_with_no_issns {
+	my ($class, $title) = @_;
+	
+	my $sql = 'SELECT DISTINCT ON (journals_auth.id) journals_auth.* FROM journals_auth JOIN journals_auth_titles ON (journals_auth_titles.journal_auth = journals_auth.id) LEFT OUTER JOIN journals_auth_issns ON (journals_auth.id = journals_auth_issns.journal_auth) WHERE journals_auth_issns.issn IS NULL AND journals_auth.title ILIKE ?';
 
 	my $dbh = $class->db_Main();
 	my $sth = $dbh->prepare_cached($sql);
