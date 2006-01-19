@@ -13,19 +13,40 @@ in
 <div style="margin-top: 1em;">
 
 [% FOREACH journal_auth IN journal_auths %]
- <div>
- <span class="heading">[% journal_auth.title %]</span> [% FOREACH issn IN journal_auth.issns %]([% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %]) [% END %]
- <a href="[% url("$url_base/journalauth/edit_marc/$journal_auth.id") %]">edit MARC</a><br />
- [% FOREACH title IN journal_auth.titles %]
-  [% title.title | html %]<br />
- [% END %]
- <div id="journal-auth-marc-[% journal_auth.id %]" class="journal-auth-marc-dump">
-  [% IF journal_auth.marc %]
-   <pre>[% journal_auth.marc_object.as_formatted %]</pre>
-  [% ELSE %]
-   No MARC data
-  [% END %]
- </div>
+ <div class="journal-auth-record">
+  <span class="heading">[% journal_auth.title | html %]</span> [% FOREACH issn IN journal_auth.issns %]([% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %]) [% END %]
+  <a href="[% url("$url_base/journalauth/edit_marc/$journal_auth.id") %]">edit MARC</a><br />
+  <div class="journal-auth-titles">
+   <div id="journal-auth-titles-heading">Titles</div>
+   <table>
+   [% FOREACH title IN journal_auth.titles %]
+    <tr><td>[% title.title | html %]</td><td>[% title.title_count %]</td></tr>
+   [% END %]
+   </table>
+  </div>
+  <div class="journal-auth-global-resources">
+  <div id="journal-auth-global-resources-heading">Global Resources</div>
+   <table>
+   [% FOREACH journal IN journal_auth.global_journals %]
+    <tr><td>[% journal.resource.name | html %]</td><td>[% journal.resource.provider | html %]</td></tr> 
+   [% END %]
+   </table>
+  </div>
+  <div class="journal-auth-local-resources">
+   <div id="journal-auth-local-resources-heading">Local Resources</div>
+   <table>
+   [% FOREACH journal IN journal_auth.local_journals %]
+    <tr><td>[% journal.resource.name | html %]</td><td>[% journal.resource.provider | html %]</td><td>[% journal.resource.site.name | html %]</td></tr>
+   [% END %]
+   </table>
+  </div>
+  <div id="journal-auth-marc-[% journal_auth.id %]" class="journal-auth-marc-dump">
+   [% IF journal_auth.marc %]
+    <pre>[% journal_auth.marc_object.as_formatted | html %]</pre>
+   [% ELSE %]
+    No MARC data
+   [% END %]
+  </div>
  </div>
 [% END %]
 
