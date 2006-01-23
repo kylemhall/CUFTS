@@ -92,8 +92,8 @@ sub load_journals {
         $search_module = 'CUFTS::DB::LocalJournals';
         
         if ($site_id) {
-            $search_extra->{'basic_search'}->{'resource.site'} = $site_id;
-            $search_extra->{'basic_search'}->{'resource.active'} = 't';
+            $search_extra->{'resource.site'} = $site_id;
+            $search_extra->{'resource.active'} = 't';
         }
 
     } else {
