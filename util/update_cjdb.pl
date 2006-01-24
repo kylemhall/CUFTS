@@ -28,6 +28,7 @@ use CJDB::DB::Journals;
 use MARC::File;
 use MARC::File::USMARC;
 use MARC::Record;
+#$MARC::Record::DEBUG = 1;
 
 use CUFTS::CJDB::Util;
 use CUFTS::CJDB::Loader::MARC::JournalsAuth;
@@ -103,7 +104,7 @@ SITE:
                 load_print($site, \@files);
             };
             if ($@) {
-                    print("* Error found while loading print records.  Skipping remaining processing for this site.\n");
+                    print("* Error found while loading print records.  Skipping remaining processing for this site.\nError: $@");
                     CUFTS::DB::DBI->dbi_rollback;
                     CJDB::DB::DBI->dbi_rollback;
                     next SITE;
@@ -194,10 +195,14 @@ sub load_print {
 
     	while (my $record = $batch->next()) {
     	    next if $loader->skip_record($record);
+    		my @issns = $loader->get_issns($record);
+    		next unless scalar(@issns) < 2;
 
     		process_print_record($record, $loader);
         }
     }
+    
+    return 1;
 }
 
 
@@ -244,6 +249,8 @@ sub process_print_record {
 	$loader->load_relations($record, $journal);
 
 	$loader->load_link($record, $journal);
+
+    return 1;
 }	
 
 

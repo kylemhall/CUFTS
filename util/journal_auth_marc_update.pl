@@ -27,6 +27,17 @@ my $field_mappings = {
 	'785' => [qw(a s t x)],
 };
 
+my $field_stopwords = {
+    '110' => [qw(
+       ejournal
+       electronic
+       jstor
+       iop
+       online
+    )],
+};
+$field_stopwords->{'710'} = $field_stopwords->{'110'};
+
 
 use Getopt::Long;
 
@@ -278,9 +289,6 @@ sub build_marc_record {
 				}
 
 				my $new_field = MARC::Field->new($field_type, @indicators, @subfields);
-#				foreach my $subfield (@{$field_mappings->{$field_type}}) {
-#					$new_field->append_subfield($subfield => $field->subfield($subfield));
-#				}
 				
 				$new->append_fields($new_field);
 			}
