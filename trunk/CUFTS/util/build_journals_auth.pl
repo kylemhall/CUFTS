@@ -209,11 +209,7 @@ INPUT:
         	}
         }
         else {
-            
-            $stats->{multiple_matches} = {
-                'title' => $journal->title,
-                'issns' => join ',', @issn_search,
-            };
+            push @{$stats->{multiple_matches}}, $journal;
             $journal_auth = create_ja_record($journal, \@issn_search, $timestamp, $stats);
             
         }
@@ -271,7 +267,17 @@ sub create_ja_record {
     my ($journal, $issns, $timestamp, $stats) = @_;
 
     my $title = trim_string($journal->title);
-
+    
+    # Test ISSNs
+    foreach my $issn (@$issns) {
+        my @issns = CUFTS::DB::JournalsAuthISSNs->search( { issn => $issn } );
+        if ( scalar(@issns) ) {
+            push @{$stats->{ issn_dupe }}, $journal;
+            return undef;
+        }
+    }
+    
+    
     my $journal_auth = CUFTS::DB::JournalsAuth->create(
         {   
             title    => $title,
@@ -310,6 +316,21 @@ sub create_ja_record {
 sub update_ja_record {
     my ($journal_auth, $journal, $issns, $timestamp, $stats) = @_;
 
+    my @journal_auth_issns = map { $_->issn } $journal_auth->issns;
+
+    # Test ISSNs
+    foreach my $issn (@$issns) {
+        if ( !grep { $issn eq $_ } @journal_auth_issns ) {
+        
+            my @issns = CUFTS::DB::JournalsAuthISSNs->search( { issn => $issn } );
+            if ( scalar(@issns) ) {
+                push @{$stats->{ issn_dupe }}, $journal;
+                return undef;
+            }
+
+        }
+    }
+
     $journal->journal_auth( $journal_auth->id );
     $journal->update;
 
@@ -323,8 +344,6 @@ sub update_ja_record {
     );
     $title_rec->title_count( $title_rec->title_count + 1 );
     $title_rec->update;
-
-    my @journal_auth_issns = map { $_->issn } $journal_auth->issns;
 
     foreach my $issn (@$issns) {
         if ( !grep { $issn eq $_ } @journal_auth_issns ) {
@@ -383,4 +402,25 @@ sub get_site_id {
 sub display_stats {
     my ($stats) = @_;
     
+    print "Journal records checked: ", $stats->{count}, "\n";
+    print "journal_auth records created: ", $stats->{new_record}, "\n";
+    print "journal_auth records matched: ", $stats->{matched}, "\n";
+    
+    print "Records skipped due to existing ISSNs\n------------------------------------\n";
+    foreach my $journal ( @{$stats->{issn_dupe}} ) {
+        print $journal->title, "  ";
+        print $journal->issn, " ";
+        print $journal->e_issn, " ";
+        print $journal->resource->name, "\n";
+    }
+    
+    print "Records skipped due to multiple matches\n------------------------------------\n";
+    foreach my $journal ( @{$stats->{multiple_matches}} ) {
+        print $journal->title, "  ";
+        print $journal->issn, " ";
+        print $journal->e_issn, " ";
+        print $journal->resource->name, "\n";
+    }
+
+    return 1;
 }
