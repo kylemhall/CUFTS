@@ -201,7 +201,7 @@ foreach my $dat_file_name (@dat_files) {
     	}
 	}
 
-	CUFTS::DB::Resources->dbi_commit;
+	CUFTS::DB::DBI->dbi_commit;
 
 	rename("$title_list_dir/$title_list_file_name", "$title_list_dir/completed/$title_list_file_name") or
 		_error("Unable to move title list file to completed directory: $!: '$title_list_dir/$title_list_file_name $title_list_dir/completed/$title_list_file_name'");

@@ -36,21 +36,25 @@ my $searches = {
         issn         => { '!=' => undef },
         e_issn       => { '!=' => undef },
         journal_auth => undef,
+        'resource.active' => 't',
     },
     issn => {
         issn         => { '!=' => undef },
         e_issn       => undef,
         journal_auth => undef,
+        'resource.active' => 't',
     },
     e_issn => {
         issn         => undef,
         e_issn       => { '!=' => undef },
         journal_auth => undef,
+        'resource.active' => 't',
     },
     no_issn => {
-        issn         => undef,
-        e_issn       => undef,
-        journal_auth => undef,
+        issn              => undef,
+        e_issn            => undef,
+        journal_auth      => undef,
+        'resource.active' => 't',
     },
     
 };
@@ -88,12 +92,11 @@ sub load_journals {
     # Add extra search information if we're doing a local resource build
 
     if ($flag eq 'local') {
-        $search_extra = { 'journal' => undef };
+        $search_extra  = { 'journal' => undef };
         $search_module = 'CUFTS::DB::LocalJournals';
         
         if ($site_id) {
-            $search_extra->{'resource.site'} = $site_id;
-            $search_extra->{'resource.active'} = 't';
+            $search_extra->{'resource.site'}   = $site_id;
         }
 
     } else {
@@ -142,7 +145,6 @@ sub process_journal {
 
     # Skip journal if resource and journal is not active
 
-    return undef if !$journal->resource->active;
     return undef if $journal->can('active') && !$journal->active;
 
     $stats->{'count'}++;
@@ -154,7 +156,7 @@ sub process_journal {
     if ( not_empty_string( $journal->issn ) ) {
         push @issn_search, $journal->issn;
     }
-    if ( not_empty_string( $journal->e_issn ) && !grep $journal->e_issn, @issn_search ) {
+    if ( not_empty_string( $journal->e_issn ) && !grep { $_ eq $j->e_issn } @issn_search ) {
         push @issn_search, $journal->e_issn;
     }
 
@@ -194,7 +196,8 @@ INPUT:
 
         	        my @merge_ids = split /\s+/, $input;
         	        foreach my $merge_id (@merge_ids) {
-        	            if ( !grep {int($merge_id) == $_->id} @journal_auths ) {
+        	            $merge_id = int($merge_id);
+        	            if ( !grep { $merge_id == $_->id } @journal_auths ) {
         	                print "id input does not match possible merge targets: $merge_id\n";
         	                next INPUT;
         	            }
