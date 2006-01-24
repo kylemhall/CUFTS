@@ -156,7 +156,7 @@ sub process_journal {
     if ( not_empty_string( $journal->issn ) ) {
         push @issn_search, $journal->issn;
     }
-    if ( not_empty_string( $journal->e_issn ) && !grep { $_ eq $j->e_issn } @issn_search ) {
+    if ( not_empty_string( $journal->e_issn ) && !grep { $_ eq $journal->e_issn } @issn_search ) {
         push @issn_search, $journal->e_issn;
     }
 
