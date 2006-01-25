@@ -1,8 +1,8 @@
 CREATE TABLE cjdb_titles (
 	id              SERIAL PRIMARY KEY,
 	journal         INTEGER NOT NULL,
-	title           VARCHAR(512) NOT NULL,
-	search_title    VARCHAR(512) NOT NULL,
+	title           VARCHAR(1024) NOT NULL,
+	search_title    VARCHAR(1024) NOT NULL,
 	site            INTEGER NOT NULL,
 	main            INTEGER NOT NULL DEFAULT 0
 );
