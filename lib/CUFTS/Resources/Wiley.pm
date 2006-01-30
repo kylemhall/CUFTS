@@ -22,7 +22,6 @@ package CUFTS::Resources::Wiley;
 
 use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
 
-use Data::Dumper;
 use CUFTS::Exceptions qw(assert_ne);
 
 use strict;
@@ -134,8 +133,6 @@ sub clean_data {
 		$end_year =~ /(\d{4})/ and
 			$record->{'ft_end_date'} = $1;
 	}
-	
-	print Dumper($record), "\n";
 	
 	return $class->SUPER::clean_data($record);
 }
