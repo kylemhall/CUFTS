@@ -1004,8 +1004,10 @@ sub activate_all {
                 die($@);
             }
         }
-
-        $commit and $local_titles_module->dbi_commit;
+        
+        if ($commit) {
+            $local_titles_module->dbi_commit;
+        }
     }
 
     return scalar(@local_resources);
