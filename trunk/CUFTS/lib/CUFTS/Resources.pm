@@ -606,14 +606,8 @@ sub activation_title_list {
 
 		$processed_count++;
 
-		use Data::Dumper;
-		warn(Dumper($record));
-		warn(Dumper(\@match_on));
-
 		if (defined($global_resource) && defined($global_module)) {
 			my $global_records = $class->_match_on($global_resource->id, $global_module, \@match_on, $record);
-
-			warn(Dumper($global_records));
 
 			foreach my $global_record (@$global_records) {
 				# Find or create local records

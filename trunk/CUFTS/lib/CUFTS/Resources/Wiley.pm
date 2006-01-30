@@ -22,6 +22,7 @@ package CUFTS::Resources::Wiley;
 
 use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
 
+use Data::Dumper;
 use CUFTS::Exceptions qw(assert_ne);
 
 use strict;
@@ -52,7 +53,6 @@ sub title_list_get_field_headings {
 		title
 		issn
 		e_issn
-		___product_type
 		journal_url
 		___volume
 		___issues
@@ -73,16 +73,15 @@ sub title_list_get_field_headings {
 		___dec_freq
 		___dec_pages
 		___other
-		___journal_changes
 		___status
 		___new_to_wiley
 		___end
 		___start
-		___comment
 		___first_year
 		___acquired_from
 		___backfile
 		___backfile_collection
+		___comment
 	)];
 }
 
@@ -136,6 +135,8 @@ sub clean_data {
 			$record->{'ft_end_date'} = $1;
 	}
 	
+	print Dumper($record), "\n";
+	
 	return $class->SUPER::clean_data($record);
 }
 
@@ -166,7 +167,7 @@ sub build_linkJournal {
 		next unless assert_ne($record->issn);
 
 		my $url = 'http://www3.interscience.wiley.com/cgi-bin/issn?DESCRIPTOR=PRINTISSN&VALUE=';
-                $url .= substr($record->issn,0,4) . '-' . substr($record->issn,4,4);
+        $url .= substr($record->issn,0,4) . '-' . substr($record->issn,4,4);
 		my $result = new CUFTS::Result($url);
 		$result->record($record);
 		
