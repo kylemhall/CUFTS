@@ -22,18 +22,21 @@ sub not_empty_string :Export( :DEFAULT ) {
 
 sub ltrim_string :Export( :DEFAULT ) {
     my ($string) = @_;
+    return undef if !defined($string);
     $string =~ s/^ \s+ //xsm;
     return $string;
 }
 
 sub rtrim_string :Export( :DEFAULT ) {
     my ($string) = @_;
+    return undef if !defined($string);
     $string =~ s/ \s+ $//xsm;
     return $string;    
 }
 
 sub trim_string :Export( :DEFAULT ) {
     my ($string) = @_;
+    return undef if !defined($string);
     $string =~ s/^ \s+ //xsm;
     $string =~ s/ \s+ $//xsm;
     return $string;    
