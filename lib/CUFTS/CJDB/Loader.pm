@@ -61,7 +61,11 @@ sub load_journal {
         or die("No site id set for loader.");
 
     my $title = $self->get_title($record);
-    return undef if !defined($title) || $title eq '0';
+    return undef if is_empty_string($title) || $title eq '0';
+    if ( length($title) > 1024 ) {
+        print "Title too long, skipping record: $title\n";
+        return undef;
+    }
 
     my $sort_title          = $self->get_sort_title($record);
     my $stripped_sort_title = $self->strip_title($sort_title);
@@ -175,6 +179,8 @@ sub load_titles {
     foreach my $title (@search_titles) {
         next if   is_empty_string($title->[0])
                || is_empty_string($title->[1]);
+               
+        next if length($title) > 1024;
         
         my $record = {
             'journal'      => $journal->id,
