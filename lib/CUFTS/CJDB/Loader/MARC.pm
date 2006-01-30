@@ -36,7 +36,13 @@ sub clean_title {
 sub get_sort_title {
     my ( $self, $record ) = @_;
 
-    my $title = substr( $record->title, $record->field('245')->indicator('2') );
+    my $title;
+    my $title_field = $record->field('245');
+    if (defined($title_field)) {
+        $title = substr( $record->title, $record->field('245')->indicator('2') );
+    } else {
+        $title = $record->title;
+    }
     $title = CUFTS::CJDB::Util::marc8_to_latin1($title);
     $title = $self->clean_title($title);
 
