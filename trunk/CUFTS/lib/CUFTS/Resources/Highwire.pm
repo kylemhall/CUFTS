@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -31,88 +31,98 @@ use strict;
 ##
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		e_issn		
-		ft_start_date
-                journal_url
-                db_identifier
-                publisher
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            e_issn
+            ft_start_date
+            journal_url
+            db_identifier
+            publisher
+            embargo_months
+            )
+    ];
 }
-
 
 ## title_list_field_map - Hash ref mapping fields from the raw title lists to
 ## internal field names
 ##
 
 sub title_list_field_map {
-	return {
-		'Journal Name' 			=> 'title',
-		'What is the print ISSN number?'	=> 'issn',
-                'What is the online ISSN number?'	=> 'e_issn',
-                'What is the main URL for the journal site?'		=> 'journal_url',
-                'Who is the publisher?' 	=> 'publisher',
-                'db_identifier' => 'db_identifier',
-                'ft_start_date' => 'ft_start_date',
-	};
+    return {
+        'Journal Name'                               => 'title',
+        'What is the print ISSN number?'             => 'issn',
+        'What is the online ISSN number?'            => 'e_issn',
+        'What is the main URL for the journal site?' => 'journal_url',
+        'Who is the publisher?'                      => 'publisher',
+        'db_identifier'                              => 'db_identifier',
+        'ft_start_date'                              => 'ft_start_date',
+        'embargo_months'                             => 'embargo_months',
+    };
 }
-
 
 sub clean_data {
-	my ($class, $record) = @_;
-	
-	defined($record->{'issn'}) && $record->{'issn'} eq 'Unknown' and
-		delete($record->{'issn'});
+    my ( $class, $record ) = @_;
 
-	defined($record->{'e_issn'}) && $record->{'e_issn'} eq 'Unknown' and
-		delete($record->{'e_issn'});
+    defined( $record->{'issn'} ) && $record->{'issn'} eq 'Unknown'
+        and delete( $record->{'issn'} );
 
-	if (defined($record->{'___What is the range of content online?'})) {
-		my $dates = get_dates($record->{'___What is the range of content online?'});
+    defined( $record->{'e_issn'} ) && $record->{'e_issn'} eq 'Unknown'
+        and delete( $record->{'e_issn'} );
 
-		if (defined($dates->{'HTML'}) && (!defined($dates->{'PDF'}) || int($dates->{'PDF'}) > int($dates->{'HTML'}))) {
-			$record->{'ft_start_date'} = $dates->{'HTML'};
-			$record->{'db_identifier'} = 'HTML';
-		} elsif (defined($dates->{'PDF'})) {
-			$record->{'ft_start_date'} = $dates->{'PDF'};
-			$record->{'db_identifier'} = 'PDF';
-		}
-	}
-			
-	$class->SUPER::clean_data($record);
+    if ( defined( $record->{'___What is the range of content online?'} ) ) {
+        my $dates = get_dates(
+            $record->{'___What is the range of content online?'} );
 
-	sub get_dates {
-		my ($string) = @_;
-		
-		my %dates;
-		
-		while ($string =~ /(html|pdf)\s*fulltext\sdate\:?\s*([a-z]{3})\s*(\d{2}),?\s*(\d{4})/ig) {
-			my ($identifier, $month, $day, $year) = (uc($1), $2, $3, $4);
-			
-			if ($month =~ /^Jan/i) { $month = 1 }
-			elsif ($month =~ /^Feb/i) { $month = 2 }
-			elsif ($month =~ /^Mar/i) { $month = 3 }
-			elsif ($month =~ /^Apr/i) { $month = 4 }
-			elsif ($month =~ /^May/i) { $month = 5 }
-			elsif ($month =~ /^Jun/i) { $month = 6 }
-			elsif ($month =~ /^Jul/i) { $month = 7 }
-			elsif ($month =~ /^Aug/i) { $month = 8 }
-			elsif ($month =~ /^Sep/i) { $month = 9 }
-			elsif ($month =~ /^Oct/i) { $month = 10 }
-			elsif ($month =~ /^Nov/i) { $month = 11 }
-			elsif ($month =~ /^Dec/i) { $month = 12 }
-			else { CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month") }
-			
-			$dates{$identifier} = sprintf("%04i%02i%02i", $year, $month, $day);
-		}
-		return \%dates;
-	}
+        if (   defined( $dates->{'HTML'} )
+            && ( !defined( $dates->{'PDF'} ) || int( $dates->{'PDF'} ) > int( $dates->{'HTML'} ) )
+           )
+        {
+            $record->{'ft_start_date'} = $dates->{'HTML'};
+            $record->{'db_identifier'} = 'HTML';
+        }
+        elsif ( defined( $dates->{'PDF'} ) ) {
+            $record->{'ft_start_date'} = $dates->{'PDF'};
+            $record->{'db_identifier'} = 'PDF';
+        }
+    }
+
+    $class->SUPER::clean_data($record);
+
+    sub get_dates {
+        my ($string) = @_;
+
+        my %dates;
+
+        while ( $string =~ /(html|pdf)\s*fulltext\sdate\:?\s*([a-z]{3})\s*(\d{2}),?\s*(\d{4})/ig ) {
+            my ( $identifier, $month, $day, $year ) = ( uc($1), $2, $3, $4 );
+
+            if    ( $month =~ /^Jan/i ) { $month = 1 }
+            elsif ( $month =~ /^Feb/i ) { $month = 2 }
+            elsif ( $month =~ /^Mar/i ) { $month = 3 }
+            elsif ( $month =~ /^Apr/i ) { $month = 4 }
+            elsif ( $month =~ /^May/i ) { $month = 5 }
+            elsif ( $month =~ /^Jun/i ) { $month = 6 }
+            elsif ( $month =~ /^Jul/i ) { $month = 7 }
+            elsif ( $month =~ /^Aug/i ) { $month = 8 }
+            elsif ( $month =~ /^Sep/i ) { $month = 9 }
+            elsif ( $month =~ /^Oct/i ) { $month = 10 }
+            elsif ( $month =~ /^Nov/i ) { $month = 11 }
+            elsif ( $month =~ /^Dec/i ) { $month = 12 }
+            else {
+                CUFTS::Exception::App->throw(
+                    "Unable to find month match in fulltext date: $month");
+            }
+
+            $dates{$identifier}
+                = sprintf( "%04i%02i%02i", $year, $month, $day );
+        }
+        return \%dates;
+    }
 }
 
-		
 ## -------------------------------------------------------------------------------------------
 
 ## can_get* - Control whether or not an attempt to create a link is built.  This is run
@@ -120,10 +130,13 @@ sub clean_data {
 ## enough data, etc. early (here) cuts down on database hits
 
 sub can_getFulltext {
-	my ($class, $request) = @_;
-	
-	return 0 unless (assert_ne($request->spage) && assert_ne($request->volume) && assert_ne($request->issue));
-	return $class->SUPER::can_getFulltext($request);
+    my ( $class, $request ) = @_;
+
+    return 0
+        unless ( assert_ne( $request->spage )
+        && assert_ne( $request->volume )
+        && assert_ne( $request->issue ) );
+    return $class->SUPER::can_getFulltext($request);
 }
 
 # --------------------------------------------------------------------------------------------
@@ -131,16 +144,17 @@ sub can_getFulltext {
 ## can_get* - Control whether or not an attempt to create a link is built.  This is run
 ## before the database is searched for possible title matches, so catching requests without
 ## enough data, etc. early (here) cuts down on database hits
-        
+
 sub can_getTOC {
-       my ($class, $request) = @_;
-                   
-       return 0 unless (assert_ne($request->issue) && assert_ne($request->volume));
-       return $class->SUPER::can_getTOC($request);
+    my ( $class, $request ) = @_;
+
+    return 0
+        unless ( assert_ne( $request->issue )
+        && assert_ne( $request->volume ) );
+    return $class->SUPER::can_getTOC($request);
 }
-                        
+
 # --------------------------------------------------------------------------------------------
-        
 
 ## build_link* - Builds a link to a service.  Should return an array reference containing
 ## Result objects with urls and title list records (if applicable).
@@ -148,92 +162,98 @@ sub can_getTOC {
 
 # fulltext linking works on some but not all highwire journals so comment out for now
 sub build_linkFulltext {
-	my ($class, $records, $resource, $site, $request) = @_;
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw(
+        'No resource defined in build_linkFulltext');
+    defined($site)
+        or
+        CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
+    defined($request)
+        or CUFTS::Exception::App->throw(
+        'No request defined in build_linkFulltext');
 
-	my @results;
+    my @results;
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->db_identifier);
-             
-                my $dir = ($record->db_identifier eq 'HTML') ? 'content/full' : 'reprint'; 
-		my $url = $record->journal_url . '/cgi/' . $dir . '/';
-                $url .= $request->volume . '/' . $request->issue . '/' . $request->spage;
+    foreach my $record (@$records) {
+        next unless assert_ne( $record->db_identifier );
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+        my $dir = ( $record->db_identifier eq 'HTML' )
+            ? 'content/full'
+            : 'reprint';
+        my $url = $record->journal_url . '/cgi/' . $dir . '/';
+        $url .= $request->volume . '/'
+            . $request->issue . '/'
+            . $request->spage;
 
-	return \@results;
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 # TOC linking works on some but not all highwire journals so comment out for now
 sub build_linkTOC {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw(
+        'No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
+    my @results;
 
-                my $url = $record->journal_url . '/content/vol' . $request->volume;
-                $url .= '/issue' . $request->issue . '/index.shtml';
+    foreach my $record (@$records) {
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+        my $url = $record->journal_url . '/content/vol' . $request->volume;
+        $url .= '/issue' . $request->issue . '/index.shtml';
 
-	return \@results;
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
-
 
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw(
+        'No resource defined in build_linkJournal');
+    defined($site)
+        or
+        CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->journal_url);
+    my @results;
 
-		my $result = new CUFTS::Result($record->journal_url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+    foreach my $record (@$records) {
+        next unless assert_ne( $record->journal_url );
 
-	return \@results;
+        my $result = new CUFTS::Result( $record->journal_url );
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 1;
