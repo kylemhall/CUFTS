@@ -226,7 +226,7 @@ sub load_title_list {
 				if (ref($@) && $@->can('error')) {
 					CUFTS::Exception::App->throw("Database error while loading title list, row $count.\n" . $@->error);
 				} else {
-					die($@);
+					die("Database error while loading title list, row $count.\n" . $@);
 				}
 			}
 		}
@@ -554,9 +554,9 @@ sub delete_title_list {
 	my $method = "${local}_db_module";
 	my $module = $class->$method or
 		CUFTS::Exception::App->throw("resource does not have an associated database module for loading title lists");
-
-	$module->search('resource' => $resource_id)->delete_all;
-
+    
+        $module->search('resource' => $resource_id)->delete_all;
+        
 	return 1;
 }
 
