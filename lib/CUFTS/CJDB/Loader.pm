@@ -413,52 +413,47 @@ sub get_journals_auth {
 
     if ( scalar(@$issns) ) {
         @journals_auths = CUFTS::DB::JournalsAuth->search_by_issns(@$issns);
-    }
 
-    if ( scalar(@journals_auths) > 1 ) {
+        if ( scalar(@journals_auths) == 1 ) {
+            return $journals_auths[0]->id;
+        } elsif ( scalar(@journals_auths) > 1 ) {
 
-        # Try title ranking
+            # Try title ranking
 
-        my $title_ranks = $self->rank_titles( $record, $title, \@journals_auths );
+            my $title_ranks = $self->rank_titles( $record, $title, \@journals_auths );
 
-        my ( $max, $max_count, $index ) = ( 0, 0, -1 );
-        foreach my $x ( 0 .. $#$title_ranks ) {
-            if ( $title_ranks->[$x] > $max ) {
-                $max       = $title_ranks->[$x];
-                $index     = $x;
-                $max_count = 1;
+            my ( $max, $max_count, $index ) = ( 0, 0, -1 );
+            foreach my $x ( 0 .. $#$title_ranks ) {
+                if ( $title_ranks->[$x] > $max ) {
+                    $max       = $title_ranks->[$x];
+                    $index     = $x;
+                    $max_count = 1;
+                }
+                elsif ( $title_ranks->[$x] == $max ) {
+                    $max_count++;
+                }
             }
-            elsif ( $title_ranks->[$x] == $max ) {
-                $max_count++;
+
+            if ( $max_count == 1 ) {
+                return $journals_auths[$index]->id;
             }
-        }
+            else {
+                print( "Could not find unambiguous match for $title -- ", join( ',', @$issns ), "\n" );
+                return undef;
+            }
 
-        if ( $max_count == 1 ) {
-            return $journals_auths[$index]->id;
         }
-        else {
-            print( "Could not find unambiguous match for $title -- ", join( ',', @$issns ), "\n" );
-            return undef;
-        }
-
-    }
-    elsif ( scalar(@journals_auths) == 1 ) {
-        return $journals_auths[0]->id;
     }
     else {
 
         # Try for strictly title matching
         
-        if ( scalar(@$issns) ) {
+        @journals_auths = CUFTS::DB::JournalsAuth->search_by_exact_title_with_no_issns($title);
+        if ( !scalar(@journals_auths) ){ 
+            @journals_auths = CUFTS::DB::JournalsAuth->search_by_title_with_no_issns($title);
+        }
+        if ( !scalar(@journals_auths) ){ 
             @journals_auths = CUFTS::DB::JournalsAuth->search_by_title($title);
-        } else {
-            @journals_auths = CUFTS::DB::JournalsAuth->search_by_exact_title_with_no_issns($title);
-            if ( !scalar(@journals_auths) ){ 
-                @journals_auths = CUFTS::DB::JournalsAuth->search_by_title_with_no_issns($title);
-            }
-            if ( !scalar(@journals_auths) ){ 
-                @journals_auths = CUFTS::DB::JournalsAuth->search_by_title($title);
-            }
         }
 
         if ( scalar(@journals_auths) > 1 ) {
