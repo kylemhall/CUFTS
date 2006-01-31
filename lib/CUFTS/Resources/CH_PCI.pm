@@ -22,6 +22,7 @@ package CUFTS::Resources::CH_PCI;
 
 use base qw(CUFTS::Resources::Base::Journals);
 
+use URI::Escape qw(uri_escape);
 use CUFTS::Exceptions qw(assert_ne);
 
 use strict;
@@ -33,15 +34,13 @@ sub title_list_fields {
 		issn
 		ft_start_date
 		ft_end_date
-		db_identifier
 	)];
 }
 
 sub title_list_field_map {
 	return {
-		'Journal title' => 'title',
+		'Maintitle' => 'title',
 		'ISSN' => 'issn',
-		'Journal ID' => 'db_identifier',
 	};
 }
 
@@ -58,10 +57,11 @@ sub clean_data {
 	my ($self, $record) = @_;
 	
 	$record->{'title'} =~ s/^"(.+)"$/$1/;
-	$record->{'___Current Full Text coverage'} =~ s/^"(.+)"$/$1/;
-	$record->{'title'} =~ s/\(.+\)\s*$//;
+	$record->{'title'} =~ s/\s*\(.+\)\s*$//;
+
+	$record->{'___Current PCI Full Text coverage'} =~ s/^"(.+)"$/$1/;
 	
-	if (defined($record->{'___Current Full Text coverage'}) && $record->{'___Current Full Text coverage'} =~ /^\s*(\d{4}).+(\d{4})[^\d]*$/) {
+	if (defined($record->{'___Current PCI Full Text coverage'}) && $record->{'___Current PCI Full Text coverage'} =~ /^\s*(\d{4}).+(\d{4})[^\d]*$/) {
 		$record->{'ft_start_date'} = $1;
 		$record->{'ft_end_date'} = $2;
 	}
@@ -84,14 +84,14 @@ sub build_linkJournal {
 	my @results;
 
 	foreach my $record (@$records) {
-		next unless assert_ne($record->db_identifier);
-
 		my $url;
-  
 		$url .= 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&ctx_fmt=ori:format:pl:ebnf:context';
-		$url .= '&rft_val_fmt=ori:format:pl:ebnf:journal&res_id=xri:pcift-us&rft_id=xri:pcift:';
-
-		$url .= $record->db_identifier . '&res_dat=xri:pqil:res_ver=0.1';
+		$url .= '&rft_val_fmt=ori:format:pl:ebnf:journal&res_id=xri:pcift-us&res_dat=xri:pqil:res_ver=0.1';
+        if (assert_ne($record->issn)) {
+		    $url .= '&issn=' . $record->issn;
+		} else {
+		    $url .= '&title=' . uri_escape($record->title);
+		}
 
 		my $result = new CUFTS::Result($url);
 		$result->record($record);
