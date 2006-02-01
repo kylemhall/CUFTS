@@ -13,7 +13,7 @@ use CUFTS::Util::Simple;
 use Data::Dumper;
 use strict;
 
-my $__CJDB_LOADER_DEBUG = 1;
+my $__CJDB_LOADER_DEBUG = 0;
 
 sub new {
     my ( $class ) = @_;
@@ -71,7 +71,7 @@ sub load_journal {
         return undef;
     }
 
-    $__CJDB_LOADER_DEBUG and print "title... ";
+    $__CJDB_LOADER_DEBUG and print "title: $title\n";
 
     my $sort_title          = $self->get_sort_title($record);
     my $stripped_sort_title = $self->strip_title($sort_title);
@@ -114,7 +114,7 @@ sub load_journal {
             or return undef;
     }
 
-    $__CJDB_LOADER_DEBUG and print "ja\n";
+    $__CJDB_LOADER_DEBUG and print "ja found\n";
 
     if ( $self->merge_by_issns ) {
         my @journals = CJDB::DB::Journals->search( journals_auth => $journals_auth_id, site => $site_id );
@@ -505,20 +505,21 @@ sub get_journals_auth {
                 return $journals_auths[0]->id;
             }
         }
-
-        # Build basic record
-
-        my $journals_auth = CUFTS::DB::JournalsAuth->create( { 'title' => $title } );
-        $journals_auth->add_to_titles( { 'title' => $title, 'title_count' => 1 } );
-
-        my %seen;
-        foreach my $issn (@$issns) {
-            next if $seen{$issn}++; # Sometimes the same ISSN shows up twice in a MARC record. Dumb.
-            $journals_auth->add_to_issns( { 'issn' => $issn } );
-        }
-
-        return $journals_auth;
     }
+    
+    # Build basic record
+
+    my $journals_auth = CUFTS::DB::JournalsAuth->create( { 'title' => $title } );
+    $journals_auth->add_to_titles( { 'title' => $title, 'title_count' => 1 } );
+
+    my %seen;
+    foreach my $issn (@$issns) {
+        next if $seen{$issn}++; # Sometimes the same ISSN shows up twice in a MARC record. Dumb.
+        $journals_auth->add_to_issns( { 'issn' => $issn } );
+    }
+
+    return $journals_auth;
+    
 }
 
 sub rank_titles {
