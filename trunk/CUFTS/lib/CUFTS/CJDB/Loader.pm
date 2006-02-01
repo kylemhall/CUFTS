@@ -62,8 +62,8 @@ sub load_journal {
         or die("No site id set for loader.");
 
     my $title = $self->get_title($record);
-    if is_empty_string($title) || $title eq '0' {
-        print "Empty title, skipping record.\n"
+    if ( is_empty_string($title) || $title eq '0' ) {
+        print "Empty title, skipping record.\n";
         return undef;
     }
     if ( length($title) > 1024 ) {
