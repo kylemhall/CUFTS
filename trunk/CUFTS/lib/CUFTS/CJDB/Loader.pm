@@ -11,8 +11,9 @@ use CUFTS::CJDB::Util;
 use CUFTS::Util::Simple;
 
 use Data::Dumper;
-
 use strict;
+
+my $__CJDB_LOADER_DEBUG = 1;
 
 sub new {
     my ( $class ) = @_;
@@ -61,11 +62,16 @@ sub load_journal {
         or die("No site id set for loader.");
 
     my $title = $self->get_title($record);
-    return undef if is_empty_string($title) || $title eq '0';
+    if is_empty_string($title) || $title eq '0' {
+        print "Empty title, skipping record.\n"
+        return undef;
+    }
     if ( length($title) > 1024 ) {
         print "Title too long, skipping record: $title\n";
         return undef;
     }
+
+    $__CJDB_LOADER_DEBUG and print "title... ";
 
     my $sort_title          = $self->get_sort_title($record);
     my $stripped_sort_title = $self->strip_title($sort_title);
@@ -107,6 +113,8 @@ sub load_journal {
         $journals_auth_id = $self->get_journals_auth( \@issns, $title, $record )
             or return undef;
     }
+
+    $__CJDB_LOADER_DEBUG and print "ja\n";
 
     if ( $self->merge_by_issns ) {
         my @journals = CJDB::DB::Journals->search( journals_auth => $journals_auth_id, site => $site_id );
