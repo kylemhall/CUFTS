@@ -125,5 +125,10 @@ sub db_Main {
     return $dbh;
 }
 
+sub dbi_rollback {
+    my $self = shift(@_);
+    $self->clear_object_index();
+    return $self->SUPER::dbi_rollback(@_);
+}
 	
 1;
