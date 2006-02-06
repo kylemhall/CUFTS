@@ -85,7 +85,7 @@ sub build_linkJournal {
     my @results;
 
     foreach my $record (@$records) {
-        next is_empty_string( $record->journal_url );
+        next if is_empty_string( $record->journal_url );
 
         my $result = new CUFTS::Result( $record->journal_url );
         $result->record($record);
