@@ -27,7 +27,7 @@ my $field_mappings = {
 	'785' => [qw(a s t x)],
 };
 
-my $field_stopwords = {
+my $field_stopwords_re = {
     '110' => [qw(
        ejournal
        electronic
@@ -36,7 +36,11 @@ my $field_stopwords = {
        online
     )],
 };
-$field_stopwords->{'710'} = $field_stopwords->{'110'};
+$field_stopwords_re->{'710'} = $field_stopwords_re->{'110'};
+
+my $field_stopwords_eq = {
+    
+};
 
 
 use Getopt::Long;
@@ -277,6 +281,7 @@ sub build_marc_record {
 					$seen_value .= lc($field->subfield($subfield));
 					push @subfields, $subfield, $field->subfield($subfield);
 				}
+                next if check_stopwords($field_type, $seen_value);
 				next if $seen{$field_type}->{$seen_value}++;
 				next unless scalar(@subfields);
 				
@@ -296,6 +301,19 @@ sub build_marc_record {
 	}		
 
 	return $new;
+}
+
+
+sub check_stopwords {
+    my ($field_type, $seen_value) = @_;
+    
+    foreach my $stopword ( @{$field_stopwords_eq->{$field_type}} ) {
+        return 1 if $seen_value eq $stopword;
+    }
+    foreach my $stopword ( @{$field_stopwords_re->{$field_type}} ) {
+        return 1 if $seen_value =~ /$stopword/;
+    }
+    return 0;
 }
 
 
