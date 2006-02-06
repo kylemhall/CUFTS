@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -22,82 +22,86 @@ package CUFTS::Resources::GenericJournal;
 
 use base qw(CUFTS::Resources::Base::Journals);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		e_issn
-		cit_start_date
-		cit_end_date
-		ft_start_date
-		ft_end_date
-		embargo_months
-		embargo_days
-		journal_url
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            e_issn
+            cit_start_date
+            cit_end_date
+            ft_start_date
+            ft_end_date
+            embargo_months
+            embargo_days
+            journal_url
+            cjdb_note
+        )
+    ];
 }
 
 sub overridable_resource_details {
-	return undef;
+    return undef;
 }
-	
 
 sub title_list_field_map {
-	return {
-		'title' 		=> 'title',
-		'issn' 			=> 'issn',
-		'e_issn'		=> 'e_issn',
-		'fulltext_start' 	=> 'ft_start_date',
-		'fulltext_end'		=> 'ft_end_date',
-		'ft_start_date' 	=> 'ft_start_date',
-		'ft_end_date'		=> 'ft_end_date',
-		'citation_start' 	=> 'cit_start_date',
-		'citation_end'		=> 'cit_end_date',
-		'cit_start_date' 	=> 'cit_start_date',
-		'cit_end_date'		=> 'cit_end_date',
-		'embargo_months'	=> 'embargo_months',
-		'embargo_days'		=> 'embargo_days',
-		'journal_url'		=> 'journal_url',
-		
-	};
+    return {
+        'title'          => 'title',
+        'issn'           => 'issn',
+        'e_issn'         => 'e_issn',
+        'fulltext_start' => 'ft_start_date',
+        'fulltext_end'   => 'ft_end_date',
+        'ft_start_date'  => 'ft_start_date',
+        'ft_end_date'    => 'ft_end_date',
+        'citation_start' => 'cit_start_date',
+        'citation_end'   => 'cit_end_date',
+        'cit_start_date' => 'cit_start_date',
+        'cit_end_date'   => 'cit_end_date',
+        'embargo_months' => 'embargo_months',
+        'embargo_days'   => 'embargo_days',
+        'journal_url'    => 'journal_url',
+
+    };
 }
 
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->journal_url);
+    my @results;
 
-		my $result = new CUFTS::Result($record->journal_url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+    foreach my $record (@$records) {
+        next is_empty_string( $record->journal_url );
 
-	return \@results;
+        my $result = new CUFTS::Result( $record->journal_url );
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
 
 sub can_getFulltext {
-	return 0;
+    return 0;
 }
+
 sub can_getTOC {
-	return 0;
+    return 0;
 }
 
 1;
