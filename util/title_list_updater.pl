@@ -193,8 +193,13 @@ foreach my $dat_file_name (@dat_files) {
     			) or CUFTS::Exception::App->throw("Unable to attach deleted titles file to MIME::Lite object: $!");
     		}
 			
-    		MIME::Lite->send('smtp', $host);
-    		$msg->send;
+    		eval {
+    		    MIME::Lite->send('smtp', $host);
+    		    $msg->send;
+    		};
+    		if ($@) {
+    		    warn("Unable to send message using MIME::Lite: $@");
+    		}
     	}
     	else {
     	    warn("Unable to create MIME::Lite object: $!");
