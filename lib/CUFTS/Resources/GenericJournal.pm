@@ -66,7 +66,7 @@ sub title_list_field_map {
         'embargo_months' => 'embargo_months',
         'embargo_days'   => 'embargo_days',
         'journal_url'    => 'journal_url',
-
+        'cjdb_note'      => 'cjdb_note',
     };
 }
 
