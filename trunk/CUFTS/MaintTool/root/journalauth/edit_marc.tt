@@ -75,11 +75,11 @@
   </div>
  [% END %]
  </div>
- <script>window['marc_field_max']['[% field_type %]'] = [% max_field %]</script>
+ <script type="text/javascript">window['marc_field_max']['[% field_type %]'] = [% max_field %]</script>
 [% END %]
 
 [% BLOCK write_marc_fields_to_js %]
- <script>
+ <script type="text/javascript">
  window['marc_field_config'] = new Array();
  [%- FOREACH field IN marc_fields.keys %]
   window['marc_field_config']['[% field %]'] = new Array();

@@ -1,6 +1,7 @@
 [% USE url %]
 
 [% SET columns = resource.do_module('title_list_fields') %]
+[% columns.push('journal_auth') %]
 [% SET paging_url = url_base _ '/global/titles/' _ resource.id _ '?page=' %]
 [% paging_text = BLOCK %][% PROCESS paging.tt %][% END %]
 <div><span class="heading">[% resource.name %]</span></div>
@@ -24,7 +25,11 @@ Filter: <input type="text" name="filter" value="[% filter %]"> <input type="subm
  <tr>
   [% FOREACH col IN columns %]
    <td class="[% class %]">
-    [% title.$col | html %]
+    [% IF col == 'id' %]
+     <a href="[% url("$url_base/global/edit_title/$resource.id?title_id=$title.id&paging_page=$paging_page") %]">[% title.id %]</a>
+    [% ELSE %]
+     [% title.$col | html %]
+    [% END %]
    </td>
   [% END %]
  </tr>

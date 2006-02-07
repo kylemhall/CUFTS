@@ -53,7 +53,6 @@ table.grid td {
 
 table.grid td.heading {
 	background: #001457;
-//	color: white;
 }
 
 
@@ -243,9 +242,9 @@ div.heading {
 	background: #004997;
 	font-weight: bold;
 	color: white;
-	padding-right: 5px;
-	padding-left: 5px;
+	padding: 2px 5px;
 	white-space: nowrap;
+	
 }
 
 
@@ -275,7 +274,7 @@ a.heading {
 	float: left;
 	border-bottom: 1px solid #004997;
 	width: 95%;
-	whitespace: nowrap;
+	white-space: nowrap;
 }
 
 #navbar UL {
@@ -485,4 +484,16 @@ div#journal-auth-alt-titles-container {
 div.journal-auth-marc-fields {
 	margin-top: 1em;
 	border: 1px solid #004997;
+}
+
+div#journal-auth-edit-issns {
+    margin-top: 1em;
+    border: 1px solid #004997;
+    background: #EEEEEE;
+}
+
+div#journal-auth-edit-titles {
+    margin-top: 1em;
+    border: 1px solid #004997;
+    background: #EEEEEE;
 }
