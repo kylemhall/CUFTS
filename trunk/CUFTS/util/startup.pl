@@ -1,4 +1,4 @@
-use Class::Accessor;
+#use Class::Accessor;
 use Class::DBI;
 use Class::DBI::AbstractSearch;
 use SQL::Abstract;
