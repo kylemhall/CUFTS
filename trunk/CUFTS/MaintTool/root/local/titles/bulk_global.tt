@@ -1,5 +1,4 @@
 [% USE url %]
-[% USE HTML %]
 
 [% SET match_columns = global_resource.do_module('local_matchable_on_columns') %]
 

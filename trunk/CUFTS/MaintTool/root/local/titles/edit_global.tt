@@ -1,4 +1,4 @@
-[% USE HTML %]
+[% USE url %]
 
 [% SET columns = global_resource.do_module('title_list_fields') %]
 [% SET temp_cols = columns.merge(global_resource.do_module('overridable_title_list_fields')).unique %]
@@ -11,20 +11,20 @@
 
 [%# ******* ACTUAL DISPLAY CODE BEGINS HERE *************** %]
 
-<div><span class="heading">[% global_resource.name %]</span></div>
+<div><span class="heading">[% global_resource.name | html %]</span></div>
 <div style="margin-top: 1em;">
- <form method="post" action="[% url_base %]/local/titles/edit/g[% global_resource.id %]">
+ <form method="post" action="[% url("$url_base/local/titles/edit/g$global_resource.id") %]">
  Filter: <input type="text" name="filter" value="[% filter %]"> <input type="submit" name="apply_filter" value="filter">
  </form>
- <form method="post" action="[% url_base %]/local/titles/view/g[% global_resource.id %]">
+ <form method="post" action="[% url("$url_base/local/titles/view/g$global_resource.id") %]">
  <input type="submit" name="edit" style="margin-left: 2em;" value="view page" onClick="return confirmGeneric('Any data that has been changed but not applied will be lost.  Continue?');"/>
  <input type="hidden" name="page" value="[% paging_page %]" />
  </form>
- <form method="post" action="[% url_base %]/local/titles/hidden_fields/g[% global_resource.id %]">
+ <form method="post" action="[% url("$url_base/local/titles/hidden_fields/g$global_resource.id") %]">
  <input type="submit" name="hidden_fields" style="margin-left: 1em;" value="hidden fields" />
  <input type="hidden" name="page" value="[% paging_page %]" />
  </form>
- <form method="post" action="[% url_base %]/local/titles/apply_edit/g[% global_resource.id %]">
+ <form method="post" action="[% url("$url_base/local/titles/apply_edit/g$global_resource.id") %]">
  [% UNLESS local_resource.auto_activate %]
   <input type="submit" style="margin-left: 2em;" name="show" value="[% show == 'show all' ? 'show active' : 'show all' %]">
  [% END %]
@@ -56,9 +56,9 @@
      [% IF no_edit_columns.in(col) %]
       [% title.$col %]
      [% ELSE %]
-      <input type="text" name="new_[% title.id %]_[% col %]" value="[% HTML.escape(local_title.$col) %]" size="15"/>
-      <input type="hidden" name="orig_[% title.id %]_[% col %]" value="[% HTML.escape(local_title.$col) %]" />
-      [% HTML.escape(title.$col) %]
+      <input type="text" name="new_[% title.id %]_[% col %]" value="[% local_title.$col | html %]" size="15"/>
+      <input type="hidden" name="orig_[% title.id %]_[% col %]" value="[% local_title.$col | html %]" />
+      [% title.$col | html %]
      [% END %]
     </td>
    [% END %]

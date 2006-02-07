@@ -1,6 +1,4 @@
-[% USE HTML %]
-
-<div style="padding-bottom: .5em;"><span class="heading">[% global_resource.name %]</span></div>
+<div style="padding-bottom: .5em;"><span class="heading">[% global_resource.name | html %]</span></div>
 
 <table class="grid">
 <tr><td class="header-bar" colspan="2">results</td></tr>

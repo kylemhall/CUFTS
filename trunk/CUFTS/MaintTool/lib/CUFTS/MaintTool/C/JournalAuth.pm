@@ -3,6 +3,7 @@ package CUFTS::MaintTool::C::JournalAuth;
 use strict;
 use base 'Catalyst::Base';
 use MARC::Record;
+use CUFTS::Util::Simple;
 
 my $marc_fields = {
 	'022' => { 
@@ -75,6 +76,7 @@ my $form_validate_marc = {
 };
 
 
+
 sub auto : Private {
 	my ($self, $c, $resource_id) = @_;
 
@@ -100,8 +102,9 @@ sub search : Local {
 				@records = CUFTS::DB::JournalsAuth->search_like('title' => $c->form->valid->{string});
 			} elsif ($c->form->valid->{field} eq 'issn') {
 				@records = CUFTS::DB::JournalsAuth->search_by_issns($c->form->valid->{string});
-			} elsif ($c->form->valid->{field} eq 'id') {
-				@records = (CUFTS::DB::JournalsAuth->retrieve($c->form->valid->{string}));
+			} elsif ($c->form->valid->{field} eq 'ids') {
+			    my @ids = split /\s+/,  $c->form->valid->{string};
+				@records = CUFTS::DB::JournalsAuth->search( { 'id' => {'in' => \@ids} } );
 			}
 			$c->stash->{journal_auths} = \@records;
 
@@ -117,18 +120,108 @@ sub search : Local {
 	$c->stash->{template} = 'journalauth/search.tt';
 }
 
+sub edit : Local {
+    my ($self, $c, $journal_auth_id) = @_;
+    
+    my $form_validate_edit = {
+    	optional => [
+    		'save', 'cancel', 'title'
+    	],
+    	optional_regexp => qr/_(issn|info|title|count)$/,
+    	filters => ['trim'],
+    };
+    
+    my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($journal_auth_id);
+
+	$c->form($form_validate_edit);
+
+	if ( $c->form->valid->{cancel} ) {
+		return $c->forward('/journalauth/done_edits');
+	}
+    if ( $c->form->valid->{save} ) {
+        unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {		
+  		eval {
+                $journal_auth->title($c->form->valid->{'title'});
+                $journal_auth->update();
+            
+                $journal_auth->issns->delete_all;
+                foreach my $param ( keys %{$c->form->valid} ) {
+                    next if $param !~ / ^(.+)_issn $/xsm;
+
+                    my $prefix = $1;
+                    my $value  = $c->form->valid->{$param};
+
+                    next if is_empty_string($value);
+                    if ($value =~ / (\d{4}) -? (\d{3}[\dxX]) /xsm ) {
+                        $journal_auth->add_to_issns({
+                            issn  => uc("$1$2"),
+                            info  => $c->form->valid->{"${prefix}_info"}
+                        });
+                    } else {
+                        push @{$c->stash->{errors}}, "Invalid ISSN: $value";
+                    }
+                }
+            
+                $journal_auth->titles->delete_all;
+                foreach my $param ( keys %{$c->form->valid} ) {
+                    next if $param !~ / ^(.+)_title $/xsm;
+
+                    my $prefix = $1;
+                    my $value  = $c->form->valid->{$param};
+
+                    next if is_empty_string($value);
+
+                    $journal_auth->add_to_titles({
+                            title       => $value,
+                            title_count => $c->form->valid->{"${prefix}_count"}
+                    });
+                }
+            
+            };
+            if ($@) {
+                push @{$c->stash->{errors}}, $@;
+            }
+            if ( defined($c->stash->{errors}) ) {
+                CUFTS::DB::DBI->dbi_rollback();
+                
+                # See if there's any "new" fields that need to be added
+                
+                foreach my $param ( keys %{$c->form->valid} ) {
+                    if ( $param =~ / new(\d+)_issn /xsm ) {
+                        if ( $1 > $c->stash->{max_issn_field} ) {
+                            $c->stash->{max_issn_field} = $1;
+                        }
+                    }
+                    if ( $param =~ / new(\d+)_title /xsm ) {
+                        if ( $1 > $c->stash->{max_title_field} ) {
+                            $c->stash->{max_title_field} = $1;
+                        }
+                    }
+                }
+                
+    		} else {
+    		    CUFTS::DB::DBI->dbi_commit;
+    		    return $c->forward('/journalauth/done_edits');
+    		}
+        }
+    }
+
+    $c->stash->{max_title_field} ||= 0;
+    $c->stash->{max_issn_field}  ||= 0;
+    
+	$c->stash->{load_javascript} = 'journal_auth.js';
+    $c->stash->{journal_auth}    = $journal_auth;
+    $c->stash->{template}        = 'journalauth/edit.tt';
+}
+
+
 sub edit_marc : Local {
 	my ($self, $c, $journal_auth_id) = @_;
 
 	my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($journal_auth_id);
 
 	if ($c->req->params->{cancel}) {
-		$c->req->params({
-			'field'  => $c->session->{journal_auth_search_field},
-			'string' => $c->session->{journal_auth_search_string},
-			'search' => 'search',
-		});
-		return $c->forward('/journalauth/search');
+		return $c->forward('/journalauth/done_edits');
 	}
 	if ($c->req->params->{save}) {
 
@@ -177,18 +270,10 @@ sub edit_marc : Local {
 					$journal_auth->marc($record->as_usmarc());
 					$journal_auth->update();
 					CUFTS::DB::JournalsAuth->dbi_commit();
-					$c->req->params({
-						'field'  => $c->session->{journal_auth_search_field},
-						'string' => $c->session->{journal_auth_search_string},
-						'search' => 'search',
-					});
-					return $c->forward('/journalauth/search');
-					
+					return $c->forward('/journalauth/done_edits');
 				}
 			}
-
 		}
-		
 	}
 	
 	$c->stash->{marc_fields} = $marc_fields;
@@ -196,5 +281,17 @@ sub edit_marc : Local {
 	$c->stash->{journal_auth} = $journal_auth;
 	$c->stash->{template} = 'journalauth/edit_marc.tt';
 }	
+
+sub done_edits : Local {
+    my ($self, $c) = @_;
+
+	$c->req->params({
+		'field'  => $c->session->{journal_auth_search_field},
+		'string' => $c->session->{journal_auth_search_string},
+		'search' => 'search',
+	});
+	return $c->forward('/journalauth/search');
+}
+
 
 1;

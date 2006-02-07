@@ -26,7 +26,7 @@
  <tr>
   <td class="label[% loop.count % 2 %]">[% detail.replace('_', ' ') | html %]</td>
   <td class="field[% loop.count % 2 %]">[% local_resource.$detail | html %]
-   [% IF help %]<a href="/help/resource/[% help | html %]" target="CUFTShelp">[% END %]
+   [% IF help %]<a href="[% url_base %]/help/resource/[% help | html %]" target="CUFTShelp">[% END %]
    <img src="[% image_dir %]cufts_question.gif" class="help" title="[% local_resource.do_module('get_resource_details_help', detail) %]">
    [% IF help %]</a>[% END %]
   </td>
