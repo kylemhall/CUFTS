@@ -1,14 +1,15 @@
+[% USE url %]
 [% USE HTML %]
 
 [% SET match_columns = global_resource.do_module('local_matchable_on_columns') %]
 
-<div style="padding-bottom: .5em;"><span class="heading">[% global_resource.name %]</span></div>
+<div style="padding-bottom: .5em;"><span class="heading">[% global_resource.name | html %]</span></div>
 <table><tr><td>
 <table class="wide-outlined">
 <tr><td class="heading-bar" align="left" colspan="2">general settings</td></tr>
-<tr><td class="label0" align="right">provider</td><td class="field0">[% HTML.escape(global_resource.provider) %]</td></tr>
+<tr><td class="label0" align="right">provider</td><td class="field0">[% global_resource.provider | html %]</td></tr>
 <tr><td class="label1" align="right">type</td><td class="field1">[% global_resource.resource_type.type %]</td></tr>
-<tr><td class="label0" align="right">module</td><td class="field0">[% HTML.escape(global_resource.module) %]</td></tr>
+<tr><td class="label0" align="right">module</td><td class="field0">[% global_resource.module | html %]</td></tr>
 <tr><td class="label1" align="right">active</td><td class="field1">[% local_resource.active ? 'yes' : 'no' %]</td></tr>
 </table>
 </td></tr>
@@ -21,7 +22,7 @@
 <tr>
  <td class="label0">upload title list</td>
  <td class="field0">
-  <form action="[% base_url %]/local/titles/bulk_global_upload/g[% global_resource.id %]" method="post" enctype="multipart/form-data">
+  <form action="[% url("$url_base/local/titles/bulk_global_upload/g$global_resource.id") %]" method="post" enctype="multipart/form-data">
   <table>
    <tr>
     <td class="field0" style="white-space: nowrap">action</td>
@@ -32,7 +33,7 @@
     <td class="field0" style="white-space: nowrap">
      <select name="match">
      [% FOREACH columns IN match_columns %]
-      <option value="[% HTML.escape(columns) %]">[% HTML.escape(columns) %]</option>
+      <option value="[% columns | html %]">[% columns | html %]</option>
      [% END %]
      </select>
     </td>
@@ -58,9 +59,9 @@
 <tr><td class="heading-bar" align="left" colspan="2">title list export</td></tr>
 <tr>
  <td class="field0">
-  <form method="post" action="[% base_url %]/local/titles/bulk_global_export/g[% global_resource.id %]">
+  <form method="post" action="[% url("$url_base/local/titles/bulk_global_export/g$global_resource.id") %]">
    format: <select name="format"><option value="tab">tab delimited</option><option value="xml">XML</option></select>
-   records: <select name="records"><option value="all">all</option><option value="active">active</option></select>   
+   records: <select name="records"><option value="all">all</option><option value="active">active</option></select> 
    <input type="submit" name="export" value="export" />
   </form>
  </td>
