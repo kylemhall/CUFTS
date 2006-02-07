@@ -12,23 +12,29 @@ my $form_validate = {
 		'resource_identifier', 'database_url', 'auth_name', 'auth_password', 'url_base', 'notes_for_local',
 	],
 	defaults => { 'active' => 'false', 'resource_services' => [] },
-	filters => ['trim'],
+	filters  => ['trim'],
 	missing_optional_valid => 1,
 };
 
 my $form_validate_menu = {
 	optional => ['show', 'filter', 'apply_filter'],
-	filters => ['trim'],
+	filters  => ['trim'],
 };
 
 my $form_validate_titles = {
 	optional => ['page', 'filter', 'display_per_page', 'apply_filter'],
-	filters => ['trim'],
+	filters  => ['trim'],
 	defaults => { 'filter' => '', 'page' => 1 },
 };	
 
 my $form_validate_bulk = {
 	required => ['file', 'upload'],
+};
+
+my $form_validate_edit_title = {
+	optional => ['title_id', 'paging_page', 'apply', 'cancel', ],
+	filters  => ['trim'],
+	missing_optional_valid => 1,
 };
 
 sub auto : Private {
@@ -179,8 +185,9 @@ sub titles : Local {
 	my $filter;
 	if ($c->form->{valid}->{apply_filter}) {
 		$filter = $c->form->{valid}->{filter};
-		$filter ne ( $c->session->{global_titles_filter} || '' ) and
+		if ( $filter ne ( $c->session->{global_titles_filter} || '' ) ) {
 			$c->form->{valid}->{page} = 1;
+		}
 		$c->session->{global_titles_filter} = $filter;
 	} else {
 		$filter = $c->session->{global_titles_filter};
@@ -216,12 +223,12 @@ sub titles : Local {
 	## Fill in stash for templates
 	##
 
-	$c->stash->{paging_count} = $count;
-	$c->stash->{paging_page} = $page;
+	$c->stash->{paging_count}    = $count;
+	$c->stash->{paging_page}     = $page;
 	$c->stash->{paging_per_page} = $display_per_page;
 
-	$c->stash->{titles} = \@titles;
-	$c->stash->{filter} = $c->session->{global_titles_filter};
+	$c->stash->{titles}   = \@titles;
+	$c->stash->{filter}   = $c->session->{global_titles_filter};
 	$c->stash->{template} = 'global/titles.tt';
 }
 
@@ -276,6 +283,49 @@ sub bulkdone : Local {
 	$c->stash->{template} = 'global/bulkdone.tt';
 }
 
+sub edit_title : Local {
+	my ($self, $c, $resource_id) = @_;
+	
+	my $resource = $c->stash->{resource};
+	my $fields = $c->stash->{fields} = [ @{$resource->do_module('title_list_fields')}, 'journal_auth' ];
+	my %validate = %$form_validate_edit_title;
+	push @{$validate{optional}}, @$fields;
+
+	$c->form(\%validate);
+
+    if ($c->form->valid->{cancel}) {
+        return $c->redirect('/global/titles/' . $resource->id . '?page=' . $c->form->valid->{paging_page});
+    }
+
+    my $title;
+    if ( $c->form->valid->{title_id} ) {
+	    $title = $c->stash->{title} = $resource->do_module('global_db_module')->retrieve($c->form->valid->{title_id});
+	}
+
+	if ($c->form->valid->{apply}) {
+		
+		eval {
+			if (defined($title)) {
+				$title->update_from_form($c->form);
+			} else {
+				$c->form->valid->{resource} = $resource->id;
+				$resource->do_module('global_db_module')->create_from_form($c->form);
+			}
+		};
+		if ($@) {
+			my $err = $@;
+			CUFTS::DB::DBI->dbi_rollback;
+			die($err);
+		}
+
+		CUFTS::DB::DBI->dbi_commit;
+
+		return $c->redirect('/global/titles/' . $resource->id . '?page=' . $c->form->valid->{paging_page});
+	}
+
+	$c->stash->{paging_page} = $c->form->valid->{paging_page};
+	$c->stash->{template} = 'global/edit_title.tt';
+}	
 
 
 

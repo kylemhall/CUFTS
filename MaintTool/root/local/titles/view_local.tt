@@ -1,4 +1,4 @@
-[% USE HTML %]
+[% USE url %]
 
 [% SET temp_cols = local_resource.do_module('title_list_fields') %]
 
@@ -34,7 +34,7 @@
 
 <div><span class="heading">[% local_resource.name %]</span></div>
 <div style="margin-top: 1em;">
- <form action="[% url_base %]/local/titles/view/l[% local_resource.id %]">
+ <form method="post" action="[% url("$url_base/local/titles/view/l$local_resource.id") %]">
   Search within this list: <input type="text" name="filter" value="[% filter %]"> <input type="submit" name="apply_filter" value="filter">
  </form>
 </div>
@@ -56,9 +56,9 @@
       [% title.id %]
      [% ELSE %]
       [% IF local_title.$col.defined %]
-       <span class="local-override">[% HTML.escape(local_title.$col) %]</span>
+       <span class="local-override">[% local_title.$col | html %]</span>
       [% ELSE %]
-       [% HTML.escape(title.$col) %]
+       [% title.$col | html %]
       [% END %]
      [% END %]
     </td>

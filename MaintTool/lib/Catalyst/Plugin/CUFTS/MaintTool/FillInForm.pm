@@ -35,7 +35,8 @@ sub finalize {
         $c->fillform
           if $c->form->has_missing
           || $c->form->has_invalid
-          || $c->stash->{error};
+          || $c->stash->{error}
+          || $c->stash->{errors};
     }
     return $c->NEXT::finalize(@_);
 }
@@ -52,6 +53,7 @@ sub fillform {
 	my $c = shift;
 	my $fdat = $c->req->params;
 	my $valid = $c->form->valid;
+
 	foreach my $field (keys %$valid) {
 		!exists($fdat->{$field}) && exists($valid->{$field}) and
 			$fdat->{$field} = '';
