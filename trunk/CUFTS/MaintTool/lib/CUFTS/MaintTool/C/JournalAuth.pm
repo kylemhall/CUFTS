@@ -4,11 +4,12 @@ use strict;
 use base 'Catalyst::Base';
 use MARC::Record;
 use CUFTS::Util::Simple;
+use CUFTS::JournalsAuth;
 
 my $marc_fields = {
 	'022' => { 
 	           subfields => [ qw(a) ],
-	           size      => [ 8 ],
+	           size      => [ 10 ],
 	           repeats   => 1,
 	         },
 	'050' => { 
@@ -75,6 +76,9 @@ my $form_validate_marc = {
 	filters => ['trim'],
 };
 
+my $form_validate_merge = {
+    required => [ 'merge_records', 'merge'],
+};
 
 
 sub auto : Private {
@@ -231,6 +235,7 @@ sub edit_marc : Local {
 			my @fields;
 			foreach my $field_type (sort keys %$marc_fields) {
 				my $row = 0;
+                $c->stash->{max_seen_fields}->{$field_type} = -1;
 
 				while ($c->form->valid->{"${row}-${field_type}-exists"}) {
 					my $subfields = {};
@@ -246,6 +251,8 @@ sub edit_marc : Local {
 					$row++;
 					
 					next unless scalar(keys %$subfields);  # Don't save blank fields, they're to be "deleted"
+
+                    $c->stash->{max_seen_fields}->{$field_type} = $row;
 
 					my $field;
 					eval { $field = MARC::Field->new($field_type, @$indicators, %$subfields); };
@@ -265,6 +272,7 @@ sub edit_marc : Local {
 					$record->append_fields(@fields);
 				};
 				if ($@) {
+				    CUFTS::DB::DBI->dbi_rollback();
 					push @{$c->stash->{errors}}, "Error creating MARC record: $@";
 				} else {
 					$journal_auth->marc($record->as_usmarc());
@@ -293,5 +301,28 @@ sub done_edits : Local {
 	return $c->forward('/journalauth/search');
 }
 
+
+sub merge : Local {
+    my ($self, $c) = @_;
+    $c->form($form_validate_merge);
+	
+	if ( !($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) ) {		
+	    my $ids = $c->form->valid->{merge};
+	    my $merged_ja;
+	    eval {
+	        $merged_ja = CUFTS::JournalsAuth->merge(@$ids);
+        };
+        if ($@) {
+            CUFTS::DB::DBI->dbi_rollback();
+            push @{$c->stash->{errors}}, "Error merging records: $@";
+		} else {
+		    CUFTS::DB::DBI->dbi_commit();
+		}
+
+        return $c->redirect("/journalauth/search?search=search&field=ids&string=" . $merged_ja->id);
+    }
+
+    return $c->forward('/journalauth/done_edits');
+}
 
 1;
