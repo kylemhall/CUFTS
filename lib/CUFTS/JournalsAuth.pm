@@ -23,14 +23,38 @@ sub merge {
 
         my $old_journal_auth = CUFTS::DB::JournalsAuth->retrieve($ja_id);
 
-        $class->merge_ja_issns(      $journal_auth, $old_journal_auth );
-        $class->merge_ja_titles(     $journal_auth, $old_journal_auth );
+        $class->merge_ja_issns(  $journal_auth, $old_journal_auth );
+        $class->merge_ja_titles( $journal_auth, $old_journal_auth );
+
         $class->merge_cjdb_journals( $journal_auth, $old_journal_auth );
         $class->merge_cjdb_tags(     $journal_auth, $old_journal_auth );
+
+        $class->update_journals( $journal_auth, $old_journal_auth );
+
+        $old_journal_auth->delete();
     }
 
     return $journal_auth;
 }
+
+sub update_journals {
+    my ( $class, $journal_auth, $old_journal_auth ) = @_;
+    
+    my @journals = CUFTS::DB::Journals->search( 'journal_auth' => $old_journal_auth->id );
+    foreach my $journal ( @journals ) {
+        $journal->journal_auth( $journal_auth->id );
+        $journal->update();
+    }
+
+    @journals = CUFTS::DB::LocalJournals->search( 'journal_auth' => $old_journal_auth->id );
+    foreach my $journal ( @journals ) {
+        $journal->journal_auth( $journal_auth->id );
+        $journal->update();
+    }
+
+    return 1;
+}
+
 
 sub merge_ja_issns {
     my ( $class, $journal_auth, $old_journal_auth ) = @_;
@@ -88,14 +112,14 @@ sub merge_cjdb_journals {
         my $cjdb_journal = CJDB::DB::Journals->search(
             {
                 site         => $site->id,
-                journal_auth => $old_journal_auth->id,
+                journals_auth => $old_journal_auth->id,
             }
         )->first;
         
         my $old_cjdb_journals_iter = CJDB::DB::Journals->search(
             {
                 site         => $site->id,
-                journal_auth => $journal_auth->id,
+                journals_auth => $journal_auth->id,
             }
         );
         
@@ -114,7 +138,7 @@ sub merge_cjdb_journals {
             }
             else {
                 
-                $old_cjdb_journal->journal_auth( $journal_auth->id );
+                $old_cjdb_journal->journals_auth( $journal_auth->id );
                 $old_cjdb_journal->update();
 
             }
@@ -245,14 +269,14 @@ sub merge_cjdb_issns {
 sub merge_cjdb_tags {
     my ( $class, $journal_auth, $old_journal_auth ) = @_;
     
-    my $tags_iter = CJDB::DB::Tags->search({ journal_auth => $old_journal_auth->id });
+    my $tags_iter = CJDB::DB::Tags->search({ journals_auth => $old_journal_auth->id });
     while (my $tag = $tags_iter->next) {
         # Check for existing tag on new journal
         my @existing = CJDB::DB::Tags->search(
             {
                 tag          => $tag->tag,
                 account      => $tag->account,
-                journal_auth => $journal_auth->id,
+                journals_auth => $journal_auth->id,
             }
         );
 
@@ -260,7 +284,7 @@ sub merge_cjdb_tags {
             $tag->delete;
         }
         else {
-            $tag->journal_auth( $journal_auth->id );
+            $tag->journals_auth( $journal_auth->id );
             $tag->update;
         } 
     }

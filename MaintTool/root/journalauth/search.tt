@@ -8,12 +8,14 @@ in
 <select name="field"><option value="official_title">official title</option><option value="title">titles</option><option value="issn">ISSNs</option><option value="ids">ids</option></select>
 <input type="submit" name="search" value="search">
 <input type="submit" name="cancel" value="cancel">
+</form>
 </div>
 
 <div style="margin-top: 1em;">
-
+<form name="merge_form" method="post" action="[% url("$url_base/journalauth/merge") %]">
 [% FOREACH journal_auth IN journal_auths %]
  <div class="journal-auth-record">
+  <input type="checkbox" name="merge" value="[% journal_auth.id %]" />
   <span class="heading">[% journal_auth.title | html %]</span> [% FOREACH issn IN journal_auth.issns %]([% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %]) [% END %]
   <a href="[% url("$url_base/journalauth/edit/$journal_auth.id") %]">edit JA record</a> | 
   <a href="[% url("$url_base/journalauth/edit_marc/$journal_auth.id") %]">edit MARC</a><br />
@@ -51,5 +53,7 @@ in
  </div>
 [% END %]
 
+[% IF journal_auths.size > 1 %]
+<input type="submit" name="merge_records" value="merge" style="margin-top: 1em;" /></form>
+[% END %]
 </div>
-</form>
