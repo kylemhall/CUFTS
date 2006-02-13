@@ -316,10 +316,11 @@ sub load_cufts {
 			$request->genre('journal');
 			$request->pid({});
 
-			my @links;
+			my (@results, @links);
+			
 			if ( $module->can_getJournal($request) ) {
 	        	
-				my $results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
+				$results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
 				foreach my $result (@$results) {
 					$module->prepend_proxy($result, $local_resource, $site, $request);
 					$new_link->{URL} = $result->url;
@@ -329,9 +330,10 @@ sub load_cufts {
 				}
 
 			}
-			elsif ( $module->can_getDatabase($request) ) {
 
-				my $results = $module->build_linkDatabase([$local_journal], $local_resource, $site, $request);
+			if ( !scalar(@$results) && $module->can_getDatabase($request) ) {
+
+				$results = $module->build_linkDatabase([$local_journal], $local_resource, $site, $request);
 				foreach my $result (@$results) {
 					$module->prepend_proxy($result, $local_resource, $site, $request);
 					$new_link->{'URL'} = $result->url;
