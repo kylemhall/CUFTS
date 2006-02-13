@@ -316,7 +316,7 @@ sub load_cufts {
 			$request->genre('journal');
 			$request->pid({});
 
-			my (@results, @links);
+			my ($results, @links);
 			
 			if ( $module->can_getJournal($request) ) {
 	        	
