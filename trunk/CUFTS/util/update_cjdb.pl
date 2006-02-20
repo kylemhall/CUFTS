@@ -353,7 +353,6 @@ sub load_cufts {
 				foreach my $result (@$results) {
 					$module->prepend_proxy($result, $local_resource, $site, $request);
 					$new_link->{'URL'} = $result->url;
-					$new_link->{'link_label'} = 'Link to journal';
 					$new_link->{link_type} = 2;
 					my %temp_hash = %{$new_link};
 					push @links, \%temp_hash;
