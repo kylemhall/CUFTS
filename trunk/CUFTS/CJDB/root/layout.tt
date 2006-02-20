@@ -1,5 +1,6 @@
 <html>
 <head>
+<meta name="ROBOTS" content="NOINDEX,NOFOLLOW" />
 <title>CJDB</title>
 [% IF site_css_file %]
  <link rel="StyleSheet" href="[% site_css_file %]" type="text/css" media="screen, print" />
