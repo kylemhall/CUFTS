@@ -104,7 +104,7 @@ SITE:
                 load_print($site, \@files);
             };
             if ($@) {
-                    print("* Error found while loading print records.  Skipping remaining processing for this site.\nError: $@");
+                    print("* Error found while loading print records.  Skipping remaining processing for this site:\n$@");
                     CUFTS::DB::DBI->dbi_rollback;
                     CJDB::DB::DBI->dbi_rollback;
                     next SITE;
@@ -117,7 +117,7 @@ SITE:
                 load_cufts($site);
             };
             if ($@) {
-                    print("* Error found while loading CUFTS records.  Skipping remaining processing for this site.\n");
+                    print("* Error found while loading CUFTS records.  Skipping remaining processing for this site:\n$@\n");
                     CUFTS::DB::DBI->dbi_rollback;
                     CJDB::DB::DBI->dbi_rollback;
                     next SITE;
@@ -142,12 +142,28 @@ sub load_site {
     clear_site($site_id);
     if (!$options{cufts_only}) {
 		print " * Loading print journals records\n";
-        load_print($site, \@files);
+        eval {
+            load_print($site, \@files);
+        };
+        if ($@) {
+                print("* Error found while loading print records.  Skipping remaining processing for this site:\n$@");
+                CUFTS::DB::DBI->dbi_rollback;
+                CJDB::DB::DBI->dbi_rollback;
+                next SITE;
+        }
     }
 			
     if (!$options{print_only}) {
 		print " * Loading CUFTS journals records\n";
-        load_cufts($site);
+        eval {
+            load_cufts($site);
+        };
+        if ($@) {
+                print("* Error found while loading CUFTS records.  Skipping remaining processing for this site:\n$@\n");
+                CUFTS::DB::DBI->dbi_rollback;
+                CJDB::DB::DBI->dbi_rollback;
+                next SITE;
+        }
     }
 
 	CUFTS::DB::DBI->dbi_commit;
@@ -383,8 +399,8 @@ sub load_cufts {
 			}
 		}
 	}
-	
-	CJDB::DB::DBI->dbi_commit;
+
+    return 1;
 }
 
 sub get_cufts_ft_coverage {
@@ -538,8 +554,6 @@ sub get_MARC_data {
 	$loader->load_associations($record, $journal);
 
 	$loader->load_relations($record, $journal);
-
-	CJDB::DB::DBI->dbi_commit;
 
 	return $journal;
 }
