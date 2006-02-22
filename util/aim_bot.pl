@@ -31,6 +31,7 @@ my $actions = {
     'issns'    => \&issns,
     'titles'   => \&titles,
     'marc'     => \&marc,
+    'help'     => \&help,
 
     '_dump_cache' => \&_dump_cache,
 };
@@ -353,7 +354,20 @@ sub more {
 }
 
 
-
+sub help {
+    my ( $string, $sender ) = @_;
+    
+    return << "EOL";
+search ( [exact] title | issn )
+select result number
+current
+results 
+titles 
+issns 
+coverage
+marc
+EOL
+}
 
 
 
