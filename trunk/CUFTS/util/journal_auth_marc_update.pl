@@ -250,6 +250,7 @@ sub build_marc_record {
 				push @subfields, $subfield, $title_field->subfield($subfield);
 			}
 			next if $seen{'title'}{$seen_title}++;
+			next if !scalar(@subfields);
 
 			my $new_title_field = MARC::Field->new('246', '0', '0', @subfields);
 			$new->append_fields($new_title_field);

@@ -149,7 +149,7 @@ sub load_site {
                 print("* Error found while loading print records.  Skipping remaining processing for this site:\n$@");
                 CUFTS::DB::DBI->dbi_rollback;
                 CJDB::DB::DBI->dbi_rollback;
-                next SITE;
+                return 0;
         }
     }
 			
@@ -162,7 +162,7 @@ sub load_site {
                 print("* Error found while loading CUFTS records.  Skipping remaining processing for this site:\n$@\n");
                 CUFTS::DB::DBI->dbi_rollback;
                 CJDB::DB::DBI->dbi_rollback;
-                next SITE;
+                return 0;
         }
     }
 
