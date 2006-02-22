@@ -50,8 +50,8 @@ __PACKAGE__->sequence('journals_auth_id_seq');
 __PACKAGE__->has_many('titles', 'CUFTS::DB::JournalsAuthTitles' => 'journal_auth');
 __PACKAGE__->has_many('issns',  'CUFTS::DB::JournalsAuthISSNs'  => 'journal_auth');
 
-__PACKAGE__->has_many('local_journals',  'CUFTS::DB::LocalJournals' => 'journal_auth');
-__PACKAGE__->has_many('global_journals' => 'CUFTS::DB::Journals');
+__PACKAGE__->has_many('local_journals',  'CUFTS::DB::LocalJournals' => 'journal_auth', { cascade => 'None'} );
+__PACKAGE__->has_many('global_journals' => 'CUFTS::DB::Journals', { cascade => 'None'} );
 
 
 1;
@@ -124,7 +124,6 @@ sub search_by_title_with_no_issns {
 __PACKAGE__->set_sql('by_title' => qq{
 	SELECT DISTINCT ON (journals_auth.id) journals_auth.* FROM journals_auth JOIN journals_auth_titles ON (journals_auth_titles.journal_auth = journals_auth.id) WHERE journals_auth_titles.title ILIKE ?
 });	
-
 
 sub marc_object {
 	my ($self) = @_;

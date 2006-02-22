@@ -55,6 +55,12 @@ sub normalize_column_values {
 	return 1;
 }
 
+sub issn_dash {
+    my ($self) = @_;
+    my $issn = $self->issn;
+    substr($issn, 4, 0) = '-';
+    return $issn;
+}
 
 
 1;
