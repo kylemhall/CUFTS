@@ -307,6 +307,10 @@ sub coverage {
 
     }
 
+    if ( is_empty_string($out) ) {
+        $out = 'No online sources for that journal found.'
+    }
+
     return $out;
 }
 
@@ -343,6 +347,10 @@ GLOBAL_JOURNAL:
             $out .= ' open access ';
         }
         $out .= "URLs were found for that journal.\n"
+    }
+
+    if ( is_empty_string($out) ) {
+        $out = 'No online sources for that journal found.'
     }
     
     return $out;
@@ -385,6 +393,10 @@ sub full {
             $out .= "   $url";
         }
 
+    }
+
+    if ( is_empty_string($out) ) {
+        $out = 'No online sources for that journal found.'
     }
 
     return $out;
