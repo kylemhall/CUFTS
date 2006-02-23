@@ -39,6 +39,7 @@ my $actions = {
     'urls'     => \&resolve,
     'full'     => \&full,
     'help'     => \&help,
+    'site'     => \&site,
 
     '_dump_cache' => \&_dump_cache,
 };
@@ -288,22 +289,30 @@ sub coverage {
     foreach my $gj ( $result->global_journals ) {
 
 #       print($gj->resource->name . ' - ' . $gj->resource->provider . "\n");
+
         $out .= $gj->resource->name . ' - '
              .  $gj->resource->provider . "\n";
 
         my $ft_coverage  = get_cufts_ft_coverage($gj);
         my $cit_coverage = get_cufts_cit_coverage($gj);
-
-        #                print("FT: $ft_coverage\nCT: $cit_coverage\n");
+        my $coverage;
+        
+#        print("FT: $ft_coverage\nCT: $cit_coverage\n");
 
         if ( length($ft_coverage) ) {
             $ft_coverage =~ s/\n/; /g;
-            $out .= "      fulltext: $ft_coverage\n";
+            $coverage .= "      fulltext: $ft_coverage\n";
         }
         if ( length($cit_coverage) ) {
             $cit_coverage =~ s/\n/; /g;
-            $out .= "      citation: $cit_coverage\n";
+            $coverage .= "      citation: $cit_coverage\n";
         }
+
+        if ( is_empty_string($coverage) ) {
+            $coverage = "   No coverage information available.\n";
+        }
+
+        $out .= $coverage;
 
     }
 
@@ -323,21 +332,17 @@ sub resolve {
     if ( !$current ) {
         return $message;
     }
-    my $site = CUFTS::DB::Sites->search('key' => 'OPEN')->first;
-    if ( !defined($site) ) {
-        return "Unable to load site for resolving journal URLs\n";
-    }
-
+    
     my $out;
 
 GLOBAL_JOURNAL:
     foreach my $gj ( $result->global_journals ) {
 
-        my $url = get_url($gj, $site, $open);
+        my $url = get_url($gj, $sender, $open);
         if ( not_empty_string($url) ) {
             $out .= $gj->resource->name . ' - '
                  .  $gj->resource->provider . "\n"
-                 . $url;
+                 . $url . "\n";
         }
     }
     
@@ -350,7 +355,7 @@ GLOBAL_JOURNAL:
     }
 
     if ( is_empty_string($out) ) {
-        $out = 'No online sources for that journal found.'
+        $out = "No online sources for that journal found.\n";
     }
     
     return $out;
@@ -365,10 +370,6 @@ sub full {
     if ( !$current ) {
         return $message;
     }
-    my $site = CUFTS::DB::Sites->search('key' => 'OPEN')->first;
-    if ( !defined($site) ) {
-        return "Unable to load site for resolving journal URLs\n";
-    }
 
     my $out;
 
@@ -379,20 +380,26 @@ sub full {
 
         my $ft_coverage  = get_cufts_ft_coverage($gj);
         my $cit_coverage = get_cufts_cit_coverage($gj);
-        my $url = get_url($gj, $site, $open);
-
+        my $url = get_url($gj, $sender, $open);
+        my $coverage;
+    
         if ( length($ft_coverage) ) {
             $ft_coverage =~ s/\n/; /g;
-            $out .= "   fulltext: $ft_coverage\n";
+            $coverage .= "   fulltext: $ft_coverage\n";
         }
         if ( length($cit_coverage) ) {
             $cit_coverage =~ s/\n/; /g;
-            $out .= "   citation: $cit_coverage\n";
+            $coverage .= "   citation: $cit_coverage\n";
         }
         if ( not_empty_string($url) ) {
-            $out .= "   $url";
+            $coverage .= "   $url\n";
         }
 
+        if ( is_empty_string($coverage) ) {
+            $coverage = "   No coverage information available.\n";
+        }
+
+        $out .= $coverage;
     }
 
     if ( is_empty_string($out) ) {
@@ -444,6 +451,27 @@ sub current {
     }
 }
 
+sub site {
+    my ( $string, $sender ) = @_;
+    
+    if ( is_empty_string($string) ) {
+        if ( defined($cache->{$sender}->{site}) ) {
+            return "Current site is: " . $cache->{$sender}->{site} . "\n";
+        } else {
+            return "No current site\n";
+        }
+    }
+    
+    my $site = CUFTS::DB::Sites->search('key' => $string)->first;
+    if ( defined($site) ) {
+        $cache->{$sender}->{site} = $site;
+        return "Current site is: " . $site->name . "\n";
+    }
+    else {
+        return "Unable to find site key '$string'";
+    }
+}
+
 sub more {
     my ( $string, $sender ) = @_;
     my $return = $cache->{$sender}->{out};
@@ -468,6 +496,8 @@ coverage
 marc
 more
 urls [open]
+full [open]
+site site_key
 EOL
 }
 
@@ -563,12 +593,20 @@ sub get_cufts_cit_coverage {
 }
 
 sub get_url {
-    my ( $journal, $site, $open ) = @_;
+    my ( $journal, $sender, $open ) = @_;
 
     my $out;
 
-    if ( !$open && not_empty_string($journal->journal_url) ) {
-        return "journal: " . $journal->journal_url . "\n";
+    my $site = $cache->{$sender}->{site};
+    if ( !$open && !defined($site) && not_empty_string($journal->journal_url) ) {
+        return "journal: " . $journal->journal_url;
+    }
+    
+    if ( !defined($site) ) {
+       $site = CUFTS::DB::Sites->search('key' => 'OPEN')->first;
+       if ( !defined($site) ) {
+            return undef;
+        }
     }
     
     my @links;
@@ -615,7 +653,7 @@ sub get_url {
 	}
 		
     if ( scalar(@links) ) {
-        $out .= '  ' . join "\n", @links;
+        $out .= join "\n", @links;
     }
     
     return $out;
