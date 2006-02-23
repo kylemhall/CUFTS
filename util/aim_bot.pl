@@ -132,7 +132,7 @@ sub trim_output {
     my $send = substr( $string, 0, $pos+1 );
     $send .= "\n( more )\n";
 
-    my $remainder = substr( $string, $pos+2 );
+    my $remainder = substr( $string, $pos+1 );
     $cache->{$sender}->{out} = $remainder;
 
     return $send;
@@ -286,7 +286,7 @@ sub coverage {
 
     my $out;
 
-    foreach my $gj ( $result->global_journals ) {
+    foreach my $gj ( sort { $a->resource->name cmp $b->resource->name } $result->global_journals ) {
 
 #       print($gj->resource->name . ' - ' . $gj->resource->provider . "\n");
 
@@ -336,7 +336,7 @@ sub resolve {
     my $out;
 
 GLOBAL_JOURNAL:
-    foreach my $gj ( $result->global_journals ) {
+    foreach my $gj ( sort { $a->resource->name cmp $b->resource->name } $result->global_journals ) {
 
         my $url = get_url($gj, $sender, $open);
         if ( not_empty_string($url) ) {
@@ -373,7 +373,7 @@ sub full {
 
     my $out;
 
-    foreach my $gj ( $result->global_journals ) {
+    foreach my $gj ( sort { $a->resource->name cmp $b->resource->name } $result->global_journals ) {
 
         $out .= $gj->resource->name . ' - '
              .  $gj->resource->provider . "\n";
@@ -383,11 +383,11 @@ sub full {
         my $url = get_url($gj, $sender, $open);
         my $coverage;
     
-        if ( length($ft_coverage) ) {
+        if ( not_empty_string($ft_coverage) ) {
             $ft_coverage =~ s/\n/; /g;
             $coverage .= "   fulltext: $ft_coverage\n";
         }
-        if ( length($cit_coverage) ) {
+        if ( not_empty_string($cit_coverage) ) {
             $cit_coverage =~ s/\n/; /g;
             $coverage .= "   citation: $cit_coverage\n";
         }
@@ -398,12 +398,12 @@ sub full {
         if ( is_empty_string($coverage) ) {
             $coverage = "   No coverage information available.\n";
         }
-
+        
         $out .= $coverage;
     }
 
     if ( is_empty_string($out) ) {
-        $out = 'No online sources for that journal found.'
+        $out = "No online sources for that journal found.\n";
     }
 
     return $out;
