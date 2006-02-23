@@ -7,6 +7,11 @@ use Net::OSCAR qw(:standard);
 use CUFTS::DB::Resources;
 use CUFTS::DB::Journals;
 use CUFTS::DB::JournalsAuth;
+use CUFTS::DB::LocalResources;
+use CUFTS::DB::LocalJournals;
+use CUFTS::Resolve;
+
+use CUFTS::Util::Simple;
 
 use Term::ReadLine;
 use HTML::TagFilter;
@@ -19,7 +24,7 @@ GetOptions(\%options, 'offline');
 
 my $screenname = 'CUFTS2';
 my $password   = 'CUFTS4lib';
-my $max_length = 448;
+my $max_length = 440;
 
 my $actions = {
     'search'   => \&search,
@@ -31,6 +36,7 @@ my $actions = {
     'issns'    => \&issns,
     'titles'   => \&titles,
     'marc'     => \&marc,
+    'urls'     => \&resolve,
     'help'     => \&help,
 
     '_dump_cache' => \&_dump_cache,
@@ -51,7 +57,7 @@ sub offline {
     my $input = $term->readline(': ');
 
     while ($input) {
-        $input = filter($input);
+        $input = trim_string(filter($input));
         my ( $action, $rest ) = parse_message($input);
         my $response = handle( $action, $rest, 'offline' );
         print $response;
@@ -84,7 +90,7 @@ sub filter {
 sub im_in {
     my ( $oscar, $sender, $message, $is_away ) = @_;
 
-    $message = filter($message);
+    $message = trim_string(filter($message));
 
     my ( $action, $rest ) = parse_message($message);
     my $response = handle( $action, $rest );
@@ -105,10 +111,10 @@ sub handle {
 
     my $response = &$action_sub( $rest, $sender );
 
-    return trim( $response, $sender );
+    return trim_output( $response, $sender );
 }
 
-sub trim {
+sub trim_output {
     my ( $string, $sender ) = @_;
     
     if ( length($string) < $max_length ) {
@@ -122,7 +128,7 @@ sub trim {
     }
     
     my $send = substr( $string, 0, $pos+1 );
-    $send .= "\n";
+    $send .= "\n( more )\n";
 
     my $remainder = substr( $string, $pos+2 );
     $cache->{$sender}->{out} = $remainder;
@@ -154,7 +160,7 @@ sub search {
     # If it looks like an ISSN, search it as an ISSN, otherwise check for an
     # "exact" keyword for an exact title search, otherwise do a truncated
     # title search
-    if ( $string =~ /^\d[4]-?\d[3][\dxX]$/ ) {
+    if ( $string =~ /^\d{4}-?\d{3}[\dxX]$/ ) {
         @jas = CUFTS::DB::JournalsAuth->search_by_issns($string);
     }
     elsif ( $string =~ s/^exact\s+// ) {
@@ -173,6 +179,7 @@ sub search {
         return "Too many results (>20) for that search. Please refine your search term.\n";
     }
 
+    @jas = sort { $a->title cmp $b->title } @jas;
     $cache->{$sender}->{jas} = \@jas;
 
     return results( '', $sender );
@@ -280,9 +287,8 @@ sub coverage {
     foreach my $gj ( $result->global_journals ) {
 
 #       print($gj->resource->name . ' - ' . $gj->resource->provider . "\n");
-        $out .= '   '
-            . $gj->resource->name . ' - '
-            . $gj->resource->provider . "\n";
+        $out .= $gj->resource->name . ' - '
+             .  $gj->resource->provider . "\n";
 
         my $ft_coverage  = get_cufts_ft_coverage($gj);
         my $cit_coverage = get_cufts_cit_coverage($gj);
@@ -300,6 +306,96 @@ sub coverage {
 
     }
 
+    return $out;
+}
+
+sub resolve {
+    my ( $string, $sender ) = @_;
+
+    my $open = $string =~ s/\s*open\s*// ? 1 : 0;  # Only show open access URLs?
+
+    my ( $current, $result, $message ) = _select( $string, $sender );
+    if ( !$current ) {
+        return $message;
+    }
+    my $site = CUFTS::DB::Sites->search('key' => 'OPEN')->first;
+    if ( !defined($site) ) {
+        return "Unable to load site for resolving journal URLs\n";
+    }
+
+    my $out;
+
+GLOBAL_JOURNAL:
+    foreach my $gj ( $result->global_journals ) {
+        
+        if ( !$open && not_empty_string($gj->journal_url) ) {
+            $out .= $gj->resource->name . ' - '
+                 .  $gj->resource->provider . "\n";
+            $out .= "journal: " . $gj->journal_url . "\n";
+            next GLOBAL_JOURNAL;
+        }
+        
+        my @links;
+        
+        my $local_resource = CUFTS::DB::LocalResources->search( 'site' => $site->id, 'resource' => $gj->resource->id, 'active' => 't' )->first;
+        next GLOBAL_JOURNAL if !defined($local_resource);
+
+		CUFTS::Resolve->overlay_global_resource_data($local_resource);
+		next GLOBAL_JOURNAL unless defined($local_resource->module);
+
+		my $module = CUFTS::Resolve::__module_name($local_resource->module);
+		CUFTS::Resolve->__require($module);
+        
+        my @local_journals = CUFTS::DB::LocalJournals->search( 'journal' => $gj->id, 'resource' => $local_resource->id );
+        next if !scalar(@local_journals);
+
+        foreach my $local_journal ( @local_journals ) {
+            $local_journal = $module->overlay_global_title_data($local_journal);
+
+			my $request = new CUFTS::Request;
+			$request->title($local_journal->title);
+			$request->genre('journal');
+			$request->pid({});
+
+			my $results;
+			
+			if ( $module->can_getJournal($request) ) {
+				$results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
+				foreach my $result (@$results) {
+					$module->prepend_proxy($result, $local_resource, $site, $request);
+					push @links, "journal: " . $result->url;
+				}
+
+			}
+
+			if ( !scalar(@$results) && $module->can_getDatabase($request) ) {
+
+				$results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
+				foreach my $result (@$results) {
+					$module->prepend_proxy($result, $local_resource, $site, $request);
+					push @links, "database: " . $result->url;
+				}
+
+			}
+			
+        }
+        
+        $out .= $gj->resource->name . ' - '
+             .  $gj->resource->provider . "\n";
+
+        $out .= '    ' . join "\n", @links;
+        $out .= "\n";
+        
+    }
+    
+    if ( is_empty_string($out) ) {
+        $out = 'No ';
+        if ($open) {
+            $out .= ' open access ';
+        }
+        $out .= "URLs were found for that journal.\n"
+    }
+    
     return $out;
 }
 
@@ -366,6 +462,8 @@ titles
 issns 
 coverage
 marc
+more
+urls [open]
 EOL
 }
 
