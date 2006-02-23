@@ -37,6 +37,7 @@ my $actions = {
     'titles'   => \&titles,
     'marc'     => \&marc,
     'urls'     => \&resolve,
+    'full'     => \&full,
     'help'     => \&help,
 
     '_dump_cache' => \&_dump_cache,
@@ -327,65 +328,13 @@ sub resolve {
 
 GLOBAL_JOURNAL:
     foreach my $gj ( $result->global_journals ) {
-        
-        if ( !$open && not_empty_string($gj->journal_url) ) {
+
+        my $url = get_url($gj, $site, $open);
+        if ( not_empty_string($url) ) {
             $out .= $gj->resource->name . ' - '
-                 .  $gj->resource->provider . "\n";
-            $out .= "journal: " . $gj->journal_url . "\n";
-            next GLOBAL_JOURNAL;
+                 .  $gj->resource->provider . "\n"
+                 . $url;
         }
-        
-        my @links;
-        
-        my $local_resource = CUFTS::DB::LocalResources->search( 'site' => $site->id, 'resource' => $gj->resource->id, 'active' => 't' )->first;
-        next GLOBAL_JOURNAL if !defined($local_resource);
-
-		CUFTS::Resolve->overlay_global_resource_data($local_resource);
-		next GLOBAL_JOURNAL unless defined($local_resource->module);
-
-		my $module = CUFTS::Resolve::__module_name($local_resource->module);
-		CUFTS::Resolve->__require($module);
-        
-        my @local_journals = CUFTS::DB::LocalJournals->search( 'journal' => $gj->id, 'resource' => $local_resource->id );
-        next if !scalar(@local_journals);
-
-        foreach my $local_journal ( @local_journals ) {
-            $local_journal = $module->overlay_global_title_data($local_journal);
-
-			my $request = new CUFTS::Request;
-			$request->title($local_journal->title);
-			$request->genre('journal');
-			$request->pid({});
-
-			my $results;
-			
-			if ( $module->can_getJournal($request) ) {
-				$results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
-				foreach my $result (@$results) {
-					$module->prepend_proxy($result, $local_resource, $site, $request);
-					push @links, "journal: " . $result->url;
-				}
-
-			}
-
-			if ( !scalar(@$results) && $module->can_getDatabase($request) ) {
-
-				$results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
-				foreach my $result (@$results) {
-					$module->prepend_proxy($result, $local_resource, $site, $request);
-					push @links, "database: " . $result->url;
-				}
-
-			}
-			
-        }
-        
-        $out .= $gj->resource->name . ' - '
-             .  $gj->resource->provider . "\n";
-
-        $out .= '    ' . join "\n", @links;
-        $out .= "\n";
-        
     }
     
     if ( is_empty_string($out) ) {
@@ -397,6 +346,49 @@ GLOBAL_JOURNAL:
     }
     
     return $out;
+}
+
+sub full {
+    my ( $string, $sender ) = @_;
+
+    my $open = $string =~ s/\s*open\s*// ? 1 : 0;  # Only show open access URLs?
+
+    my ( $current, $result, $message ) = _select( $string, $sender );
+    if ( !$current ) {
+        return $message;
+    }
+    my $site = CUFTS::DB::Sites->search('key' => 'OPEN')->first;
+    if ( !defined($site) ) {
+        return "Unable to load site for resolving journal URLs\n";
+    }
+
+    my $out;
+
+    foreach my $gj ( $result->global_journals ) {
+
+        $out .= $gj->resource->name . ' - '
+             .  $gj->resource->provider . "\n";
+
+        my $ft_coverage  = get_cufts_ft_coverage($gj);
+        my $cit_coverage = get_cufts_cit_coverage($gj);
+        my $url = get_url($gj, $site, $open);
+
+        if ( length($ft_coverage) ) {
+            $ft_coverage =~ s/\n/; /g;
+            $out .= "   fulltext: $ft_coverage\n";
+        }
+        if ( length($cit_coverage) ) {
+            $cit_coverage =~ s/\n/; /g;
+            $out .= "   citation: $cit_coverage\n";
+        }
+        if ( not_empty_string($url) ) {
+            $out .= "   $url";
+        }
+
+    }
+
+    return $out;
+    
 }
 
 sub issns {
@@ -556,6 +548,65 @@ sub get_cufts_cit_coverage {
     }
 
     return $cit_coverage;
+}
+
+sub get_url {
+    my ( $journal, $site, $open ) = @_;
+
+    my $out;
+
+    if ( !$open && not_empty_string($journal->journal_url) ) {
+        return "journal: " . $journal->journal_url . "\n";
+    }
+    
+    my @links;
+    
+    my $local_resource = CUFTS::DB::LocalResources->search( 'site' => $site->id, 'resource' => $journal->resource->id, 'active' => 't' )->first;
+    return undef if !defined($local_resource);
+
+	CUFTS::Resolve->overlay_global_resource_data($local_resource);
+	return undef if !defined($local_resource->module);
+
+	my $module = CUFTS::Resolve::__module_name($local_resource->module);
+	CUFTS::Resolve->__require($module);
+    
+    my $local_journal = CUFTS::DB::LocalJournals->search( 'journal' => $journal->id, 'resource' => $local_resource->id )->first;
+    next if !defined($local_journal);
+
+    $local_journal = $module->overlay_global_title_data($local_journal);
+
+	my $request = new CUFTS::Request;
+	$request->title($local_journal->title);
+	$request->genre('journal');
+	$request->pid({});
+
+	my $results;
+	
+	if ( $module->can_getJournal($request) ) {
+
+		$results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
+		foreach my $result (@$results) {
+			$module->prepend_proxy($result, $local_resource, $site, $request);
+			push @links, "journal: " . $result->url;
+		}
+
+	}
+
+	if ( !scalar(@$results) && $module->can_getDatabase($request) ) {
+
+		$results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
+		foreach my $result (@$results) {
+			$module->prepend_proxy($result, $local_resource, $site, $request);
+			push @links, "database: " . $result->url;
+		}
+
+	}
+		
+    if ( scalar(@links) ) {
+        $out .= '  ' . join "\n", @links;
+    }
+    
+    return $out;
 }
 
 sub _dump_cache {
