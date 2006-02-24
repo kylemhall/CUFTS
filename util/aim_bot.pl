@@ -373,6 +373,8 @@ sub full {
 
     my $out;
 
+    warn($result->id);
+
     foreach my $gj ( sort { $a->resource->name cmp $b->resource->name } $result->global_journals ) {
 
         $out .= $gj->resource->name . ' - '
@@ -398,7 +400,7 @@ sub full {
         if ( is_empty_string($coverage) ) {
             $coverage = "   No coverage information available.\n";
         }
-        
+
         $out .= $coverage;
     }
 
@@ -456,7 +458,7 @@ sub site {
     
     if ( is_empty_string($string) ) {
         if ( defined($cache->{$sender}->{site}) ) {
-            return "Current site is: " . $cache->{$sender}->{site} . "\n";
+            return "Current site is: " . $cache->{$sender}->{site}->name . "\n";
         } else {
             return "No current site\n";
         }
@@ -738,7 +740,7 @@ sub get_url {
 	CUFTS::Resolve->__require($module);
     
     my $local_journal = CUFTS::DB::LocalJournals->search( 'journal' => $journal->id, 'resource' => $local_resource->id )->first;
-    next if !defined($local_journal);
+    return undef if !defined($local_journal);
 
     $local_journal = $module->overlay_global_title_data($local_journal);
 
