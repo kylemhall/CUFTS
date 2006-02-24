@@ -485,20 +485,137 @@ sub more {
 sub help {
     my ( $string, $sender ) = @_;
     
-    return << "EOL";
+    if ( $string =~ /search/ ) {
+        return << "EOL";
+search ( [exact] title | issn )
+  Searches for journals by ISSN or title.  If 'exact' keyword is included then title searches will not be truncated. A maximum of 25 results are supported, if more journals are found you will need to refine your search.
+  Examples:
+    search american journal of b
+    search exact outlook
+    search 1553-3468
+EOL
+    }
+    elsif ( $string =~ /select/ ) {
+        return << "EOL";
+select result_number
+  Selects a search result to work with.  After a select is done any "url", "coverage", "titles", etc. command will return data for that result.
+  Examples:
+    result 1
+
+EOL
+    }
+    elsif ( $string =~ /more/ ) {
+        return << "EOL";
+more
+   Displays text next 400 (or so) characters when the data returned was too long for the IM system.
+   Examples:
+      more
+EOL
+    }
+    elsif ( $string =~ /current/ ) {
+        return << "EOL";
+current
+Displays the currently selected journal
+EOL
+    }
+    elsif ( $string =~ /results/ ) {
+        return << "EOL";
+results
+  Displays the result list from the last search
+EOL
+    }
+    elsif ( $string =~ /titles/ ) {
+        return << "EOL";
+titles [result_number]
+   Displays a list of alternate titles for the selected journal
+   Examples:
+     titles
+     titles 5
+EOL
+    }
+    elsif ( $string =~ /issns/ ) {
+        return << "EOL";
+issns [result_number]
+   Displays a list of ISSNs for the selected journal
+   Examples:
+     issns
+     issns 2
+EOL
+    }
+    elsif ( $string =~ /coverage/ ) {
+        return << "EOL";
+coverage [result_number]
+   Displays a list of databases the journal can be found in and what the coverage periods for citations and full text are.
+   Examples:
+     coverage
+     coverage 3
+EOL
+    }
+    elsif ( $string =~ /urls/ ) {
+        return << "EOL";
+coverage [result_number]
+   Displays a list of databases the journal can be found in and URLs to them. If you have picked a site, the system will only display links to databases you have access to and will link through your site's proxy server. If "open" is specified, only links to open access content will be returned.
+   Examples:
+     urls open
+     urls 1
+EOL
+    }
+    elsif ( $string =~ /full/ ) {
+        return << "EOL";
+full [result_number] [open]
+   Displays a list of databases the journal can be found in, coverage periods, and URLs to them. If you have picked a site, the system will only display links to databases you have access to and will link through your site's proxy server. If "open" is specified, only links to open access content will be returned.
+   Examples:
+     full
+     full open
+     full 10
+EOL
+    }
+    elsif ( $string =~ /site/ ) {
+        return << "EOL";
+site site_key
+   Selects a current site. This is used to return only links to journals that you can access through your institution. The site_key is the NUC code for your site, which must be actively using CUFTS for this to work.
+   Examples:
+     site BVAS
+     site ALU
+EOL
+    }
+    elsif ( $string =~ /marc/ ) {
+        return << "EOL";
+marc [result_number]
+   Returns a human readable dump of the MARC record for the journal. A subset of the journals in CUFTS have associated MARC data, so this will not be available for all journals.
+   Examples:
+     marc
+     marc 3
+EOL
+    }
+    elsif ( $string =~ /commands/ ) {
+        return << "EOL";
 search ( [exact] title | issn )
 select result number
 current
 results 
-titles 
-issns 
-coverage
+titles [result_number]
+issns [result_number]
+coverage [result_number]
 marc
 more
 urls [open]
 full [open]
 site site_key
 EOL
+    } else {
+        return << "EOL";
+This bot is used to search the CUFTS journals database for information on where journals are indexed, available in fulltext, and what the coverage periods are.
+"help commands" will give a list of valid commands.
+Example Usage:
+  search outlook
+  select 4
+  coverage
+  results
+  site BVAS
+  urls 2
+EOL
+    }
 }
 
 
