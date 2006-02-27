@@ -72,7 +72,7 @@ sub load_site {
     my %jas;
     my $count;
     while ( my $lj = $lj_iter->next ) {
-        last if $count++ > 50;
+#        last if $count++ > 50;
         
         if ( $lj->journal ) {
             my $gj = $lj->journal;
@@ -192,7 +192,7 @@ sub create_summary {
 
     print GSFILE "<electronic_holdings>\n";
     foreach my $count ( 1 .. ( $file_count - 1 ) ) {
-        print GSFILE "<url>http://cufts2.lib.sfu.ca:8082/Resolver/sites/1/static/GoogleScholar/journal${count}.xml</url>\n";
+        print GSFILE "<url>http://cufts2.lib.sfu.ca:8082/Resolver/sites/1/static/GoogleScholar/journals${count}.xml</url>\n";
     }
     print GSFILE "</electronic_holdings>\n";
     
