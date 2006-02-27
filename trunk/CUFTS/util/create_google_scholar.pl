@@ -224,7 +224,6 @@ sub output {
         # First run - create directories if necessary, delete any
         # existing files.
 
-        $dir = $CUFTS::Config::CUFTS_RESOLVER_SITE_DIR;
         -d $dir
             or die("No directory for the CUFTS resolver site files: $dir");
 
@@ -257,7 +256,7 @@ sub output {
 
         $file_count++;
     } else {
-        $dir = '/' . $site->id . '/static/GoogleScholar';
+        $dir .= '/' . $site->id . '/static/GoogleScholar';
     }
 
     my $file = "$dir/journals${file_count}.xml";
