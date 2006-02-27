@@ -18,26 +18,16 @@ use vars qw(
 
 	$CUFTS_SMTP_HOST
 	$CUFTS_MAIL_FROM
-
-	$CJDB_DB
-	$CJDB_USER
-	$CJDB_PASSWORD
-
 );
 
-$CUFTS_BASE_DIR = '/usr/local/devel/CUFTS';
+$CUFTS_BASE_DIR = '/usr/local/CUFTS';
 
 $CUFTS_DB = 'CUFTS2';
-$CUFTS_USER = 'tholbroo';
+$CUFTS_USER = 'CUFTS';
 $CUFTS_PASSWORD = '';
 
 $CUFTS_SMTP_HOST = 'localhost';
-$CUFTS_MAIL_FROM = 'tholbroo@sfu.ca';
-
-$CJDB_DB = 'CJDB2';
-$CJDB_USER = 'tholbroo';
-$CJDB_PASSWORD = '';
-
+$CUFTS_MAIL_FROM = '';
 
 1;
 
