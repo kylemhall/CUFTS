@@ -50,12 +50,15 @@ use vars qw(
 	$CJDB_SITE_CSS_DIR
 
 	$CJDB_SITE_DATA_DIR
+	
+	$CUFTS_RESOLVER_DIR
+	$CUFTS_RESOLVER_SITE_DIR
 );
 
 
 
 $CUFTS_DB_STRING = "dbi:Pg:dbname=${CUFTS_DB};host=localhost;port=5432";
-$CUFTS_DB_ATTR = { 'PrintError' => 0, 'RaiseError' => 0, 'HandleError' => Exception::Class::DBI->handler() };
+$CUFTS_DB_ATTR = { 'PrintError' => 0, 'RaiseError' => 0, 'HandleError' => Exception::Class::DBI->handler(), 'AutoCommit' => 0 };
 @CUFTS_DB_CONNECT = ($CUFTS_DB_STRING, $CUFTS_USER, $CUFTS_PASSWORD, $CUFTS_DB_ATTR);
 
 $CUFTS_LOG_DIR = "${CUFTS_BASE_DIR}/logs";
@@ -78,5 +81,9 @@ $CJDB_CSS_DIR = "${CJDB_BASE_DIR}/root/static/css";
 $CJDB_SITE_CSS_DIR = "${CJDB_CSS_DIR}/sites";
 
 $CJDB_SITE_DATA_DIR = "${CUFTS_BASE_DIR}/data/sites";
+
+$CUFTS_RESOLVER_DIR = "${CUFTS_BASE_DIR}/Resolver";
+$CUFTS_RESOLVER_SITE_DIR = "${CUFTS_RESOLVER_DIR}/root/sites";
+
 
 1;
