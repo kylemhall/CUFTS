@@ -22,7 +22,14 @@ package CUFTS::Resources::CrossRef;
 
 use base qw(CUFTS::Resources);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
+use CUFTS::DB::CrossRefCache;
+
+use LWP::UserAgent;
+use HTTP::Request::Common;
+
+use strict;
 
 sub has_title_list { return 0; }
 sub local_resource_details { return ['auth_name', 'auth_passwd'] }
@@ -36,28 +43,38 @@ sub resource_details_help {
 	}
 }
 
-use strict;
-
-use LWP::UserAgent;
-use HTTP::Request::Common;
 
 sub get_records {
 	my ($class, $resource, $site, $request) = @_;
 	
-	assert_ne($resource->auth_name) or
+	if ( is_empty_string($resource->auth_name) ) {
 		CUFTS::Exception::App->throw('No auth_name defined for CrossRef lookups.');
-	assert_ne($resource->auth_passwd) or
+	}
+	if ( is_empty_string($resource->auth_passwd) ) {
 		CUFTS::Exception::App->throw('No auth_passwd defined for CrossRef lookups.');
-                       
+    }
 
 	my $year = '';
 	defined($request->date) && $request->date =~ /^(\d{4})/ and
 		$year = $1;
 
-	my ($qdata, $qtype);
+	my ($qdata, $qtype, $cache_query);
 	
-	if (assert_ne($request->issn) || assert_ne($request->title)) {
-		$qdata = join('|',(
+	if ( not_empty_string($request->issn) || not_empty_string($request->title) ) {
+        $cache_query = $qdata = join('|', (
+            'q',
+			$request->issn   || '',
+			$request->title  || '',
+			$request->aulast || '',
+			$request->volume || '',
+			$request->issue  || '',
+			$request->spage  || '',
+			$year,
+			$request->doi || '',
+		    )
+		);
+			
+		$qdata = join('|', (
 			$request->issn || '',
 			$request->title || '',
 			$request->aulast || '',
@@ -71,34 +88,49 @@ sub get_records {
 			)
 		);
 		$qtype = 'q';
-	} elsif (assert_ne($request->doi)) {
+		
+	} elsif ( not_empty_string($request->doi) ) {
+
 		$qdata = $request->doi;
 		$qtype = 'd';
+		$cache_query = 'd|' . $request->doi;
+
 	} else {
 		return undef;
 	}
+
+    # Check the cache
+    
+    my $cache_data = CUFTS::DB::CrossRefCache->search('query' => $cache_query)->first;
+    
+    if ( !defined($cache_data) ) {
 		
-	# Lookup meta-data
+    	# Lookup meta-data
 
-	my $start_time = time;
+    	my $start_time = time;
 
-	my $ua = LWP::UserAgent->new('timeout' => 20);
-	my $response = $ua->request(POST 'http://doi.crossref.org/servlet/query', [
-		'type' => $qtype,
-		'usr'  => $resource->auth_name,
-		'pwd'  => $resource->auth_passwd,
-		'area' => 'live',
-		'format' => 'piped',
-		'qdata' => $qdata,
-	]);
+    	my $ua = LWP::UserAgent->new('timeout' => 20);
+    	my $response = $ua->request(POST 'http://doi.crossref.org/servlet/query', [
+    		'type' => $qtype,
+    		'usr'  => $resource->auth_name,
+    		'pwd'  => $resource->auth_passwd,
+    		'area' => 'live',
+    		'format' => 'piped',
+    		'qdata' => $qdata,
+    	]);
 
-	$response->is_success or return undef;
+    	$response->is_success or return undef;
 	
-	my $returned_data = $response->content;
-	$returned_data =~ s/^[\s\n]*//;
-	$returned_data =~ s/[\s\n]*$//;
+    	my $returned_data = trim_string($response->content);
 
-	print STDERR "CrossRef returned (" . (time-$start_time) . "s): $returned_data\n";
+    	print STDERR "CrossRef returned (" . (time-$start_time) . "s): $returned_data\n";
+    	
+    	$cache_data = CUFTS::DB::CrossRefCache->create({
+    	    query  => $cache_query,
+    	    result => $returned_data,
+    	});
+    	CUFTS::DB::CrossRefCache->dbi_commit;
+    }
 
 	my (
 		$issn,
@@ -111,29 +143,29 @@ sub get_records {
 		$type,
 		$key,
 		$doi,
-	) = split /\|/, $returned_data;
+	) = split /\|/, $cache_data->result;
 
-	!defined($request->doi) && assert_ne($doi) and
+	is_empty_string($request->doi) && not_empty_string($doi) and
 		$request->doi($doi);
 
-	!defined($request->aulast) && assert_ne($aulast) and
+	is_empty_string($request->aulast) && not_empty_string($aulast) and
 		$request->aulast($aulast);
 
-	!defined($request->title) && assert_ne($title) and
+	is_empty_string($request->title) && not_empty_string($title) and
 		$request->title($title);
 
-	if (!defined($request->issn) && assert_ne($issn)) {
+	if (is_empty_string($request->issn) && not_empty_string($issn)) {
 		$issn =~ /^([\dxX]{8})/ and
 			$request->issn($1);
 	}
 
-	!defined($request->volume) && assert_ne($volume) and
+	is_empty_string($request->volume) && not_empty_string($volume) and
 		$request->volume($volume);
 
-	!defined($request->issue) && assert_ne($issue) and
+	is_empty_string($request->issue) && not_empty_string($issue) and
 		$request->issue($issue);
 
-	!defined($request->spage) && assert_ne($start_page) and
+	is_empty_string($request->spage) && not_empty_string($start_page) and
 		$request->spage($start_page);
 	
 	return undef;
@@ -142,13 +174,13 @@ sub get_records {
 sub can_getMetadata {
 	my ($class, $request) = @_;
 	
-	assert_ne($request->issn) || assert_ne($request->eissn) and
+	not_empty_string($request->issn) || not_empty_string($request->eissn) and
 		return 1;
 		
-	assert_ne($request->title) and
+	not_empty_string($request->title) and
 		return 1;
 		
-	assert_ne($request->doi) and
+	not_empty_string($request->doi) and
 		return 1;
 		
 	return 0;
