@@ -76,11 +76,11 @@ sub load_site {
 
 
         my $gj = $lj->journal;
-        my $ft_start_date  = defined($lj->ft_start_date)  ? $lj->ft_start_date  : defined($gj->ft_start_date)  ? $gj->ft_start_date  : undef;
-        my $ft_end_date    = defined($lj->ft_end_date)    ? $lj->ft_end_date    : defined($gj->ft_end_date)    ? $gj->ft_end_date    : undef;
-        my $embargo_days   = defined($lj->embargo_days)   ? $lj->embargo_days   : defined($gj->embargo_days)   ? $gj->embargo_days   : undef;
-        my $embargo_months = defined($lj->embargo_months) ? $lj->embargo_months : defined($gj->embargo_months) ? $gj->embargo_months : undef;
-        my $ja_id          = defined($lj->journal_auth)   ? $lj->journal_auth   : defined($gj->journal_auth)   ? $gj->journal_auth   : undef;
+        my $ft_start_date  = defined($lj->ft_start_date)  ? $lj->ft_start_date  : defined($gj) ? $gj->ft_start_date  : undef;
+        my $ft_end_date    = defined($lj->ft_end_date)    ? $lj->ft_end_date    : defined($gj) ? $gj->ft_end_date    : undef;
+        my $embargo_days   = defined($lj->embargo_days)   ? $lj->embargo_days   : defined($gj) ? $gj->embargo_days   : undef;
+        my $embargo_months = defined($lj->embargo_months) ? $lj->embargo_months : defined($gj) ? $gj->embargo_months : undef;
+        my $ja_id          = defined($lj->journal_auth)   ? $lj->journal_auth   : defined($gj) ? $gj->journal_auth   : undef;
 
         next if !defined($ja_id);
 
