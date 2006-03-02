@@ -73,37 +73,45 @@ sub load_site {
     my $count;
     while ( my $lj = $lj_iter->next ) {
 #        last if $count++ > 50;
-        
-        if ( $lj->journal ) {
-            my $gj = $lj->journal;
-            $lj = $gj->resource->do_module('overlay_global_title_data', $lj, $gj)
-        }
 
-        my $ja_id = $lj->journal_auth;
+
+        my $gj = $lj->journal;
+        my $ft_start_date  = defined($lj->ft_start_date)  ? $lj->ft_start_date  : defined($gj->ft_start_date)  ? $gj->ft_start_date  : undef;
+        my $ft_end_date    = defined($lj->ft_end_date)    ? $lj->ft_end_date    : defined($gj->ft_end_date)    ? $gj->ft_end_date    : undef;
+        my $embargo_days   = defined($lj->embargo_days)   ? $lj->embargo_days   : defined($gj->embargo_days)   ? $gj->embargo_days   : undef;
+        my $embargo_months = defined($lj->embargo_months) ? $lj->embargo_months : defined($gj->embargo_months) ? $gj->embargo_months : undef;
+        my $ja_id          = defined($lj->journal_auth)   ? $lj->journal_auth   : defined($gj->journal_auth)   ? $gj->journal_auth   : undef;
+
         next if !defined($ja_id);
 
-        if ( !defined($lj->ft_start_date) ) {
+        next if    is_empty_string($ft_start_date  )
+                && is_empty_string($ft_end_date    )
+                && is_empty_string($embargo_days   )
+                && is_empty_string($embargo_months );
+
+        if ( !defined($ft_start_date) ) {
             $jas{$ja_id}->{start} = '0000-00-00';
         }
-        elsif ( !defined($jas{$ja_id}->{start}) || $lj->ft_start_date lt $jas{$ja_id}->{start} ) {
-            $jas{$ja_id}->{start} = $lj->ft_start_date;
+        elsif ( !defined($jas{$ja_id}->{start}) || $ft_start_date lt $jas{$ja_id}->{start} ) {
+            $jas{$ja_id}->{start} = $ft_start_date;
         }
 
-        if ( !defined($lj->ft_end_date) ) {
+        if ( !defined($ft_end_date) ) {
             $jas{$ja_id}->{end} = '9999-99-99';
         }
-        elsif ( !defined($jas{$ja_id}->{end}) || $lj->ft_end_date gt $jas{$ja_id}->{end} ) {
-            $jas{$ja_id}->{end} = $lj->ft_end_date;
+        elsif ( !defined($jas{$ja_id}->{end}) || $ft_end_date gt $jas{$ja_id}->{end} ) {
+            $jas{$ja_id}->{end} = $ft_end_date;
         }
 
-        my $embargo_days = $lj->embargo_days;
-        if ( not_empty_string($lj->embargo_months) ) {
-            $embargo_days = $lj->embargo_months * 30;
+        if ( not_empty_string($embargo_months) ) {
+            $embargo_days = $embargo_months * 30;
         }
         if ( not_empty_string($embargo_days) ) {
             if ( !defined($jas{$ja_id}->{embargo}) || $embargo_days < $jas{$ja_id}->{embargo} ) {
                 $jas{$ja_id}->{embargo} = $embargo_days;
             }
+        } else {
+            $jas{$ja_id}->{embargo} = 0;
         }
  
     }
@@ -136,6 +144,7 @@ sub load_site {
             $output .=  "<month>$month</month>\n";
             $output .=  "</from>\n";
         }
+
         if ( $jas{$ja_id}->{end} ne '9999-99-99' ) {
             my ($year, $month, $day) = split '-', $jas{$ja_id}->{end};
             $output .=  "<to>\n";
@@ -144,7 +153,7 @@ sub load_site {
             $output .=  "</to>\n";
         }
 
-        if ( not_empty_string($jas{$ja_id}->{embargo}) ) {
+        if ( not_empty_string($jas{$ja_id}->{embargo}) && $jas{$ja_id}->{embargo} > 0 ) {
             $output .=  "<embargo>\n";
             $output .=  "<days_not_available>" . $jas{$ja_id}->{embargo} ."</days_not_available>\n";
             $output .=  "</embargo>\n";
