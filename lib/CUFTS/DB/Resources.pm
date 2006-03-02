@@ -41,6 +41,13 @@ __PACKAGE__->columns(All => qw(
 
 	module
 
+	resource_identifier
+	database_url
+	auth_name
+	auth_passwd
+	url_base
+	proxy_suffix
+
 	active
 		
 	title_list_scanned
@@ -61,14 +68,8 @@ __PACKAGE__->has_many('local_resources' => 'CUFTS::DB::LocalResources');
 
 __PACKAGE__->has_details('details', 'CUFTS::DB::ResourceDetails' => 'resource');
 __PACKAGE__->details_columns(qw/
-	resource_identifier
-	database_url
-	auth_name
-	auth_passwd
-	url_base
 	notes_for_local
 	cjdb_note
-	proxy_suffix
 /);
 
 __PACKAGE__->add_trigger('before_delete' => \&delete_titles);

@@ -24,7 +24,7 @@ use base qw(CUFTS::Resources);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
-use CUFTS::DB::CrossRefCache;
+use CUFTS::DB::SearchCache;
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
@@ -101,7 +101,7 @@ sub get_records {
 
     # Check the cache
     
-    my $cache_data = CUFTS::DB::CrossRefCache->search('query' => $cache_query)->first;
+    my $cache_data = CUFTS::DB::SearchCache->search(type => 'crossref', 'query' => $cache_query)->first;
     
     if ( !defined($cache_data) ) {
 		
@@ -125,11 +125,12 @@ sub get_records {
 
     	print STDERR "CrossRef returned (" . (time-$start_time) . "s): $returned_data\n";
     	
-    	$cache_data = CUFTS::DB::CrossRefCache->create({
+    	$cache_data = CUFTS::DB::SearchCache->create({
+    	    type   => 'crossref',
     	    query  => $cache_query,
     	    result => $returned_data,
     	});
-    	CUFTS::DB::CrossRefCache->dbi_commit;
+    	CUFTS::DB::SearchCache->dbi_commit;
     }
 
 	my (
