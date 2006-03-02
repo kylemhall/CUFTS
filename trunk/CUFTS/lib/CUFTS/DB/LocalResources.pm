@@ -51,6 +51,13 @@ __PACKAGE__->columns(All => qw(
 	auto_activate
 	rank
 
+	resource_identifier
+	database_url
+	auth_name
+	auth_passwd
+	url_base
+	proxy_suffix
+
 	active
 		
 	title_list_scanned
@@ -74,13 +81,7 @@ __PACKAGE__->add_trigger('before_delete' => \&delete_titles);
 
 __PACKAGE__->has_details('details', 'CUFTS::DB::LocalResourceDetails' => 'local_resource');
 __PACKAGE__->details_columns(qw/
-	resource_identifier
-	database_url
-	auth_name
-	auth_passwd
-	url_base
 	cjdb_note
-	proxy_suffix
 	
 	erm_basic_name
 	erm_basic_vendor

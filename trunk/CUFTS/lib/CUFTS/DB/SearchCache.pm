@@ -1,4 +1,4 @@
-## CUFTS::DB::CrossRefCache
+## CUFTS::DB::SearchCache
 ##
 ## Copyright Todd Holbrook, Simon Fraser University (2003)
 ##
@@ -18,17 +18,18 @@
 ## with CUFTS; if not, write to the Free Software Foundation, Inc., 59
 ## Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package CUFTS::DB::CrossRefCache;
+package CUFTS::DB::SearchCache;
 
 use strict;
 use base 'CUFTS::DB::DBI';
 
 
-__PACKAGE__->table('crossrefcache');
+__PACKAGE__->table('searchcache');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
 
+    type
     query
     result
 
@@ -36,5 +37,5 @@ __PACKAGE__->columns(All => qw(
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 
-__PACKAGE__->sequence('crossrefcache_id_seq');
+__PACKAGE__->sequence('searchcache_id_seq');
 1;
