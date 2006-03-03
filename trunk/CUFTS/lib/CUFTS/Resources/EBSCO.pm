@@ -24,6 +24,8 @@ use base qw(CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions qw(assert_ne);
 
+use CUFTS::DB::SearchCache;
+
 use LWP::UserAgent;
 use HTTP::Request;
 use HTML::Entities ();
@@ -214,6 +216,11 @@ sub build_linkDatabase {
 sub check_article_matcher {
 	my ($class, $XML) = @_;
 
+    my $cache = CUFTS::DB::SearchCache->search('type' => 'ebsco', 'query' => $XML)->first;
+    if ( defined($cache) ) {
+        return $cache->result;
+    }
+
 	my $URL = 'http://articlematcher.epnet.com/EpAmRc.dll';
 
 	my $ua = new LWP::UserAgent;
@@ -222,6 +229,13 @@ sub check_article_matcher {
 	my $request = HTTP::Request->new(POST => $URL);
 	$request->content($XML);
 	my $response = $ua->simple_request($request);
+
+    CUFTS::DB::SearchCache->create({
+        type   => 'ebsco',
+        query  => $XML,
+        result => $response->content,
+    });
+    CUFTS::DB::SearchCache->dbi_commit;
 
 	return $response->content;
 }
