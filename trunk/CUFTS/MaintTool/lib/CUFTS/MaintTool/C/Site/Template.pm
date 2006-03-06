@@ -19,7 +19,7 @@ sub auto : Private {
 sub menu : Local {
     my ( $self, $c ) = @_;
 
-    my $site_id = $c->stash->{current_site}->id;
+    my $site = $c->stash->{current_site};
 
     ##
     ## Get CJDB template files, active, and sandbox lists
@@ -65,21 +65,8 @@ sub menu : Local {
         tag_viewing_string.tt
     );
 
-    my $site_dir    = get_site_base_dir('cjdb_template') . '/' . $site_id;
-    my $active_dir  = $site_dir . '/active';
-    my $sandbox_dir = $site_dir . '/sandbox';
-
-    -d $site_dir
-        or mkdir $site_dir
-            or die('Unable to access CJDB site base template directory.');
-
-    -d $active_dir
-        or mkdir $active_dir
-            or die('Unable to access CJDB site active template directory.');
-
-    -d $sandbox_dir
-        or mkdir $sandbox_dir
-            or die('Unable to access CJDB site sandbox template directory.');
+    my $active_dir  = get_site_base_dir('cjdb_template', $site, '/active');
+    my $sandbox_dir = get_site_base_dir('cjdb_template', $site, '/sandbox');
 
     opendir ACTIVE, $active_dir
         or die('Unable to open CJDB site active template directory for reading');
@@ -96,21 +83,8 @@ sub menu : Local {
     ##
 
     my @css_list        = qw( cjdb.css );
-    my $css_dir         = get_site_base_dir('css') . '/' . $site_id;
-    my $active_css_dir  = $css_dir . '/active';
-    my $sandbox_css_dir = $css_dir . '/sandbox';
-
-    -d $css_dir
-        or mkdir $css_dir
-            or die(qq{Unable to access CJDB site base CSS directory "$css_dir": $!});
-
-    -d $active_css_dir
-        or mkdir $active_css_dir
-            or die('Unable to access CJDB site active CSS directory.');
-
-    -d $sandbox_css_dir
-        or mkdir $sandbox_css_dir
-            or die('Unable to access CJDB site sandbox CSS directory.');
+    my $active_css_dir  = get_site_base_dir( 'css', $site, 'active'  );
+    my $sandbox_css_dir = get_site_base_dir( 'css', $site, 'sandbox' );
 
     opendir ACTIVE, $active_css_dir
         or die('Unable to open CJDB site active CSS directory for reading');
@@ -156,8 +130,6 @@ sub edit : Local {
 sub handle : Private {
     my ( $self, $c ) = @_;
 
-    my $site_id = $c->stash->{current_site}->id;
-
     my $state         = $c->stash->{state};
     my $type          = $c->stash->{type};
     my $template_name = $c->stash->{template_name};
@@ -171,21 +143,14 @@ sub handle : Private {
     $template_name =~ /[\/\\;:'"]/
         and die("Bad characters in template name: $template_name");
 
-    my $base_dir      = get_base_dir($type);
-    my $base_site_dir = get_site_base_dir($type);
-
-    my $site_dir = $base_site_dir . '/' . $site_id . '/sandbox';
-
-    -d $site_dir
-        or mkdir $site_dir
-        or CUFTS::Exception::App::CGI->throw(
-        'Unable to access CJDB site base template directory.');
+    my $base_dir = get_base_dir($type);
+    my $site_dir = get_site_base_dir($type, $c->stash->{current_site}, 'sandbox');
 
     my $template_contents;
     my $template_file =
         -e "${site_dir}/${template_name}"
-        ? "${site_dir}/${template_name}"
-        : "${base_dir}/${template_name}";
+        ?  "${site_dir}/${template_name}"
+        :  "${base_dir}/${template_name}";
 
     open TEMPLATE, "${template_file}"
         or CUFTS::Exception::App::CGI->throw(qq{Unable to open template file "${template_file}": $!});
@@ -222,13 +187,7 @@ sub save : Local {
         die('Error with edit form');
     }
 
-    my $site_dir = get_site_base_dir($type) . '/'
-        . $c->stash->{current_site}
-        . '/sandbox';
-
-    -d $site_dir
-        or mkdir $site_dir
-            or die('Unable to access template directory.');
+    my $site_dir = get_site_base_dir( $type, $c->stash->{current_site}, 'sandbox' );
 
     open TEMPLATE, ">${site_dir}/${template_name}"
         or die("Unable to open template file: $!");
@@ -251,18 +210,11 @@ sub delete : Local {
     $template_name =~ /[\/\\;:'"]/
         and die("Bad characters in template name: $template_name");
 
-    my $site_dir = get_site_base_dir($type) . '/'
-        . $c->stash->{current_site} . '/'
-        . $state;
-
-    -d $site_dir
-        or mkdir $site_dir
-        or die('Unable to access CJDB site base template directory.');
+    my $site_dir = get_site_base_dir($type, $c->stash->{current_site}, $state);
 
     -e "${site_dir}/${template_name}"
-        and unlink "${site_dir}/${template_name}"
-        or die(
-        "Unable to unlink template file '${site_dir}/${template_name}': $!");
+            and unlink "${site_dir}/${template_name}"
+                or die("Unable to unlink template file '${site_dir}/${template_name}': $!");
 
     $c->redirect('/site/template/menu');
 }
@@ -276,22 +228,8 @@ sub transfer : Local {
     grep { $type eq $_ } @valid_types
         or die("Invalid template type: $type");
 
-    my $site_dir = get_site_base_dir($type) . '/'
-        . $c->stash->{current_site}->id . '/';
-    my $sandbox_dir = $site_dir . 'sandbox';
-    my $active_dir  = $site_dir . 'active';
-
-    -d $site_dir
-        or mkdir $site_dir
-            or die('Unable to access site base template directory.');
-
-    -d $active_dir
-        or mkdir $active_dir
-            or die('Unable to access site active template directory.');
-
-    -d $sandbox_dir
-        or mkdir $sandbox_dir
-            or die('Unable to access site sandbox template directory.');
+    my $sandbox_dir = get_site_base_dir( $type, $c->stash->{current_site}, 'sandbox' );
+    my $active_dir  = get_site_base_dir( $type, $c->stash->{current_site}, 'active'  );
 
     -e "${sandbox_dir}/${template_name}"
         or die("Unable to find template file to copy");
@@ -321,14 +259,40 @@ sub get_base_dir {
 }
 
 sub get_site_base_dir {
-    my ($type) = @_;
+    my $type = shift;
+    my $site = shift;
+    my @path_parts = @_;
 
     if ( $type eq 'css' ) {
-        return $CUFTS::Config::CJDB_SITE_CSS_DIR;
+        unshift @path_parts, ( $CUFTS::Config::CJDB_SITE_CSS_DIR, $site->id, 'static', 'css' );
     }
     elsif ( $type eq 'cjdb_template' ) {
-        return $CUFTS::Config::CJDB_SITE_TEMPLATE_DIR;
+        unshift @path_parts, ( $CUFTS::Config::CJDB_SITE_TEMPLATE_DIR, $site->id );
     }
+    
+    my $path;
+    foreach my $part (@path_parts) {
+        if ( defined($path) && $path !~ m{/$} ) {
+            $path .= '/';
+        }
+        $path .= $part;
+        _build_path($path);
+    }
+    
+    warn($path);
+    return $path;
+}
+
+
+
+sub _build_path {
+    my $path = shift;
+
+    -d $path
+        or mkdir $path
+            or die(qq{Unable to create directory "$path": $!});
+            
+    return $path;
 }
 
 =head1 NAME

@@ -5,9 +5,11 @@ use Catalyst qw/Session Session::Store::FastMmap Session::State::Cookie Static::
 use lib '../lib';
 use CUFTS::Config;
 use CUFTS::CJDB::Util;
+use CUFTS::Util::Simple;
 
 #use CUFTS::DB::LocalResources;
 use CUFTS::Resolve;
+
 
 our $VERSION = '2.00.00';
 
@@ -84,12 +86,12 @@ sub begin : Private {
 
     # Set up site specific CSS file if it exists
     
-    my $site_css = 'sites/' . $c->stash->{current_site}->id 
-                   . '/' . $c->stash->{template_type} 
+    my $site_css = '/sites/' . $c->stash->{current_site}->id 
+                   . '/static/css/' . $c->stash->{template_type} 
                    . '/cjdb.css';
                   
-    if ( -e ($c->config->{root} . '/static/css/' . $site_css) ) {
-        $c->stash->{site_css_file} = $c->stash->{css_dir} . $site_css;
+    if ( -e ($c->config->{root} . $site_css) ) {
+        $c->stash->{site_css_file} = $c->stash->{url_base} . $site_css;
     }
 
     # Get the current user for the stash if they have logged in
@@ -121,12 +123,22 @@ sub auto : Private {
         my $resources_iter = CUFTS::DB::LocalResources->search('site' => $c->stash->{current_site}->id, 'active' => 't');
 
         while (my $resource = $resources_iter->next) {
-            CUFTS::Resolve->overlay_global_resource_data($resource);
             my $resource_id = $resource->id;
+            my $global_resource = $resource->resource;
+
             $resources_display{$resource_id}->{cjdb_note} = $resource->cjdb_note;
-            $resources_display{$resource_id}->{name} = $resource->name;
+            $resources_display{$resource_id}->{name} = not_empty_string($resource->name) 
+                                                       ? $resource->name
+                                                       : defined($global_resource)
+                                                       ? $global_resource->name 
+                                                       : '';
             if (!$c->stash->{current_site}->cjdb_display_db_name_only) {
-                $resources_display{$resource_id}->{name} .= ' - ' . $resource->provider;
+                my $provider = not_empty_string($resource->provider) 
+                               ? $resource->provider
+                               : defined($global_resource)
+                               ? $global_resource->provider 
+                               : '';
+                $resources_display{$resource_id}->{name} .= " - ${provider}";
             }
         }
         

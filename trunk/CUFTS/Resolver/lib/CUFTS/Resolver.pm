@@ -2,7 +2,7 @@ package CUFTS::Resolver;
 
 use strict;
 
-use Catalyst qw/Static::Simple/;
+use Catalyst qw/Static::Simple Prototype/;
 use lib '../lib';
 use CUFTS::Config;
 
@@ -68,6 +68,10 @@ sub begin : Private {
     $c->stash->{image_dir} = $c->stash->{url_base} . '/static/images/';
     $c->stash->{css_dir}   = $c->stash->{url_base} . '/static/css/';
     $c->stash->{js_dir}    = $c->stash->{url_base} . '/static/js/';
+
+    if ( my $site_key = c->stash->{current_site_key} ) {
+        $c->stash->{site_css_dir}   = $c->stash->{url_base} . "/sites/${site_key}/static/css/";
+    }
 
     return 1;
 }
