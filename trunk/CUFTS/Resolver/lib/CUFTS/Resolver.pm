@@ -69,10 +69,6 @@ sub begin : Private {
     $c->stash->{css_dir}   = $c->stash->{url_base} . '/static/css/';
     $c->stash->{js_dir}    = $c->stash->{url_base} . '/static/js/';
 
-    if ( my $site_key = c->stash->{current_site_key} ) {
-        $c->stash->{site_css_dir}   = $c->stash->{url_base} . "/sites/${site_key}/static/css/";
-    }
-
     return 1;
 }
 
