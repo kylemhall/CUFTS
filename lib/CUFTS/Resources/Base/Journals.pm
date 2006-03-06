@@ -390,11 +390,10 @@ sub _modify_record {
 
     foreach my $column (@columns) {
         next
-            if grep { $column eq $_ }
-            ( 'id', 'created', 'modified', 'scanned', 'resource', 'active' );
+            if grep { $column eq $_ } qw{ id created modified scanned resource active journal_auth };
 
         if ( $old_record->$column ne $new_record->{$column} ) {
-            if ( assert_ne( $new_record->{$column} ) ) {
+            if ( not_empty_string( $new_record->{$column} ) ) {
                 $old_record->$column( $new_record->{$column} );
             }
             else {
