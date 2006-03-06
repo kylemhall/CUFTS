@@ -274,19 +274,32 @@ sub process_print_record {
 sub load_cufts {
 	my ($site) = @_;
 
-	my $local_resources_iter = CUFTS::DB::LocalResources->search('active' => 'true', 'site' => $site->id);
+	my $local_resources_iter = CUFTS::DB::LocalResources->search(
+	    {
+	        'active' => 'true',
+	        'site' => $site->id,
+	        '-nest' => [
+               'resource'        => undef,
+               'resource.active' => 'true',
+            ],
+	    },
+	    { prefetch => [ 'resource' ] }
+	);
 
 	while (my $local_resource = $local_resources_iter->next) {
-		if (defined($local_resource->resource) and !$local_resource->resource->active) {
-			next;
-		}
 
-		CUFTS::Resolve->overlay_global_resource_data($local_resource);
-		next unless defined($local_resource->module);
+		my $resource = CUFTS::Resolve->overlay_global_resource_data($local_resource);
+		next if !defined($resource->module);
 		
-		my $module = CUFTS::Resolve::__module_name($local_resource->module);
+		my $module = CUFTS::Resolve::__module_name($resource->module);
 
-		my $journals_iter = CUFTS::DB::LocalJournals->search('resource' => $local_resource->id, 'active' => 'true');
+		my $journals_iter = CUFTS::DB::LocalJournals->search(
+		    {
+		        'resource' => $local_resource->id,
+		        'active' => 'true',
+		    },
+		    { 'prefetch' => [ 'journal' ] }
+		);
 		while (my $local_journal = $journals_iter->next) {
 
 			$local_journal = $module->overlay_global_title_data($local_journal);
@@ -336,7 +349,7 @@ sub load_cufts {
 			
 			if ( $module->can_getJournal($request) ) {
 	        	
-				$results = $module->build_linkJournal([$local_journal], $local_resource, $site, $request);
+				$results = $module->build_linkJournal([$local_journal], $resource, $site, $request);
 				foreach my $result (@$results) {
 					$module->prepend_proxy($result, $local_resource, $site, $request);
 					$new_link->{URL} = $result->url;
@@ -349,7 +362,7 @@ sub load_cufts {
 
 			if ( !scalar(@$results) && $module->can_getDatabase($request) ) {
 
-				$results = $module->build_linkDatabase([$local_journal], $local_resource, $site, $request);
+				$results = $module->build_linkDatabase([$local_journal], $resource, $site, $request);
 				foreach my $result (@$results) {
 					$module->prepend_proxy($result, $local_resource, $site, $request);
 					$new_link->{'URL'} = $result->url;
@@ -384,8 +397,8 @@ sub load_cufts {
 						
 						CJDB::DB::Associations->find_or_create({
 							'journal'            => $CJDB_record->id,
-							'association'        => $local_resource->name,
-							'search_association' => CUFTS::CJDB::Util::strip_title($local_resource->name),
+							'association'        => $resource->name,
+							'search_association' => CUFTS::CJDB::Util::strip_title($resource->name),
 							'site'               => $site->id,
 						});
 					
