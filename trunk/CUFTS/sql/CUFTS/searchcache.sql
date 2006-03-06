@@ -8,4 +8,4 @@ CREATE TABLE searchcache (
 	created		TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX searchcache_typequery_idx ON searchrefcache (type, query);
+CREATE INDEX searchcache_typequery_idx ON searchcache (type, query);
