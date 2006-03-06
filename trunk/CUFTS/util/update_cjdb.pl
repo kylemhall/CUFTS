@@ -34,6 +34,7 @@ use CUFTS::CJDB::Util;
 use CUFTS::CJDB::Loader::MARC::JournalsAuth;
 
 use CUFTS::Resolve;
+use CUFTS::ResourcesLoader;
 
 use Getopt::Long;
 
@@ -284,7 +285,6 @@ sub load_cufts {
 		next unless defined($local_resource->module);
 		
 		my $module = CUFTS::Resolve::__module_name($local_resource->module);
-		CUFTS::Resolve->__require($module);
 
 		my $journals_iter = CUFTS::DB::LocalJournals->search('resource' => $local_resource->id, 'active' => 'true');
 		while (my $local_journal = $journals_iter->next) {
