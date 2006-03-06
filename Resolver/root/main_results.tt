@@ -33,7 +33,7 @@
     <span class="results-from-resource">[% resource.name %]</span>: </span>
 
     [% IF service_total > 1 %]
-     <a href="javascript:void(0)" onclick="toggleServicesLayer('[% results_iter.count %]')" style="text-decoration: none;"><span id="showhide[% results_iter.count %]" class="results-others-available">(show other services)</span></a>
+     <a href="javascript:void(0)" onclick="new Element.toggle('others[% results_iter.count %]')" style="text-decoration: none;"><span id="showhide[% results_iter.count %]" class="results-others-available">(show other services)</span></a>
     [% END %]
 
     <br />

@@ -29,6 +29,8 @@ use CUFTS::DB::LocalResources;
 use CUFTS::DB::Stats;
 
 use CUFTS::Request;
+use CUFTS::ResourcesLoader;
+use CUFTS::ResolverResource;
 
 use CUFTS::Exceptions;
 use CUFTS::Config;
@@ -55,23 +57,23 @@ SITE:
         my $resources = defined($site) 
                         ? $self->get_active_resources($site)
                         : [];
-
+        
 RESOURCE:
-        foreach my $resource (@$resources) {
-            $self->overlay_global_resource_data($resource);
-            my $global_resource = $resource->resource;
-            my $provider        = $resource->provider;
+        foreach my $local_resource (@$resources) {
+
+            my $global_resource = $local_resource->resource;
+
+            my $resource = $self->overlay_global_resource_data($local_resource);
+            my $provider = $resource->provider;
 
             # Skip resource if there's no handling module
             next RESOURCE if !defined( $resource->module );
 
-            # Skip resource if we've already got results from anther site
+            # Skip resource if we've already got results from another site
             next RESOURCE if defined($global_resource)
                              && $global_resource_dedupe{ $global_resource->id };
 
             my $module = __module_name( $resource->module );
-            $self->__require($module);
-
 
             # Get records to work with.  This can also be used to modify the 
             # request object for things like adding extra metadata, in which
@@ -83,7 +85,7 @@ RESOURCE:
 
             # Loop through the active services to get results.
 
-            my $services = $self->get_services( $resource, $module, $site, $request );
+            my $services = $self->get_services( $local_resource, $module, $site, $request );
             my $compiled_results;
 SERVICE:
             foreach my $service (@$services) {
@@ -91,7 +93,7 @@ SERVICE:
 
                 # Dedupe providers that have already provided a link at this service level
 
-                next SERVICE if $resource->dedupe
+                next SERVICE if $local_resource->dedupe
                                 && not_empty_string( $provider )
                                 && $provider_dedupe{ $provider }->{ $service_name };
 
@@ -135,8 +137,6 @@ SERVICE:
                 }
             }
 
-            # We've changed the data due to the overlay, but we don't want to save it
-            $resource->discard_changes; 
         }
     }
 
@@ -309,22 +309,19 @@ sub get_active_resources {
     my ( $self, $site ) = @_;
 
     my @resources = CUFTS::DB::LocalResources->search(
-        active => 'true',
-        site   => $site->id,
-        { order_by => 'rank desc' }
+        active  => 'true',
+        site    => $site->id,
+        '-nest' => [
+           'resource'        => undef,
+           'resource.active' => 'true',
+        ],
+        { 
+          order_by => 'rank desc',
+          prefetch => [ 'resource' ]
+        },
     );
 
-    # Filter out resources that are not active at the global level
-
-    my @active_resources;
-    foreach my $resource (@resources) {
-        if ( defined( $resource->resource ) ) {
-            next if !$resource->resource->active;
-        }
-        push @active_resources, $resource;
-    }
-
-    return \@active_resources;
+    return \@resources;
 }
 
 sub get_services {
@@ -359,64 +356,36 @@ sub get_services {
     return \@valid_services;
 }
 
-my $__required;
-
-sub __require {
-    my ( $self, $class ) = @_;
-    return if defined( $__required->{$class} ) && $__required->{$class} == 1;
-
-    $class =~ /[^a-zA-Z:_]/
-        and
-        die("Invalid class name passed into __require_class - \"$class\"");
-
-    eval "require $class";
-    if ($@) {
-        die("Error requiring class = \"$@\"");
-    }
-    $__required->{$class} = 1;
-
-    return 1;
-}
 
 sub __module_name {
     return $CUFTS::Config::CUFTS_MODULE_PREFIX . $_[0];
 }
 
 ##
-## overlay_global_resource_data - Overlay global resource data into a local resource record and
-## sets the "ignore_changes" flag so that the record does not get written into the DB.
+## overlay_global_resource_data - Overlay global resource data into a non-CDBI object
+## with merged local/global fields.  Previous versions used CDBI objects but modifying
+## the fields, even temporarily was too slow due to triggers, etc.
 ##
 
 sub overlay_global_resource_data {
     my ( $self, $local ) = @_;
 
-    return if !defined($local);
-    
+    my $resource = CUFTS::ResolverResource->new();
+
     my $global = $local->resource;
-    return $local if !defined( $local->resource );
-
-    # get global data for fields that are not defined in local
-
-    foreach my $column (qw(name provider resource_type module)) {
-        if ( !defined( $local->$column ) ) {
-            $local->$column( $global->$column )
-        }
+    my $is_local = !defined( $global );
+    if (!$is_local) {
+        $resource->resource($global);
     }
 
-    # get global details data for fields that are not defined in local
-
-COLUMN:
-    foreach my $column ( $local->details->columns ) {
-        next COLUMN if $column =~ /^erm/;  # Skip ERM columns
-
-        if ( !defined( $local->$column ) && defined( $global->$column ) ) {
-            $local->$column( $global->$column );
-        }
+    foreach my $column ( $resource->columns ) {
+        $resource->$column( 
+            $is_local || not_empty_string( $local->$column ) 
+            ? $local->$column
+            : $global->$column );
     }
 
-    $local->ignore_changes;
-
-    return $local;
+    return $resource;
 }
 
 1;

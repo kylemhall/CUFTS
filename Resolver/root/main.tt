@@ -2,6 +2,10 @@
 <html>
 <head><title>CUFTS Resolver</title>
 <link rel="stylesheet" href="[% css_dir %]resolver.css" type="text/css" media="screen" />
+[% IF site_css_dir %]
+<link rel="stylesheet" href="[% site_css_dir %]resolver.css" type="text/css" media="screen" />
+[% END %]
+<script src="[% js_dir %]prototype.js" type="text/javascript"></script>
 <script src="[% js_dir %]resolver.js" type="text/javascript"></script>
 </head>
 <body>
