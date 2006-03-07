@@ -72,6 +72,13 @@ __PACKAGE__->details_columns(
         rebuild_ejournals_only
         show_ERM
         test_MARC_file
+        
+        google_scholar_on
+        google_scholar_keywords
+        google_scholar_e_link_label
+        google_scholar_other_link_label
+        google_scholar_openurl_base
+        google_scholar_other_xml
     )
 );
 
