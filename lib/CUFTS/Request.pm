@@ -137,10 +137,23 @@ sub parse_openurl_0 {
     foreach my $field ( keys %$fields ) {
         $fields->{$field} =~ s/\n/ /g;
 
-        $request->can($field)
-            or warn("Unrecognized OpenURL parameter: $field");
-        $request->$field( $fields->{$field} );
+        if ($field eq 'id') {
+            # Move id fields into seperate fields
+            
+            my ($subfield, $value) = split ':', $fields->{$field};
+            if ( grep {$_ eq $subfield} qw(doi oai pmid bibcode ) ) {
+                $request->$subfield($value);
+            }
+            
+        } else {
+            $request->can($field)
+                or warn("Unrecognized OpenURL parameter: $field");
+            $request->$field( $fields->{$field} );
+        }
+
     }
+
+    
 
     ##
     ## Deal with "pid" fields
