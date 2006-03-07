@@ -382,7 +382,9 @@ sub overlay_global_resource_data {
         $resource->$column( 
             $is_local || not_empty_string( $local->$column ) 
             ? $local->$column
-            : $global->$column );
+            : $global->can($column) 
+            ? $global->$column 
+            : undef );
     }
 
     return $resource;
