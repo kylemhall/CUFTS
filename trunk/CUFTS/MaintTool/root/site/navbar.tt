@@ -33,6 +33,14 @@
  <li id="navbar-list"><a id="navbar-link" href="[% url("$url_base/site/cjdb/data") %]">CJDB Data</a></li>
 [% END %]
 </ul>
+
+[% IF section == 'googlescholar' %]
+ <li id="navbar-list-active"><span>Google Scholar</span></li>
+[% ELSE %]
+ <li id="navbar-list"><a id="navbar-link" href="[% url("$url_base/site/googlescholar/edit") %]">Google Scholar</a></li>
+[% END %]
+</ul>
+
 </div>
 
 <div style="clear: left;"></div>
