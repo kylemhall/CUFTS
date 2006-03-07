@@ -41,7 +41,7 @@ sub openurl : Local {
     # resolve the request
     my $start = [Time::HiRes::gettimeofday];
     my $results = $resolver->resolve( $sites, $request );
-    warn(Time::HiRes::tv_interval($start));
+#    warn(Time::HiRes::tv_interval($start));
 
     $c->stash->{results}  = $results;
     $c->stash->{request}  = $request;
