@@ -242,7 +242,7 @@ sub _cleanup {
     # Fill in start page if it is not set and there is pages data
     if (     is_empty_string( $self->spage )
          && not_empty_string( $self->pages )
-         && $self->pages =~ /(\d+)$/ ) {
+         && $self->pages =~ /^(\d+)/ ) {
 
         $self->spage($1);
     }
