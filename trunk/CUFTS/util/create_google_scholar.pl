@@ -27,35 +27,64 @@ use Net::IP;
 
 use Unicode::String qw(utf8 latin1);
 
-use Getopt::Long;
-
 use strict;
 
-my %options;
-GetOptions( \%options, 'site_key=s', 'site_id=i' );
-
-if ($options{site_key} || $options{site_id}) {
-    my $site = get_site();
-    load_site($site);
-} else {
-    load_all_sites();
-}
+load_all_sites();
 
 sub load_all_sites {
+    my $output;
+    $output .= qq{<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n};
+    $output .= qq{<!DOCTYPE institutions PUBLIC "-//GOOGLE//Institutional Links List 1.0//EN" "http://scholar.google.com/scholar/institutions.dtd">\n};
+    $output .= "<institutions>\n";
+
     my $site_iter = CUFTS::DB::Sites->retrieve_all;
 
 SITE:
-    while (my $site = $site_iter->next) {
-    	my $site_id = $site->id;	
-
+    while ( my $site = $site_iter->next ) {
     	print "Checking " . $site->name . "\n";
 
-    	next if $site->update_gs ne '1';
+    	next if $site->google_scholar_on ne '1';
+    	my $errors = 0;
+    	if ( is_empty_string($site->google_scholar_e_link_label) ) {
+    	    print " * Error: electronic link label field is empty\n";
+    	    $errors++;
+    	}
+    	if ( is_empty_string($site->google_scholar_other_link_label) ) {
+    	    print " * Error: other link label field is empty\n";
+    	    $errors++;
+    	}
+    	if ( is_empty_string($site->google_scholar_openurl_base) ) {
+    	    print " * Error: OpenURL base field is empty\n";
+    	    $errors++;
+    	}
+    	if ( !scalar($site->ips) ) {
+    	    print " * Error: No site IP ranges defined\n";
+    	    $errors++;
+    	}
+    	
+        next if $errors;
 
-        load_site($site);
+        $output .= load_site($site);
 
     	print "Finished ", $site->name,  "\n";
     }	
+    $output .= "</institutions>\n";
+
+    print "Attempting to create control file\n";
+
+    my $dir = $CUFTS::Config::CUFTS_RESOLVER_SITE_DIR . '/GoogleScholar';
+    -d $dir
+        or mkdir $dir
+            or die("Unable to create directory for Google Scholar control file ($dir): $!");
+            
+    my $file = $dir . '/institutions.xml';
+    open GSFILE, ">$file"
+        or die("Unable to open file ($file) for writing: $!");
+    
+    print GSFILE $output;
+    close GSFILE;
+
+    print "Done!\n";
 }
 
 sub load_site {
@@ -67,13 +96,12 @@ sub load_site {
         'active'          => 't',
         'resource.active' => 't',
         'resource.site'   => $site_id,
-#        'journal.journal_auth' => 315128,
-    });
+    },
+    { prefetch => ['journal'] }
+    );
     my %jas;
     my $count;
     while ( my $lj = $lj_iter->next ) {
-#        last if $count++ > 50;
-
 
         my $gj = $lj->journal;
         my $ft_start_date  = defined($lj->ft_start_date)  ? $lj->ft_start_date  : defined($gj) ? $gj->ft_start_date  : undef;
@@ -172,50 +200,50 @@ sub load_site {
 
     $file_count = output( $site, $file_count, \$output );
 
-    create_summary($site, $file_count);
-
-    return 1;
+    return create_summary($site, $file_count);
 }
 
 sub create_summary {
     my ($site, $file_count) = @_;
     
-    my $dir = $CUFTS::Config::CUFTS_RESOLVER_SITE_DIR . '/' . $site->id . '/static/GoogleScholar';
-    my $file = "$dir/institutional_links.xml";
-    open GSFILE, ">$file"
-        or die("Unable to open file ($file)for writing: $!");
-
-    print GSFILE qq{<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n};
-    print GSFILE qq{<!DOCTYPE institutional_links PUBLIC "-//GOOGLE//Institutional Links 1.0//EN" "http://scholar.google.com/scholar/institutional_links.dtd">\n};
-    print GSFILE "<institutional_links>\n";
-
-    print GSFILE "<institution>" . $site->name . "</institution>\n";
-    print GSFILE "<keywords>" . $site->key . "</keywords>\n";
-    print GSFILE "<contact>" . $site->email . "</contact>\n";
-    print GSFILE "<electronic_link_label>electronic journals</electronic_link_label>\n";
+    my $site_key = $site->key;
+    my $site_id  = $site->id;
     
-    print GSFILE "<openurl_base>http://cufts2.lib.sfu.ca:8082/Resolver/site/" . $site->key . "/resolve/openurl/main</openurl_base>\n";
+    my $output = qq{<institutional_links id="$site_key">\n};
     
-    print GSFILE "<openurl_option>doi</openurl_option>\n";
-    print GSFILE "<openurl_option>journal-title</openurl_option>\n";
-
-    print GSFILE "<electronic_holdings>\n";
-    foreach my $count ( 1 .. ( $file_count - 1 ) ) {
-        print GSFILE "<url>http://cufts2.lib.sfu.ca:8082/Resolver/sites/1/static/GoogleScholar/journals${count}.xml</url>\n";
+    $output .= "<institution>" . $site->name . "</institution>\n";
+    if ( not_empty_string($site->google_scholar_keywords) ) {
+        $output .=  "<keywords>" . $site->google_scholar_keywords . "</keywords>\n";
     }
-    print GSFILE "</electronic_holdings>\n";
+    $output .=  "<contact>" . $site->email . "</contact>\n";
+    $output .=  "<electronic_link_label>" .  $site->google_scholar_e_link_label . "</electronic_link_label>\n";
+    $output .=  "<other_link_label>" .  $site->google_scholar_other_link_label . "</other_link_label>\n";
+    
+    $output .=  "<openurl_base>" . $site->google_scholar_openurl_base . "</openurl_base>\n";
+    
+    $output .=  "<openurl_option>doi</openurl_option>\n";
+    $output .=  "<openurl_option>journal-title</openurl_option>\n";
+
+    $output .=  "<electronic_holdings>\n";
+    foreach my $count ( 1 .. ( $file_count - 1 ) ) {
+        $output .=  "<url>${CUFTS::Config::CUFTS_RESOLVER_URL}/sites/${site_id}/static/GoogleScholar/journals${count}.xml</url>\n";
+    }
+    $output .=  "</electronic_holdings>\n";
     
     foreach my $network ( map { $_->network } $site->ips ) {
         my $ip = Net::IP->new($network);
         my $start = $ip->ip;
         my $end   = $ip->last_ip;
-        print GSFILE "<patron_ip_range>${start}-${end}</patron_ip_range>\n";
+        $output .=  "<patron_ip_range>${start}-${end}</patron_ip_range>\n";
     }
     
-    print GSFILE "</institutional_links>\n";
-    close GSFILE;
+    if ( not_empty_string($site->google_scholar_other_xml) ) {
+        $output .= $site->google_scholar_other_xml;
+    }
     
-    
+    $output .=  "</institution>\n";
+
+    return $output;
 }
 
 
@@ -270,7 +298,7 @@ sub output {
 
     my $file = "$dir/journals${file_count}.xml";
     open GSFILE, ">$file"
-        or die("Unable to open file ($file)for writing: $!");
+        or die("Unable to open file ($file) for writing: $!");
 
     print GSFILE qq{<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n};
     print GSFILE qq{<!DOCTYPE institutional_holdings PUBLIC "-//GOOGLE//Institutional Holdings 1.0//EN" "http://scholar.google.com/scholar/institutional_holdings.dtd">\n};
@@ -281,19 +309,3 @@ sub output {
 
     return $file_count;
 }
-
-
-sub get_site {
-	defined($options{'site_id'}) and
-		return CUFTS::DB::Sites->retrieve(int($options{'site_id'}));
-
-	my @sites = CUFTS::DB::Sites->search('key' => $options{'site_key'});
-	
-	scalar(@sites) == 1 or
-		die('Could not get CUFTS site for key: ' . $options{'site_key'});
-		
-	return $sites[0];
-}
-
-
-
