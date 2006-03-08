@@ -17,8 +17,3 @@
 There were problems with the submitted data.  See below.
 </div>
 [% END -%]
-[%- IF c.form.has_missing %]
-<div id="form-invalid">
-Some required fields were not filled out.
-</div>
-[% END -%]
