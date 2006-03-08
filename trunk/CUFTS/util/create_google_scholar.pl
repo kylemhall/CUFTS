@@ -72,10 +72,15 @@ SITE:
 
     print "Attempting to create control file\n";
 
-    my $dir = $CUFTS::Config::CUFTS_RESOLVER_SITE_DIR . '/GoogleScholar';
+    my $dir = $CUFTS::Config::CUFTS_RESOLVER_SITE_DIR . '/static';
     -d $dir
         or mkdir $dir
             or die("Unable to create directory for Google Scholar control file ($dir): $!");
+
+    $dir = $CUFTS::Config::CUFTS_RESOLVER_SITE_DIR . '/GoogleScholar';
+    -d $dir
+         or mkdir $dir
+             or die("Unable to create directory for Google Scholar control file ($dir): $!");
             
     my $file = $dir . '/institutions.xml';
     open GSFILE, ">$file"
@@ -241,7 +246,7 @@ sub create_summary {
         $output .= $site->google_scholar_other_xml;
     }
     
-    $output .=  "</institution>\n";
+    $output .=  "</institutional_links>\n";
 
     return $output;
 }
