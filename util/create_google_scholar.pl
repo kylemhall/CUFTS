@@ -102,7 +102,6 @@ sub load_site {
         'resource.active' => 't',
         'resource.site'   => $site_id,
     },
-    { prefetch => ['journal'] }
     );
     my %jas;
     my $count;

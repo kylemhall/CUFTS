@@ -274,19 +274,10 @@ sub process_print_record {
 sub load_cufts {
 	my ($site) = @_;
 
-	my $local_resources_iter = CUFTS::DB::LocalResources->search(
-	    {
-	        'active' => 'true',
-	        'site' => $site->id,
-	        '-nest' => [
-               'resource'        => undef,
-               'resource.active' => 'true',
-            ],
-	    },
-	    { prefetch => [ 'resource' ] }
-	);
+	my $local_resources_iter = CUFTS::DB::LocalResources->search( active => 'true', site => $site->id );
 
 	while (my $local_resource = $local_resources_iter->next) {
+        next if defined($resource->resource) && !$resource->resource->active;
 
 		my $resource = CUFTS::Resolve->overlay_global_resource_data($local_resource);
 		next if !defined($resource->module);
@@ -298,7 +289,6 @@ sub load_cufts {
 		        'resource' => $local_resource->id,
 		        'active' => 'true',
 		    },
-		    { 'prefetch' => [ 'journal' ] }
 		);
 		while (my $local_journal = $journals_iter->next) {
 

@@ -227,7 +227,6 @@ sub delete_titles {
 }
 
 
-
 sub is_local_resource {
 	return 1;
 }
