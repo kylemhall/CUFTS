@@ -277,7 +277,7 @@ sub load_cufts {
 	my $local_resources_iter = CUFTS::DB::LocalResources->search( active => 'true', site => $site->id );
 
 	while (my $local_resource = $local_resources_iter->next) {
-        next if defined($resource->resource) && !$resource->resource->active;
+        next if defined($local_resource->resource) && !$local_resource->resource->active;
 
 		my $resource = CUFTS::Resolve->overlay_global_resource_data($local_resource);
 		next if !defined($resource->module);
