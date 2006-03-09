@@ -309,20 +309,24 @@ sub get_active_resources {
     my ( $self, $site ) = @_;
 
     my @resources = CUFTS::DB::LocalResources->search(
-        active  => 'true',
-        site    => $site->id,
-        '-nest' => [
-           'resource'        => undef,
-           'resource.active' => 'true',
-        ],
-        { 
-          order_by => 'rank desc',
-          prefetch => [ 'resource' ]
-        },
+        active => 'true',
+        site   => $site->id,
+        { order_by => 'rank desc' }
     );
 
-    return \@resources;
+    # Filter out resources that are not active at the global level
+
+    my @active_resources;
+    foreach my $resource (@resources) {
+        if ( defined( $resource->resource ) ) {
+	            next if !$resource->resource->active;
+        }
+        push @active_resources, $resource;
+    }
+
+    return \@active_resources;
 }
+
 
 sub get_services {
     my ( $self, $resource, $module, $site, $request ) = @_;
