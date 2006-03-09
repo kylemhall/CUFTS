@@ -120,7 +120,7 @@ sub auto : Private {
 
     if (!($c->stash->{resources_display} = $c->session->{resources_display})) {
         my %resources_display;
-        my $resources_iter = CUFTS::DB::LocalResources->search('site' => $c->stash->{current_site}->id, 'active' => 't');
+        my $resources_iter = CUFTS::DB::LocalResources->search( { 'site' => $c->stash->{current_site}->id, 'active' => 't' } );
 
         while (my $resource = $resources_iter->next) {
             my $resource_id = $resource->id;
