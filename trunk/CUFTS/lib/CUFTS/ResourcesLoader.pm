@@ -70,6 +70,7 @@ use CUFTS::Resources::Oxford;
 use CUFTS::Resources::Proquest_CNS;
 use CUFTS::Resources::Proquest;
 use CUFTS::Resources::ProquestMicromedia;
+#use CUFTS::Resources::PubMed;
 use CUFTS::Resources::PubMedCentral;
 use CUFTS::Resources::SageCSA;
 use CUFTS::Resources::SIRSI;
