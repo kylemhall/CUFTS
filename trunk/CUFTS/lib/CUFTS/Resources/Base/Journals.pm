@@ -966,8 +966,7 @@ sub activate_all {
         local $local_titles_module->db_Main->{AutoCommit};
 
         eval {
-            while ( my $global_title = $global_titles->next )
-            {
+            while ( my $global_title = $global_titles->next ) {
 
       # Check for existing local title record, create it if it does not exist.
 
