@@ -53,6 +53,9 @@
 		
 		<label for="doi">DOI</label>
 		<input type="text" name="doi" id="doi" /><br />
+
+		<label for="doi">PMID</label>
+		<input type="text" name="pmid" id="pmid" /><br />
 		
 		<input type="submit" name="_submit" value="submit" class="submit"/>
 		
