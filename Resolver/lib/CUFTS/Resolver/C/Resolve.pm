@@ -36,10 +36,10 @@ sub openurl : Local {
         @{$sites} = $resolver->get_sites($request);
     }
 
-    use Time::HiRes ();
+#    use Time::HiRes ();
 
     # resolve the request
-    my $start = [Time::HiRes::gettimeofday];
+#    my $start = [Time::HiRes::gettimeofday];
     my $results = $resolver->resolve( $sites, $request );
 #    warn(Time::HiRes::tv_interval($start));
 

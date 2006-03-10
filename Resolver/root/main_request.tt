@@ -35,5 +35,6 @@
 [% IF request.date %]date: [% request.date %][% END %]
 </div>
 [% IF request.doi %]<div class="request-label">doi</div><div class="request-field">[% request.doi %]</div>[% END %]
+[% IF request.pmid %]<div class="request-label">pmid</div><div class="request-field">[% request.pmid %]</div>[% END %]
 [% IF request.oai %]<div class="request-label">doi</div><div class="request-field">[% request.oai %]</div>[% END %]
 </div>
