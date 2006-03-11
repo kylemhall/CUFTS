@@ -6,7 +6,7 @@
 <tr><td class="label0" align="right">provider</td><td class="field0">[% global_resource.provider | html %]</td></tr>
 <tr><td class="label1" align="right">type</td><td class="field1">[% global_resource.resource_type.type | html %]</td></tr>
 <tr><td class="label0" align="right">module</td><td class="field0">[% global_resource.module | html %]</td></tr>
-<tr><td class="label1" align="right">rank</td><td class="field1">[% local_resource.rank | html || 0 %]</td></tr>
+<tr><td class="label1" align="right">rank</td><td class="field1">[% local_resource.rank || 0 | html %]</td></tr>
 <tr><td class="label0" align="right">proxy</td><td class="field0">[% local_resource.proxy ? 'yes' : 'no' %]</td></tr>
 <tr><td class="label1" align="right">dedupe</td><td class="field1">[% local_resource.active ? 'yes' : 'no' %]</td></tr>
 <tr><td class="label0" align="right">auto activate</td><td class="field0">[% local_resource.auto_activate ? 'yes' : 'no' %]</td></tr>
