@@ -29,9 +29,10 @@ sub prepare_path {
 
     my $strip_base = $c->config->{strip_base};
 
-    if ( $path =~ s{^ ${strip_base} (\w+) / }{}oxsm ) {
-        my $site_key = $1;
+    if ( $path =~ s{^ ${strip_base} ([,A-Za-z0-9]+) / }{}oxsm ) {
+        my ( $site_key, @other_sites ) = split ',', $1;
         $c->stash->{current_site_key}  = $site_key;
+        $c->stash->{other_sites}       = \@other_sites;
         $c->stash->{site_template_dir} = "root/sites/${site_key}";
 
         # Stringify c->req->base - otherwise it's a URI object

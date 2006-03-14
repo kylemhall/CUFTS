@@ -12,8 +12,7 @@ sub auto : Private {
 
     # FUTURE: Consider adding load of site specific resolver?
     my $resolver = new CUFTS::Resolve();
-
-    my $sites = $resolver->get_sites( undef, $c->stash->{current_site_key} );
+    my $sites = $resolver->get_sites( undef, [ $c->stash->{current_site_key}, defined($c->stash->{other_sites}) ? @{$c->stash->{other_sites}} : () ] );
 
     $c->stash->{sites}    = $sites;
     $c->stash->{resolver} = $resolver;
@@ -33,7 +32,7 @@ sub openurl : Local {
 
     # if we didn't get the sites from the URL earlier, try the request.
     if ( !scalar( @{$sites} ) ) {
-        @{$sites} = $resolver->get_sites($request);
+        $sites = $resolver->get_sites($request);
     }
 
 #    use Time::HiRes ();
