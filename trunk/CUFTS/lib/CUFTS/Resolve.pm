@@ -255,14 +255,22 @@ sub get_sites {
 
     my @sites;
 
+    my @site_keys;
     if ( defined($site_keys) ) {
-        my @site_keys = split ',', $site_keys;
-
-        foreach my $site_key (@site_keys) {
-            my @db_sites = CUFTS::DB::Sites->search( 'key' => $site_key );
-            if ( scalar(@db_sites) == 1 ) {
-                push @sites, $db_sites[0];
-            }
+        @site_keys = ref($site_keys) eq 'ARRAY'
+                     ? @$site_keys
+                     : split ',', $site_keys;
+    }
+    if ( defined($request) ) {
+        if ( defined($request->pid->{CUFTSSite}) ) {
+            push @site_keys, split(',', $request->pid->{CUFTSSite});
+        }
+    }
+    
+    foreach my $site_key (@site_keys) {
+        my @db_sites = CUFTS::DB::Sites->search( 'key' => $site_key );
+        if ( scalar(@db_sites) == 1 ) {
+            push @sites, $db_sites[0];
         }
     }
 
