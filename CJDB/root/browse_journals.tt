@@ -1,5 +1,4 @@
 [% USE url %]
-
 [% INCLUDE page_title.tt %]
 
 [% search_details.count %] [% INCLUDE browse_search_description.tt browse_type = browse_type, search_type = search_type, search_terms = search_terms, browse_field = browse_field %]
@@ -19,7 +18,6 @@
   [% SET journal = record %]
   [% SET title = journal.title %]
  [% END %]
-
  <div class="unified-journal">
   <span class="unified-title"><a href="[% url("$url_base/journal/$journal.id") %]">[% title | html %]</a></span>
   <span class="unified-issn">[% FOREACH issn IN journal.issns %][% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %][% ',' UNLESS loop.last %][% END %]</span>
