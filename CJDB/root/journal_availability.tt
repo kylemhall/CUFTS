@@ -33,6 +33,11 @@
    <div class="availability-data">[% link.embargo | html %]</div>
   [% END %]
 
+  [% IF link.current %]
+   <div class="availability-label">Current Limit:</div>
+   <div class="availability-data">Limited to the latest [% link.current | html %] only</div>
+  [% END %]
+
   <div class="availability-label">Link:</div>
   <div class="availability-data"><a href="[% link.URL %]">[%- PROCESS journals_link_label.tt -%]</a></div>
 
