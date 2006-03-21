@@ -38,6 +38,7 @@ __PACKAGE__->columns(All => qw(
 	citation_coverage
 	fulltext_coverage
 	embargo
+	current
 
 	URL
 	link_type
