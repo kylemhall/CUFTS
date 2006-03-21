@@ -6,6 +6,7 @@ CREATE TABLE cjdb_links (
     citation_coverage VARCHAR(2048),
     fulltext_coverage VARCHAR(2048),
     embargo	          VARCHAR(2048),
+    current	          VARCHAR(2048),
     URL               VARCHAR(2048),
     link_type         INTEGER NOT NULL,
     resource          INTEGER,
