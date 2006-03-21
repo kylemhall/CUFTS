@@ -290,13 +290,15 @@ sub load_cufts {
 		        'active' => 'true',
 		    },
 		);
+		
+JOURNAL:		
 		while (my $local_journal = $journals_iter->next) {
 
 			$local_journal = $module->overlay_global_title_data($local_journal);
 			my $journal_auth = $local_journal->journal_auth;
 			unless (defined($journal_auth)) {
 				print "Skipping journal '", $local_journal->title, "' due to missing journal_auth record.\n";
-				next;
+				next JOURNAL;
 			}
 
 			my $new_link = {
@@ -322,9 +324,19 @@ sub load_cufts {
 				$new_link->{'embargo'} = $local_journal->embargo_months . ' months';
 			}
 
+			if (defined($local_journal->current_months)) {
+				$new_link->{'current'} = $local_journal->current_months . ' months';
+			}
+
 			# Skip if citations are turned off and we have no fulltext coverage data
 				
-			next if !defined($new_link->{'fulltext_coverage'}) && !$site->cjdb_show_citations;
+			if (    !defined($new_link->{'fulltext_coverage'}) 
+			     && !defined($new_link->{'embargo'})
+			     && !defined($new_link->{'current'})
+			     && !$site->cjdb_show_citations
+			   ) {
+				next JOURNAL;
+			}
 
 			##
 			## Create a request object and use the resolver to create journal/database level links
