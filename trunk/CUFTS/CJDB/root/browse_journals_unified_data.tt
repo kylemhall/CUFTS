@@ -31,7 +31,18 @@
      </span>
    [% END %]
 
-   [% IF link.citation_coverage && current_site.cjdb_show_citations && !(link.embargo || link.fulltext_coverage) %]
+   [% IF link.current %]
+    <span class="unified-current">
+     [%- IF link.fulltext_coverage || link.embargo -%]
+      (latest [% link.current | html %] only)
+     [%- ELSE -%]
+      fullext with latest [% link.current | html %] only
+     [%- END -%]
+     </span>
+   [% END %]
+
+
+   [% IF link.citation_coverage && current_site.cjdb_show_citations && !(link.embargo || link.fulltext_coverage || link.current) %]
    [% IF link.embargo || link.fulltext_coverage %]<br />[% END %]
    <span class="unified-citation">citation [% link.citation_coverage | html %]</span>
    [% END %]
