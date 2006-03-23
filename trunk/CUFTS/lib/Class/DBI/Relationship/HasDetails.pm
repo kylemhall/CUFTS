@@ -66,10 +66,6 @@ You can now do:
 
 =cut
 
-
-
-
-
 use strict;
 use warnings;
 
@@ -78,146 +74,158 @@ use Data::Dumper;
 use base 'Class::DBI::Relationship';
 
 sub import {
-	my $self = shift;
-	my $caller = caller();
-	$caller->mk_classdata('__has_details_list');
-	$caller->add_relationship_type(
-		has_details => 'Class::DBI::Relationship::HasDetails'
-	);
+    my $self   = shift;
+    my $caller = caller();
+    $caller->mk_classdata('__has_details_list');
+    $caller->add_relationship_type(
+        has_details => 'Class::DBI::Relationship::HasDetails' );
 }
 
 sub remap_arguments {
-	my ($proto, $class, $accessor, $f_class, $f_key, $args) = @_;
+    my ( $proto, $class, $accessor, $f_class, $f_key, $args ) = @_;
 
-	return $class->_croak("has_details needs an accessor name") unless $accessor;
-	return $class->_croak("has_details needs a foreign class")  unless $f_class;
-	return $class->_croak("has_details needs a foreign key") unless $f_key;
+    return $class->_croak("has_details needs an accessor name")
+        unless $accessor;
+    return $class->_croak("has_details needs a foreign class")
+        unless $f_class;
+    return $class->_croak("has_details needs a foreign key") unless $f_key;
 
-	$class->can($accessor)
-		and return $class->_carp("$accessor method already exists in $class\n");
+    $class->can($accessor)
+        and return $class->_carp("$accessor method already exists in $class\n");
 
-	$class->_require_class($f_class);
+    $class->_require_class($f_class);
 
-	if (ref $f_key eq "HASH") {    # didn't supply f_key, this is really $args
-		return $class->_croak("has_details needs a foreign key");
-	}
+    if ( ref $f_key eq "HASH" ) {  # didn't supply f_key, this is really $args
+        return $class->_croak("has_details needs a foreign key");
+    }
 
-	if (ref $f_key eq "ARRAY") {
-		return $class->_croak("Multi-column foreign keys not supported")
-			if @$f_key > 1;
-		$f_key = $f_key->[0];
-	}
+    if ( ref $f_key eq "ARRAY" ) {
+        return $class->_croak("Multi-column foreign keys not supported")
+            if @$f_key > 1;
+        $f_key = $f_key->[0];
+    }
 
-	$args ||= {};
-	$args->{foreign_key} = $f_key;
+    $args ||= {};
+    $args->{foreign_key} = $f_key;
 
-	no strict 'refs';
-	*{"$class\::__details_objects"} = sub { 
-			my ($self, $value) = @_;
-			defined($value) and
-				$self->{'__details_objects'} = $value;
-			return $self->{'__details_objects'};
-		};
+    no strict 'refs';
+    *{"$class\::__details_objects"} = sub {
 
-	return ($class, $accessor, $f_class, $args);
+        my ( $self, $value ) = @_;
+        defined($value)
+            and $self->{'__details_objects'} = $value;
+
+        return $self->{'__details_objects'};
+    };
+
+    return ( $class, $accessor, $f_class, $args );
 }
 
 sub _set_up_class_data {
-	my $self = shift;
-	my $accessor = $self->accessor;
+    my $self     = shift;
+    my $accessor = $self->accessor;
 
-	$self->SUPER::_set_up_class_data;
+    $self->SUPER::_set_up_class_data;
 }
 
 sub triggers {
-	my $details_self = shift;
-	my $accessor = $details_self->accessor;
+    my $details_self = shift;
+    my $accessor     = $details_self->accessor;
 
-	return (
-		before_update => sub {
-			my $self = shift;
-			return $self->$accessor->_update;
-		},
-		before_delete => sub {
-			my $self = shift;
-			return $self->$accessor->_delete;
-		}
-	);
+    return (
+        before_update => sub {
+            my $self = shift;
+            return $self->$accessor->_update;
+        },
+        before_delete => sub {
+            my $self = shift;
+            return $self->$accessor->_delete;
+        }
+    );
 }
 
 sub methods {
-	my $self = shift;
-	my $accessor = $self->accessor;
+    my $self     = shift;
+    my $accessor = $self->accessor;
 
-	return (
-		$accessor		=> $self->_has_details_method,
-		"${accessor}_columns"	=> $self->_details_columns,
-	);
+    return (
+        $accessor             => $self->_has_details_method,
+        "${accessor}_columns" => $self->_details_columns,
+    );
 }
 
 sub _has_details_method {
-	my $details_self = shift;
-	my $accessor = $details_self->accessor;
-	
-	return sub {
-		my $self = shift;
-		defined($self->__details_objects) or
-			$self->__details_objects({});
-		unless (ref($self->__details_objects->{$accessor})) {
-			my $virtual_class_name = 'Class::DBI::Relationship::HasDetails::Details::' . $details_self->foreign_class;
-			my $virtual_class = "package ${virtual_class_name};\n";
-			$virtual_class .= "use base 'Class::DBI::Relationship::HasDetails::Details';\n";
-			$virtual_class .= "1;\n";
+    my $details_self = shift;
+    my $accessor     = $details_self->accessor;
 
-			eval($virtual_class);
-			if ($@) {
-				$self->_croak("Unable to eval dynamic class: $@");
-			}
-			$self->__details_objects->{$accessor} = $virtual_class_name->new($details_self->foreign_class, $details_self->args->{foreign_key}, $self->id(), $details_self->args->{columns});
-		}
-		return $self->__details_objects->{$accessor};
-	}
+    return sub {
+        my $self = shift;
+        defined( $self->__details_objects )
+            or $self->__details_objects( {} );
+        unless ( ref( $self->__details_objects->{$accessor} ) ) {
+            my $virtual_class_name = 'Class::DBI::Relationship::HasDetails::Details::' . $details_self->foreign_class;
+            my $virtual_class = "package ${virtual_class_name};\n";
+            $virtual_class .= "use base 'Class::DBI::Relationship::HasDetails::Details';\n";
+            $virtual_class .= "1;\n";
+
+            eval($virtual_class);
+            if ($@) {
+                $self->_croak("Unable to eval dynamic class: $@");
+            }
+            $self->__details_objects->{$accessor} = $virtual_class_name->new(
+                $details_self->foreign_class,
+                $details_self->args->{foreign_key},
+                $self->id(), $details_self->args->{columns}
+            );
+        }
+        return $self->__details_objects->{$accessor};
+    }
 }
 
 sub _details_columns {
-	my $self = shift;
-	my $accessor = $self->accessor;
-	
-	return sub {
-		my $class = shift;
-		if (scalar(@_) > 0) {
-			defined($self->args->{columns}) and
-				$self->_carp("Detail columns have already been set for accessor '$accessor'.  Results may be... unexpected.");
+    my $self     = shift;
+    my $accessor = $self->accessor;
 
-			$self->args->{columns} = [@_];
+    return sub {
+        my $class = shift;
+        if ( scalar(@_) > 0 ) {
+            defined( $self->args->{columns} )
+                and $self->_carp("Detail columns have already been set for accessor '$accessor'.  Results may be... unexpected.");
 
-			no strict 'refs';
-			foreach my $method (@{$self->args->{columns}}) {
-				if ($class->can($method)) {
-					$self->_carp("method '$method' already exists in base object while mapping details methods");
-					next;
-				}
-				my $accessor_name = Class::DBI::Relationship::HasDetails::Details->accessor_name($method);
-				my $deletor_name = Class::DBI::Relationship::HasDetails::Details->deletor_name($method);
+            $self->args->{columns} = [@_];
 
-				*{"$class\::$accessor_name"} = sub {return shift->$accessor->$accessor_name(@_);};
-				*{"$class\::$deletor_name"} = sub {return shift->$accessor->$deletor_name(@_);};
-				
-			}
+            no strict 'refs';
+            foreach my $method ( @{ $self->args->{columns} } ) {
+                if ( $class->can($method) ) {
+                    $self->_carp("method '$method' already exists in base object while mapping details methods");
+                    next;
+                }
+                my $accessor_name
+                    = Class::DBI::Relationship::HasDetails::Details->accessor_name($method);
+                my $deletor_name
+                    = Class::DBI::Relationship::HasDetails::Details->deletor_name($method);
 
-		} else {
-			return defined($self->args->{columns}) ? @{$self->args->{columns}} : ();
-		}
-	}
+                *{"$class\::$accessor_name"}
+                    = sub { return shift->$accessor->$accessor_name(@_); };
+                *{"$class\::$deletor_name"}
+                    = sub { return shift->$accessor->$deletor_name(@_); };
+
+            }
+
+        }
+        else {
+            return
+                defined( $self->args->{columns} )
+                ? @{ $self->args->{columns} }
+                : ();
+        }
+    }
 }
 
 ##
 ## Remap set() and get() and provide our own.  We keep the original set() and get() around
 ## so we can call them.  Hopefully this will be a little more upgrade proof.
 ##
-
-
-
 
 package Class::DBI::Relationship::HasDetails::Details;
 
@@ -227,59 +235,63 @@ use Data::Dumper;
 
 __PACKAGE__->mk_classdata('_columns');
 __PACKAGE__->mk_classdata('_f_class');
+__PACKAGE__->mk_classdata('_fast_delete');
 __PACKAGE__->mk_classdata('_key');
 __PACKAGE__->mk_classdata('_field');
 __PACKAGE__->mk_classdata('_value');
 
-sub _initializing 		{ shift->_local_accessor('_initializing',	@_) }
-sub _initialized		{ shift->_local_accessor('_initialized', 	@_) }
-sub _id				{ shift->_local_accessor('_id',			@_) }
-sub _dirty_cols			{ shift->_local_accessor('_dirty_cols',		@_) }
-sub _deleted_cols		{ shift->_local_accessor('_deleted_cols',	@_) }
+
+sub _initializing { shift->_local_accessor( '_initializing', @_ ) }
+sub _initialized  { shift->_local_accessor( '_initialized',  @_ ) }
+sub _id           { shift->_local_accessor( '_id',           @_ ) }
+sub _dirty_cols   { shift->_local_accessor( '_dirty_cols',   @_ ) }
+sub _deleted_cols { shift->_local_accessor( '_deleted_cols', @_ ) }
 
 __PACKAGE__->_field('field');
 __PACKAGE__->_value('value');
 
 sub _local_accessor {
-	my ($self, $field, $value) = @_;
-	defined($self) or
-		$self->_croak('Undefined $self in _local_accessor() called from: ' . caller());
-	defined($field) or
-		$self->_croak('Undefined $field in _local_accessor() called from: ' . caller());
+    my ( $self, $field, $value ) = @_;
+    defined($self)
+        or $self->_croak('Undefined $self in _local_accessor() called from: ' . caller() );
+    defined($field)
+        or $self->_croak('Undefined $field in _local_accessor() called from: ' . caller() );
 
-	if (defined($value)) {
-		$self->{$field} = $value;
-	}
-	return $self->{$field};
+    if ( defined($value) ) {
+        $self->{$field} = $value;
+    }
+    return $self->{$field};
 }
 
-
 sub new {
-	my ($class, $f_class, $key, $id, $columns) = @_;
-	my $self = bless {}, $class;
+    my ( $class, $f_class, $key, $id, $columns ) = @_;
+    my $self = bless {}, $class;
 
-	$self->_initialized(0);
-	$self->_initializing(0);
+    $self->_initialized(0);
+    $self->_initializing(0);
 
-	$self->_f_class($f_class);
-	$self->_key($key);
-	$self->_id($id);
+    $self->_f_class($f_class);
+    $self->_key($key);
+    $self->_id($id);
+    $self->_fast_delete($f_class->can('fast_delete'));
 
-	$self->_dirty_cols({});
-	$self->_deleted_cols({});
+    $self->_dirty_cols(   {} );
+    $self->_deleted_cols( {} );
 
-	$self->columns(@$columns);
+    $self->columns(@$columns);
 
-	return $self;
+    return $self;
 }
 
 sub _mk_column_accessors {
-	my ($self, @columns) = @_;
+    my ( $self, @columns ) = @_;
 
-	foreach my $col (@columns) {
-		$self->_make_method($self->accessor_name($col), $self->my_make_accessor($col));
-		$self->_make_method($self->deletor_name($col), $self->make_delete_accessor($col));
-	}
+    foreach my $col (@columns) {
+        $self->_make_method( $self->accessor_name($col),
+            $self->my_make_accessor($col) );
+        $self->_make_method( $self->deletor_name($col),
+            $self->make_delete_accessor($col) );
+    }
 }
 
 ##
@@ -288,25 +300,27 @@ sub _mk_column_accessors {
 ##
 
 sub my_make_accessor {
-	my ($class, $field) = @_;
-	
-	# Build a closure around $field.
+    my ( $class, $field ) = @_;
 
-	my $deletor_name = $class->deletor_name($field);
-	
-	return sub {
-		my $self = shift;
-		
-		if (scalar(@_)) {
-			if (defined($_[0])) {
-				return $self->set($field, @_);
-			} else {
-				return $self->$deletor_name;
-			}
-		} else {
-			return $self->get($field);
-		}
-	};
+    # Build a closure around $field.
+
+    my $deletor_name = $class->deletor_name($field);
+
+    return sub {
+        my $self = shift;
+
+        if ( scalar(@_) ) {
+            if ( defined( $_[0] ) ) {
+                return $self->set( $field, @_ );
+            }
+            else {
+                return $self->$deletor_name;
+            }
+        }
+        else {
+            return $self->get($field);
+        }
+    };
 }
 
 ##
@@ -314,160 +328,175 @@ sub my_make_accessor {
 ##
 
 sub _make_method {
-	my ($self, $name, $method) = @_;
-	no strict 'refs';
+    my ( $self, $name, $method ) = @_;
+    no strict 'refs';
 
-	my $class = ref($self);
-	return if defined &{"$class\::$name"};
+    my $class = ref($self);
+    return if defined &{"$class\::$name"};
 
-	$self->_carp("Column '$name' in $self clashes with built-in method")
-		if defined &{"Class::DBI::Details::$name"};
+    $self->_carp("Column '$name' in $self clashes with built-in method")
+        if defined &{"Class::DBI::Details::$name"};
 
-	*{"$class\::$name"} = $method;	
+    *{"$class\::$name"} = $method;
 
-	return;
+    return;
 }
 
 sub make_delete_accessor {
-	my ($class, $col) = @_;
+    my ( $class, $col ) = @_;
 
-	return sub {
-		my $self = shift;
-		$self->_init() unless $self->_initialized || $self->_initializing;
-		if (defined($self->{$col})) {
-			delete $self->{$col};
-			$self->_deleted_cols->{$col} = 1;
-		}
-		return undef;
-	};
+    return sub {
+        my $self = shift;
+        $self->_init() unless $self->_initialized || $self->_initializing;
+        if ( defined( $self->{$col} ) ) {
+            delete $self->{$col};
+            $self->_deleted_cols->{$col} = 1;
+        }
+        return undef;
+    };
 }
 
 sub set {
-	my $self = shift;
-	my $key = shift;
+    my $self = shift;
+    my $key  = shift;
 
-	$self->_init() unless $self->_initialized || $self->_initializing;
+    $self->_init() unless $self->_initialized || $self->_initializing;
 
-	$self->_dirty_cols->{$key} = 1 unless $self->_initializing;
-	delete($self->_deleted_cols->{$key}) if $self->_deleted_cols->{$key};
+    $self->_dirty_cols->{$key} = 1 unless $self->_initializing;
+    delete( $self->_deleted_cols->{$key} ) if $self->_deleted_cols->{$key};
 
-	return $self->SUPER::set($key, @_);
+    return $self->SUPER::set( $key, @_ );
 }
 
 sub get {
-	my $self = shift;
-	my $key = shift;
+    my $self = shift;
+    my $key  = shift;
 
-	$self->_init() unless $self->_initialized || $self->_initializing;
-	
-	return undef if $self->_deleted_cols->{$key};
-	return $self->SUPER::get($key, @_);
+    $self->_init() unless $self->_initialized || $self->_initializing;
+
+    return undef if $self->_deleted_cols->{$key};
+    return $self->SUPER::get( $key, @_ );
 }
 
 sub columns {
-	my $class = shift;
+    my $class = shift;
 
-	return $class->_set_columns(@_) if @_;
-	return @{$class->_columns};
+    return $class->_set_columns(@_) if @_;
+    return @{ $class->_columns };
 }
 
 sub _set_columns {
-	my ($class, @columns) = @_;
+    my ( $class, @columns ) = @_;
 
-	$class->_columns([@columns]);
-	$class->_mk_column_accessors(@columns);
+    $class->_columns( [@columns] );
+    $class->_mk_column_accessors(@columns);
 
-	return @columns;
+    return @columns;
 }
 
 sub accessor_name {
-	my ($class, $column) = @_;
-	return $column;
+    my ( $class, $column ) = @_;
+    return $column;
 }
 
 sub deletor_name {
-	my ($class, $column) = @_;
-	return "delete_$column";
+    my ( $class, $column ) = @_;
+    return "delete_$column";
 }
 
 sub _init {
-	my ($self) = @_;
-	
-	my @rows = $self->_f_class->search($self->_key => $self->_id);
+    my ($self) = @_;
 
-	$self->_initializing(1);
+    my @rows = $self->_f_class->search( $self->_key => $self->_id );
 
-	foreach my $row (@rows) {
-		my $method = $row->field;
-		if (defined($self->$method())) {
-			$self->_f_class->_croak('Multiple detail fields found in ' . $self->_f_class . ' for id '.  $self->{_id} . ' - field ' . $method);
-		}
-		$self->$method($row->value);
-	}
+    $self->_initializing(1);
 
-	$self->_initializing(0);
-	$self->_initialized(1);  # Cheat here to avoid get _init trigger loop
+    foreach my $row (@rows) {
+        my $method = $row->field;
+        if ( defined( $self->$method() ) ) {
+            $self->_f_class->_croak( 'Multiple detail fields found in ' . $self->_f_class . ' for id ' . $self->{_id} . ' - field ' . $method );
+        }
+        $self->$method( $row->value );
+    }
+
+    $self->_initializing(0);
+    $self->_initialized(1);    # Cheat here to avoid get _init trigger loop
 }
-
 
 sub _update {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	no strict 'refs';
-	foreach my $col (keys %{$self->_dirty_cols}) {
-		my @rows = $self->_f_class->search($self->_key => $self->_id, $self->_field => $col);
-		if (scalar(@rows) == 1) {
-			my $method = $self->_value;
-			$rows[0]->$method($self->$col);
-			$rows[0]->update();
-		} elsif (scalar(@rows) > 0) {
-			$self->_croak('Multiple detail fields found in ' . $self->_f_class . ' for id ' . $self->_id . ' - field ' . $col);
-		} else {
-			$self->_f_class->create({$self->_field => $col, $self->_value => $self->$col, $self->_key => $self->_id});
-		}
-	}
-	
-	foreach my $col (keys %{$self->_deleted_cols}) {
-		$self->_f_class->search($self->_key => $self->_id, $self->_field => $col)->delete_all;
-	}
-	
-	$self->_dirty_cols({});
-	$self->_deleted_cols({});
+    no strict 'refs';
+    foreach my $col ( keys %{ $self->_dirty_cols } ) {
+        my @rows = $self->_f_class->search(
+            $self->_key   => $self->_id,
+            $self->_field => $col
+        );
+        if ( scalar(@rows) == 1 ) {
+            my $method = $self->_value;
+            $rows[0]->$method( $self->$col );
+            $rows[0]->update();
+        }
+        elsif ( scalar(@rows) > 0 ) {
+            $self->_croak( 'Multiple detail fields found in ' . $self->_f_class . ' for id ' . $self->_id . ' - field ' . $col );
+        }
+        else {
+            $self->_f_class->create(
+                {   $self->_field => $col,
+                    $self->_value => $self->$col,
+                    $self->_key   => $self->_id
+                }
+            );
+        }
+    }
 
-	return 1;
+    foreach my $col ( keys %{ $self->_deleted_cols } ) {
+        $self->_f_class->search(
+            $self->_key   => $self->_id,
+            $self->_field => $col
+        )->delete_all;
+    }
+
+    $self->_dirty_cols(   {} );
+    $self->_deleted_cols( {} );
+
+    return 1;
 }
 
-
 sub _delete {
-	my ($self) = @_;
-	$self->_f_class->search($self->_key => $self->_id)->delete_all;
-	return 1;
+    my ($self) = @_;
+
+    if ( $self->_fast_delete ) {
+        $self->_f_class->fast_delete( $self->_key => $self->_id );
+    }
+    else {
+        $self->_f_class->search($self->_key => $self->_id)->delete_all;
+    }
+
+    return 1;
 }
 
 
 
 sub DESTROY {
-	my ($self) = shift;
-	my @dirty;
-	foreach my $col (keys %{$self->_dirty_cols}) {
-		push @dirty, $col;
-	}
-	foreach my $col (keys %{$self->_deleted_cols}) {
-		push @dirty, $col;
-	}
-	if (scalar(@dirty) > 0) {
-		my($class, $id, $key) = (ref($self), $self->_id, $self->_key);
-		$self->_f_class->_carp("$class for key $key id $id destroyed without saving changes to " . join (', ', @dirty));
-	}
+    my ($self) = shift;
+    my @dirty;
+    foreach my $col ( keys %{ $self->_dirty_cols } ) {
+        push @dirty, $col;
+    }
+    foreach my $col ( keys %{ $self->_deleted_cols } ) {
+        push @dirty, $col;
+    }
+    if ( scalar(@dirty) > 0 ) {
+        my ( $class, $id, $key ) = ( ref($self), $self->_id, $self->_key );
+        $self->_f_class->_carp( "$class for key $key id $id destroyed without saving changes to " . join( ', ', @dirty ) );
+    }
 }
 
 sub ignore_changes {
-	$_[0]->_dirty_cols({});
-	$_[0]->_deleted_cols({});
-	return $_[0];
+    $_[0]->_dirty_cols(   {} );
+    $_[0]->_deleted_cols( {} );
+    return $_[0];
 }
 
-
-
-	
 1;

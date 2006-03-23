@@ -22,6 +22,7 @@ package CUFTS::DB::ResourceDetails;
 
 use strict;
 use base 'CUFTS::DB::DBI';
+use Class::DBI::Plugin::FastDelete;
 
 __PACKAGE__->table('resource_details', 'resource_details');
 __PACKAGE__->columns(Primary => 'id');
