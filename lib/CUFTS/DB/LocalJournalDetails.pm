@@ -22,6 +22,7 @@ package CUFTS::DB::LocalJournalDetails;
 
 use strict;
 use base 'CUFTS::DB::DBI';
+use Class::DBI::Plugin::FastDelete;
 
 __PACKAGE__->table('local_journal_details', 'local_journal_details');
 __PACKAGE__->columns(Primary => 'id');
