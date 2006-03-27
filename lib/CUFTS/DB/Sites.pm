@@ -68,6 +68,14 @@ __PACKAGE__->details_columns(
         cjdb_print_name
         cjdb_print_link_label
 
+        cjdb_authentication_module
+        cjdb_authentication_server
+        cjdb_authentication_string1
+        cjdb_authentication_string2
+        cjdb_authentication_string3
+        cjdb_authentication_level100
+        cjdb_authentication_level50
+
         rebuild_cjdb
         rebuild_ejournals_only
         show_ERM

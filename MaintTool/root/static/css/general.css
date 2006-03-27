@@ -60,16 +60,14 @@ td.heading-bar {
 	font-weight: bold;
 	background: #004997;
 	color: white;
-	padding-left: 5px;
-	padding-right: 5px;
+	padding: 3px 5px;
 }
 
 td.heading-bar2 {
 	font-weight: bold;
 	background: #004997;
 	color: white;
-	padding-left: 5px;
-	padding-right: 5px;
+	padding: 3px 5px;
 	border-top: 1px #d0deed solid;
 	border-right: 1px #d0deed solid;
 }

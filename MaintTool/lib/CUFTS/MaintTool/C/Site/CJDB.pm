@@ -6,8 +6,19 @@ use base 'Catalyst::Base';
 my @valid_states = ('active', 'sandbox');
 my @valid_types = ('css', 'cjdb_template');
 
-my $form_display_validate = {
-	optional => ['submit', 'cancel'],
+my $form_settings_validate = {
+	optional => [qw{
+	    submit
+	    cancel
+
+	    cjdb_authentication_module
+	    cjdb_authentication_server
+	    cjdb_authentication_string1
+	    cjdb_authentication_string2
+	    cjdb_authentication_string3
+	    cjdb_authentication_level100
+	    cjdb_authentication_level50
+	}],
 	required => [qw{
 	    cjdb_unified_journal_list
 	    cjdb_show_citations
@@ -16,6 +27,7 @@ my $form_display_validate = {
 	    cjdb_print_link_label
 	}],
 	filters  => ['trim'],
+	missing_optional_valid => 1,
 };
 
 my $form_data_validate = {
@@ -32,14 +44,14 @@ my $form_data_validate = {
 	filters  => ['trim'],
 };
 
-sub display : Local {
+sub settings : Local {
 	my ($self, $c) = @_;
 
 	$c->req->params->{cancel} and
 		return $c->redirect('/site/edit');
 
 	if ($c->req->params->{submit}) {
-		$c->form($form_display_validate);
+		$c->form($form_settings_validate);
 
 		unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
 		
@@ -57,8 +69,8 @@ sub display : Local {
 		}
 	}
 
-	$c->stash->{section} = 'cjdb_display';
-	$c->stash->{template} = 'site/cjdb/display.tt';
+	$c->stash->{section} = 'cjdb_settings';
+	$c->stash->{template} = 'site/cjdb/settings.tt';
 }
 
 sub data : Local {
