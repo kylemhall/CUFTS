@@ -3,6 +3,9 @@ package CUFTS::CJDB::C::Account;
 use strict;
 use base 'Catalyst::Base';
 
+use CUFTS::CJDB::Authentication::LDAP;
+use CUFTS::Util::Simple;
+
 sub logout : Local {
 	my ($self, $c) = @_;
 
@@ -20,14 +23,37 @@ sub login : Local {
 	$c->form({'required' => ['key', 'password', 'login'], 'filters' => ['trim']});
 
 	if (defined($c->form->{valid}->{key})) {
-		my ($key, $password) = ($c->form->{valid}->{key}, $c->form->{valid}->{password});
+		my $key      = $c->form->{valid}->{key};
+		my $password = $c->form->{valid}->{password};
+        my $site     = $c->stash->{current_site};
+        my $account;
 
-		my $crypted_pass = crypt($password, $key);
-		my @accounts = CJDB::DB::Accounts->search('site' => $c->stash->{current_site}->id, 'key' => $key, 'password' => $crypted_pass);
+        if ( not_empty_string($site->cjdb_authentication_module) ) {
+            # Get our internal record, then check external system for password
+
+    		$account = CJDB::DB::Accounts->search('site' => $site->id, 'key' => $key)->first;
+    		if ( defined($account) ) {
+    		    my $module = 'CUFTS::CJDB::Authentication::' . $site->cjdb_authentication_module;
+    		    eval {
+    		        $module->authenticate($site, $key, $password);
+    		    };
+    		    if ($@) {
+    		        # External validation error.
+    		        warn($@);
+    		        $account = undef;
+    		    }
+    		}
+        }
+        else {
+            # Use internal authentication
+
+    		my $crypted_pass = crypt($password, $key);
+    		$account = CJDB::DB::Accounts->search('site' => $site->id, 'key' => $key, 'password' => $crypted_pass)->first;
+        }
 		
-		if (scalar(@accounts) == 1) {
-			$c->stash->{current_account} = $accounts[0];
-			$c->session->{current_account_id} = $accounts[0]->id;
+		if ( defined($account) ) {
+			$c->stash->{current_account} = $account;
+			$c->session->{current_account_id} = $account->id;
 			
 			$c->req->params($c->session->{prev_params});
 			return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
@@ -51,35 +77,57 @@ sub create : Local {
 
 	if (defined($c->req->params->{key})) {
 
-		$c->form({required => ['key', 'name', 'password', 'password2', 'create'],
-		          optional => ['email'],
+		$c->form({required => ['key', 'name', 'password', 'create'],
+		          optional => ['email', 'password2'],
 		          filters => ['trim']});
 
+        my $site = $c->stash->{current_site};
 		unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
 
-			my ($key, $password, $password2) = ($c->form->{valid}->{key}, $c->form->{valid}->{password}, $c->form->{valid}->{password2});
+			my $key       = $c->form->{valid}->{key};
+			my $password  = $c->form->{valid}->{password};
+			my $password2 = $c->form->{valid}->{password2};
+            my $crypted_pass;
+            my $level;
 
-			my @accounts = CJDB::DB::Accounts->search('site' => $c->stash->{current_site}->id, 'key' => $key);
+			my @accounts = CJDB::DB::Accounts->search('site' => $site->id, 'key' => $key);
 			if (scalar(@accounts)) {
 				push @{$c->stash->{error}}, "The user id '$key' already exists.";
 				return;
 			}
 
-			if ($password ne $password2) {
-				push @{$c->stash->{error}}, "Passwords do not match.";
-				return;
-			}
+            if ( not_empty_string($site->cjdb_authentication_module) ) {
+    		    my $module = 'CUFTS::CJDB::Authentication::' . $site->cjdb_authentication_module;
+    		    eval {
+    		        $level = $module->authenticate($site, $key, $password);
+    		    };
+    		    if ($@) {
+    		        # External validation error.
+    		        warn($@);
+    		        push @{$c->stash->{error}}, "Unable to authenticate user against external service.";
+    		        return;
+    		    }
+            }    
+            else {
+                # Use internal authentication
 
-			my $crypted_pass = crypt($password, $key);
+    			if ($password ne $password2) {
+    				push @{$c->stash->{error}}, "Passwords do not match.";
+    				return;
+    			}
+
+    			$crypted_pass = crypt($password, $key);
+
+            }
 			
 			my $account = CJDB::DB::Accounts->create({
-				'site'      => $c->stash->{current_site}->id,
-				'name'      => $c->form->{valid}->{name},
-				'email'     => $c->form->{valid}->{email},
-				'key'       => $key,
-				'password'  => $crypted_pass,
-				'active'    => 'true',
-				'level'     => 0,
+				site      => $site->id,
+				name      => $c->form->{valid}->{name},
+				email     => $c->form->{valid}->{email},
+				key       => $key,
+				password  => $crypted_pass,
+				active    => 'true',
+				level     => $level || 0,
 				
 			});
 
@@ -124,8 +172,6 @@ sub manage : Local {
 
 		unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
 
-			warn('1');
-
 			my ($password, $password2) = ($c->form->{valid}->{password}, $c->form->{valid}->{password2});
 
 			if (defined($password) || defined($password2)) {
@@ -137,15 +183,11 @@ sub manage : Local {
 				}
 			}
 
-			warn('2');
-
 			$c->stash->{current_account}->name($c->form->{valid}->{name});
 			$c->stash->{current_account}->email($c->form->{valid}->{email});
 			$c->stash->{current_account}->update;			
 			
 			CJDB::DB::DBI->dbi_commit();
-
-			warn('3');
 
 			$c->req->params($c->session->{prev_params});
 			return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});

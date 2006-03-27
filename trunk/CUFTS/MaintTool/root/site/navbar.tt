@@ -22,9 +22,9 @@
 [% END %]
 
 [% IF section == 'cjdb_display' %]
- <li id="navbar-list-active"><span>CJDB Display</span></li>
+ <li id="navbar-list-active"><span>CJDB Settings</span></li>
 [% ELSE %]
- <li id="navbar-list"><a id="navbar-link" href="[% url("$url_base/site/cjdb/display") %]">CJDB Display</a></li>
+ <li id="navbar-list"><a id="navbar-link" href="[% url("$url_base/site/cjdb/settings") %]">CJDB Settings</a></li>
 [% END %]
 
 [% IF section == 'cjdb_data' %]
