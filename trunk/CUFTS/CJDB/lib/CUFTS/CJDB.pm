@@ -118,9 +118,11 @@ sub auto : Private {
     # Build and store information about CUFTS resources such
     # as whether they are active, display names, any notes, etc.
 
-    if (!($c->stash->{resources_display} = $c->session->{resources_display})) {
+    my $site_id = $c->stash->{current_site}->id;
+
+    if ( !($c->stash->{resources_display} = $c->session->{resources_display}->{$site_id}) ) {
         my %resources_display;
-        my $resources_iter = CUFTS::DB::LocalResources->search( { 'site' => $c->stash->{current_site}->id, 'active' => 't' } );
+        my $resources_iter = CUFTS::DB::LocalResources->search( { 'site' => $site_id, 'active' => 't' } );
 
         while (my $resource = $resources_iter->next) {
             my $resource_id = $resource->id;
@@ -142,8 +144,8 @@ sub auto : Private {
             }
         }
         
-        $c->stash->{resources_display}   = \%resources_display;
-        $c->session->{resources_display} = \%resources_display;
+        $c->stash->{resources_display}               = \%resources_display;
+        $c->session->{resources_display}->{$site_id} = \%resources_display;
     }
     
     return 1;
