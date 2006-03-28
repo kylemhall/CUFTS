@@ -51,7 +51,6 @@ sub authenticate {
     if ( my $level100_string = $site->cjdb_authentication_level100 ) {
         my ($field, $regex) = split('=', $level100_string, 2);
         my $value = $result->get_value($field);
-        warn($value);
         if ( $value =~ /$regex/ ) {
             return 100;
         }
@@ -60,8 +59,6 @@ sub authenticate {
     if ( my $level50_string = $site->cjdb_authentication_level50 ) {
         my ($field, $regex) = split('=', $level50_string, 2);
         my $value = $result->get_value($field);
-        warn($value);
-        warn($regex);
         if ($value =~ /$regex/) {
             return 50;
         }
