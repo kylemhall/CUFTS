@@ -104,7 +104,7 @@ sub do_module {
 	my $module = $CUFTS::Config::CUFTS_MODULE_PREFIX . $self->module;
 	
 	eval "use $module";
-	die if $@;
+	die($@) if $@;
 
 	no strict 'refs';
 	return $module->$method(@args);
