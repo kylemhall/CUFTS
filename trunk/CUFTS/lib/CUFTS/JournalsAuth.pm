@@ -126,7 +126,6 @@ sub merge_cjdb_journals {
         while ( my $old_cjdb_journal = $old_cjdb_journals_iter->next ) {
 
             if ( defined($cjdb_journal) ) {
-
                 $class->merge_cjdb_titles(       $cjdb_journal, $old_cjdb_journal );
                 $class->merge_cjdb_links(        $cjdb_journal, $old_cjdb_journal );
                 $class->merge_cjdb_subjects(     $cjdb_journal, $old_cjdb_journal );
@@ -137,7 +136,6 @@ sub merge_cjdb_journals {
                 $old_cjdb_journal->delete();
             }
             else {
-                
                 $old_cjdb_journal->journals_auth( $journal_auth->id );
                 $old_cjdb_journal->update();
 
@@ -154,7 +152,7 @@ sub merge_cjdb_titles {
     my @titles = map { $_->search_title } $cjdb_journal->titles;
     foreach my $title ($old_cjdb_journal->titles) {
 
-        if ( grep { $title eq $_->search_title } @titles ) {
+        if ( grep { $title->search_title eq $_ } @titles ) {
             $title->delete();
         }
         else {
@@ -173,7 +171,7 @@ sub merge_cjdb_links {
     my @links = map { $_->url } $cjdb_journal->links;
     foreach my $link ($old_cjdb_journal->links) {
 
-        if ( grep { $link eq $_->url } @links ) {
+        if ( grep { $link->url eq $_ } @links ) {
             $link->delete();
         }
         else {
@@ -193,7 +191,7 @@ sub merge_cjdb_associations {
     my @associations = map { $_->search_association } $cjdb_journal->associations;
     foreach my $association ($old_cjdb_journal->associations) {
 
-        if ( grep { $association eq $_->search_association } @associations ) {
+        if ( grep { $association->search_association eq $_ } @associations ) {
             $association->delete();
         }
         else {
@@ -212,7 +210,7 @@ sub merge_cjdb_subjects {
     my @subjects = map { $_->search_subject } $cjdb_journal->subjects;
     foreach my $subject ($old_cjdb_journal->subjects) {
 
-        if ( grep { $subject eq $_->search_subject } @subjects ) {
+        if ( grep { $subject->search_subject eq $_ } @subjects ) {
             $subject->delete();
         }
         else {
@@ -232,7 +230,7 @@ sub merge_cjdb_relations {
     my @relations = map { $_->title } $cjdb_journal->relations;
     foreach my $relation ($old_cjdb_journal->relations) {
 
-        if ( grep { $relation eq $_->title } @relations ) {
+        if ( grep { $relation->title eq $_ } @relations ) {
             $relation->delete();
         }
         else {
@@ -252,7 +250,7 @@ sub merge_cjdb_issns {
     my @issns = map { $_->issn } $cjdb_journal->issns;
     foreach my $issn ($old_cjdb_journal->issns) {
 
-        if ( grep { $issn eq $_->issn } @issns ) {
+        if ( grep { $issn->issn eq $_ } @issns ) {
             $issn->delete();
         }
         else {
