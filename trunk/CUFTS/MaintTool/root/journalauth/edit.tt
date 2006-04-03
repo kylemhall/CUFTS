@@ -3,7 +3,7 @@
 
 [%# **** NOTE: If you change the HTML in this file, also change the javascript which creates new lines! **** %]
 
-<form method="post" name="journal_auth" action="[% url("$url_base/journalauth/edit") %]">
+<form method="post" name="journal_auth" action="[% url("$url_base/journalauth/edit/$journal_auth.id") %]">
 
 <input type="text" name="title" size="40" maxlength="1024" value="[% journal_auth.title | html %]" />
 
