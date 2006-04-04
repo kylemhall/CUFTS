@@ -40,6 +40,9 @@ use Getopt::Long;
 
 use strict;
 
+$| = 1;
+my $PROGRESS = 1;
+
 my %options;
 GetOptions(\%options, 'site_key=s', 'site_id=i', 'append', 'module=s', 'print_only', 'cufts_only');
 my @files = @ARGV;
@@ -193,7 +196,16 @@ sub load_print {
     my $batch = $loader->get_batch(@files);
     $batch->strict_off;
 
+    my $count = 0;
     while (my $record = $batch->next()) {
+        $count++;
+        if ($PROGRESS) {
+            print 'p';
+            if ($count % 100 == 0) {
+                print "\n$count\n"
+            }
+        }
+
     	next if $loader->skip_record($record);
 
     	if ($loader->merge_by_issns) {
@@ -210,7 +222,16 @@ sub load_print {
     	$batch = $loader->get_batch(@files);
     	$batch->strict_off;
 
+	$count = 0;
     	while (my $record = $batch->next()) {
+            $count++;
+            if ($PROGRESS) {
+                print 'p';
+                if ($count % 100 == 0) {
+                    print "\n$count\n"
+                }
+            }
+
     	    next if $loader->skip_record($record);
     		my @issns = $loader->get_issns($record);
     		next unless scalar(@issns) < 2;
@@ -281,6 +302,8 @@ sub load_cufts {
 
 		my $resource = CUFTS::Resolve->overlay_global_resource_data($local_resource);
 		next if !defined($resource->module);
+
+		$PROGRESS && print "\n\nProcessing: ", $resource->name, "\n\n";
 		
 		my $module = CUFTS::Resolve::__module_name($resource->module);
 
@@ -290,9 +313,18 @@ sub load_cufts {
 		        'active' => 'true',
 		    },
 		);
+
+                my $count = 0;
 		
 JOURNAL:		
 		while (my $local_journal = $journals_iter->next) {
+                    $count++;
+                    if ($PROGRESS) {
+                        print 'p';
+                        if ($count % 100 == 0) {
+                            print "\n$count\n"
+                        }
+                    }
 
 			$local_journal = $module->overlay_global_title_data($local_journal);
 			my $journal_auth = $local_journal->journal_auth;
