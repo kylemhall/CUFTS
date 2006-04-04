@@ -228,5 +228,11 @@ sub build_linkDatabase {
 	return \@results;
 }
 
+sub can_getFulltext {
+    return 0;
+}
 
+sub can_getJournal {
+    return 0;
+}
 1;
