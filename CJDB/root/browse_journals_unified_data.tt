@@ -26,7 +26,7 @@
      [%- IF link.fulltext_coverage -%]
       ([% link.embargo | html %] embargo)
      [%- ELSE -%]
-      fullext with [% link.embargo | html %] embargo
+      fulltext with [% link.embargo | html %] embargo
      [%- END -%]
      </span>
    [% END %]
