@@ -11,6 +11,9 @@ my $form_settings_validate = {
 	    submit
 	    cancel
 
+	    cjdb_print_name
+	    cjdb_print_link_label
+
 	    cjdb_authentication_module
 	    cjdb_authentication_server
 	    cjdb_authentication_string1
@@ -23,8 +26,6 @@ my $form_settings_validate = {
 	    cjdb_unified_journal_list
 	    cjdb_show_citations
 	    cjdb_display_db_name_only
-	    cjdb_print_name
-	    cjdb_print_link_label
 	}],
 	filters  => ['trim'],
 	missing_optional_valid => 1,
