@@ -40,7 +40,7 @@ sub prepare_path {
     # for static objects that don't need database setup.
 
     my $regex_base = $c->config->{regex_base};
-    if ( $path =~ s{^ ${regex_base} (\w+) / (active/|sandbox/)? }{}oxsm ) {
+    if ( $path =~ s{^ ${regex_base} (\w+) / (active|sandbox)? /? }{}oxsm ) {
         my $site_key      = $c->stash->{current_site_key} = $1;
         my $template_type = $c->stash->{template_type}    = $2 || 'active';
         
@@ -58,6 +58,10 @@ sub prepare_path {
         $c->stash->{url_base} = defined($c->config->{url_base})
                                 ? ($c->config->{url_base} . $site_key)
                                 : $c->req->base;
+                                
+        if ( $template_type ne 'active' ) {
+            $c->stash->{url_base} .= '/' . $template_type;
+        }
     }
     else {
         die("Site not found in URL");
