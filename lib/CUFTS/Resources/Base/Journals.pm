@@ -404,6 +404,10 @@ sub _modify_record {
 
     $^W = 1;
 
+    if ( $local eq 'local' ) {
+        $old_record->active('t');
+    }
+
     $old_record->modified($timestamp);
     $old_record->scanned($timestamp);
     $old_record->update;

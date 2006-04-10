@@ -473,6 +473,10 @@ sub _load_record {
 		$db_record->$field($record->{$field});
 	}
 
+    if ( $local eq 'local' ) {
+        $db_record->active('t');
+    }
+
 	$db_record->scanned($timestamp);
 	$db_record->update;
 
