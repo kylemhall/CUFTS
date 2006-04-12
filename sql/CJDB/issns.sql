@@ -6,3 +6,4 @@ CREATE TABLE cjdb_issns (
 );
 
 CREATE INDEX cjdb_issns_journal ON cjdb_issns (journal);
+CREATE INDEX cjdb_issns_issn ON cjdb_issns (issn);
