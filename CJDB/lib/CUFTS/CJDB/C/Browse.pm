@@ -279,7 +279,7 @@ sub show : Local {
 		return $c->forward('/browse/journals');
 	}
 	
-	die('Invalid browse_field value: ' . $browse_field);
+	die('Invalid browse_field value: ' . Dumper($browse_field) );
 }
 
 
