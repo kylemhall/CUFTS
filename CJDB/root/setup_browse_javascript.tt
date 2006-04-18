@@ -1,13 +1,13 @@
 [% include_javascript = BLOCK %]
  window['browse_search_labels'] = new Array();
  [% FOREACH label IN search_labels.keys -%]
-  window['browse_search_labels']['[% label %]'] = '[% search_labels.$label %]'
+  window['browse_search_labels']['[% label %]'] = '[% search_labels.$label %]';
  [% END %]
  window['browse_search_types'] = new Array();
  [% FOREACH btype IN browse_search_types.keys -%]
   window['browse_search_types']['[% btype %]'] = new Array();
   [% FOREACH stype IN browse_search_types.$btype -%]
-   window['browse_search_types']['[% btype %]'][[% loop.count - 1 %]] = '[% stype %]'
+   window['browse_search_types']['[% btype %]'][[% loop.count - 1 %]] = '[% stype %]';
   [% END %]
  [% END %]
  function changeBrowse() {
