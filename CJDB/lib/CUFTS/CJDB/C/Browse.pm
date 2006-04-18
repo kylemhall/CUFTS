@@ -2,7 +2,7 @@ package CUFTS::CJDB::C::Browse;
 
 use strict;
 use base 'Catalyst::Base';
-
+use Data::Dumper;
 
 sub browse : Local {
 	my ($self, $c) = @_;
@@ -158,7 +158,7 @@ sub titles : Local {
 
 		$titles = CJDB::DB::Titles->search_distinct_by_journal_main_intersect($site_id, \@search_terms, $start_record, $per_page);
 	} else {
-		die("Unrecognized title search type: $search_type");
+		die("Unrecognized title search type: " . Dumper($search_type) );
 	}
 
 	# Build search cache information
