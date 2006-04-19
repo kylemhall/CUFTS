@@ -100,9 +100,9 @@ sub begin : Private {
 
     # Get the current user for the stash if they have logged in
 
-    if ( defined( $c->session->{current_account_id} ) ) {
+    if ( defined( $c->session->{ $c->stash->{current_site}->id }->{current_account_id} ) ) {
         $c->stash->{current_account} = CJDB::DB::Accounts->retrieve( 
-            $c->session->{current_account_id} 
+            $c->session->{ $c->stash->{current_site}->id }->{current_account_id} 
         );
     }
 
@@ -204,9 +204,9 @@ sub redirect {
 ##
 
 sub journal : Local {
-    my ( $self, $c, $journal_id ) = @_;
+    my ( $self, $c, $journals_auth_id ) = @_;
 
-    $c->forward( '/journal/view', [$journal_id] );
+    $c->forward( '/journal/view', [$journals_auth_id] );
 }
 
 =head1 NAME

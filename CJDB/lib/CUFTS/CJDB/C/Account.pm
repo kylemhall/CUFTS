@@ -9,7 +9,7 @@ use CUFTS::Util::Simple;
 sub logout : Local {
 	my ($self, $c) = @_;
 
-	delete $c->session->{current_account_id};
+	delete $c->session->{ $c->stash->{current_site}->id }->{current_account_id};
 	delete $c->stash->{current_account};
 
 	$c->req->params($c->session->{prev_params});
@@ -53,7 +53,7 @@ sub login : Local {
 		
 		if ( defined($account) ) {
 			$c->stash->{current_account} = $account;
-			$c->session->{current_account_id} = $account->id;
+			$c->session->{ $c->stash->{current_site}->id }->{current_account_id} = $account->id;
 			
 			$c->req->params($c->session->{prev_params});
 			return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
@@ -137,7 +137,7 @@ sub create : Local {
 				return;
 			}
 
-			$c->session->{current_account_id} = $account->id;
+			$c->session->{ $c->stash->{current_site}->id }->{current_account_id} = $account->id;
 			$c->stash->{current_account} = $account;
 			
 			CJDB::DB::DBI->dbi_commit();
