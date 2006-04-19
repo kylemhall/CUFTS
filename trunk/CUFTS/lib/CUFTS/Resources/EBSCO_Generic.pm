@@ -42,13 +42,7 @@ sub _build_journal_search_field {
 	my ($class, $title, $issn) = @_;
 
 	my $search_fields = $class->_search_fields();
-	my $string;
-	
-	if (assert_ne($issn)) {
-		return "$search_fields->{'title'}=$issn";
-	} else {
-		return $search_fields->{'title'} . '=' . uri_escape("$title");
-	}
+	return $search_fields->{'title'} . '=' . uri_escape("$title");
 }	
 
 
