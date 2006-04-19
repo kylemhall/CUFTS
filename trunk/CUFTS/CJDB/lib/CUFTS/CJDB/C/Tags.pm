@@ -14,18 +14,20 @@ sub save : Local {
     defined($journal)
         or die("Unable to retrieve journal id $journal_id");
 
+    my $journals_auth_id = $journal->journals_auth->id;
+
     # Exit out now if the cancel button was pushed (no javascript)
 
     if ( $c->req->params->{cancel} ) {
-        return $c->redirect("/journal/$journal_id");
+        return $c->redirect("/journal/$journals_auth_id");
     }
 
-    $self->_do_add_tags( $c, $journal );
+    $self->_do_add_tags(  $c, $journal );
     $self->_do_save_tags( $c, $journal );
 
     CJDB::DB::Tags->dbi_commit;
 
-    return $c->redirect("/journal/$journal_id");
+    return $c->redirect("/journal/$journals_auth_id");
 }
 
 sub _do_save_tags {
