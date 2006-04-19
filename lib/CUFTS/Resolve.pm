@@ -57,12 +57,11 @@ SITE:
         my $resources = defined($site) 
                         ? $self->get_active_resources($site)
                         : [];
-        
+
 RESOURCE:
         foreach my $local_resource (@$resources) {
 
             my $global_resource = $local_resource->resource;
-
             my $resource = $self->overlay_global_resource_data($local_resource);
             my $provider = $resource->provider;
 
@@ -391,6 +390,8 @@ sub overlay_global_resource_data {
     }
 
     foreach my $column ( $resource->columns ) {
+        next if $column eq 'resource';
+        
         $resource->$column( 
             $is_local || not_empty_string( $local->$column ) 
             ? $local->$column
