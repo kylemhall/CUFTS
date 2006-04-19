@@ -6,7 +6,7 @@
     <div class="tag-mine">[% tag.tag %] ([%- INCLUDE tag_viewing_string.tt viewing = tag.viewing -%])</div>
    [% END %]
     <div style="margin-top: .5em;">
-     <a href="[% url("$url_base/journal/manage_tags/$journal.id") %]" onclick="return showDiv('manage-tags','my-tags-group');">[% IF my_tags.size %]add/manage tags[% ELSE %]add tags[% END %]</a>
+     <a href="[% url("$url_base/journal/manage_tags/$journal.journals_auth") %]" onclick="return showDiv('manage-tags','my-tags-group');">[% IF my_tags.size %]add/manage tags[% ELSE %]add tags[% END %]</a>
     </div>
    </div>
  
