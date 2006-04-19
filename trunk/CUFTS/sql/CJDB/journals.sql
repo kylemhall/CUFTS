@@ -10,3 +10,4 @@ CREATE TABLE cjdb_journals (
 );
 
 create index cjdb_journals_st_idx on cjdb_journals (sort_title);
+create index cjdb_journals_ja_idx on cjdb_journals (journals_auth);
