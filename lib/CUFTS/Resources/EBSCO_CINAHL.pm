@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -23,75 +23,93 @@
 package CUFTS::Resources::EBSCO_CINAHL;
 
 use base qw(CUFTS::Resources::EBSCO_Generic);
-use URI::Escape;
-use CUFTS::Exceptions qw(assert_ne);
+
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
-sub _search_fields {
-	return {
-		'issn' 		=> 'is',
-		'title'		=> 'jn',
-		'spage' 	=> 'pp',
-		'volume'	=> 'vi',
-		'issue'		=> 'ip',
-		'atitle'	=> 'ti',
-	};
-}
-
-
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		ft_start_date
-		ft_end_date
-		cit_start_date
-		cit_end_date
-		embargo_months
-		publisher
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            ft_start_date
+            ft_end_date
+            cit_start_date
+            cit_end_date
+            embargo_months
+            publisher
+        )
+    ];
 }
 
 sub title_list_field_map {
-	return {
-		'Publication Name' => 'title',
-		'ISSN' => 'issn',
-		'Publisher' => 'publisher',
-		'Full Text Delay (in months)' => 'embargo_months',
-	};
+    return {
+        'Publication Name'            => 'title',
+        'ISSN'                        => 'issn',
+        'Publisher'                   => 'publisher',
+        'Full Text Delay (in months)' => 'embargo_months',
+    };
 }
 
-
 sub clean_data {
-	my ($class, $record) = @_;
-	
-	if (defined($record->{'___Full Text'}) && $record->{'___Full Text'} =~ m#^\s*(\d{2})/(\d{2})/(\d{4})#) {
-		$record->{'ft_start_date'} = "$3/$1/$2";
-	}
-	if (defined($record->{'___Full Text'}) && $record->{'___Full Text'} =~ m#\s+to\s+(\d{2})/(\d{2})/(\d{4})\s*$#) {
-		$record->{'ft_end_date'} = "$3/$1/$2";
-	}
+    my ( $class, $record ) = @_;
 
-	if (defined($record->{'___Searchable Cited References'}) && $record->{'___Searchable Cited References'} =~ m#^\s*(\d{2})/(\d{2})/(\d{4})#) {
-		$record->{'cit_start_date'} = "$3/$1/$2";
-	}
-	if (defined($record->{'___Searchable Cited References'}) && $record->{'___Searchable Cited References'} =~ m#\s+to\s+(\d{2})/(\d{2})/(\d{4})\s*$#) {
-		$record->{'cit_end_date'} = "$3/$1/$2";
-	}
+    if ( defined( $record->{'___Full Text'} ) ) {
 
-	if (defined($record->{'embargo_months'})) {
-		$record->{'embargo_months'} = int($record->{'embargo_months'} + 0.99);
-	}
+        if ( $record->{'___Full Text'} =~ m{^ \s* (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
+            $record->{ft_start_date} = "$3/$1/$2";
+        }
+        elsif ( $record->{'___Full Text'} =~ m{^ \s* (\d{4}) }xsm ) {
+            $record->{ft_start_date} = $1;
+        }
 
-	$record->{'title'} =~ s/^"//;
-	$record->{'title'} =~ s/"$//;
+    }
 
-	$record->{'publisher'} =~ s/^"//;
-	$record->{'publisher'} =~ s/"$//;
+    if ( defined( $record->{'___Full Text'} ) ) {
+    
+        if ( $record->{'___Full Text'} =~ m{ to \s+ (\d{2}) / (\d{2}) / (\d{4}) \s* $}xsm ) {
+            $record->{ft_end_date} = "$3/$1/$2";
+        }
+        elsif ( $record->{'___Full Text'} =~ m{ to \s+ (\d{4}) }xsm ) {
+            $record->{ft_end_date} = $1;
+        }
 
-	return $class->SUPER::clean_data($record);
+    }
+    
+    if ( defined( $record->{'___Searchable Cited References'} ) ) {
+    
+        if ( $record->{'___Searchable Cited References'} =~ m{^ \s* (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
+            $record->{cit_start_date} = "$3/$1/$2";
+        }
+        elsif ( $record->{'___Searchable Cited References'} =~ m{^ \s* (\d{4}) }xsm ) {
+            $record->{cit_start_date} = $1;
+        }
+
+    }
+    
+    if ( defined( $record->{'___Searchable Cited References'} ) ) {
+    
+        if ( $record->{'___Searchable Cited References'} =~ m{ to \s+ (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
+            $record->{cit_end_date} = "$3/$1/$2";
+        }
+        elsif ( $record->{'___Searchable Cited References'} =~ m{ to \s+ (\d{4}) }xsm ) {
+            $record->{cit_end_date} = $1;
+        }
+
+    }
+    
+
+    if ( defined( $record->{embargo_months} ) ) {
+        $record->{embargo_months} = int( $record->{embargo_months} + 0.99 );
+    }
+
+    $record->{title}     = trim_string($record->{title},     '"');
+    $record->{publisher} = trim_string($record->{publisher}, '"');
+
+    return $class->SUPER::clean_data($record);
 
 }
 
