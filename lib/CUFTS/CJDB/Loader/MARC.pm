@@ -79,7 +79,7 @@ sub get_alt_titles {
     # Also load abbreviations and previous titles
 
     push @alt_marc_titles, $record->field('210');
-    push @alt_marc_titles, $record->field('247');
+#    push @alt_marc_titles, $record->field('247');
 
 ALT_TITLE:
     foreach my $alt_title (@alt_marc_titles) {

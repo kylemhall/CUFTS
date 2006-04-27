@@ -239,7 +239,7 @@ sub build_marc_record {
 	# Grab all the alternate titles from MARC records and the journals_auth files and compile them
 	
 	foreach my $record (@$records) {
-		foreach my $title_field ($record->field('245'), $record->field('246')) {
+		foreach my $title_field ($record->field('245'), $record->field('246'), $record->field('210')) {
 			my $seen_title = '';
 			my @subfields;
 			foreach my $subfield (qw/a b c n p/) {
@@ -252,14 +252,14 @@ sub build_marc_record {
 			next if $seen{'title'}{$seen_title}++;
 			next if !scalar(@subfields);
 
-			my $new_title_field = MARC::Field->new('246', '0', '0', @subfields);
+			my $new_title_field = MARC::Field->new('246', '0', '#', @subfields);
 			$new->append_fields($new_title_field);
 		}
 	}
 
 	foreach my $title_field ($journals_auth->titles) {
 		next if $seen{'title'}{lc($title_field->title)}++;
-		$new->append_fields(MARC::Field->new('246', '0', '0', 'a' => $title_field->title));
+		$new->append_fields(MARC::Field->new('246', '0', '#', 'a' => $title_field->title));
 	}
 	
 

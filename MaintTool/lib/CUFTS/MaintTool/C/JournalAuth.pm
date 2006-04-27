@@ -22,6 +22,11 @@ my $marc_fields = {
 	           size      => [ 40, 40 , 10 ],
 	           repeats   => 0,
 	         },
+  	'210' => {
+  	           subfields => [ qw(a) ],
+  	           size      => [ 40 ],
+  	           repeats   => 1,
+  	         },
 	'245' => {
 	           indicators => [ 2 ],
 	           subfields  => [ qw(a b c n p) ],

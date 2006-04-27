@@ -2,10 +2,23 @@ package CUFTS::CJDB::Util;
 
 use Pod::Escapes;
 use String::Approx qw(amatch);
+use CUFTS::Util::Simple;
 use Data::Dumper;
 
 my @stop_words = qw(of and the an a la le les der das die et in for);
 my @generic_titles = ('journal', 'review', 'bulletin', 'newsletter', 'proceedings', 'transactions', 'symposium');
+my @articles = (
+#	'A\s+',
+	'An\s+',
+	'The\s+',
+	'La\s+',
+	'Le\s+',
+	'Les\s+',
+	'L\'',
+	'Der\s+',
+	'Das\s+',
+	'Die\s+',
+);
 
 use strict;
 
@@ -25,33 +38,43 @@ sub strip_title {
 
 	$string =~ s/\s\s+/ /g;
 
-	$string =~ s/\s+$//g;	
-	$string =~ s/^\s+//g;	
+	$string = trim_string($string);
 
 	return $string;
 }
 
 sub strip_articles {
-	my ($string) = @_;
-	
-	my (@articles) = (
-#		'A\s+',
-		'An\s+',
-		'The\s+',
-		'La\s+',
-		'Le\s+',
-		'Les\s+',
-		'L\'',
-		'Der\s+',
-		'Das\s+',
-		'Die\s+',
-	);
+	my ( $string, $removed_count ) = @_;
 	
 	foreach my $article (@articles) {
-		$string =~ s/^${article}//i;
+	    my $orig_length = length($string);
+		if ( $string =~ s/^${article}//i ) {
+		    if ( ref($removed_count) ) {
+		        $$removed_count = $orig_length - length($string);
+		    }
+            return $string;
+		}
 	}
+
+    if ( ref($removed_count) ) {
+        $$removed_count = 0;
+    }
 	
 	return $string;
+}
+
+
+sub count_articles {
+	my ( $string ) = @_;
+	
+	foreach my $article (@articles) {
+	    my $orig_length = length($string);
+		if ( $string =~ s/^${article}//i ) {
+		    return $orig_length - length($string);
+		}
+	}
+
+	return 0;
 }
 
 

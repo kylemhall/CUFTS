@@ -24,6 +24,8 @@
 
 [% PROCESS display_marc_fields field_type='246', field_description='Varying Form of Title' %]
 
+[% PROCESS display_marc_fields field_type='210', field_description='Title Abbreviations' %]
+
 [% PROCESS display_marc_fields field_type='050', field_description='Call Number' %]
 
 [% PROCESS display_marc_fields field_type='260', field_description='Publication, Distribution, etc.' %]
