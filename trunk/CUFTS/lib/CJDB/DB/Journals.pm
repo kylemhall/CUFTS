@@ -183,12 +183,15 @@ sub search_distinct_by_tags {
 			$search_sql .= ' AND cjdb_tags.viewing = ? AND cjdb_tags.site = ? ';
 			push @bind, 1, $site;
 		} elsif ($viewing == 2) {
-			$search_sql .= ' AND cjdb_tags.viewing = ? AND cjdb_tags.site = ?	';
+			$search_sql .= ' AND cjdb_tags.viewing = ? AND cjdb_tags.site = ? ';
 			push @bind, 2, $site;
 		} elsif ($viewing == 3) {
 			$search_sql .= ' AND (cjdb_tags.viewing = ? OR (cjdb_tags.viewing = ? AND cjdb_tags.site = ?)) ';
 			push @bind, 1, 2, $site;
-		}
+		} elsif ($viewing == 4) {
+    		$search_sql .= ' AND (cjdb_tags.viewing = ? OR cjdb_tags.viewing = ?) AND cjdb_tags.site = ?) ';
+    		push @bind, 1, 2, $site;
+    	}
 
 		if ($level) {
 			$search_sql .= ' AND cjdb_tags.level >= ?';
