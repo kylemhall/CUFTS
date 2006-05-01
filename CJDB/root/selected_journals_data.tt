@@ -32,4 +32,5 @@
    }
 %]
 
-[% SET selected_journals_level = 50 %]
+[% SET selected_journals_level   = 50 %]
+[% SET selected_journals_viewing = 4  %] [%# 4 == local and public for your site only %]
