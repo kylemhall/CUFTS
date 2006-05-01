@@ -113,7 +113,7 @@ sub build_linkJournal {
 
         my $url = $record->journal_url;
 
-        if ( defined( $resource->proxy_suffix ) ) {
+        if ( not_empty_string( $resource->proxy_suffix ) ) {
             $url .= $resource->proxy_suffix;
         }
 
