@@ -36,5 +36,5 @@
    [% SET url_data_string = url_data_string _ '/' %]
   [% END %]
  [% END %]
- <a href="[% url("$url_base/browse/bytags/$url_data_string", level=selected_journals_level, viewing=4) %]">[% key | html %]</a> 
+ <a href="[% url("$url_base/browse/bytags/$url_data_string", level=selected_journals_level, viewing=selected_journals_viewing) %]">[% key | html %]</a> 
 [% END %]
