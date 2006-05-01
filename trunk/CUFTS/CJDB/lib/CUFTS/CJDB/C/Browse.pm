@@ -66,9 +66,11 @@ sub journals : Local {
 		# If a viewing level has not been defined, check the local param for local search only,
 		# or default to public + local (3).
 
-		my $viewing = defined($c->req->params->{viewing}) ?
-				$c->req->params->{viewing} :
-				( $c->req->params->{local} ? 2 : 3 );
+		my $viewing =   defined($c->req->params->{viewing})
+		              ? $c->req->params->{viewing}
+		              : $c->req->params->{local}
+		              ? 2 
+		              : 3;
 
 
 		$journals = CJDB::DB::Journals->search_distinct_by_tags($search, $start_record, $per_page, $c->req->params->{level}, $c->stash->{current_site}->id, $c->req->params->{account}, $viewing);
