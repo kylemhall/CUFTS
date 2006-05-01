@@ -9,7 +9,7 @@ my $form_validate_local = {
 		# Standard fields
 		'provider', 'proxy', 'dedupe', 'rank', 'active', 'resource_services', 'submit', 'cancel',
 		# Resource details...
-		'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'notes_for_local', 'cjdb_note'
+		'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'notes_for_local', 'cjdb_note', 'proxy_prefix', 'proxy_suffix'
 	],
 	defaults => {
 		'active' => 'false',
@@ -27,7 +27,7 @@ my $form_validate_global = {
 		# Standard fields
 		'proxy', 'dedupe', 'auto_activate', 'rank', 'active', 'resource_services', 'submit', 'cancel',
 		# Resource details...
-		'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'cjdb_note'
+		'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'cjdb_note', 'proxy_prefix', 'proxy_suffix'
 	],
 	defaults => {
 		'active' => 'false',
