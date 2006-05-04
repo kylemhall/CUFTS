@@ -8,8 +8,8 @@
 <table class="outlined" style="width: 100%;">
  <tr><td class="heading-bar" colspan="5">CJDB print MARC record files</td></tr>
  <tr><td class="heading-bar2-left" style="width: 1%; text-align: center;">delete</td>
-     <td class="heading-bar2" style="width: 1%; text-align: center;">rebuild</td>
-     <td class="heading-bar2" style="width: 1%; text-align: center;">MARC only</td>
+     <td class="heading-bar2" style="width: 1%; text-align: center;">rebuild with print</td>
+     <td class="heading-bar2" style="width: 1%; text-align: center;">rebuild electronic only</td>
      <td class="heading-bar2" style="width: 1%; text-align: center;">test</td>
      <td class="heading-bar2-right" style="text-align: left;">file</td>
  </tr>
