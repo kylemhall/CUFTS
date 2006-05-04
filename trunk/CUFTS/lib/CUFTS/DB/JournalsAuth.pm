@@ -43,6 +43,7 @@ __PACKAGE__->columns(All => qw(
 __PACKAGE__->columns(Essential => qw(
 	id
 	title
+	MARC
 ));
 
 __PACKAGE__->sequence('journals_auth_id_seq');

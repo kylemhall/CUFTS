@@ -56,7 +56,7 @@ sub get_clean_issn_list {
 }
 
 sub load_journal {
-    my ( $self, $record, $journals_auth_id ) = @_;
+    my ( $self, $record, $journals_auth_id, $no_save ) = @_;
 
     my $site_id = $self->site_id
         or die("No site id set for loader.");
@@ -83,29 +83,7 @@ sub load_journal {
     # Consider modifying simple titles like "Journal" and "Review" by adding
     # an association.  This might need to be a site option later on.
 
-    foreach my $bad_title (@CUFTS::CJDB::Util::generic_titles) {
-        if ( $stripped_sort_title eq $bad_title ) {
-            my @associations = $self->get_associations($record);
-            my @final_associations;
-            foreach my $association (@associations) {
-                next if $association =~ /journal/i;
-                push @final_associations, $association;
-            }
-
-            # Grab the first assn/org, but consider adding code to
-            # add the others as extra additional titles
-
-            if ( scalar(@final_associations) ) {
-                $title      =~ s{ \s* / \s* $}{}xsm;
-                $sort_title =~ s{ \s* / \s* $}{}xsm;
-
-                $title      = $title      . ' / ' . $final_associations[0];
-                $sort_title = $sort_title . ' / ' . $final_associations[0];
-
-                $stripped_sort_title = $self->strip_title($sort_title);
-            }
-        }
-    }
+    $self->fix_bad_titles( $record, \$title, \$sort_title, \$stripped_sort_title ); 
 
     # Find or create a journals_auth record to associate with
 
@@ -151,6 +129,72 @@ sub load_journal {
     }
 
     return $journal;
+}
+
+
+sub match_journals_auth {
+    my ( $self, $record ) = @_;
+
+    my $site_id = $self->site_id
+        or die("No site id set for loader.");
+
+    my $title = $self->get_title($record);
+    if ( is_empty_string($title) || $title eq '0' ) {
+        print "Empty title, skipping record.\n";
+        return undef;
+    }
+    if ( length($title) > 1024 ) {
+        print "Title too long, skipping record: $title\n";
+        return undef;
+    }
+
+    $__CJDB_LOADER_DEBUG and print "title: $title\n";
+
+    my $sort_title          = $self->get_sort_title($record);
+    my $stripped_sort_title = $self->strip_title($sort_title);
+
+    # Get clean list of ISSNs
+
+    my @issns = $self->get_clean_issn_list($record);
+
+    # Consider modifying simple titles like "Journal" and "Review" by adding
+    # an association.  This might need to be a site option later on.
+
+    $self->fix_bad_titles( $record, \$title, \$sort_title, \$stripped_sort_title ); 
+
+    # Find a journals_auth record to associate with
+
+    return $self->get_journals_auth( \@issns, $title, $record, 1 );
+}
+
+sub fix_bad_titles {
+    my ( $self, $record, $title_ref, $sort_title_ref, $stripped_sort_title_ref ) = @_;
+    
+    foreach my $bad_title (@CUFTS::CJDB::Util::generic_titles) {
+        if ( $$stripped_sort_title_ref eq $bad_title ) {
+            my @associations = $self->get_associations($record);
+            my @final_associations;
+            foreach my $association (@associations) {
+                next if $association =~ /journal/i;
+                push @final_associations, $association;
+            }
+
+            # Grab the first assn/org, but consider adding code to
+            # add the others as extra additional titles
+
+            if ( scalar(@final_associations) ) {
+                $$title_ref      =~ s{ \s* / \s* $}{}xsm;
+                $$sort_title_ref =~ s{ \s* / \s* $}{}xsm;
+
+                $$title_ref      = $$title_ref      . ' / ' . $final_associations[0];
+                $$sort_title_ref = $$sort_title_ref . ' / ' . $final_associations[0];
+
+                $$stripped_sort_title_ref = $self->strip_title($$sort_title_ref);
+            }
+        }
+    }
+    
+    return 1;
 }
 
 sub load_titles {
@@ -415,7 +459,7 @@ sub strip_articles {
 }
 
 sub get_journals_auth {
-    my ( $self, $issns, $title, $record ) = @_;
+    my ( $self, $issns, $title, $record, $no_save ) = @_;
 
     my @journals_auths;
 
@@ -506,6 +550,8 @@ sub get_journals_auth {
             }
         }
     }
+    
+    return undef if $no_save;
     
     # Build basic record
 

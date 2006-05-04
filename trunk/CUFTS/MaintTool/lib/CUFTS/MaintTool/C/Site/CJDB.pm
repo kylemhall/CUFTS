@@ -21,6 +21,19 @@ my $form_settings_validate = {
 	    cjdb_authentication_string3
 	    cjdb_authentication_level100
 	    cjdb_authentication_level50
+	    
+	    marc_dump_856_link_label
+        marc_dump_duplicate_title_field
+        marc_dump_cjdb_id_field
+        marc_dump_cjdb_id_indicator1
+        marc_dump_cjdb_id_indicator2
+        marc_dump_cjdb_id_subfield
+        marc_dump_holdings_field
+        marc_dump_holdings_indicator1
+        marc_dump_holdings_indicator2
+        marc_dump_holdings_subfield
+        marc_dump_medium_text
+        
 	}],
 	required => [qw{
 	    cjdb_unified_journal_list
@@ -32,14 +45,28 @@ my $form_settings_validate = {
 };
 
 my $form_data_validate = {
-	optional => ['submit', 'cancel', 'delete', 'rebuild', 'test', 'delete_lccn', 'rebuild_ejournals_only', 'upload_data', 'cjdb_data_upload', 'upload_label', 'lccn_data_upload', 'upload_lccn'],
+	optional => [ qw(
+	    submit
+	    cancel
+	    delete
+	    rebuild
+	    test
+	    delete_lccn
+	    MARC
+	    rebuild_ejournals_only
+	    upload_data
+	    cjdb_data_upload
+	    upload_label
+	    lccn_data_upload
+	    upload_lccn
+	) ],
 	dependency_groups => {
 		'data_upload' => ['upload_data', 'cjdb_data_upload'],
 		'lccn_upload' => ['lccn_data_upload', 'upload_lccn'],
 	},
 	constraints => {
-		'delete' => qr/^[^\|:;'"\\\/]+$/,
-		'test' => qr/^[^\|:;'"\\\/]+$/,
+		'delete'  => qr/^[^\|:;'"\\\/]+$/,
+		'test'    => qr/^[^\|:;'"\\\/]+$/,
 		'rebuild' => qr/^[^\|:;'"\\\/]+$/,
 	},		
 	filters  => ['trim'],
@@ -86,11 +113,13 @@ sub data : Local {
 		$c->form($form_data_validate);
 
 		unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
-			my (%delete, %rebuild, %test);
+			my (%delete, %rebuild, %marc, %test);
 			$c->form->valid->{delete} and
 				%delete = map {$_,1} ref($c->form->valid->{delete}) ? @{$c->form->valid->{delete}} : ($c->form->valid->{delete});
 			$c->form->valid->{rebuild} and
 				%rebuild = map {($_,1)} ref($c->form->valid->{rebuild}) ? @{$c->form->valid->{rebuild}} : ($c->form->valid->{rebuild});
+			$c->form->valid->{MARC} and
+				%marc = map {($_,1)} ref($c->form->valid->{MARC}) ? @{$c->form->valid->{MARC}} : ($c->form->valid->{MARC});
 			$c->form->valid->{test} and
 				%test = map {($_,1)} ref($c->form->valid->{test}) ? @{$c->form->valid->{test}} : ($c->form->valid->{test});
 
@@ -98,15 +127,17 @@ sub data : Local {
 			
 			foreach my $key (keys %delete) {
 				delete $rebuild{$key};
+				delete $marc{$key};
 				delete $test{$key};
 			}
 
 			$c->form->valid->{delete_lccn} and
 				$delete{lccn_subjects} = 1;
 
-			my @delete = keys(%delete);
+			my @delete  = keys(%delete);
 			my @rebuild = keys(%rebuild);
-			my @test = keys(%test);
+			my @test    = keys(%test);
+			my @MARC    = keys(%marc);
 				
 			foreach my $file (@delete) {
 				-e "$upload_dir/$file" and
@@ -117,22 +148,29 @@ sub data : Local {
 			scalar(@delete) and
 				push @{$c->stash->{results}}, ('Files deleted: ' . (join ', ', @delete));
 
+			$c->stash->{current_site}->rebuild_cjdb(undef);
+			$c->stash->{current_site}->rebuild_MARC(undef);
+			$c->stash->{current_site}->rebuild_ejournals_only(undef);
+
 			if (scalar(@rebuild)) {
 				$c->stash->{current_site}->rebuild_cjdb(join '|', @rebuild);
 				push @{$c->stash->{results}}, ('CJDB will be rebuilt using files: ' . (join ', ', @rebuild));
-			} elsif ($c->form->valid->{rebuild_ejournals_only}) {
+			}
+			if (scalar(@MARC)) {
+				$c->stash->{current_site}->rebuild_MARC(join '|', @MARC);
+				push @{$c->stash->{results}}, ('CJDB will be rebuilt using files for MARC records only: ' . (join ', ', @MARC));
+			}
+			
+			if ($c->form->valid->{rebuild_ejournals_only}) {
 				$c->stash->{current_site}->rebuild_ejournals_only(1);
 				push @{$c->stash->{results}}, 'CJDB will be rebuilt from CUFTS electronic journal data only.';
-			} else {
-				$c->stash->{current_site}->rebuild_cjdb(undef);
-				$c->stash->{current_site}->rebuild_ejournals_only(undef);
-				push @{$c->stash->{results}}, 'CJDB will not be rebuilt.';
 			}
 
 			if (scalar(@test)) {
 				$c->stash->{current_site}->test_MARC_file(join '|', @test);
 				push @{$c->stash->{results}}, ('Files to have MARC data tested: ' . (join ', ', @test));
-			} else {
+			}
+			else {
 				$c->stash->{current_site}->test_MARC_file(undef);
 				push @{$c->stash->{results}}, 'No files marked for MARC testing.';
 			}
