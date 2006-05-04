@@ -227,6 +227,7 @@ sub create_summary {
     
     $output .=  "<openurl_option>doi</openurl_option>\n";
     $output .=  "<openurl_option>journal-title</openurl_option>\n";
+    $output .=  "<openurl_option>pmid</openurl_option>\n";
 
     $output .=  "<electronic_holdings>\n";
     foreach my $count ( 1 .. ( $file_count - 1 ) ) {
