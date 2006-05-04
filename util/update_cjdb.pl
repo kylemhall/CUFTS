@@ -703,7 +703,11 @@ sub build_dump {
     
     my $cjdb_record_iter = CJDB::DB::Journals->search( site => $site->id );
 
-    my $base_url = $CUFTS::Config::CJDB_URL . $site->key . '/journal/';
+    my $base_url = $CUFTS::Config::CJDB_URL;
+    if ( $base_url !~ m{/$} ) {
+        $base_url .= '/';
+    }
+    $base_url .= $site->key . '/journal/';
 
     # Cache resource information
     
