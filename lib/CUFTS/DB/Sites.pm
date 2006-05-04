@@ -76,7 +76,20 @@ __PACKAGE__->details_columns(
         cjdb_authentication_level100
         cjdb_authentication_level50
 
+        marc_dump_856_link_label
+        marc_dump_duplicate_title_field
+        marc_dump_cjdb_id_field
+        marc_dump_cjdb_id_indicator1
+        marc_dump_cjdb_id_indicator2
+        marc_dump_cjdb_id_subfield
+        marc_dump_holdings_field
+        marc_dump_holdings_indicator1
+        marc_dump_holdings_indicator2
+        marc_dump_holdings_subfield
+        marc_dump_medium_text
+
         rebuild_cjdb
+        rebuild_MARC
         rebuild_ejournals_only
         show_ERM
         test_MARC_file
