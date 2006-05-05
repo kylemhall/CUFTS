@@ -28,6 +28,7 @@
  [% ELSE %]
   <tr>
    <td class="field1">&nbsp;</td>
+   <td class="field1">&nbsp;</td>
    <td class="field1" style="width: 1%; text-align: center;"><input type="checkbox" name="rebuild_ejournals_only" value="1" [% IF current_site.rebuild_ejournals_only %]checked="checked"[% END %] /></td>
    <td class="field1">&nbsp;</td>
    <td class="field1">No print files available, rebuild from CUFTS data only</td></tr>
