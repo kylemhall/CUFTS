@@ -52,7 +52,16 @@
 
 <tr><td>
 <table class="outlined" style="width: 100%;">
- <tr><td class="heading-bar" colspan="2">LC Call Number File</td></tr>
+ <tr><td class="heading-bar" colspan="2">MARC data</td></tr>
+ <tr><td class="label1">readable</td><td class="field1"><a href="[% url("${MARC_url}marc_dump.txt") %]">marc_data.txt</a></td></tr>
+ <tr><td class="label0">transmission</td><td class="field0"><a href="[% url("${MARC_url}marc_dump.mrc") %]">marc_data.mrc</a></td></tr>
+</table>
+</td></tr>
+
+<tr><td><br /></td></tr>
+
+<tr><td>
+<table class="outlined" style="width: 100%;">
  <tr>
   <td class="heading-bar2-left" style="width: 1%;">delete</td>
   <td class="heading-bar2-right">file</td></tr>

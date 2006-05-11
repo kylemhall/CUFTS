@@ -250,6 +250,13 @@ sub data : Local {
 			$c->stash->{call_number_file} = sprintf("%04i-%02i-%02i %02i:%02i:%02i", $year, $mon, $mday, $hour, $min, $sec);
 		}
 	}
+
+	$c->stash->{MARC_url} = $CUFTS::Config::CJDB_URL;
+	if ( $c->stash->{MARC_url} !~ m{/$} ) {
+		$c->stash->{MARC_url} .= '/';
+	}
+
+	$c->stash->{MARC_url} .= $c->stash->{current_site}->key . '/sites/' . $c->stash->{current_site}->id . '/static/';
 	
 	$c->stash->{section} = 'cjdb_data';
 	$c->stash->{template} = 'site/cjdb/data.tt';
