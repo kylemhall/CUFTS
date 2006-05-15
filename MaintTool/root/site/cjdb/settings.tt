@@ -52,7 +52,7 @@
 <br />
 
 <table class="outlined">
-<tr><td class="heading-bar" colspan="2">CJDB authentication options</td></tr>
+<tr><td class="heading-bar" colspan="2">MARC record dump settings</td></tr>
 <tr><td class="label0">856 link label</td><td class="field0">
 <input type="text" name="marc_dump_856_link_label" value="[% current_site.marc_dump_856_link_label %]" maxlength="1024" size="30"/>
 </td></tr>
