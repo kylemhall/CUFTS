@@ -164,6 +164,10 @@ sub build_linkTOC {
             $url .= '_AND_iu_' . $request->issue;
         }
 
+        if ( not_empty_string( $resource->proxy_suffix ) ) {
+            $url .= $resource->proxy_suffix;
+        }
+
         my $result = new CUFTS::Result($url);
         $result->record($record);
         push @results, $result;
@@ -216,6 +220,10 @@ sub build_linkFulltext {
 #        if ( not_empty_string($request->atitle) ) { 
 #            $url .= '+AND+ti+' . $request->atitle;
 #        }
+
+        if ( not_empty_string( $resource->proxy_suffix ) ) {
+            $url .= $resource->proxy_suffix;
+        }
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
