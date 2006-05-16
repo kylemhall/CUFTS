@@ -314,7 +314,7 @@ sub ajax_issn : Local {
     if ( not_empty_string($string) ) {
         my $issns = CJDB::DB::ISSNs->search_issnlist( $c->stash->{current_site}->id, "$string%" );
         foreach my $issn (@$issns) {
-            $response .= '<li>' . dashed_issn($issn->[0]) . "</li>\n";
+            $response .= '<li>' . dashed_issn($issn->[0]) . '<span class="informal"> : ' . $issn->[1] . "</span></li>\n";
         }
     }
     

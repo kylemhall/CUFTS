@@ -65,7 +65,7 @@ sub search_issnlist {
 
     $issn =~ s/\-//g;
 
-    my $sql = "SELECT DISTINCT on (issn) issn FROM cjdb_issns WHERE cjdb_issns.site = ? AND cjdb_issns.issn LIKE ? ORDER BY issn LIMIT $limit OFFSET $offset";
+    my $sql = "SELECT DISTINCT on (issn) issn, title FROM cjdb_issns JOIN cjdb_journals ON (cjdb_journals.id = cjdb_issns.journal) WHERE cjdb_issns.site = ? AND cjdb_issns.issn LIKE ? ORDER BY issn LIMIT $limit OFFSET $offset";
     my $dbh = $class->db_Main();
     my $sth = $dbh->prepare( $sql );
 
