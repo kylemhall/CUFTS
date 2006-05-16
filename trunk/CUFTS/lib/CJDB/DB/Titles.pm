@@ -44,6 +44,22 @@ __PACKAGE__->sequence('cjdb_titles_id_seq');
 __PACKAGE__->has_a('journal' => 'CJDB::DB::Journals');
 
 
+sub search_titlelist {
+	my ($class, $site, $title, $offset, $limit) = @_;
+	
+	$limit ||= 'ALL';
+	$offset ||= 0;
+	
+	my $sql = "SELECT DISTINCT on (search_title) title FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title LIKE ? ORDER BY search_title LIMIT $limit OFFSET $offset";
+	my $dbh = $class->db_Main();
+        my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
+	
+	$sth->execute($site, $title);
+	my $results = $sth->fetchall_arrayref;
+	return $results;
+}		
+
+
 sub search_distinct_by_journal_main {
 	my ($class, $site, $title, $offset, $limit) = @_;
 	
