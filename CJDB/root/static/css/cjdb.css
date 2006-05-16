@@ -26,7 +26,7 @@ form {
 
 #page-header-background {
 	width: 100%;
-	background: url(../images/cjdb_header_repeat.gif) repeat-x;
+	background: url(/static/images/cjdb_header_repeat.gif) repeat-x;
 }
 
 /* Page title - words at the top of every page */
@@ -555,3 +555,101 @@ div#account td.label {
 
 div#account td.data {
 }
+
+
+/**************************************************
+
+script.aculo.us autocomplete
+
+***************************************************/
+
+div.autocomplete {
+     position:absolute;
+     width:250px;
+     background-color:white;
+     border:1px solid #888;
+     margin:0px;
+     padding:0px;
+}
+
+div.autocomplete ul {
+     list-style-type:none;
+     margin:0px;
+     padding:0px;
+}
+
+div.autocomplete ul li.selected { background-color: #ffb;}
+
+div.autocomplete ul li {
+     list-style-type:none;
+     display:block;
+     margin:0;
+     padding:2px;
+     cursor:pointer;
+}
+
+
+
+
+
+
+/************************************************
+
+alternate browse tabs
+
+*************************************************/
+
+
+#browse-tabs {
+  float:left;
+  width:100%;
+  font-size:93%;
+  background:#DAE0D2 url("/static/images/tab-bg.gif") repeat-x bottom;
+  line-height:normal;
+  }
+#browse-tabs ul {
+  margin:0;
+  padding:10px 10px 0;
+  list-style:none;
+  }
+#browse-tabs li {
+  float:left;
+  background:url("/static/images/tab-left.gif") no-repeat left top;
+  margin:0;
+  padding:0 0 0 9px;
+  }
+#browse-tabs a {
+  float:left;
+  display:block;
+  background:url("/static/images/tab-right.gif") no-repeat right top;
+  padding:5px 15px 4px 6px;
+  text-decoration:none;
+  font-weight:bold;
+  color:#667;
+  }
+/* Commented Backslash Hack
+   hides rule from IE5-Mac \*/
+#browse-tabs a {float:none;}
+/* End IE5-Mac hack */
+#browse-tabs a:hover {
+  color:#222;
+  }
+#browse-tabs .current {
+  background-image:url("/static/images/tab-left-current.gif");
+  }
+#browse-tabs .current a {
+  background-image:url("/static/images/tab-right-current.gif");
+  color:#222;
+  padding-bottom:5px;
+  }
+  
+div.browse-screen {
+    border-left:   #a6bce8 solid 1px;
+    border-right:  #a6bce8 solid 1px;
+    border-bottom: #a6bce8 solid 1px; 
+    padding: 10px;
+    clear: both;
+    background: #DDDDFF;
+}
+
+div.browse-screen input { padding: 1px; }

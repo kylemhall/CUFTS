@@ -13,32 +13,28 @@ function imageSwap(image, image1, image2) {
 
 
 function showDiv(show, hide, field, displayStyle) {
-    if (!document.getElementById) return true;
 
     var show_obj;
     if (show) {
-        var show_obj = document.getElementById(show);
-	if (!show_obj) return true;
-
+        var show_obj = $(show);
+	    if (!show_obj) return true;
     }
 
     var hide_obj;
     if (hide) {
-        var hide_obj = document.getElementById(hide);
-	if (!hide_obj) return true;
-
+        var hide_obj = $(hide);
+	    if (!hide_obj) return true;
     }
 
     var field_obj;
     if (field) {
-        var field_obj = document.getElementById(field);
-	if (!field_obj) return true;
-
+        var field_obj = $(field);
+	    if (!field_obj) return true;
     }
 
-    if (hide_obj)  hide_obj.style.display = 'none';
-    if (show_obj)  show_obj.style.display = displayStyle || 'block';
-    if (field_obj) field_obj.focus();
+    Element.hide(hide);
+    show_obj.style.display = displayStyle || 'block';
+    field_obj.focus();
 
     return false;
 }
@@ -48,7 +44,7 @@ function showTagManageDivs() {
 	var sd1 = showDiv('manage-tags','show-manage-tags');
 	var sd2 = showDiv(undefined, 'my-tags-group');
 
-	// Why Javascript wont let me && the above to calls directly is beyond me.
+	// Why Javascript wont let me && the above two calls directly is beyond me.
 
 	return(sd1 && sd2);
 }
@@ -95,3 +91,32 @@ function classSwap(layer, class1, class2) {
 
 	return false;
 }
+
+
+function changeBrowseAlt(activate) {
+   var actions = new Array('title', 'subject', 'association', 'tag', 'issn');
+   
+   // Switch active tab
+   
+   actions.each( function(action) {
+       Element.removeClassName("tab-" + action, 'current');
+   });
+   
+   Element.addClassName("tab-" + activate, 'current');
+
+   // Switch active div
+
+   actions.each( function(action) {
+      Element.hide("search-" + action);
+   });
+   
+   Element.show("search-" + activate);
+  
+   // Set focus and select any existing text  
+   
+   var fields = Form.getInputs("form-" + activate, "text", "search_terms");
+   Field.activate(fields[0]);
+   
+   return false;
+}
+

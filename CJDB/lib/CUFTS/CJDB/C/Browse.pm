@@ -2,7 +2,10 @@ package CUFTS::CJDB::C::Browse;
 
 use strict;
 use base 'Catalyst::Base';
+use CUFTS::Util::Simple;
+
 use Data::Dumper;
+
 
 sub browse : Local {
 	my ($self, $c) = @_;
@@ -284,6 +287,62 @@ sub show : Local {
 	die('Invalid browse_field value: ' . Dumper($browse_field) );
 }
 
+
+sub ajax_title : Local {
+    my ( $self, $c ) = @_;
+    
+    my $string = $c->req->params->{search_terms};
+    my $response = '';
+
+    if ( not_empty_string($string) ) {
+        my $titles = CJDB::DB::Titles->search_titlelist( $c->stash->{current_site}->id, "$string%" );
+        foreach my $title (@$titles) {
+            $response .= "<li>$title->[0]</li>\n";
+        }
+    }
+    
+    $c->response->body("<ul>$response</ul>\n");
+    $c->response->content_type('text/html; charset=iso-8859-1');
+}
+
+sub ajax_issn : Local {
+    my ( $self, $c ) = @_;
+    
+    my $string = $c->req->params->{search_terms};
+    my $response = '';
+
+    if ( not_empty_string($string) ) {
+        my $issns = CJDB::DB::ISSNs->search_issnlist( $c->stash->{current_site}->id, "$string%" );
+        foreach my $issn (@$issns) {
+            $response .= '<li>' . dashed_issn($issn->[0]) . "</li>\n";
+        }
+    }
+    
+    $c->response->body("<ul>$response</ul>\n");
+    $c->response->content_type('text/html; charset=iso-8859-1');
+}
+
+sub ajax_tag : Local {
+    my ( $self, $c ) = @_;
+    
+    my $string = $c->req->params->{search_terms};
+    my $response = '';
+
+    if ( not_empty_string($string) ) {
+        my $tags;
+        if ( defined($c->stash->{current_account}) ) {
+            $tags = CJDB::DB::Tags->search_taglist_account( $c->stash->{current_site}->id, $c->stash->{current_account}->id, "$string%" );
+        } else {
+            $tags = CJDB::DB::Tags->search_taglist_noaccount( $c->stash->{current_site}->id, "$string%" );
+        }
+        foreach my $tag (@$tags) {
+            $response .= "<li>$tag->[0]</li>\n";
+        }
+    }
+    
+    $c->response->body("<ul>$response</ul>\n");
+    $c->response->content_type('text/html; charset=iso-8859-1');
+}
 
 sub selected_journals : Local {
 	my ($self, $c) = @_;
