@@ -1,6 +1,7 @@
 <html>
 <head>
 <meta name="ROBOTS" content="NOINDEX,NOFOLLOW" />
+<base href="[% url_base %]" />
 <title>CJDB</title>
 <link rel="StyleSheet" href="[% css_dir %]cjdb.css" type="text/css" media="screen, print" />
 [% IF site_css_file %]
