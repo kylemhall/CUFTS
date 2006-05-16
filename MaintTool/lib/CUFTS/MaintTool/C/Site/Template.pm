@@ -31,6 +31,8 @@ sub menu : Local {
         azmenu.tt
         browse.tt
         browse_associations.tt
+        browse_form.tt
+        browse_form_alt.tt
         browse_journals.tt
         browse_journals_unified_data.tt
         browse_search_description.tt
