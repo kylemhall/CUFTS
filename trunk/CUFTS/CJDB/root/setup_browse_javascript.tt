@@ -24,4 +24,9 @@
    search_field.options[i] = new Option(new_label, new_value);
   }
  }
+
+
+
 [% END %]
+
+
