@@ -79,4 +79,5 @@ __PACKAGE__->set_sql(display => qq{
     WHERE cjdb_links.journal = ?;
 });
 
+
 1;

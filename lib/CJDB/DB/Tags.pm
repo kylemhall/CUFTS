@@ -103,6 +103,51 @@ __PACKAGE__->set_sql('_tag_summary_without_account' => qq{
 });
 
 
+sub search_taglist_noaccount {
+	my ($class, $site, $tag, $offset, $limit) = @_;
+	
+	$limit  ||= 'ALL';
+	$offset ||= 0;
+	
+	my $sql = qq{
+	    SELECT DISTINCT on (tag) tag FROM cjdb_tags 
+	    WHERE (    ( site = ?    AND viewing = 2 )
+	            OR viewing = 1
+	          )
+	          AND tag LIKE ?
+	    ORDER BY tag
+    };
+
+	my $dbh = $class->db_Main();
+    my $sth = $dbh->prepare($sql);
+	
+	$sth->execute($site, $tag);
+	my $results = $sth->fetchall_arrayref;
+	return $results;
+}		
+
+sub search_taglist_account {
+	my ($class, $site, $account, $tag, $offset, $limit) = @_;
+	
+	$limit ||= 'ALL';
+	$offset ||= 0;
+	
+	my $sql = qq{
+	    SELECT DISTINCT on (tag) tag FROM cjdb_tags 
+	    WHERE (    ( site = ?    AND viewing = 2 )
+	            OR ( account = ? AND viewing = 0 )
+	            OR viewing = 1
+	          )
+	          AND tag LIKE ?
+	    ORDER BY tag
+    };
+	my $dbh = $class->db_Main();
+    my $sth = $dbh->prepare($sql);
+	
+	$sth->execute($site, $account, $tag);
+	my $results = $sth->fetchall_arrayref;
+	return $results;
+}		
 
 
 sub get_mytags_list {
