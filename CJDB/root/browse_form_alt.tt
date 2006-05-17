@@ -1,6 +1,8 @@
 [% USE url %]
 [% PROCESS setup_browse.tt %] 
 
+<div id="tabs-container">
+
 <div id="browse-tabs">
  <ul>
   <li id="tab-title"       onClick="return changeBrowseAlt('title');" class="current"><a href="#">Title</a></li>
@@ -70,6 +72,8 @@
 <div style="width: 500px; " class="autocomplete" id="auto_issns_complete"></div><script type="text/javascript">new Ajax.Autocompleter("auto_issns", "auto_issns_complete", "[% url("$url_base/browse/ajax_issn") %]", {minChars: 4})</script>
 <input type="hidden" name="browse_field" value="issn">
 </form>
+</div>
+
 </div>
 
 <div id="browse-subject"><a href="[% url("$url_base/browse/lcc") %]">Browse by journal subject</a></div>
