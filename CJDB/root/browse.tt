@@ -3,5 +3,5 @@
 [% INCLUDE page_title.tt %]
 [% INCLUDE azmenu.tt %]
 
-[%# INCLUDE browse_form.tt %]
-[% INCLUDE browse_form_alt.tt %]
+[% INCLUDE browse_form.tt %]
+[%# INCLUDE browse_form_alt.tt %]
