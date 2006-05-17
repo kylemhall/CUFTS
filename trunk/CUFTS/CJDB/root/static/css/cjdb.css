@@ -653,3 +653,9 @@ div.browse-screen {
 }
 
 div.browse-screen input { padding: 1px; }
+
+div#tabs-container {
+    float: left;
+    clear: both;
+    width: 99%;
+}
