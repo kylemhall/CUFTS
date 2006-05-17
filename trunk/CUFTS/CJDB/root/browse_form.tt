@@ -1,4 +1,5 @@
 [% USE url %]
+[% PROCESS setup_browse.tt %]
 
 <form method="post" name="browse" action="[% url("$url_base/browse/show") %]">
 <span class="highlight">Search</span> for journals by:
