@@ -79,3 +79,5 @@
 <div id="browse-subject"><a href="[% url("$url_base/browse/lcc") %]">Browse by journal subject</a></div>
 
 <div id="browse-selected"><a href="[% url("$url_base/browse/selected_journals") %]">Browse selected journals</a></div>
+
+[% SET javascript_onload = "rememberTab();" %]
