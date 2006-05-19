@@ -799,7 +799,7 @@ CJDB_RECORD:
         # Clone the title fields if necessary (for journal title indexing)
         
         if ( not_empty_string($site->marc_dump_duplicate_title_field) ) {
-            foreach my $field_num ( '245', '246' '210' ) {
+            foreach my $field_num ( '245', '246', '210' ) {
                 my @title_fields = $MARC_record->field( $field_num );
                 foreach my $title_field ( @title_fields ) {
                     my @subfields = map { @{ $_ } } $title_field->subfields;  # Flatten subfields
