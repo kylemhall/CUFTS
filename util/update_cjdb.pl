@@ -784,13 +784,17 @@ CJDB_RECORD:
         }
 	    $MARC_record->append_fields( $field_856 );
 
-        # Clone the title field if necessary (for journal title indexing)
+        # Clone the title fields if necessary (for journal title indexing)
         
         if ( not_empty_string($site->marc_dump_duplicate_title_field) ) {
-            my $title_field = $MARC_record->field('245');
-            my @subfields = map { @{ $_ } } $title_field->subfields;  # Flatten subfields
-            my $new_field = MARC::Field->new( $site->marc_dump_duplicate_title_field, $title_field->indicator(1), $title_field->indicator(2), @subfields );
-            $MARC_record->append_fields( $new_field );
+            foreach my $field_num ( '245', '246' '210' ) {
+                my @title_fields = $MARC_record->field( $field_num );
+                foreach my $title_field ( @title_fields ) {
+                    my @subfields = map { @{ $_ } } $title_field->subfields;  # Flatten subfields
+                    my $new_field = MARC::Field->new( $site->marc_dump_duplicate_title_field, $title_field->indicator(1), $title_field->indicator(2), @subfields );
+                    $MARC_record->append_fields( $new_field );
+                }
+            }
         }
 	    
 	    # Add CJDB identifier if defined
