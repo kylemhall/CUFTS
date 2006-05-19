@@ -113,7 +113,7 @@ sub begin : Private {
 
     # Store previous action/arguments/parameters data
 
-    unless ( $c->req->action =~ /^account/ ) {
+    if ( $c->req->action !~ /^account/ && $c->req->action !~ /ajax/ ) {
         $c->session->{prev_action}    = $c->req->action;
         $c->session->{prev_arguments} = $c->req->arguments;
         $c->session->{prev_params}    = $c->req->params;
