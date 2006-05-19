@@ -784,6 +784,18 @@ CJDB_RECORD:
         }
 	    $MARC_record->append_fields( $field_856 );
 
+        # Add medium to title fields
+
+        if ( not_empty_string($site->marc_dump_medium_text) ) {
+            foreach my $field_num ( '245', '246' ) {
+                my @title_fields = $MARC_record->field( $field_num );
+                foreach my $title_field ( @title_fields ) {
+                    $MARC_record->add_subfields( 'h', $site->marc_dump_medium_text );
+                }
+            }
+        }
+
+
         # Clone the title fields if necessary (for journal title indexing)
         
         if ( not_empty_string($site->marc_dump_duplicate_title_field) ) {
