@@ -179,15 +179,33 @@ sub search_distinct_by_tags {
 		if ($viewing == 0) {
 			$search_sql .= ' AND cjdb_tags.viewing = ? ';
 			push @bind, 0;
+    		if ($account) {
+    			$search_sql .= ' AND cjdb_tags.account = ?';
+    			push @bind, $account;
+    		}
 		} elsif ($viewing == 1) {
 			$search_sql .= ' AND cjdb_tags.viewing = ? AND cjdb_tags.site = ? ';
 			push @bind, 1, $site;
+    		if ($account) {
+    			$search_sql .= ' AND cjdb_tags.account = ?';
+    			push @bind, $account;
+    		}
 		} elsif ($viewing == 2) {
 			$search_sql .= ' AND cjdb_tags.viewing = ? AND cjdb_tags.site = ? ';
 			push @bind, 2, $site;
+    		if ($account) {
+    			$search_sql .= ' AND cjdb_tags.account = ?';
+    			push @bind, $account;
+    		}
 		} elsif ($viewing == 3) {
-			$search_sql .= ' AND (cjdb_tags.viewing = ? OR (cjdb_tags.viewing = ? AND cjdb_tags.site = ?)) ';
+			$search_sql .= ' AND (cjdb_tags.viewing = ? OR (cjdb_tags.viewing = ? AND cjdb_tags.site = ?) ';
 			push @bind, 1, 2, $site;
+    		if ($account) {
+    			$search_sql .= ' OR (cjdb_tags.account = ? AND cjdb_tags.viewing = 0)';
+    			push @bind, $account;
+    		}
+			
+			$search_sql .= ')';
 		} elsif ($viewing == 4) {
     		$search_sql .= ' AND (cjdb_tags.viewing = ? OR cjdb_tags.viewing = ?) AND cjdb_tags.site = ? ';
     		push @bind, 1, 2, $site;
@@ -198,10 +216,6 @@ sub search_distinct_by_tags {
 			push @bind, $level;
 		}
 
-		if ($account) {
-			$search_sql .= ' AND cjdb_tags.account = ?';
-			push @bind, $account;
-		}
 
 		$search_sql .= ' )';
 		push @search, $search_sql;
@@ -209,6 +223,9 @@ sub search_distinct_by_tags {
 		
 	$sql .= join ' INTERSECT ', @search;
 	$sql .= ") AS combined_journals ORDER BY combined_journals.stripped_sort_title, combined_journals.id LIMIT $limit OFFSET $offset";
+
+    warn($sql);
+    warn(join ',', @bind);
 
 	my $dbh = $class->db_Main();
 	my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
