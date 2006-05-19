@@ -21,10 +21,6 @@ sub mytags : Local {
 	
 	return $c->redirect('/browse') if !defined($c->stash->{current_account});
 
-	# Add account to the parameters so that /browse/bytags will search on only that account
-	
-	$c->req->params->{account} = $c->stash->{current_account}->id;
-	
 	$c->forward('/browse/bytags', \@tags);
 }
 
@@ -75,6 +71,11 @@ sub journals : Local {
 		              ? 2 
 		              : 3;
 
+      	# Add account to the parameters so that /browse/bytags will search on only that account
+
+      	if ( is_empty_string( $c->req->params->{account} ) && defined( $c->stash->{current_account} ) ) {
+      	    $c->req->params->{account} = $c->stash->{current_account}->id;
+      	}
 
 		$journals = CJDB::DB::Journals->search_distinct_by_tags($search, $start_record, $per_page, $c->req->params->{level}, $c->stash->{current_site}->id, $c->req->params->{account}, $viewing);
 	} elsif ($browse_field eq 'issn') {
