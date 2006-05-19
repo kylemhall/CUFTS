@@ -312,6 +312,7 @@ sub ajax_issn : Local {
     my $response = '';
 
     if ( not_empty_string($string) ) {
+        $string = uc($string);
         my $issns = CJDB::DB::ISSNs->search_issnlist( $c->stash->{current_site}->id, "$string%" );
         foreach my $issn (@$issns) {
             $response .= '<li>' . dashed_issn($issn->[0]) . '<span class="informal"> : ' . $issn->[1] . "</span></li>\n";
@@ -329,6 +330,7 @@ sub ajax_tag : Local {
     my $response = '';
 
     if ( not_empty_string($string) ) {
+        $string = lc(string);
         my $tags;
         if ( defined($c->stash->{current_account}) ) {
             $tags = CJDB::DB::Tags->search_taglist_account( $c->stash->{current_site}->id, $c->stash->{current_account}->id, "$string%" );
