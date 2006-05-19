@@ -25,14 +25,15 @@ use strict;
 sub strip_title {
 	my ($string) = @_;
 	
+    $string =~ s/\s+\&\s+/ and /g;
+
 	$string = latin1_fallback($string);
 
 	$string = lc($string);
 	$string =~ s/[^a-z0-9 ]//g;
 
 	# !!! Should this go here? We'll see how it works long term
-
-	$string =~ s/\s+and\s+/ /g;
+#	$string =~ s/\s+and\s+/ /g;
 
 	# Remove extra spaces
 
@@ -306,81 +307,6 @@ sub strip_title_for_matching {
 
 			
 	
-
-1;
-
-__END__
-
-sub title_match {
-	my ($titles1, $titles2, $threshold) = @_;
-
-	my @stop_words = qw(of and the an a la le les der das die et);
-	
-	int($threshold) > 0 or
-		$threshold = 75;
-
-	# Build title array for first set
-	
-	my %title1_hash;
-	
-	foreach my $title (@$titles1) {
-		$title = strip_articles(strip_title($title));
-
-		foreach my $word (split / /, $title) {
-			next if grep {$word eq $_} @stop_words;
-
-			$title1_hash{$word}++;
-		}
-	}
-
-	my %title2_hash;
-	
-	foreach my $title (@$titles2) {
-		$title = strip_articles(strip_title($title));
-
-		foreach my $word (split / /, $title) {
-			next if grep {$word eq $_} @stop_words;
-
-			$title2_hash{$word}++;
-		}
-	}
-
-	my %match_hash;
-	my ($matches, $extra1, $extra2) = (0,0,0);
-	
-	foreach my $word1 (keys %title1_hash) {
-		if ($title2_hash{$word1}) {
-			$match_hash{$word1}++ == 0 and
-				$matches++;
-		} else {
-			$extra1++;
-		}
-	}
-
-	foreach my $word2 (keys %title2_hash) {
-		if ($title1_hash{$word2}) {
-			$match_hash{$word2}++ == 0 and
-				$matches++;
-		} else {
-			$extra2++;
-		}
-	}
-
-	# DEBUG DUMP
-
-	if (0) {
-		print("Matches : $matches\nExtra 1 : $extra1\nExtra 2 : $extra2\n");
-	}
-	
-	$extra1 == 0 || $extra2 == 0 and
-		return 1;
-		
-	$matches > ($extra1+$extra2) and
-		return 1;
-
-	return 0;
-}
-
 
 1;
 
