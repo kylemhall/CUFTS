@@ -330,7 +330,7 @@ sub ajax_tag : Local {
     my $response = '';
 
     if ( not_empty_string($string) ) {
-        $string = lc(string);
+        $string = lc($string);
         my $tags;
         if ( defined($c->stash->{current_account}) ) {
             $tags = CJDB::DB::Tags->search_taglist_account( $c->stash->{current_site}->id, $c->stash->{current_account}->id, "$string%" );
