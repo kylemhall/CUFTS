@@ -790,7 +790,7 @@ CJDB_RECORD:
             foreach my $field_num ( '245', '246' ) {
                 my @title_fields = $MARC_record->field( $field_num );
                 foreach my $title_field ( @title_fields ) {
-                    $MARC_record->add_subfields( 'h', $site->marc_dump_medium_text );
+                    $title_field->add_subfields( 'h', $site->marc_dump_medium_text );
                 }
             }
         }
