@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -22,81 +22,82 @@ package CUFTS::Resources::Emerald;
 
 use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		ft_start_date
-		ft_end_date
-		journal_url
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            ft_start_date
+            ft_end_date
+            journal_url
+        )
+    ];
 }
 
 sub title_list_field_map {
-	return {
-		'Full Title of Journal'	=> 'title',
-		'ISSN' 			=> 'issn',
-		'Access URL'		=> 'journal_url',
-	};
+    return {
+        'Full Title of Journal' => 'title',
+        'ISSN'                  => 'issn',
+        'Access URL'            => 'journal_url',
+    };
 }
 
 sub clean_data {
-	my ($class, $record) = @_;
-	
-	$record->{'title'} =~ s/^"\s*//;
-	$record->{'title'} =~ s/"\s*$//;
-	$record->{'title'} =~ s/\s*\*+$//;
+    my ( $class, $record ) = @_;
 
-	my $date = $record->{'___Full Text'};
-	if (defined($date) && $date =~ /^\s*(\d{4})/) {
-		$record->{'ft_start_date'} = $1;
-	}
-	if (defined($date) && $date =~ /-\s*(\d{4})$/) {
-		$record->{'ft_end_date'} = $1;
-	} elsif (defined($date) && $date =~ /-\s*(\d{2})$/) {
-		if ($1 < 10) {
-			$record->{'ft_end_date'} = '20' . $1;
-		} else {
-			$record->{'ft_end_date'} = '19' . $1;
-		}
-	}
+    $record->{title} =~ s/^"\s*//;
+    $record->{title} =~ s/"\s*$//;
+    $record->{title} =~ s/\s*\*+$//;
 
-	return $class->SUPER::clean_data($record);
+    my $date = $record->{'___Full Text'};
+    if ( defined($date) && $date =~ /^ \s* (\d{4}) /xsm ) {
+        $record->{ft_start_date} = $1;
+    }
+    if ( defined($date) && $date =~ / - \s* (\d{4}) $/xsm ) {
+        $record->{ft_end_date} = $1;
+    }
+    elsif ( defined($date) && $date =~ / - \s* (\d{2}) $/xsm ) {
+        if ( $1 < 10 ) {
+            $record->{ft_end_date} = '20' . $1;
+        }
+        else {
+            $record->{ft_end_date} = '19' . $1;
+        }
+    }
+
+    return $class->SUPER::clean_data($record);
 }
 
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
-	foreach my $record (@$records) {
-		next unless assert_ne($record->issn);
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-		my $url = 'http://www.emeraldinsight.com/';
-		$url .= substr($record->issn, 0, 4) . '-' . substr($record->issn, 4, 4);
-		$url .= '.htm';
+    my @results;
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->issn );
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		push @results, $result;
-	}
+        my $url = 'http://www.emeraldinsight.com/' . dashed_issn( $record->issn ) . 'htm';
 
-	return \@results;
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
-
 
 1;
