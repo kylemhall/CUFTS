@@ -11,5 +11,5 @@ CREATE TABLE cjdb_tags (
 
 CREATE INDEX cjdb_tags_j_a_idx     ON cjdb_tags (journals_auth);
 CREATE INDEX cjdb_tags_account_idx ON cjdb_tags (account);
-CREATE INDEX cjdb_tags_tag_idx     ON cdjb_tags (tag);
+CREATE INDEX cjdb_tags_tag_idx     ON cjdb_tags (tag);
 CREATE INDEX cjdb_tags_site_idx    ON cjdb_tags (site);
