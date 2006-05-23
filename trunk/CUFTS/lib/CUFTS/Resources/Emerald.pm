@@ -60,6 +60,12 @@ sub clean_data {
     $record->{title} = trim_string( $record->{title}, '"' );
     $record->{title} =~ s/ \s* \*+ \s* $//xsm;
 
+    if ( $record->{ft_start_date} !~ /^ \d{4} $/xsm ) {
+       delete $record->{ft_start_date};
+       delete $record->{vol_ft_start};
+       delete $record->{iss_ft_start};
+    }
+
     return $class->SUPER::clean_data($record);
 }
 
