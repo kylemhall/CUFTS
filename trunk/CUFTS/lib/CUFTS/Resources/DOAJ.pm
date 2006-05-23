@@ -1,6 +1,6 @@
 ## CUFTS::Resources::DOAJ
 ##
-## Copyright Michelle Gauthier - Simon Fraser University (2003)
+## Copyright Todd Holbrook - Simon Fraser University (2003)
 ##
 ## This file is part of CUFTS.
 ##
@@ -24,6 +24,7 @@ use base qw(CUFTS::Resources::Base::Journals);
 use Unicode::String qw(utf8);
 
 use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
@@ -68,8 +69,7 @@ sub title_list_split_row {
     my $csv = CUFTS::Util::CSVParse->new();
 
     $csv->parse($row)
-        or CUFTS::Exception::App->throw(
-        'Error parsing CSV line: ' . $csv->error_input() );
+        or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
 
     my @fields = $csv->fields;
     return \@fields;
@@ -78,17 +78,19 @@ sub title_list_split_row {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    if ( !defined($record->{'ft_start_date'}) || $record->{'ft_start_date'} !~ /^\d{4}$/ ) {
-        delete $record->{'ft_start_date'};
+    if ( !defined( $record->{ft_start_date} )
+        || $record->{ft_start_date} !~ /^ \d{4} $/xsm )
+    {
+        delete $record->{ft_start_date};
     }
-    
-    $record->{'title'} =~ s/\s*\(.+?\)\s*$//;
-    $record->{'title'} = utf8( $record->{'title'} )->latin1;
 
-	$record->{'publisher'} = (utf8($record->{'publisher'}))->latin1;
+    $record->{title} =~ s{ \s* \( .+? \) \s* $}{}xsm;
+    $record->{title} = utf8( $record->{title} )->latin1;
 
-    $record->{'issn'} =~ /d\d+/
-        and delete $record->{'issn'};
+    $record->{publisher} = ( utf8( $record->{'publisher'} ) )->latin1;
+
+    $record->{issn} =~ /d\d+/
+        and delete $record->{issn};
 
     return $class->SUPER::clean_data($record);
 }
