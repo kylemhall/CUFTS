@@ -9,7 +9,7 @@ my $form_validate = {
 		# Standard fields
 		'provider', 'active', 'resource_services', 'submit', 'cancel',
 		# Resource details...
-		'resource_identifier', 'database_url', 'auth_name', 'auth_password', 'url_base', 'notes_for_local',
+		'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'notes_for_local',
 	],
 	defaults => { 'active' => 'false', 'resource_services' => [] },
 	filters  => ['trim'],
