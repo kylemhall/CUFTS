@@ -45,6 +45,12 @@ sub title_list_field_map {
         'Full Title of Journal' => 'title',
         'ISSN'                  => 'issn',
         'Access URL'            => 'journal_url',
+        'First Fulltext Online Year'    => 'ft_start_date',
+        'First Fulltext Online Volume'  => 'vol_ft_start',
+        'First Fulltext Online Issue'   => 'iss_ft_start',
+        'Final Fulltext Online Year'    => 'ft_end_date',
+        'Final Fulltext Online Volume'  => 'vol_ft_end',
+        'Final Fulltext Online Issue'   => 'iss_ft_end',
     };
 }
 
@@ -53,22 +59,6 @@ sub clean_data {
 
     $record->{title} = trim_string( $record->{title}, '"' );
     $record->{title} =~ s/ \s* \*+ \s* $//xsm;
-
-    my $date = $record->{'___Full Text'};
-    if ( defined($date) && $date =~ /^ \s* (\d{4}) /xsm ) {
-        $record->{ft_start_date} = $1;
-    }
-    if ( defined($date) && $date =~ / - \s* (\d{4}) $/xsm ) {
-        $record->{ft_end_date} = $1;
-    }
-    elsif ( defined($date) && $date =~ / - \s* (\d{2}) $/xsm ) {
-        if ( $1 < 10 ) {
-            $record->{ft_end_date} = '20' . $1;
-        }
-        else {
-            $record->{ft_end_date} = '19' . $1;
-        }
-    }
 
     return $class->SUPER::clean_data($record);
 }
