@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -22,73 +22,68 @@ package CUFTS::Resources::Extenza;
 
 use base qw(CUFTS::Resources::GenericJournalDOI);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		e_issn
-		ft_start_date
-		vol_ft_start
-		iss_ft_start
-		ft_end_date
-		vol_ft_end
-		iss_ft_end
-		publisher
-		journal_url
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            e_issn
+            ft_start_date
+            vol_ft_start
+            iss_ft_start
+            ft_end_date
+            vol_ft_end
+            iss_ft_end
+            publisher
+            journal_url
+        )
+    ];
 }
 
 sub overridable_resource_details {
-	return undef;
+    return undef;
 }
-	
 
 sub title_list_field_map {
-	return {
-		'Journal'		=> 'title',
-		'Print ISSN'		=> 'issn',
-		'Electronic'		=> 'e_issn',
-		'Publisher'		=> 'publisher',
-		'Link'			=> 'journal_url',
-		'Coverage (year)'	=> 'ft_start_date',
-		
-	};
+    return {
+        'Journal'         => 'title',
+        'Print ISSN'      => 'issn',
+        'Electronic'      => 'e_issn',
+        'Publisher'       => 'publisher',
+        'Link'            => 'journal_url',
+        'Coverage (year)' => 'ft_start_date',
+
+    };
 }
 
 sub clean_data {
-	my ($class, $record) = @_;
+    my ( $class, $record ) = @_;
 
-	$record->{'ft_start_date'} =~ s/.*(\d{4}).*/$1/;
-	
-	if ($record->{'___Coverage (vol)'} =~ /vol\s+(\d+)\((\d+)\)/i) {
-		$record->{'vol_ft_start'} = $1;
-		$record->{'iss_ft_start'} = $2;
-	} elsif ($record->{'___Coverage (vol)'} =~ /vol\s+(\d+)/i) {
-		$record->{'vol_ft_start'} = $1;
-	}
+    $record->{ft_start_date} =~ s/.*(\d{4}).*/$1/;
 
-	$record->{'title'} =~ s/^"//;
-	$record->{'title'} =~ s/"$//;
+    if ( $record->{'___Coverage (vol)'} =~ / vol \s+ (\d+) \( (\d+) \) /xsmi ) {
+        $record->{vol_ft_start} = $1;
+        $record->{iss_ft_start} = $2;
+    }
+    elsif ( $record->{'___Coverage (vol)'} =~ / vol \s+ (\d+)/xsmi ) {
+        $record->{vol_ft_start} = $1;
+    }
 
-	$record->{'journal_url'} =~ s/^"\s*//;
-	$record->{'journal_url'} =~ s/\s*"$//;
+    $record->{title}       = trim_string($record->{title},       '"');
+    $record->{journal_url} = trim_string($record->{journal_url}, '"');
+    $record->{publisher}   = trim_string($record->{publisher},   '"');
 
-	$record->{'publisher'} =~ s/^"\s*//;
-	$record->{'publisher'} =~ s/\s*"$//;
-
-	return $class->SUPER::clean_data($record);
+    return $class->SUPER::clean_data($record);
 }
-
-
 
 sub can_getTOC {
-	return 0;
+    return 0;
 }
-
 
 1;
