@@ -51,9 +51,8 @@ sub title_list_field_map {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    $record->{title} =~ s/^"\s*//;
-    $record->{title} =~ s/"\s*$//;
-    $record->{title} =~ s/\s*\*+$//;
+    $record->{title} = trim_string( $record->{title}, '"' );
+    $record->{title} =~ s/ \s* \*+ \s* $//xsm;
 
     my $date = $record->{'___Full Text'};
     if ( defined($date) && $date =~ /^ \s* (\d{4}) /xsm ) {
