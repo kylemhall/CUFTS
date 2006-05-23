@@ -1,6 +1,6 @@
 ## CUFTS::Resources::Cambridge.pm
 ##
-## Copyright Michelle Gauthier - Simon Fraser University (2004-02-09)
+## Copyright Todd Holbrook - Simon Fraser University (2006-05-09)
 ##
 ## This file is part of CUFTS.
 ##
