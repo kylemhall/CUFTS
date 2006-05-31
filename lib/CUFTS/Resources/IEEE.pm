@@ -77,15 +77,15 @@ sub title_list_split_row {
 sub clean_data {
     my ( $class, $record ) = @_;
     
-    if ( $record->{ft_start_date} !~ /\d{4}/ ) {
+    if ( not_empty_string($record->{ft_start_date}) && $record->{ft_start_date} !~ /\d{4}/ ) {
         delete $record->{ft_start_date};
     }
 
-    if ( $record->{ft_end_date} !~ /\d{4}/ ) {
+    if ( not_empty_string($record->{ft_end_date}) && $record->{ft_end_date} !~ /\d{4}/ ) {
         delete $record->{ft_end_date};
     }
 
-    if ( $record->{issn} !~ / \d{4} - \d{3}[\dxX] /xsm ) {
+    if ( not_empty_string($record->{issn}) && $record->{issn} !~ / \d{4} - \d{3}[\dxX] /xsm ) {
         delete $record->{issn};
     }
 
