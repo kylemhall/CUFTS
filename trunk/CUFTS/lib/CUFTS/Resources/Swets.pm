@@ -1,6 +1,6 @@
 ## CUFTS::Resources::Swets
 ##
-## Copyright Michelle Gauthier - Simon Fraser University (2003-11-05)
+## Copyright Todd Holbrook - Simon Fraser University (2003-11-05)
 ##
 ## This file is part of CUFTS.
 ##
@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -22,7 +22,8 @@ package CUFTS::Resources::Swets;
 
 use base qw(CUFTS::Resources::Base::Journals);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
@@ -33,19 +34,20 @@ my $url_base = 'http://www.swetswise.com/link/access_db?';
 ##
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		e_issn
-		ft_start_date
-		ft_end_date
-                vol_ft_start
-                iss_ft_start
-                publisher
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            e_issn
+            ft_start_date
+            ft_end_date
+            vol_ft_start
+            iss_ft_start
+            publisher
+        )
+    ];
 }
-
 
 ## title_list_field_map - Hash ref mapping fields from the raw title lists to
 ## internal field names
@@ -53,64 +55,53 @@ sub title_list_fields {
 
 sub title_list_field_map {
 
-	return {
-                'TITLE'		=> 'title',
- 		'ISSN 1'	=> 'issn',
-		'ISSN 2'	=> 'e_issn',
-		'START YEAR'	=> 'ft_start_date',
-		'CEASED YEAR'	=> 'ft_end_date',
-		'FIRST VOL'	=> 'vol_ft_start',
-                'LAST VOL'	=> 'vol_ft_end',
-		'FIRST ISS'	=> 'iss_ft_start',
-		'LAST ISS'	=> 'iss_ft_end',
-		'PUBLISHER'	=> 'publisher',
-         };
+    return {
+        'TITLE'       => 'title',
+        'ISSN 1'      => 'issn',
+        'ISSN 2'      => 'e_issn',
+        'START YEAR'  => 'ft_start_date',
+        'CEASED YEAR' => 'ft_end_date',
+        'FIRST VOL'   => 'vol_ft_start',
+        'LAST VOL'    => 'vol_ft_end',
+        'FIRST ISS'   => 'iss_ft_start',
+        'LAST ISS'    => 'iss_ft_end',
+        'PUBLISHER'   => 'publisher',
+    };
 }
 
 sub title_list_extra_requires {
-	require Text::CSV;
+    require Text::CSV;
 }
-
 
 sub title_list_split_row {
-	my ($class, $row) = @_;
-	
-	my $csv = Text::CSV->new();
-	$csv->parse($row) or
-		CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input());
-	
-	my @fields = $csv->fields;
-	return \@fields;
-}
+    my ( $class, $row ) = @_;
 
+    my $csv = Text::CSV->new();
+    $csv->parse($row)
+        or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
+
+    my @fields = $csv->fields;
+    return \@fields;
+}
 
 sub clean_data {
-	my ($class, $record) = @_;
-	
-	if (defined($record->{'ft_start_date'}) && ($record->{'ft_start_date'} = int($record->{'ft_start_date'})) == 0) {
-		delete $record->{'ft_start_date'};
-	}
-	if (defined($record->{'vol_ft_start'}) && ($record->{'vol_ft_start'} = int($record->{'vol_ft_start'})) == 0) {
-		delete $record->{'vol_ft_start'};
-	}
-	if (defined($record->{'iss_ft_start'}) && ($record->{'iss_ft_start'} = int($record->{'iss_ft_start'})) == 0) {
-		delete $record->{'iss_ft_start'};
-	}
-	if (defined($record->{'ft_end_date'}) && ($record->{'ft_end_date'} = int($record->{'ft_end_date'})) == 0) {
-		delete $record->{'ft_end_date'};
-	}
-	if (defined($record->{'vol_ft_end'}) && ($record->{'vol_ft_end'} = int($record->{'vol_ft_end'})) == 0) {
-		delete $record->{'vol_ft_end'};
-	}
-	if (defined($record->{'iss_ft_end'}) && ($record->{'iss_ft_end'} = int($record->{'iss_ft_end'})) == 0) {
-		delete $record->{'iss_ft_end'};
-	}
-		
+    my ( $class, $record ) = @_;
 
-	return $class->SUPER::clean_data($record);
+    # int each field and delete if it is 0
+
+    foreach my $field ( qw( ft_start_date ft_end_date vol_ft_start vol_ft_end iss_ft_start iss_ft_end ) ) {
+        if ( defined($record->{$field}) ) {
+
+            $record->{$field} = int( $record->{$field} );
+            if ( $record->{$field} == 0 ) {
+                delete $record->{$field};
+            }
+
+        }
+    }
+
+    return $class->SUPER::clean_data($record);
 }
-
-
 
 ## -------------------------------------------------------------------------------------------
 
@@ -119,17 +110,24 @@ sub clean_data {
 ## enough data, etc. early (here) cuts down on database hits
 
 sub can_getFulltext {
-	my ($class, $request) = @_;
-	
-	return 0 unless assert_ne($request->spage);
-	return $class->SUPER::can_getFulltext($request);
+    my ( $class, $request ) = @_;
+    
+    return 0 
+        if is_empty_string( $request->spage  )
+        || is_empty_string( $request->issue  )
+        || is_empty_string( $request->volume );
+
+    return $class->SUPER::can_getFulltext($request);
 }
 
 sub can_getTOC {
-	my ($class, $request) = @_;
-	
-	return 0 unless (assert_ne($request->spage) || assert_ne($request->volume));
-	return $class->SUPER::can_getFulltext($request);
+    my ( $class, $request ) = @_;
+
+    return 0
+        if is_empty_string( $request->issue  )
+        || is_empty_string( $request->volume );
+        
+    return $class->SUPER::can_getFulltext($request);
 }
 
 # --------------------------------------------------------------------------------------------
@@ -139,91 +137,88 @@ sub can_getTOC {
 ##
 
 sub build_linkFulltext {
-	my ($class, $records, $resource, $site, $request) = @_;
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
 
-	my @results;
+    my @results;
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->issn);
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->issn );
 
-		my $url = $url_base . 'issn=' . $record->issn;	
-	        $url .= '&vol=' . $request->volume . '&iss=' . $request->issue;
-                $url .= '&page=' . $request->spage . '&FT=1';
+        my $url = $url_base . 'issn=' . $record->issn;
+        $url .= '&vol=' . $request->volume . '&iss=' . $request->issue;
+        $url .= '&page=' . $request->spage . '&FT=1';
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
 
-	return \@results;
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 sub build_linkTOC {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->issn);
+    my @results;
 
-		my $url = $url_base . 'issn=' . $record->issn;
-	        $url .= '&vol=' . $request->volume . '&iss=' . $request->issue;
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->issn );
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+        my $url = $url_base . 'issn=' . $record->issn;
+        $url .= '&vol=' . $request->volume . '&iss=' . $request->issue;
 
-	return \@results;
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->issn);
+    my @results;
 
-		my $result = new CUFTS::Result($url_base . 'issn=' . $record->issn);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->issn );
 
-	return \@results;
+        my $result = new CUFTS::Result( $url_base . 'issn=' . $record->issn );
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 1;
