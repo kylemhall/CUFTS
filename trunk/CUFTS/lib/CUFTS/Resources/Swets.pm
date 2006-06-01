@@ -106,7 +106,7 @@ sub clean_data {
         return [ 'Invalid date: ' . $record->{ft_start_date} ];
     }
 
-    if ( defined($record->{ft_end_date}) && $record->{ft_end_date} !~ /^(19|20)/ ) {
+    if ( defined($record->{ft_end_date}) && $record->{ft_end_date} !~ /^(18|19|20)/ ) {
         return [ 'Invalid date: ' . $record->{ft_end_date} ];
     }
 
