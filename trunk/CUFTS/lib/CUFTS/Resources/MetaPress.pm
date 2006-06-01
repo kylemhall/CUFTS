@@ -108,6 +108,13 @@ sub clean_data {
         }
     }
 
+    foreach my $field ( qw( vol_ft_start vol_ft_end iss_ft_start iss_ft_end ) ) {
+        if ( defined($record->{$field}) && $record->{$field} eq '-1' ) {
+            delete $record->{$field};
+        }
+    }
+
+
     if ( defined( $record->{title} ) ) {
         $record->{title} =~ s/\([^\)]+?\)$//;
         $record->{title} = utf8( $record->{title} )->latin1;
