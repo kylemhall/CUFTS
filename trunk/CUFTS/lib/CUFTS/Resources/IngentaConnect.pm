@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -18,232 +18,274 @@
 ## with CUFTS; if not, write to the Free Software Foundation, Inc., 59
 ## Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-
 package CUFTS::Resources::IngentaConnect;
 
 use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
 
 use HTML::Entities;
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
 sub title_list_extra_requires {
-	require CUFTS::Util::CSVParse;
+    require CUFTS::Util::CSVParse;
 }
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		e_issn
+    return [
+        qw(
+            id
+            title
+            issn
+            e_issn
 
-		ft_start_date
-		ft_end_date
+            ft_start_date
+            ft_end_date
 
-		publisher
-		journal_url
-	)];
+            publisher
+            journal_url
+        )
+    ];
 }
 
 sub overridable_resource_details {
-	return undef;
+    return undef;
 }
-	
+
 sub clean_data {
-	my ($class, $record) = @_;
+    my ( $class, $record ) = @_;
 
-	$record->{'title'} = HTML::Entities::decode_entities($record->{'title'});
-	if (defined($record->{'ft_start_date'})) {
-		if ($record->{'ft_start_date'} =~ /(\d{4})\s*-\s*(\d{4})/) {
-			$record->{'ft_start_date'} = $1;
-			$record->{'ft_end_date'} = $2;
-		} elsif ($record->{'ft_start_date'} =~ /^(\d{4})/)  {
-			$record->{'ft_start_date'} = $1;
-		} else {
-			delete $record->{'ft_start_date'};
-		}
-	}
+    $record->{title} = HTML::Entities::decode_entities( $record->{title} );
+    
+    if ( defined( $record->{ft_start_date} ) ) {
 
-	defined($record->{'e_issn'}) && ($record->{'e_issn'} =~ /0000\-?0000/ || $record->{'e_issn'} =~ /unknown/) and
-		delete $record->{'e_issn'};
+        if ( $record->{ft_start_date} =~ / (\d{4}) \s* - \s* (\d{4}) /xsm ) {
+            $record->{ft_start_date} = $1;
+            $record->{ft_end_date}   = $2;
+        }
+        elsif ( $record->{ft_start_date} =~ /^ (\d{4}) /xsm ) {
+            $record->{ft_start_date} = $1;
+        }
+        else {
+            delete $record->{ft_start_date};
+        }
 
-	defined($record->{'issn'}) && ($record->{'issn'} =~ /0000\-?0000/ || $record->{'issn'} =~ /unknown/)  and
-		delete $record->{'issn'};
+    }
 
-	return $class->SUPER::clean_data($record);
+    if ( defined( $record->{e_issn} )
+         && ( $record->{e_issn} =~ /0000\-?0000/ || $record->{e_issn} =~ /unknown/ )
+       )
+    {
+        delete $record->{e_issn};
+    }
+
+    if ( defined( $record->{issn} )
+         && ( $record->{issn} =~ /0000\-?0000/ || $record->{issn} =~ /unknown/ )
+       )
+    {
+        delete $record->{issn};
+    }
+
+    return $class->SUPER::clean_data($record);
 }
-
 
 sub title_list_split_row {
-	my ($class, $row) = @_;
-	
-	my $csv = CUFTS::Util::CSVParse->new();
+    my ( $class, $row ) = @_;
 
-	$row =~ s/\s*$//;
+    my $csv = CUFTS::Util::CSVParse->new();
 
-	$csv->parse($row) or
-		CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input());
-	
-	my @fields = $csv->fields;
-	return \@fields;
+    $row = trim_string($row);
+
+    $csv->parse($row)
+        or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
+
+    my @fields = $csv->fields;
+    return \@fields;
 }
 
 sub title_list_get_field_headings {
-	return [qw(
-		publisher
-		title
-		issn
-		e_issn
-		ft_start_date
-		journal_url	
-	)];
+    return [
+        qw(
+            publisher
+            title
+            issn
+            e_issn
+            ft_start_date
+            journal_url
+        )
+    ];
 }
-
 
 ## preprocess_file - Join the multi-line style of title list into one title list
 ##                   write a temp file and open it.  In this case, we're just deleting
 ##                   tons of duplicate lines
 
 sub preprocess_file {
-	my ($class, $IN) = @_;
+    my ( $class, $IN ) = @_;
 
-	use File::Temp;
-	
-	my ($fh, $filename) = File::Temp::tempfile();
-	my %seen;
+    use File::Temp;
 
+    my ( $fh, $filename ) = File::Temp::tempfile();
+    my %seen;
 
-	# publisher, title, issn, e_issn, coverage, url	
-	while (my $line = <$IN>) {
-		my ($publisher, $title, $issn, $e_issn, $coverage, $url) = @{$class->title_list_split_row($line)};
+    # publisher, title, issn, e_issn, coverage, url
+    while ( my $line = <$IN> ) {
+        my ( $publisher, $title, $issn, $e_issn, $coverage, $url )
+            = @{ $class->title_list_split_row($line) };
 
-		defined($seen{$url}) or
-			$seen{$url} = {};
+        if ( !defined( $seen{$url} ) ) {
+            $seen{$url} = {};
+        }
 
-		defined($seen{$url}->{'publisher'}) or
-			$seen{$url}->{'publisher'} = $publisher;
+        $seen{$url}->{publisher} ||= $publisher;
+        $seen{$url}->{title}     ||= $title;
 
-		defined($seen{$url}->{'title'}) or
-			$seen{$url}->{'title'} = $title;
+        my @temp_issns;
+        if ( defined($issn) 
+             && $issn ne '0000-0000' 
+             && $issn =~ /\d{4}-\d{3}[\dxX]/ ) 
+        {
+            push @temp_issns, $issn;
+        }
+            
 
-		my @temp_issns;
-		defined($issn) && $issn ne '0000-0000' && $issn =~ /\d{4}-\d{3}[\dxX]/ and
-			push @temp_issns, $issn;
+        if ( defined($e_issn)
+            && $e_issn ne '0000-0000'
+            && $e_issn =~ /\d{4}-\d{3}[\dxX]/ )
+        {
+            push @temp_issns, $e_issn;
+        }
 
-		defined($e_issn) && $e_issn ne '0000-0000' && $e_issn =~ /\d{4}-\d{3}[\dxX]/ and
-			push @temp_issns, $e_issn;
+        foreach my $temp_issn (@temp_issns) {
 
-		foreach my $temp_issn (@temp_issns) {
+            if ( !defined( $seen{$url}->{issns} ) ) {
+                $seen{$url}->{issns} = [];
+            }
 
-			defined($seen{$url}->{'issns'}) or
-				$seen{$url}->{'issns'} = [];
+            push @{ $seen{$url}->{issns} }, $temp_issn;
+        }
 
-			push @{$seen{$url}->{'issns'}}, $temp_issn;
-		}
+        my ( $temp_start, $temp_end ) = split /-/, $coverage;
+        
+        if (defined($temp_start)
+            && ( !defined( $seen{$url}->{start} )
+                || $temp_start < $seen{$url}->{start} )
+            )
+        {
+            $seen{$url}->{start} = $temp_start;
+        }
+        
+        if (defined($temp_end)
+            && ( !defined( $seen{$url}->{end} )
+                || $temp_end > $seen{$url}->{end} )
+            )
+        {
+            $seen{$url}->{end} = $temp_end;
+        }
+    }
 
-		my ($temp_start, $temp_end) = split /-/, $coverage;
-		if (defined($temp_start) && (!defined($seen{$url}->{'start'}) || $temp_start < $seen{$url}->{'start'})) {
-			$seen{$url}->{'start'} = $temp_start;
-		}
-		if (defined($temp_end) && (!defined($seen{$url}->{'end'}) || $temp_end > $seen{$url}->{'end'})) {
-			$seen{$url}->{'end'} = $temp_end;
-		}
-	}	
+    foreach my $url ( keys %seen ) {
+        print $fh '"', $seen{$url}->{publisher}, '",';
+        print $fh '"', $seen{$url}->{title},     '",';
 
-	foreach my $url (keys %seen) {
-		print $fh '"', $seen{$url}->{'publisher'}, '",';
-		print $fh '"', $seen{$url}->{'title'}, '",';
+        if ( defined( $seen{$url}->{issns} ) ) {
+            print $fh shift( @{ $seen{$url}->{issns} } );
+        }
+        print $fh ',';
 
-		if (defined($seen{$url}->{'issns'})) {
-			print $fh shift(@{$seen{$url}->{'issns'}});
-		}
-		print $fh ',';
-		
-		if (defined($seen{$url}->{'issns'})) {
-			print $fh shift(@{$seen{$url}->{'issns'}});
-		}
-		print $fh ',';
-		
-		print $fh $seen{$url}->{'start'}, '-', $seen{$url}->{'end'}, ',';
-		
-		print $fh $url;
-		print $fh "\n";
-	}	
+        if ( defined( $seen{$url}->{issns} ) ) {
+            print $fh shift( @{ $seen{$url}->{issns} } );
+        }
+        print $fh ',';
 
-	close *$IN;
-	seek *$fh, 0, 0;
+        print $fh $seen{$url}->{start}, '-', $seen{$url}->{end}, ',';
 
-	return $fh;
+        print $fh $url;
+        print $fh "\n";
+    }
+
+    close *$IN;
+    seek *$fh, 0, 0;
+
+    return $fh;
 }
-
-
 
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
-	foreach my $record (@$records) {
-		next unless assert_ne($record->journal_url);
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-		my $result = new CUFTS::Result($record->journal_url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+    my @results;
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->journal_url );
 
-	return \@results;
+        my $result = new CUFTS::Result( $record->journal_url );
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
 
+
+sub can_getFulltext {
+    my ( $class, $request ) = @_;
+
+    return 0 if is_empty_string( $request->date  );
+    return 0 if is_empty_string( $request->spage );
+
+    return $class->SUPER::can_getFulltext($request);
+}
+
+
 sub build_linkFulltext {
-	my ($class, $records, $resource, $site, $request) = @_;
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
 
-	my @results;
+    my @results;
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->issn);
-		next unless assert_ne($request->date);
-		next unless assert_ne($request->spage);
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->issn );
 
-		my $url = 'http://www.ingentaselect.com/rpsv/cgi-bin/cgi?body=linker&reqidx=';
-		$url .= $record->issn;
-		
-		$url .= '(' . $request->date . ')';
-		
-		assert_ne($request->volume) and
-			$url.= $request->volume;
-			
-		assert_ne($request->issue) and
-			$url .= ':' . $request->issue;
-			
-		$url .= 'L.' . $request->spage;
+        my $url = 'http://www.ingentaselect.com/rpsv/cgi-bin/cgi?body=linker&reqidx=';
+        $url .= $record->issn;
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+        $url .= '(' . $request->date . ')';
 
-	return \@results;
+        if ( not_empty_string($request->volume) ) {
+            $url .= $request->volume;
+        }
+
+        if ( not_empty_string($request->issue) ) {
+             $url .= ':' . $request->issue;
+        }
+
+        $url .= 'L.' . $request->spage;
+
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
 
 1;
