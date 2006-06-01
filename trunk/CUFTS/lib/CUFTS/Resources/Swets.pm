@@ -100,6 +100,16 @@ sub clean_data {
         }
     }
 
+    # Check that dates make sense.. sometimes there are bad dates like "0410"
+    
+    if ( defined($record->{ft_start_date}) && $record->{ft_start_date} !~ /^(19|20)/ ) {
+        return [ 'Invalid date: ' . $record->{ft_start_date} ];
+    }
+
+    if ( defined($record->{ft_end_date}) && $record->{ft_end_date} !~ /^(19|20)/ ) {
+        return [ 'Invalid date: ' . $record->{ft_end_date} ];
+    }
+
     return $class->SUPER::clean_data($record);
 }
 
