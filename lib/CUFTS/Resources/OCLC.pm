@@ -97,12 +97,22 @@ sub title_list_split_row {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    foreach my $date_field ( qw(cit_start_date cit_end_date ft_start_date ft_end_date)) {
-        next if !defined( $record->{$date_field} );
+    foreach my $field ( qw( cit_start_date cit_end_date ft_start_date ft_end_date ) ) {
+        next if !defined( $record->{$field} );
 
-        $record->{$date_field} =~ /^\d{4}$/
-            or delete $record->{$date_field};
+        if ( $record->{$field} !~ /^\d{4}$/ ) {
+            delete $record->{$field};
+        }
     }
+
+    foreach my $field ( qw( vol_ft_start vol_ft_end iss_ft_start iss_ft_end vol_cit_start vol_cit_end iss_cit_start iss_cit_end ) ) {
+        next if !defined( $record->{$field} );
+
+        if ( $record->{$field} eq '0' ) {
+            delete $record->{$field};
+        }
+    }
+
 
     $record->{title} = HTML::Entities::decode_entities( $record->{title} );
 
