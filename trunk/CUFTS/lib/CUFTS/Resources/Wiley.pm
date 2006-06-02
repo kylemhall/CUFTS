@@ -20,7 +20,7 @@
 
 package CUFTS::Resources::Wiley;
 
-use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::GenericJournalDOI);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
@@ -149,40 +149,6 @@ sub clean_data {
     }
 
     return $class->SUPER::clean_data($record);
-}
-
-# --------------------------------------------------------------------------------------------
-
-## build_link* - Builds a link to a service.  Should return an array reference containing
-## Result objects with urls and title list records (if applicable).
-##
-
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $url = 'http://www3.interscience.wiley.com/cgi-bin/issn?DESCRIPTOR=PRINTISSN&VALUE=';
-        $url .= dashed_issn( $record->issn );
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
 }
 
 1;
