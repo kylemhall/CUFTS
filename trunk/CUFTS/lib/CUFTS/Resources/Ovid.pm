@@ -21,8 +21,11 @@
 package CUFTS::Resources::Ovid;
 
 use base qw(CUFTS::Resources::Base::Journals);
+
 use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Util::Simple;
 use URI::Escape;
+
 use strict;
 
 ## title_list_fields - Controls what fields get displayed and loaded from
