@@ -108,7 +108,7 @@ sub clean_data {
     foreach my $field ( qw( vol_ft_start vol_ft_end iss_ft_start iss_ft_end vol_cit_start vol_cit_end iss_cit_start iss_cit_end ) ) {
         next if !defined( $record->{$field} );
 
-        if ( $record->{$field} eq '0' ) {
+        if ( $record->{$field} !~ /^\d+$/ || $record->{$field} eq '0' ) {
             delete $record->{$field};
         }
     }
