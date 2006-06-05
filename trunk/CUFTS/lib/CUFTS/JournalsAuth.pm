@@ -65,8 +65,8 @@ sub merge_ja_issns {
             next if grep { $_ eq $column } qw{ id journal_auth };
             $record->{$column} = $issn->$column();
         }
-        CUFTS::DB::JournalsAuthISSNs->find_or_create($record);
         $issn->delete();
+        CUFTS::DB::JournalsAuthISSNs->find_or_create($record);
     }
 
     return 1;
