@@ -75,7 +75,7 @@ sub main {
     else {
         load_journals( 'global', $timestamp, $term );
     }
-    
+
     CUFTS::DB::DBI->dbi_commit();
 
     return 1;
@@ -321,7 +321,7 @@ sub update_ja_record {
     # Test ISSNs - don't create records with duplicate ISSNS and
     # don't naively merge records that already have two ISSNs 
 
-    my $issn_count = scalar(@journal_auth_issns);
+    my $new_issn_count = 0;
     foreach my $issn (@$issns) {
         if ( !grep { $issn eq $_ } @journal_auth_issns ) {
         
@@ -330,12 +330,12 @@ sub update_ja_record {
                 push @{$stats->{ issn_dupe }}, $journal;
                 return undef;
             }
-            $issn_count++;
+            $new_issn_count++;
 
         }
     }
 
-    if ($issn_count > 2) {
+    if ($new_issn_count && ( $new_issn_count + scalar(@journal_auth_issns) ) > 2) {
     	push @{$stats->{ too_many_issns }}, $journal;
     	return undef;
     }
@@ -417,25 +417,25 @@ sub display_stats {
     
     print "Records skipped due to existing ISSNs\n------------------------------------\n";
     foreach my $journal ( @{$stats->{issn_dupe}} ) {
-        print $journal->title, "  ";
-        print $journal->issn, " ";
-        print $journal->e_issn, " ";
+        print $journal->title, "\t";
+        print $journal->issn, "\t";
+        print $journal->e_issn, "\t";
         print $journal->resource->name, "\n";
     }
     
     print "Records skipped due to multiple matches\n------------------------------------\n";
     foreach my $journal ( @{$stats->{multiple_matches}} ) {
-        print $journal->title, "  ";
-        print $journal->issn, " ";
-        print $journal->e_issn, " ";
+        print $journal->title, "\t";
+        print $journal->issn, "\t";
+        print $journal->e_issn, "\t";
         print $journal->resource->name, "\n";
     }
 
     print "Records skipped due to merge creating too many ISSNs\n------------------------------------\n";
     foreach my $journal ( @{$stats->{too_many_issns}} ) {
-        print $journal->title, "  ";
-        print $journal->issn, " ";
-        print $journal->e_issn, " ";
+        print $journal->title, "\t";
+        print $journal->issn, "\t";
+        print $journal->e_issn, "\t";
         print $journal->resource->name, "\n";
     }
 
