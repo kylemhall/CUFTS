@@ -668,7 +668,6 @@ sub strip_print_MARC {
 sub create_brief_MARC {
     my ( $site, $journals_auth ) = @_;
 
-
     my %seen;
     my $MARC_record = MARC::Record->new();
 
@@ -702,6 +701,12 @@ sub build_dump {
     my ( $site, $MARC_cache ) = @_;
     
     my $cjdb_record_iter = CJDB::DB::Journals->search( site => $site->id );
+
+    my ( $sec, $min, $hour, $day, $mon, $year ) = localtime(time);
+    $year += 1900;
+    $mon++;
+    my $datestamp = sprintf( '%04i%02i%02i%02i%02i%02i.0', $year, $mon, $day, $hour, $min, $sec );
+
 
     my $base_url = $CUFTS::Config::CJDB_URL;
     if ( $base_url !~ m{/$} ) {
@@ -775,6 +780,16 @@ CJDB_RECORD:
             print "  * Error - unable to create MARC record for dump\n";
             next CJDB_RECORD;
         }
+        
+        # Add 005 field
+
+        my $existing_005 = $MARC_record->field('005');
+        if ( defined($existing_005) ) {
+                $MARC_record->delete( $existing_005 );
+        }
+        $MARC_record->append_fields(
+                MARC::Field->new( '005', $datestamp )
+        );
         
         # Add 856 link
 
