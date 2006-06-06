@@ -41,9 +41,11 @@ sub title_list_fields {
             issn
             e_issn
             ft_start_date
-            ft_end_date
             vol_ft_start
             iss_ft_start
+            ft_end_date
+            vol_ft_end
+            iss_ft_end
             publisher
         )
     ];
@@ -108,6 +110,17 @@ sub clean_data {
 
     if ( defined($record->{ft_end_date}) && $record->{ft_end_date} !~ /^(18|19|20)/ ) {
         return [ 'Invalid date: ' . $record->{ft_end_date} ];
+    }
+
+    # Clear vol/iss ends unless the journal is really ending (has a ft end date)
+
+    if ( !defined($record->{ft_end_date}) ) {
+        if ( defined($record->{vol_ft_end}) {
+            delete $record->{vol_ft_end};
+        }
+        if ( defined($record->{iss_ft_end}) {
+            delete $record->{iss_ft_end};
+        }
     }
 
     return $class->SUPER::clean_data($record);
