@@ -785,7 +785,7 @@ CJDB_RECORD:
 
         my $existing_005 = $MARC_record->field('005');
         if ( defined($existing_005) ) {
-                $MARC_record->delete( $existing_005 );
+                $MARC_record->delete_field( $existing_005 );
         }
         $MARC_record->append_fields(
                 MARC::Field->new( '005', $datestamp )
