@@ -318,7 +318,10 @@ sub update_ja_record {
 
     my @journal_auth_issns = map { $_->issn } $journal_auth->issns;
 
-    # Test ISSNs
+    # Test ISSNs - don't create records with duplicate ISSNS and
+    # don't naively merge records that already have two ISSNs 
+
+    my $issn_count = scalar(@journal_auth_issns);
     foreach my $issn (@$issns) {
         if ( !grep { $issn eq $_ } @journal_auth_issns ) {
         
@@ -327,10 +330,16 @@ sub update_ja_record {
                 push @{$stats->{ issn_dupe }}, $journal;
                 return undef;
             }
+            $issn_count++;
 
         }
     }
 
+    if ($issn_count > 2) {
+    	push @{$stats->{ too_many_issns }}, $journal;
+    	return undef;
+    }
+    
     $journal->journal_auth( $journal_auth->id );
     $journal->update;
 
@@ -402,9 +411,9 @@ sub get_site_id {
 sub display_stats {
     my ($stats) = @_;
     
-    print "Journal records checked: ", $stats->{count}, "\n";
+    print "\nJournal records checked: ", $stats->{count}, "\n";
     print "journal_auth records created: ", $stats->{new_record}, "\n";
-    print "journal_auth records matched: ", $stats->{matched}, "\n";
+    print "journal_auth records matched: ", $stats->{match}, "\n";
     
     print "Records skipped due to existing ISSNs\n------------------------------------\n";
     foreach my $journal ( @{$stats->{issn_dupe}} ) {
@@ -416,6 +425,14 @@ sub display_stats {
     
     print "Records skipped due to multiple matches\n------------------------------------\n";
     foreach my $journal ( @{$stats->{multiple_matches}} ) {
+        print $journal->title, "  ";
+        print $journal->issn, " ";
+        print $journal->e_issn, " ";
+        print $journal->resource->name, "\n";
+    }
+
+    print "Records skipped due to merge creating too many ISSNs\n------------------------------------\n";
+    foreach my $journal ( @{$stats->{too_many_issns}} ) {
         print $journal->title, "  ";
         print $journal->issn, " ";
         print $journal->e_issn, " ";
