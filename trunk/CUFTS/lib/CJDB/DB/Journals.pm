@@ -229,9 +229,12 @@ sub search_distinct_by_tags {
     warn(join ',', @bind);
 
 	my $dbh = $class->db_Main();
+	$dbh->do('set enable_nestloop = off');
+	
 	my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
 	$sth->execute(@bind);
 	my @results = $class->sth_to_objects($sth);	
+	$dbh->do('set enable_nestloop = on');
 	
 	return \@results;
 }	
