@@ -225,8 +225,8 @@ sub search_distinct_by_tags {
 	$sql .= join ' INTERSECT ', @search;
 	$sql .= ") AS combined_journals ORDER BY combined_journals.stripped_sort_title, combined_journals.id LIMIT $limit OFFSET $offset";
 
-    warn($sql);
-    warn(join ',', @bind);
+#    warn($sql);
+#    warn(join ',', @bind);
 
 	my $dbh = $class->db_Main();
 	$dbh->do('set enable_nestloop = off');
