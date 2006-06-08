@@ -172,10 +172,8 @@ sub search_distinct_by_tags {
 	my @search;
 	foreach my $tag (@$tags) {
 
-		# cjdb_journals.site = $site is repeated twice.  I have no clue why, but it cuts down PostgreSQL processing by about 10 times.
-
-		my $search_sql = '(SELECT cjdb_journals.* FROM cjdb_journals JOIN cjdb_tags ON (cjdb_journals.journals_auth = cjdb_tags.journals_auth) WHERE tag = ? AND cjdb_journals.site = ? AND cjdb_journals.site = ?';
-		push @bind, $tag, $site, $site;
+		my $search_sql = '(SELECT cjdb_journals.* FROM cjdb_journals JOIN cjdb_tags ON (cjdb_journals.journals_auth = cjdb_tags.journals_auth) WHERE tag = ? AND cjdb_journals.site = ?';
+		push @bind, $tag, $site;
 
 		# Full on public search.
 		
