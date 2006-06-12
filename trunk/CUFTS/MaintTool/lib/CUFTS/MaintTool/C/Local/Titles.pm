@@ -407,7 +407,7 @@ sub single : Local {
 			} else {
 				$c->form->valid->{resource} = $local_resource->id;
 				$c->form->valid->{$global_resource->do_module('local_to_global_field')} = $global_title->id;
-				$local_title->create_from_form($c->form);
+				$local_title = $local_resource->do_module('local_db_module')->create_from_form($c->form);
 			}
 		};
 		if ($@) {
