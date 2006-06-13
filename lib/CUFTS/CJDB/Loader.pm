@@ -417,25 +417,25 @@ sub load_extras {
     
     my $image = $self->get_image($record);
     if ( defined($image) ) {
-        $record->image($image);
+        $journal->image($image);
     }
 
     my $image_link = $self->get_image_link($record);
     if ( defined($image_link) ) {
-        $record->image($image_link);
+        $journal->image($image_link);
     }
 
     my $rss = $self->get_rss($record);
     if ( defined($rss) ) {
-        $record->rss($rss);
+        $journal->rss($rss);
     }
 
     my $misc = $self->get_miscelaneous($record);
     if ( defined($misc) ) {
-        $record->miscelaneous($misc);
+        $journal->miscelaneous($misc);
     }
 
-    $record->update;
+    $journal->update;
     
     return 0;
 }
