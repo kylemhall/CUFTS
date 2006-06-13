@@ -283,6 +283,8 @@ sub process_print_record {
     my $journal = $loader->load_journal($record);
     return if !defined($journal);
 
+    $loader->load_extras( $record, $journal );
+
     $loader->load_titles( $record, $journal );
 
     $loader->load_MARC_subjects( $record, $journal );
