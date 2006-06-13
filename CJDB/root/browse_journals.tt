@@ -25,7 +25,7 @@
     <img src="[% journal.image %]" />
     [%- IF journal.image_link.defined %]</a>[%- END -%]
     </span>
-  [% END %]
+  [%- END %]
   <span class="unified-title"><a href="[% url("$url_base/journal/$journal.journals_auth") %]">[% title | html %]</a></span>
   <span class="unified-issn">[% FOREACH issn IN journal.issns %][% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %][% ',' UNLESS loop.last %][% END %]</span>
   <br />

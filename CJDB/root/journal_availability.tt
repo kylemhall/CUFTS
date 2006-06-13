@@ -1,5 +1,12 @@
 [% USE HTML %]
  <div id="availability" class="details">
+ [% IF journal.image.defined -%]
+  <span class="availability-image">
+   [%- IF journal.image_link.defined -%]<a href="[% journal.image_link %]">[%- END -%]
+   <img src="[% journal.image %]" />
+   [%- IF journal.image_link.defined %]</a>[%- END -%]
+   </span>
+ [%- END %]
  <div id="availability-heading" class="details-headings">Availability</div>
  [% SET count = 0 %]
  [% FOREACH link IN journal.display_links.nsort('rank').reverse %]
