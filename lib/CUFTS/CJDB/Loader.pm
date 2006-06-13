@@ -412,6 +412,34 @@ sub load_relations {
     return $count;
 }
 
+sub load_extras {
+    my ( $self, $record, $journal, $site_id ) = @_;
+    
+    my $image = $self->get_image($record);
+    if ( defined($image) ) {
+        $record->image($image);
+    }
+
+    my $image_link = $self->get_image_link($record);
+    if ( defined($image_link) ) {
+        $record->image($image_link);
+    }
+
+    my $rss = $self->get_rss($record);
+    if ( defined($rss) ) {
+        $record->rss($rss);
+    }
+
+    my $misc = $self->get_miscelaneous($record);
+    if ( defined($misc) ) {
+        $record->miscelaneous($misc);
+    }
+
+    $record->update;
+    
+    return 0;
+}
+
 sub load_link {
     my ( $self, $record, $journal, $site_id ) = @_;
 

@@ -41,6 +41,11 @@ __PACKAGE__->columns(All => qw(
 
 	call_number
 
+    image
+    image_link
+    rss
+    miscelaneous
+
 	journals_auth
 
 	site
@@ -167,7 +172,7 @@ sub search_distinct_by_tags {
 	$offset ||= 0;
 
 	my @bind;	
-	my $sql = 'SELECT DISTINCT ON (combined_journals.stripped_sort_title, combined_journals.id) combined_journals.* FROM (';
+	my $sql = 'SELECT DISTINCT ON (combined_journals.sort_title, combined_journals.id) combined_journals.* FROM (';
 
 	my @search;
 	foreach my $tag (@$tags) {
@@ -223,7 +228,7 @@ sub search_distinct_by_tags {
 	}
 		
 	$sql .= join ' INTERSECT ', @search;
-	$sql .= ") AS combined_journals ORDER BY combined_journals.stripped_sort_title, combined_journals.id LIMIT $limit OFFSET $offset";
+	$sql .= ") AS combined_journals ORDER BY combined_journals.sort_title, combined_journals.id LIMIT $limit OFFSET $offset";
 
 #    warn($sql);
 #    warn(join ',', @bind);

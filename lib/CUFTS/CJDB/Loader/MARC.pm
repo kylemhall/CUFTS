@@ -165,6 +165,30 @@ sub get_MARC_subjects {
     return @subjects;
 }
 
+sub get_image {
+    my ( $self, $record ) = @_;
+
+    return undef;
+}
+
+sub get_image_link {
+    my ( $self, $record ) = @_;
+
+    return undef;
+}
+
+sub get_rss {
+    my ( $self, $record ) = @_;
+
+    return undef;
+}
+
+sub get_miscelaneous {
+    my ( $self, $record ) = @_;
+
+    return undef;
+}
+
 sub get_call_numbers {
     my ( $self, $record ) = @_;
 
