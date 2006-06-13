@@ -422,7 +422,7 @@ sub load_extras {
 
     my $image_link = $self->get_image_link($record);
     if ( defined($image_link) ) {
-        $journal->image($image_link);
+        $journal->image_link($image_link);
     }
 
     my $rss = $self->get_rss($record);
