@@ -106,7 +106,7 @@ sub search : Local {
 		if ($c->form->valid->{string}) {
 			my @records;
 			if ($c->form->valid->{field} eq 'title') {
-				@records = CUFTS::DB::JournalsAuth->search_by_title($c->form->valid->{string});
+				@records = CUFTS::DB::JournalsAuth->search_by_title($c->form->valid->{string} . '%');
 			} elsif ($c->form->valid->{field} eq 'official_title') {
 				@records = CUFTS::DB::JournalsAuth->search_like('title' => $c->form->valid->{string});
 			} elsif ($c->form->valid->{field} eq 'issn') {
