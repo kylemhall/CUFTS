@@ -47,24 +47,20 @@
    <span class="unified-citation">citation [% link.citation_coverage | html %]</span>
    [% END %]
 
-  [% IF link.journal_cjdb_note %]
-   <div class="availability-journal-note">
-    <div class="availability-label">Journal Note:</div>
-    <div class="availability-data">
-     [% link.journal_cjdb_note | html %]
-    </div>
-   </div>
-  [% END %]
+   [% IF link.journal_cjdb_note %]
+     <div class="unified-journal-note">
+      <span class="unified-note-label">Journal Note:</span>
+      <span class="unified-note-data">[% link.journal_cjdb_note | html %]</span>
+     </div>
+    [% END %]
 
-  [% IF resource.cjdb_note %]
-   <div class="availability-resource-note">
-    <div class="availability-label">Resource Note:</div>
-    <div class="availability-data">
-     [% resource.cjdb_note | html %]
-    </div>
-   </div>
-  [% END %]
-
+    [% IF resource.cjdb_note %]
+     <div class="unified-resource-note">
+      <span class="unified-note-label">Resource Note:</span>
+      <span class="unified-note-data">[% resource.cjdb_note | html %]</span>
+     </div>
+    [% END %]
+    
   </div>
  [% END %]
  [% IF count == 0 %]

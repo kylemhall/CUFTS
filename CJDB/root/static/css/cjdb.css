@@ -397,6 +397,15 @@ span.unified-title a:hover, span.unified-title a:active {
         text-decoration: underline;
 }
 
+span.unified-note-label {
+    font-weight: bold;
+}
+
+span.unified-note-data {
+    font-weight: bold;
+    color: red;
+}
+
 span.unified-issn {
 	font-size: 80%;
 }
