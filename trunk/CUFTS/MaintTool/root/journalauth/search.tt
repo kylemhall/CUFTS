@@ -3,9 +3,14 @@
 <div>
 <form method="post" action="[% url("$url_base/journalauth/search") %]">
 Search:
-<input type="text" name="string" value="" size="30" maxlength="128" />
+<input type="text" name="string" value="[% string %]" size="30" maxlength="128" />
 in
-<select name="field"><option value="official_title">official title</option><option value="title">titles</option><option value="issn">ISSNs</option><option value="ids">ids</option></select>
+<select name="field">
+ <option value="title" [% 'selected="selected"' IF field == 'title' %]>titles</option>
+ <option value="official_title" [% 'selected="selected"' IF field == 'official_title' %]>official title</option>
+ <option value="issn" [% 'selected="selected"' IF field == 'issn' %]>ISSNs</option>
+ <option value="ids" [% 'selected="selected"' IF field == 'ids' %]>ids</option>
+</select>
 <input type="submit" name="search" value="search">
 <input type="submit" name="cancel" value="cancel">
 </form>
@@ -16,7 +21,9 @@ in
 [% FOREACH journal_auth IN journal_auths %]
  <div class="journal-auth-record">
   <input type="checkbox" name="merge" value="[% journal_auth.id %]" />
-  <span class="heading">[% journal_auth.title | html %]</span> [% FOREACH issn IN journal_auth.issns %]([% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %]) [% END %]
+  <span class="heading">[% journal_auth.title | html %]</span>
+  <span style="font-size: 80%">[% journal_auth.id %]</span>
+  [% FOREACH issn IN journal_auth.issns %]([% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %]) [% END %]
   <a href="[% url("$url_base/journalauth/edit/$journal_auth.id") %]">edit JA record</a> | 
   <a href="[% url("$url_base/journalauth/edit_marc/$journal_auth.id") %]">edit MARC</a><br />
   <div class="journal-auth-titles">
