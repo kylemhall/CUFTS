@@ -34,9 +34,10 @@ CREATE TABLE local_journals (
 	modified	TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX local_journals_issn_idx ON local_journals (issn);
-CREATE INDEX local_journals_title_idx ON local_journals (title);
-CREATE INDEX local_journals_e_issn_idx ON local_journals (e_issn);
+CREATE INDEX local_journals_issn_idx ON local_journals (issn) WHERE issn IS NOT NULL;
+CREATE INDEX local_journals_title_idx ON local_journals (title) WHERE title IS NOT NULL;
+CREATE INDEX local_journals_e_issn_idx ON local_journals (e_issn) WHERE e_issn IS NOT NULL;
 CREATE INDEX local_journals_r_idx ON local_journals (resource);
+CREATE INDEX local_journals_j_idx ON local_journals (journal);
 CREATE UNIQUE INDEX local_journals_r_j_idx ON local_journals (resource, journal) WHERE journal IS NOT NULL;
 CREATE INDEX local_journals_ja_index ON local_journals (journal_auth) WHERE journal_auth IS NOT NULL;
