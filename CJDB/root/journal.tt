@@ -4,6 +4,14 @@
 
 <div id="journal-title">[% journal.title | html %]</div>
 <div id="details">
+[% IF journal.image.defined -%]
+ <span class="availability-image">
+  [%- IF journal.image_link.defined -%]<a href="[% journal.image_link %]">[%- END -%]
+  <img src="[% journal.image %]" />
+  [%- IF journal.image_link.defined %]</a>[%- END -%]
+  </span>
+[%- END %]
+
 [%- PROCESS journal_issns.tt -%]
 [%- PROCESS journal_titles.tt -%]
 [%- PROCESS journal_subjects.tt -%]
