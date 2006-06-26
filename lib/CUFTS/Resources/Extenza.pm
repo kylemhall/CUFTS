@@ -40,7 +40,6 @@ sub title_list_fields {
             ft_end_date
             vol_ft_end
             iss_ft_end
-            publisher
             journal_url
         )
     ];
@@ -52,32 +51,35 @@ sub overridable_resource_details {
 
 sub title_list_field_map {
     return {
-        'Journal'         => 'title',
-        'Print ISSN'      => 'issn',
-        'Electronic'      => 'e_issn',
-        'Publisher'       => 'publisher',
-        'Link'            => 'journal_url',
-        'Coverage (year)' => 'ft_start_date',
-
+        'TITLE'         => 'title',
+        'ISSN'          => 'issn',
+        'EISSN'         => 'e_issn',
+        'URL'           => 'journal_url',
+        'FIRST ONLINE YEAR'   => 'ft_start_date',
+        'FIRST ONLINE VOLUME' => 'vol_ft_start',
+        'FIRST ONLINE ISSUE'  => 'iss_ft_start',
+        'LAST ONLINE YEAR'    => 'ft_end_date',
+        'LAST ONLINE VOLUME'  => 'vol_ft_end',
+        'LAST ONLINE ISSUE'   => 'iss_ft_end'
     };
 }
 
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    $record->{ft_start_date} =~ s/.*(\d{4}).*/$1/;
-
-    if ( $record->{'___Coverage (vol)'} =~ / vol \s+ (\d+) \( (\d+) \) /xsmi ) {
-        $record->{vol_ft_start} = $1;
-        $record->{iss_ft_start} = $2;
-    }
-    elsif ( $record->{'___Coverage (vol)'} =~ / vol \s+ (\d+)/xsmi ) {
-        $record->{vol_ft_start} = $1;
-    }
-
     $record->{title}       = trim_string($record->{title},       '"');
     $record->{journal_url} = trim_string($record->{journal_url}, '"');
-    $record->{publisher}   = trim_string($record->{publisher},   '"');
+
+    $record->{title} =~ s/\s+\(.+?\)$//;
+
+    foreach my $field ( qw( vol_ft_start vol_ft_end iss_ft_start iss_ft_end ) ) {
+        next if !defined($record->{$field});
+        
+        if ( $record->{$field} !~ /^\d+$/ ) {
+            delete $record->{$field};
+        }
+        
+    }
 
     return $class->SUPER::clean_data($record);
 }
