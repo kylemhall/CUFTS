@@ -247,8 +247,15 @@ sub load_title_list {
 		'timestamp' => $timestamp,
 	};
 
+    my $title_count = $module->count_search('resource' => $resource->id);
+    
+    if ( $title_count == 0 ) {
+        $module->dbi_rollback;
+        die("All titles will be deleted by this load.  Rolling back changes.  There is probably an error in the resource module or the title list format has changed.");
+    }
+
 	$local eq 'global' and
-		$resource->title_count($module->count_search('resource' => $resource->id));
+		$resource->title_count($title_count);
 
 	$resource->title_list_scanned($timestamp);
 	$resource->update;
