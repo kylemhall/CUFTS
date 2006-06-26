@@ -153,7 +153,7 @@ sub build_linkFulltext {
         next if is_empty_string($db);
         $db = lc($db);
 
-        my $url = "http://search.epnet.com/direct.asp?db=${db}&";
+        my $url = "http://search.ebscohost.com/direct.asp?db=${db}&";
 
         $url .= $class->_build_journal_search_field( $record->title, $record->issn );
 
@@ -208,7 +208,7 @@ sub build_linkTOC {
         next if is_empty_string($db);
         $db = lc($db);
 
-        my $url = "http://search.epnet.com/direct.asp?db=${db}&";
+        my $url = "http://search.ebscohost.com/direct.asp?db=${db}&";
 
         $url .= $class->_build_journal_search_field( $record->title, $record->issn );
 
@@ -250,7 +250,7 @@ sub build_linkJournal {
         next if is_empty_string($db);
         $db = lc($db);
 
-        my $url = "http://search.epnet.com/direct.asp?db=${db}&scope=site&";
+        my $url = "http://search.ebscohost.com/direct.asp?db=${db}&scope=site&";
 
         $url .= $class->_build_journal_search_field( $record->title,
             $record->issn );
@@ -275,7 +275,7 @@ sub build_linkDatabase {
 
     foreach my $record (@$records) {
         my $url = $resource->database_url
-               || "http://search.epnet.com/login.asp?profile=web&defaultdb=$db";
+               || "http://search.ebscohost.com/login.asp?profile=web&defaultdb=$db";
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
