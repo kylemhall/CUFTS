@@ -221,8 +221,12 @@ sub build_linkFulltext {
                 and push @params, 'issue=' . $request->issue;
         }
 
-        defined( $request->year )
-            and push @params, 'date=' . $request->year;
+        if ( defined($request->day) ) {
+            push @params, 'date=' . $request->date;
+        }
+        elsif ( defined($request->year) ) {
+            push @params, 'date=' . $request->year;
+        }
 
         push @params, 'spage=' . $request->spage;
 
