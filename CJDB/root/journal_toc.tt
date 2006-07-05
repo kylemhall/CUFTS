@@ -29,7 +29,7 @@
    </div>
    [% IF item.authors %]
    <div class="toc-item-authors">
-    By: [% item.authors.list.join(', ') %]
+    By: [% item.authors.list.join('; ') %]
    </div>
    [% END %]
    [% IF collapse %]
