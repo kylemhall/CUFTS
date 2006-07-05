@@ -216,8 +216,8 @@ sub clean_data {
         }
     }
 
-    # Remove extra spaces from titles
-
+    # Remove extra quotes and spaces from titles
+    $record->{'title'} = trim_string($record->{'title'}, '"');
     $record->{'title'} = trim_string($record->{'title'});
 
     # Check to make sure there's an (e-)ISSN or title
@@ -489,12 +489,10 @@ sub search_getFulltext {
     $active = $class->filter_fulltext( $active, $resource, $site, $request );
 
     $class->can('build_linkFulltext')
-        or CUFTS::Exception::App->throw(
-        "No build_linkFulltext method defined for class: $class");
+        or CUFTS::Exception::App->throw("No build_linkFulltext method defined for class: $class");
 
     if ( defined($active) && scalar(@$active) > 0 ) {
-        return $class->build_linkFulltext( $active, $resource, $site,
-            $request );
+        return $class->build_linkFulltext( $active, $resource, $site, $request );
     }
     else {
         return undef;
@@ -511,12 +509,10 @@ sub search_getJournal {
     $active = $class->filter_fulltext( $active, $resource, $site, $request );
 
     $class->can('build_linkJournal')
-        or CUFTS::Exception::App->throw(
-        "No build_linkJournal method defined for class: $class");
+        or CUFTS::Exception::App->throw("No build_linkJournal method defined for class: $class");
 
     if ( defined($active) && scalar(@$active) > 0 ) {
-        return $class->build_linkJournal( $active, $resource, $site,
-            $request );
+        return $class->build_linkJournal( $active, $resource, $site, $request );
     }
     else {
         return undef;
@@ -533,8 +529,7 @@ sub search_getTOC {
     $active = $class->filter_fulltext( $active, $resource, $site, $request );
 
     $class->can('build_linkTOC')
-        or CUFTS::Exception::App->throw(
-        "No build_linkTOC method defined for class: $class");
+        or CUFTS::Exception::App->throw("No build_linkTOC method defined for class: $class");
 
     if ( defined($active) && scalar(@$active) > 0 ) {
         return $class->build_linkTOC( $active, $resource, $site, $request );
@@ -554,12 +549,10 @@ sub search_getDatabase {
     $active = $class->filter_fulltext( $active, $resource, $site, $request );
 
     $class->can('build_linkDatabase')
-        or CUFTS::Exception::App->throw(
-        "No build_linkDatabase method defined for class: $class");
+        or CUFTS::Exception::App->throw("No build_linkDatabase method defined for class: $class");
 
     if ( defined($active) && scalar(@$active) > 0 ) {
-        return $class->build_linkDatabase( $active, $resource, $site,
-            $request );
+        return $class->build_linkDatabase( $active, $resource, $site, $request );
     }
     else {
         return undef;
@@ -568,15 +561,11 @@ sub search_getDatabase {
 
 sub build_linkDatabase {
     my ( $class, $records, $resource, $site, $request ) = @_;
-    assert_ne( $resource->database_url ) or return [];
+    return [] if is_empty_string( $resource->database_url );
 
     my @results;
     foreach my $record (@$records) {
-        my $result = new CUFTS::Result;
-
-        my $url = $resource->database_url;
-
-        $result->url($url);
+        my $result = new CUFTS::Result($resource->database_url);
         $result->record($record);
 
         push @results, $result;
@@ -678,13 +667,13 @@ sub filter_fulltext {
 sub has_fulltext {
     my ( $class, $record, $resource, $site, $request ) = @_;
 
-           assert_ne( $record->ft_start_date )
-        or assert_ne( $record->ft_end_date )
-        or assert_ne( $record->vol_ft_start )
-        or assert_ne( $record->vol_ft_end )
-        or assert_ne( $record->iss_ft_start )
-        or assert_ne( $record->iss_ft_end )
-        or return 0;
+       assert_ne( $record->ft_start_date )
+    or assert_ne( $record->ft_end_date )
+    or assert_ne( $record->vol_ft_start )
+    or assert_ne( $record->vol_ft_end )
+    or assert_ne( $record->iss_ft_start )
+    or assert_ne( $record->iss_ft_end )
+    or return 0;
 
     return 1;
 }
@@ -756,8 +745,7 @@ sub check_fulltext_embargo {
 sub check_fulltext_current_months {
     my ( $class, $record, $resource, $site, $request ) = @_;
 
-    my ( $year, $month, $day )
-        = ( $request->year, $request->month, $request->day );
+    my ( $year, $month, $day ) = ( $request->year, $request->month, $request->day );
     return $class->_check_current_months( $year, $month, $day,
         $record->current_months );
 }
@@ -766,8 +754,7 @@ sub check_fulltext_current_months {
 sub check_fulltext_current_years {
     my ( $class, $record, $resource, $site, $request ) = @_;
 
-    my ( $year, $month, $day )
-        = ( $request->year, $request->month, $request->day );
+    my ( $year, $month, $day ) = ( $request->year, $request->month, $request->day );
     return $class->_check_current_years( $year, $month, $day, $record->current_years );
 }
 
@@ -776,8 +763,7 @@ sub check_fulltext_current_years {
 sub _check_date_range {
     my ( $class, $year, $month, $day, $start, $end ) = @_;
 
-    my $start_check
-        = $class->_check_start_date( $year, $month, $day, $start );
+    my $start_check = $class->_check_start_date( $year, $month, $day, $start );
     my $end_check = $class->_check_end_date( $year, $month, $day, $end );
 
     return $start_check && $end_check;
@@ -1035,7 +1021,7 @@ sub overlay_global_title_data {
 
     foreach my $column (
         qw(title issn e_issn vol_cit_start vol_cit_end iss_cit_start iss_cit_end vol_ft_start vol_ft_end iss_ft_start iss_ft_end cit_start_date cit_end_date ft_start_date ft_end_date embargo_months embargo_days urlbase db_identifier journal_url toc_url publisher abbreviation current_months journal_auth)
-        )
+    )
     {
         $local->$column( $global->$column ) unless defined( $local->$column );
     }
