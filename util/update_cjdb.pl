@@ -576,6 +576,10 @@ sub build_basic_record {
     $record->{'stripped_sort_title'} = $stripped_sort_title;
     $record->{'site'}                = $site->id;
     $record->{'journals_auth'}       = $journal_auth->id;
+    
+    if ( not_empty_string($journal_auth->rss) ) {
+        $record->{'rss'} = $journal_auth->rss;
+    }
 
     my $journal    = CJDB::DB::Journals->create($record);
     my $journal_id = $journal->id;

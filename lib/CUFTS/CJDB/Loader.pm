@@ -4,6 +4,7 @@ use base ('Class::Accessor');
 CUFTS::CJDB::Loader->mk_accessors('site_id');
 
 use CUFTS::DB::Resources;
+use CUFTS::DB::JournalsAuth;
 use CJDB::DB::Journals;
 use CJDB::DB::LCCSubjects;
 
@@ -92,6 +93,8 @@ sub load_journal {
             or return undef;
     }
 
+    my $journals_auth = CUFTS::DB::JournalsAuth->retrieve( $journals_auth_id );
+
     $__CJDB_LOADER_DEBUG and print "ja found\n";
 
     if ( $self->merge_by_issns ) {
@@ -106,15 +109,20 @@ sub load_journal {
 
     # Create the journal record
 
-    my $journal = CJDB::DB::Journals->create(
-        {   'title'               => $title,
+    my $new_journal_record = {
+            'title'               => $title,
             'sort_title'          => $sort_title,
             'stripped_sort_title' => $stripped_sort_title,
             'site'                => $site_id,
             'journals_auth'       => $journals_auth_id,
             'call_number'         => shift @$call_numbers,
-        }
-    );
+    };
+
+    if ( not_empty_string( $journals_auth->rss) ) {
+        $new_journal_record->{rss} = $journals_auth->rss;
+    }
+
+    my $journal = CJDB::DB::Journals->create( $new_journal_record );
 
     CJDB::Exception::App->throw('Unable to create new journal record.') 
         if !defined($journal);
