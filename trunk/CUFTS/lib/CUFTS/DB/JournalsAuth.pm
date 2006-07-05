@@ -36,6 +36,8 @@ __PACKAGE__->columns(All => qw(
 
 	title
 	MARC
+	
+	RSS
 
 	created
 	modified
@@ -43,6 +45,7 @@ __PACKAGE__->columns(All => qw(
 __PACKAGE__->columns(Essential => qw(
 	id
 	title
+	RSS
 	MARC
 ));
 

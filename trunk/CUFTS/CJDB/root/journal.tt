@@ -21,3 +21,4 @@
 [%- PROCESS journal_availability.tt -%]
 [%- PROCESS journal_mytags.tt -%]
 [%- PROCESS journal_tags.tt -%]
+[%#- PROCESS journal_toc.tt -%]

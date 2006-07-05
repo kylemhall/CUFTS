@@ -1,7 +1,8 @@
 CREATE TABLE journals_auth (
 	id		SERIAL PRIMARY KEY,
-	title		VARCHAR(1024),
-	MARC		TEXT,
+	title	VARCHAR(1024),
+	MARC	TEXT,
+	rss		VARCHAR(1024),
 
 	active		BOOLEAN DEFAULT true,
 	created		TIMESTAMP NOT NULL DEFAULT NOW(),
