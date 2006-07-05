@@ -56,6 +56,13 @@ window['field_max']['issn'] = [% max_field.max(max_issn_field) %];
 window['field_max']['title'] = [% max_field.max(max_title_field) %];
 </script>
 
+<div id="journal-auth-edit-rss">
+<div class="heading">RSS feed</div>
+<div class="row1">
+<input type="text" name="rss" size="80" maxlength="1024" value="[% journal_auth.rss | html %]" />
+</div>
+</div>
+
 <div id="submit" style="margin-top: 1em; margin-bottom: 1em;">
 <input type="submit" name="save" value="save" />
 <input type="submit" name="cancel" value="cancel" />

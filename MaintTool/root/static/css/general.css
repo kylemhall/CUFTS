@@ -434,6 +434,16 @@ div#journal-auth-titles-heading {
     font-weight: bold;
 }
 
+div.journal-auth-rss {
+    margin: 5px;
+    background: #DDDDDD;
+    padding: 2px;
+}
+
+div#journal-auth-rss-heading {
+    font-weight: bold;
+}
+
 
 div.journal-auth-global-resources {
     margin: 5px;
@@ -491,6 +501,12 @@ div#journal-auth-edit-issns {
 }
 
 div#journal-auth-edit-titles {
+    margin-top: 1em;
+    border: 1px solid #004997;
+    background: #EEEEEE;
+}
+
+div#journal-auth-edit-rss {
     margin-top: 1em;
     border: 1px solid #004997;
     background: #EEEEEE;

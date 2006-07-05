@@ -134,7 +134,7 @@ sub edit : Local {
     
     my $form_validate_edit = {
     	optional => [
-    		'save', 'cancel', 'title'
+    		'save', 'cancel', 'title', 'rss'
     	],
     	optional_regexp => qr/_(issn|info|title|count)$/,
     	filters => ['trim'],
@@ -151,6 +151,7 @@ sub edit : Local {
         unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {		
   		eval {
                 $journal_auth->title($c->form->valid->{'title'});
+                $journal_auth->rss($c->form->valid->{'rss'});
                 $journal_auth->update();
             
                 $journal_auth->issns->delete_all;
