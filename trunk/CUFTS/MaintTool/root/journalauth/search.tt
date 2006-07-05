@@ -34,6 +34,12 @@ in
    [% END %]
    </table>
   </div>
+  [% IF journal_auth.rss.defined %]
+  <div class="journal-auth-rss">
+   <div id="journal-auth-rss-heading">RSS</div>
+   [% journal_auth.rss %]
+  </div>
+  [% END %]
   <div class="journal-auth-global-resources">
   <div id="journal-auth-global-resources-heading">Global Resources</div>
    <table>
