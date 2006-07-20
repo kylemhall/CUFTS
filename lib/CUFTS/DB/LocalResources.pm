@@ -129,6 +129,19 @@ sub record_count {
 }
 
 
+sub normalize_column_values {
+	my ($self, $values) = @_;
+	
+	# Force rank to 0 if it is empty
+
+	if ( exists($values->{rank}) && defined($values->{rank}) && $values->{rank} eq '' ) {
+		$values->{rank} = 0;
+	}
+
+	return 1;   # ???
+}
+
+
 sub do_module {
 	my ($self, $method, @args) = @_;
 	
