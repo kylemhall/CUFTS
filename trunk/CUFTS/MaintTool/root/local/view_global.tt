@@ -19,7 +19,7 @@
 <table class="wide-outlined">
 <tr><td class="heading-bar" align="left" colspan="3">resource details</td></tr>
 [% SET details = global_resource.do_module('local_resource_details') %]
-[% SET help = global_resource.do_module('help_templates') %]
+[% SET help = global_resource.do_module('help_template') %]
 [% FOREACH detail IN details %]
  [% NEXT UNLESS local_resource.$detail.defined %]
  <tr>
