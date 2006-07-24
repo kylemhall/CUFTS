@@ -57,6 +57,44 @@ sub view : Private {
 	$c->stash->{template} = 'journal.tt';
 }
 
+sub rss_proxy : Local {
+	my ($self, $c, $journals_auth_id) = @_;
+
+	defined($journals_auth_id) or
+		die "journal auth id not defined";
+	
+	my $site_id = $c->stash->{current_site}->id;
+
+	my $journal = CJDB::DB::Journals->search(site => $site_id, journals_auth => $journals_auth_id)->first;
+	defined($journal) or
+		die("Unable to retrieve journal auth id $journals_auth_id");
+
+    if ( not_empty_string($journal->rss) ) {
+        my $xml = get($journal->rss);
+
+        if ( not_empty_string($xml) ) {
+
+            my $prefix = $c->stash->{current_site}->proxy_prefix;
+
+            if ( not_empty_string($prefix) ) {
+                $xml =~ s{ <link> \s* (http:// .+?) </link> }{<link>${prefix}$1</link>}gxsm;
+                $xml =~ s{ <link> \s* <!\[CDATA\[ \s* (http:// .+?) \s* \] \s* \] \s* > \s* </link> }{<link><![CDATA[${prefix}$1]]></link>}gxsm;
+            }
+
+            $c->response->content_type('text/xml');
+            $c->response->output($xml);
+
+        }
+        else {
+            $c->res->output('There was an error retrieving the RSS feed for this journal');
+            warn("Error retrieving RSS for journal: " . $journal->id . " site: $site_id");
+        }
+    }
+    else {
+        $c->res->output('There is no RSS feed enabled for this journal');
+    }
+}
+
 sub manage_tags : Local {
 	my ($self, $c, $journals_auth_id) = @_;
 	
