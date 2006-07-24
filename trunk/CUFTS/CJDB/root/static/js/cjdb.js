@@ -46,25 +46,27 @@ function showDiv(show, hide, field, displayStyle) {
 
     var show_obj;
     if (show) {
-        var show_obj = $(show);
+        show_obj = $(show);
 	    if (!show_obj) return true;
     }
 
     var hide_obj;
     if (hide) {
-        var hide_obj = $(hide);
+        hide_obj = $(hide);
 	    if (!hide_obj) return true;
     }
 
     var field_obj;
     if (field) {
-        var field_obj = $(field);
+        field_obj = $(field);
 	    if (!field_obj) return true;
     }
 
     Element.hide(hide);
     show_obj.style.display = displayStyle || 'block';
-    field_obj.focus();
+    if (field_obj) {
+        field_obj.focus();
+    }
 
     return false;
 }
