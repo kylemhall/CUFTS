@@ -79,7 +79,7 @@ sub rss_proxy : Local {
             if ( not_empty_string($prefix) ) {
                 $xml =~ s{ <link> \s* (http:// .+?) </link> }{<link>${prefix}$1</link>}gxsm;
                 $xml =~ s{ <link> \s* <!\[CDATA\[ \s* (http:// .+?) \s* \] \s* \] \s* > \s* </link> }{<link><![CDATA[${prefix}$1]]></link>}gxsm;
-                $xml =~ s{ <item \s* (.+?)(http:// .+?) > }{<item $1${prefix}$2>}gxsm;
+                $xml =~ s{ <item \s+ (.+?)(http:// .+?) > }{<item $1${prefix}$2>}gxsm;
             }
 
             $c->response->content_type('text/xml');
