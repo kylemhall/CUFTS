@@ -28,19 +28,21 @@ use HTML::Entities;
 use strict;
 
 sub title_list_fields {
-    return [qw(
-        id
-        title
-        issn
-        ft_start_date
-        vol_ft_start
-        iss_ft_start
-        ft_end_date
-        vol_ft_end
-        iss_ft_end
-        publisher
-        current_months
-    )];
+    return [
+        qw(
+            id
+            title
+            issn
+            ft_start_date
+            vol_ft_start
+            iss_ft_start
+            ft_end_date
+            vol_ft_end
+            iss_ft_end
+            publisher
+            current_months
+        )
+    ];
 }
 
 sub help_template {
@@ -53,15 +55,15 @@ sub resource_details_help {
 
 sub title_list_field_map {
     return {
-        'Publication Name'         => 'title',
-        'ISSN'                      => 'issn',
-        'Publisher'                 => 'publisher',
-        'Coverage Begins Volume'    => 'vol_ft_start',
-        'Coverage Begins Issue'     => 'iss_ft_start',
-        'Coverage Ends Volume'      => 'vol_ft_end',
-        'Coverage Ends Issue'       => 'iss_ft_end',
-        'Coverage Begins Date'      => 'ft_start_date',  
-        'Coverage Ends Date'        => 'ft_end_date',
+        'Publication Name'       => 'title',
+        'ISSN'                   => 'issn',
+        'Publisher'              => 'publisher',
+        'Coverage Begins Volume' => 'vol_ft_start',
+        'Coverage Begins Issue'  => 'iss_ft_start',
+        'Coverage Ends Volume'   => 'vol_ft_end',
+        'Coverage Ends Issue'    => 'iss_ft_end',
+        'Coverage Begins Date'   => 'ft_start_date',
+        'Coverage Ends Date'     => 'ft_end_date',
     };
 }
 
@@ -74,11 +76,9 @@ sub title_list_split_row {
 
     $row =~ s/;+\s*$//;
     $row =~ s/"{2,3}/"/g;
-#    $row =~ s/,",/,"",/g;
+
     $row =~ s/"?;"?/;/g;
     $row =~ s/Subscribed,"Journal/Subscribed","Journal/;
-
-
 
     my $csv = Text::CSV->new();
     $csv->parse($row)
@@ -92,38 +92,52 @@ sub title_list_split_row {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    if ( $record->{ft_start_date} =~ /(\d+)-(\w+)-(\d+)/ ) {
-            my ( $day, $month, $year ) = ( $1, $2, $3 );
-            $month = get_month( $month, 'start' );
-            $record->{ft_start_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
+    if ( $record->{ft_start_date} =~ / (\d+) - (\w+) - (\d+) /xsm ) {
+        my ( $day, $month, $year ) = ( $1, $2, $3 );
+        $month = get_month( $month, 'start' );
+        $record->{ft_start_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
     }
     else {
-        delete $record->{ft_start_date}
+        delete $record->{ft_start_date};
     }
 
-    if ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d+)/ ) {
-            my ( $day, $month, $year ) = ( $1, $2, $3 );
+    if ( $record->{ft_end_date} =~ / (\d+) - (\w+) - (\d+) /xsm ) {
+
+        my ( $day, $month, $year ) = ( $1, $2, $3 );
+        
+        # Remove end periods if the year matches the current year
+
+        my $current_year = localtime()[5] + 1900;
+        if ( int($year) >= $current_year ) {
+            
+            delete $record->{iss_ft_end};
+            delete $record->{vol_ft_end};
+            delete $record->{ft_end_date};
+            
+        }
+        else {
             $month = get_month( $month, 'end' );
             $record->{ft_end_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
+        }
+
     }
     else {
-        delete $record->{ft_end_date}
+        delete $record->{ft_end_date};
     }
-    
-    if ( $record->{vol_ft_start} =~ /^(\d+)-/ ) {
+
+    if ( $record->{vol_ft_start} =~ /^ (\d+) - /xsm ) {
         $record->{vol_ft_start} = $1;
     }
-    if ( $record->{iss_ft_start} =~ /^(\d+)-/ ) {
+    if ( $record->{iss_ft_start} =~ /^ (\d+) - /xsm ) {
         $record->{iss_ft_start} = $1;
     }
-    if ( $record->{vol_ft_end} =~ /-(\d+)$/ ) {
+    if ( $record->{vol_ft_end} =~ / - (\d+) $/xsm ) {
         $record->{vol_ft_end} = $1;
     }
-    if ( $record->{iss_ft_end} =~ /-(\d+)$/ ) {
+    if ( $record->{iss_ft_end} =~ / - (\d+) $/xsm ) {
         $record->{iss_ft_end} = $1;
     }
-    
-    
+
     $record->{title} = HTML::Entities::decode_entities( $record->{title} );
 
     sub get_month {
@@ -147,14 +161,10 @@ sub clean_data {
         elsif ( $month =~ /^Aut/i ) { return $period eq 'start' ? 6 : 12 }
         elsif ( $month =~ /^Win/i ) { return $period eq 'start' ? 9 : 12 }
         else {
-            CUFTS::Exception::App->throw(
-                "Unable to find month match in fulltext date: $month");
+            CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
         }
     }
 
-#    use Data::Dumper;
-#    print Dumper($record);
-    
     return $class->SUPER::clean_data($record);
 }
 
@@ -164,21 +174,18 @@ sub build_linkJournal {
     defined($records) && scalar(@$records) > 0
         or return [];
     defined($resource)
-        or CUFTS::Exception::App->throw(
-        'No resource defined in build_linkJournal');
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
     defined($site)
-        or
-        CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
     defined($request)
-        or CUFTS::Exception::App->throw(
-        'No request defined in build_linkJournal');
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
     my @results;
     foreach my $record (@$records) {
         next if is_empty_string( $record->issn );
 
         my $result = new CUFTS::Result;
-        $result->url( 'http://www.sciencedirect.com/science/journal/' . $record->issn );
+        $result->url('http://www.sciencedirect.com/science/journal/' . $record->issn );
         $result->record($record);
 
         push @results, $result;
