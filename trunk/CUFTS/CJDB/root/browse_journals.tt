@@ -29,7 +29,7 @@
   <span class="unified-title"><a href="[% url("$url_base/journal/$journal.journals_auth") %]">[% title | html %]</a></span>
   <span class="unified-issn">[% FOREACH issn IN journal.issns %][% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %][% ',' UNLESS loop.last %][% END %]</span>
   [% IF 0 && journal.rss.defined %]
-  <span class="unified-rss"><a href="[% current_site.proxy_prefix %][% journal.rss %]"><img src="[% image_dir %]rss.gif" /></a></span>
+  <span class="unified-rss"><a href="[% url("$url_base/journal/rss_proxy/$journal.journals_auth") %]"><img src="[% image_dir %]rss.gif" /></a></span>
   [% END %]
   <br />
 
