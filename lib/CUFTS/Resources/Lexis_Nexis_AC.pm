@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -22,84 +22,84 @@ package CUFTS::Resources::Lexis_Nexis_AC;
 
 use base qw(CUFTS::Resources::Base::Journals);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		ft_start_date
-		ft_end_date
-		db_identifier
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            ft_start_date
+            ft_end_date
+            db_identifier
+        )
+    ];
 }
 
 sub clean_data {
-	my ($self, $record) = @_;
+    my ( $self, $record ) = @_;
 
-	$record->{'title'} =~ s/\(.+?\)//g;
-	
-	return $self->SUPER::clean_data($record);
+    $record->{title} =~ s/\(.+?\)//g;
+
+    return $self->SUPER::clean_data($record);
 }
 
-
-
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->db_identifier);
-  
-		my $url = 'http://cisweb.lexis-nexis.com/sourceselect/returnToSearch.asp?csisrc=';
-		$url .= $record->db_identifier;
-		$url .= '&srcpdn=academic&cc=&spn=&product=universe&unix=http://web.lexis-nexis.com/universe';
+    my @results;
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->db_identifier );
 
-	return \@results;
+        my $url = 'http://cisweb.lexis-nexis.com/sourceselect/returnToSearch.asp?csisrc=';
+        $url .= $record->db_identifier;
+        $url .= '&srcpdn=academic&cc=&spn=&product=universe&unix=http://web.lexis-nexis.com/universe';
+
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
 
 sub build_linkDatabase {
-        my ($class, $records, $resource, $site, $request) = @_;
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-        defined($records) && scalar(@$records) > 0 or
-                return [];
-        defined($resource) or
-                CUFTS::Exception::App->throw('No resource defined in build_linkDatabase');
-        defined($site) or
-                CUFTS::Exception::App->throw('No site defined in build_linkDatabase');
-        defined($request) or
-                CUFTS::Exception::App->throw('No request defined in build_linkDatabase');
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkDatabase');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkDatabase');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkDatabase');
 
-        my @results;
+    my @results;
 
-        foreach my $record (@$records) {
-                my $result = new CUFTS::Result('http://web.lexis-nexis.com/universe');
-                $result->record($record);
-        
-                push @results, $result;
-        }
-                
-        return \@results;
+    foreach my $record (@$records) {
+        my $result = new CUFTS::Result('http://web.lexis-nexis.com/universe');
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 1;

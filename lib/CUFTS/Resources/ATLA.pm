@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -26,73 +26,72 @@ use CUFTS::Exceptions qw(assert_ne);
 
 use strict;
 
-
 ## title_list_fields - Controls what fields get displayed and loaded from
 ## title lists.
 ##
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		ft_start_date
-		ft_end_date
-		vol_ft_start
-		vol_ft_end
-		iss_ft_start
-		iss_ft_end
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            ft_start_date
+            ft_end_date
+            vol_ft_start
+            vol_ft_end
+            iss_ft_start
+            iss_ft_end
+            )
+    ];
 }
-
 
 ## title_list_field_map - Hash ref mapping fields from the raw title lists to
 ## internal field names
 ##
 
 sub title_list_field_map {
-	return {
-		'title' 		=> 'title',
-		'issn' 			=> 'issn',
-		'ft_start_date' 	=> 'ft_start_date',
-		'ft_end_date'		=> 'ft_end_date',
-		'vol_ft_start'		=> 'vol_ft_start',
-		'vol_ft_end'		=> 'vol_ft_end',
-                'iss_ft_start'          => 'iss_ft_start',
-                'iss_ft_end'            => 'iss_ft_end'
-	};
+    return {
+        'title'         => 'title',
+        'issn'          => 'issn',
+        'ft_start_date' => 'ft_start_date',
+        'ft_end_date'   => 'ft_end_date',
+        'vol_ft_start'  => 'vol_ft_start',
+        'vol_ft_end'    => 'vol_ft_end',
+        'iss_ft_start'  => 'iss_ft_start',
+        'iss_ft_end'    => 'iss_ft_end'
+    };
 }
 
 ## -------------------------------------------------------------------------------------------
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
+    my @results;
 
-		next unless assert_ne($record->issn);
+    foreach my $record (@$records) {
 
-		my $url = 'http://purl.org/atlaonline/pls/eli/eli_bd.volsuper?TXT=n';
-		$url .= substr($record->issn,0,4) . '-' . substr($record->issn,4,4);
+        next unless assert_ne( $record->issn );
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+        my $url = 'http://purl.org/atlaonline/pls/eli/eli_bd.volsuper?TXT=n'
+                  . substr( $record->issn, 0, 4 ) . '-' . substr( $record->issn, 4, 4 );
 
-	return \@results;
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 1;

@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -22,9 +22,10 @@ package CUFTS::Resources::Karger;
 
 use base qw(CUFTS::Resources::Base::Journals);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
-use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::Base::Journals);
 
 use strict;
 
@@ -35,48 +36,46 @@ my $base_url = 'http://www.karger.com/';
 ##
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn		
-                e_issn
-		ft_start_date
-		ft_end_date
-		vol_ft_start
-		vol_ft_end
-                db_identifier
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            e_issn
+            ft_start_date
+            ft_end_date
+            vol_ft_start
+            vol_ft_end
+            db_identifier
+        )
+    ];
 }
-
 
 ## title_list_field_map - Hash ref mapping fields from the raw title lists to
 ## internal field names
 ##
 
 sub title_list_field_map {
-	return {
-		'title' 		=> 'title',
-		'issn' 			=> 'issn',
-                'e_issn'                => 'e_issn',
-		'ft_start_date' 	=> 'ft_start_date',
-		'ft_end_date'		=> 'ft_end_date',
-                'vol_ft_start'		=> 'vol_ft_start',
-		'vol_ft_end'		=> 'vol_ft_end',
-		'db_identifier'		=> 'db_identifier'
-	};
+    return {
+        'title'         => 'title',
+        'issn'          => 'issn',
+        'e_issn'        => 'e_issn',
+        'ft_start_date' => 'ft_start_date',
+        'ft_end_date'   => 'ft_end_date',
+        'vol_ft_start'  => 'vol_ft_start',
+        'vol_ft_end'    => 'vol_ft_end',
+        'db_identifier' => 'db_identifier'
+    };
 }
-
 
 ## global_resource_details - Controls which details are displayed on the global
 ## resource pages
 ##
 
 sub global_resource_details {
-	my ($class) = @_;
-	return [ @{$class->SUPER::global_resource_details},
-	];
+    my ($class) = @_;
+    return [ @{ $class->SUPER::global_resource_details }, ];
 }
-
 
 #sub resource_details_help {
 #	return {
@@ -91,17 +90,22 @@ sub global_resource_details {
 ## enough data, etc. early (here) cuts down on database hits
 
 sub can_getFulltext {
-	my ($class, $request) = @_;
-	
-	return 0 unless assert_ne($request->doi);        
-	return $class->SUPER::can_getFulltext($request);
+    my ( $class, $request ) = @_;
+
+    return 0 if is_empty_string( $request->doi );
+    
+    return $class->SUPER::can_getFulltext($request);
 }
 
 sub can_getTOC {
-	my ($class, $request) = @_;
-	
-	return 0 unless (assert_ne($request->year) && assert_ne($request->volume) && assert_ne($request->issue));
-	return $class->SUPER::can_getFulltext($request);
+    my ( $class, $request ) = @_;
+
+    return 0
+        if is_empty_string( $request->year   )
+        || is_empty_string( $request->volume )
+        || is_empty_string( $request->issue  );
+        
+    return $class->SUPER::can_getFulltext($request);
 }
 
 # --------------------------------------------------------------------------------------------
@@ -111,83 +115,84 @@ sub can_getTOC {
 ##
 
 sub build_linkFulltext {
-        my ($class, $records, $resource, $site, $request) = @_;
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-        defined($records) && scalar(@$records) > 0 or
-                return [];
-        defined($resource) or
-                CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-        defined($site) or
-                CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-        defined($request) or
-                CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
-  
-        my @results;    
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
 
-        foreach my $record (@$records) {
-                my $result = new CUFTS::Result($base_url . 'doi/' . $request->doi);
-                $result->record($record);
-                
-                push @results, $result;
-        }
-        
-        return \@results;
+    my @results;
+
+    foreach my $record (@$records) {
+        my $result = new CUFTS::Result( $base_url . 'doi/' . $request->doi );
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
 
-
 sub build_linkTOC {
-        my ($class, $records, $resource, $site, $request) = @_;
-                
-        defined($records) && scalar(@$records) > 0 or
-                return [];
-        defined($resource) or
-                CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-        defined($site) or
-                CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-        defined($request) or
-                CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-                
-        my @results;   
+    my ( $class, $records, $resource, $site, $request ) = @_;
+
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+
+    my @results;
+
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->db_identifier );
         
-        foreach my $record (@$records) {                
-                my $url = $base_url . $record->db_identifier;
-                $url .= '/' . $request->year . '/' . sprintf("%03u", $request->volume);
-		$url .= '/' . sprintf("%03u", $request->issue) . '/toc';
-                
-                my $result = new CUFTS::Result($url);
-                $result->record($record);
-                
-                push @results, $result;
-        }
-        
-        return \@results;
+        my $url = $base_url . $record->db_identifier;
+        $url .= '/' . $request->year;
+        $url .= '/' . sprintf( "%03u", $request->volume );
+        $url .= '/' . sprintf( "%03u", $request->issue  ) . '/toc';
+
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
 
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->db_identifier);
-                
-		my $result = new CUFTS::Result($base_url . $record->db_identifier);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+    my @results;
 
-	return \@results;
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->db_identifier );
+
+        my $result = new CUFTS::Result( $base_url . $record->db_identifier );
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 1;

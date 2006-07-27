@@ -23,8 +23,6 @@
 package CUFTS::Resources::EBSCO_II;
 
 use base qw(CUFTS::Resources::EBSCO_Generic);
-use URI::Escape;
-use CUFTS::Exceptions qw(assert_ne);
 
 use strict;
 

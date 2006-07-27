@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -33,49 +33,50 @@ use strict;
 ##
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		e_issn
-		
-		ft_start_date
-        journal_url
-	)];
-}
+    return [
+        qw(
+            id
+            title
+            issn
+            e_issn
 
+            ft_start_date
+            journal_url
+        )
+    ];
+}
 
 ## local_resource_details - Controls which details are displayed on the local
 ## resource pages
 ##
 
 sub local_resource_details {
-	my ($class) = @_;
-	return [ @{$class->SUPER::local_resource_details},
-		 qw(
-			auth_name
-			auth_passwd
-		 )
-	];
+    my ($class) = @_;
+    return [
+        @{ $class->SUPER::local_resource_details },
+        qw(
+            auth_name
+            auth_passwd
+            )
+    ];
 }
-
 
 ## overridable_resource_details - Controls which of the *global* resource details
 ## are displayed on the *local* resource pages to possibly be overridden
 ##
 
 sub overridable_resource_details {
-	my ($class) = @_;
-	return [ @{$class->SUPER::overridable_resource_details},
-		 qw(
-			database_url
-		 )
-	];
+    my ($class) = @_;
+    return [
+        @{ $class->SUPER::overridable_resource_details },
+        qw(
+            database_url
+            )
+    ];
 }
 
-
 sub clean_data {
-	my ($class, $record) = @_;
+    my ( $class, $record ) = @_;
 
     $record->{journal_url} =~ s{ username=[^&]+& }{}xsm;
     $record->{journal_url} =~ s{ access=[^&]+&   }{}xsm;
@@ -83,7 +84,7 @@ sub clean_data {
 
     return $class->SUPER::clean_data($record);
 }
-	
+
 ## -------------------------------------------------------------------------------------------
 
 ## can_get* - Control whether or not an attempt to create a link is built.  This is run
@@ -91,15 +92,16 @@ sub clean_data {
 ## enough data, etc. early (here) cuts down on database hits
 
 sub can_getFulltext {
-	my ($class, $request) = @_;
-	
-	return 1 if not_empty_string($request->doi);
-	
-    return 1 if    not_empty_string($request->volume) 
-                && not_empty_string($request->issue)
-                && not_empty_string($request->spage);
-	
-	return 0;
+    my ( $class, $request ) = @_;
+
+    return 1 if not_empty_string( $request->doi );
+
+    return 1
+        if not_empty_string( $request->volume )
+        && not_empty_string( $request->issue )
+        && not_empty_string( $request->spage );
+
+    return 0;
 }
 
 # --------------------------------------------------------------------------------------------
@@ -109,80 +111,83 @@ sub can_getFulltext {
 ##
 
 sub build_linkFulltext {
-	my ($class, $records, $resource, $site, $request) = @_;
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
-    if ( is_empty_string($resource->auth_name) || is_empty_string($resource->auth_passwd) ) {
-        warn($site->name . ' is using SageCSA without an auth_name and auth_passwd set.');
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
+    if (   is_empty_string( $resource->auth_name )
+        || is_empty_string( $resource->auth_passwd ) )
+    {
+        warn( $site->name . ' is using SageCSA without an auth_name and auth_passwd set.' );
         return [];
     }
 
-	my @results;
+    my @results;
 
-	foreach my $record (@$records) {
-		my $url = $record->journal_url;
-		$url .= '&username=' . $resource->auth_name;
-		$url .= '&access='   . $resource->auth_passwd;
-		$url .= '&mode=pdf';
-		
-		if ( not_empty_string($request->doi) ) {
-		    $url .= '&doi=' . uri_escape($request->doi);
-		} else {
- 		    $url .= '&volume=' . $request->volume;
-		    $url .= '&issue=' . $request->issue;
-		    $url .= '&firstpage=' . $request->spage;
+    foreach my $record (@$records) {
+        my $url = $record->journal_url;
+        $url .= '&username=' . $resource->auth_name;
+        $url .= '&access='   . $resource->auth_passwd;
+        $url .= '&mode=pdf';
+
+        if ( not_empty_string( $request->doi ) ) {
+            $url .= '&doi=' . uri_escape( $request->doi );
+        }
+        else {
+            $url .= '&volume='    . $request->volume;
+            $url .= '&issue='     . $request->issue;
+            $url .= '&firstpage=' . $request->spage;
         }
 
-		my $result = new CUFTS::Result($url);
+        my $result = new CUFTS::Result($url);
 
-		$result->record($record);
-		push @results, $result;
-	}
+        $result->record($record);
+        push @results, $result;
+    }
 
-	return \@results;
+    return \@results;
 }
 
-
-
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-    if ( is_empty_string($resource->auth_name) || is_empty_string($resource->auth_passwd) ) {
-        warn($site->name . ' is using SageCSA without an auth_name and auth_passwd set.');
+    my ( $class, $records, $resource, $site, $request ) = @_;
+
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+
+    if (   is_empty_string( $resource->auth_name )
+        || is_empty_string( $resource->auth_passwd ) )
+    {
+        warn( $site->name . ' is using SageCSA without an auth_name and auth_passwd set.' );
         return [];
     }
 
-	my @results;
+    my @results;
 
-	foreach my $record (@$records) {
-		my $url = $record->journal_url;
-		$url .= '&username=' . $resource->auth_name;
-		$url .= '&access='   . $resource->auth_passwd;
-		$url .= '&mode=all';
+    foreach my $record (@$records) {
+        my $url = $record->journal_url;
+        $url .= '&username=' . $resource->auth_name;
+        $url .= '&access=' . $resource->auth_passwd;
+        $url .= '&mode=all';
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
 
-	return \@results;
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 1;

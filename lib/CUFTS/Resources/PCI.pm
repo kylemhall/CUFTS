@@ -32,6 +32,10 @@ use CUFTS::Exceptions qw(assert_ne);
 
 use strict;
 
+INIT {
+ eval { CUFTS::ResourcesLoader->add_module('PCI'); };
+}
+
 sub title_list_fields {
 	return [qw(
 		id

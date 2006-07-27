@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -21,33 +21,33 @@
 package CUFTS::Resources::SIRSI;
 
 use base qw(CUFTS::Resources::Base::Catalog);
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
 use CUFTS::Result;
 use strict;
 
 sub local_resource_details {
-	return [qw(url_base)];
+    return [qw(url_base)];
 }
 
 sub search_getHoldings {
-	my ($class, $resource, $site, $request) = @_;
+    my ( $class, $resource, $site, $request ) = @_;
 
-	my $base = $resource->url_base or
-		CUFTS::Exception::App->throw('No url_base defined for SIRSI resource.');
-		
-	if (assert_ne($request->issn)) {
-		my $issn = $request->issn;
-		$issn =~ s/^(\d{4})(\d{3}[\dxX])$/$1-$2/;
-		$base .= "uhtbin/cgisirsi/x/0/57/5?user_id=WUAARCHIVE&searchdata1=${issn}\{022\}";
-	} else {
-		return undef;
-	}
+    my $url = $resource->url_base
+        or CUFTS::Exception::App->throw('No url_base defined for SIRSI resource.');
 
-	my $result = new CUFTS::Result;
-	$result->url($base);
+    if ( not_empty_string( $request->issn ) ) {
+        my $issn = $request->issn;
+        $issn =~ s/^ (\d{4}) -? ( \d{3} [\dxX] ) $/$1-$2/xsm;
+        $url .= "uhtbin/cgisirsi/x/0/57/5?user_id=WUAARCHIVE&searchdata1=${issn}\{022\}";
+    }
+    else {
+        return undef;
+    }
 
-	return [$result];
+    my $result = new CUFTS::Result;
+    $result->url($url);
+
+    return [$result];
 }
-
 
 1;

@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -22,7 +22,8 @@ package CUFTS::Resources::Kluwer;
 
 use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
@@ -31,111 +32,64 @@ use strict;
 ##
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn		
-		ft_start_date
-		vol_ft_start
-		iss_ft_start
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            ft_start_date
+            vol_ft_start
+            iss_ft_start
+        )
+    ];
 }
-
 
 ## title_list_field_map - Hash ref mapping fields from the raw title lists to
 ## internal field names
 ##
 
 sub title_list_field_map {
-	return {
-		'title' 		=> 'title',
-		'issn' 			=> 'issn',
-		'ft_start_date' 	=> 'ft_start_date',
-                'vol_ft_start'		=> 'vol_ft_start',
-		'iss_ft_start'		=> 'iss_ft_start'
-	};
+    return {
+        'title'         => 'title',
+        'issn'          => 'issn',
+        'ft_start_date' => 'ft_start_date',
+        'vol_ft_start'  => 'vol_ft_start',
+        'iss_ft_start'  => 'iss_ft_start'
+    };
 }
 
-
-## global_resource_details - Controls which details are displayed on the global
-## resource pages
-##
-
-sub global_resource_details {
-	my ($class) = @_;
-	return [ @{$class->SUPER::global_resource_details},
-	];
-}
-
-
-
-## help_template - path to the help template for this resource relative to the
-## general templates directory
-##
-
-#sub help_template {
-#	return 'help/Template';
-#}
-
-
-## resource_details_help - A hash ref containing the hoverover help for each of the
-## local resource details
-##
-
-#sub resource_details_help {
-#	return {
-#		'example_detail' => 'This is an example detail help item that appears for the (?) tooltip',
-#	}
-#}
-
-## -------------------------------------------------------------------------------------------
-
-## can_get* - Control whether or not an attempt to create a link is built.  This is run
-## before the database is searched for possible title matches, so catching requests without
-## enough data, etc. early (here) cuts down on database hits
-
-#sub can_getFulltext {
-#	my ($class, $request) = @_;
-#	
-#	return 0 unless assert_ne($request->spage);
-#	return $class->SUPER::can_getFulltext($request);
-#}
-
-# --------------------------------------------------------------------------------------------
 
 ## build_link* - Builds a link to a service.  Should return an array reference containing
 ## Result objects with urls and title list records (if applicable).
 ##
 
-
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
-		next unless assert_ne($record->issn);
+    my @results;
 
-		my $url = 'http://www.kluweronline.com/issn/';
-                $url .= substr($record->issn, 0,4) . '-' . substr($record->issn, 4,4) . '/contents';
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->issn );
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
+        my $url = 'http://www.kluweronline.com/issn/';
+        $url .= dashed_issn( $record->issn ) . '/contents';
 
-	return \@results;
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
-
 
 1;

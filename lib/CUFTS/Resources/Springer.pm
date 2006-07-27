@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -22,7 +22,8 @@ package CUFTS::Resources::Springer;
 
 use base qw(CUFTS::Resources::Base::Journals);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
@@ -31,38 +32,35 @@ use strict;
 ##
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		e_issn		
-		ft_start_date
-		vol_ft_start
-		iss_ft_start
-		iss_ft_end
-		
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            e_issn
+            ft_start_date
+            vol_ft_start
+            iss_ft_start
+            iss_ft_end
+        )
+    ];
 }
-
 
 ## title_list_field_map - Hash ref mapping fields from the raw title lists to
 ## internal field names
 ##
 
 sub title_list_field_map {
-	return {
-		'title' 		=> 'title',
-		'issn' 			=> 'issn',
-                'e_issn'                => 'e_issn',
-		'ft_start_date' 	=> 'ft_start_date',
-		'ft_end_date'		=> 'ft_end_date',
-		'vol_ft_start'		=> 'vol_ft_start',
-                'iss_ft_start'          => 'iss_ft_start'
-	};
+    return {
+        'title'         => 'title',
+        'issn'          => 'issn',
+        'e_issn'        => 'e_issn',
+        'ft_start_date' => 'ft_start_date',
+        'ft_end_date'   => 'ft_end_date',
+        'vol_ft_start'  => 'vol_ft_start',
+        'iss_ft_start'  => 'iss_ft_start'
+    };
 }
-
-
-	
 
 ## help_template - path to the help template for this resource relative to the
 ## general templates directory
@@ -71,7 +69,6 @@ sub title_list_field_map {
 #sub help_template {
 #	return 'help/Template';
 #}
-
 
 ## resource_details_help - A hash ref containing the hoverover help for each of the
 ## local resource details
@@ -90,17 +87,19 @@ sub title_list_field_map {
 ## enough data, etc. early (here) cuts down on database hits
 
 sub can_getFulltext {
-	my ($class, $request) = @_;
-	
-	return 0 unless assert_ne($request->spage);
-	return $class->SUPER::can_getFulltext($request);
+    my ( $class, $request ) = @_;
+
+    return 0 if is_empty_string( $request->spage );
+    
+    return $class->SUPER::can_getFulltext($request);
 }
 
 sub can_getTOC {
-	my ($class, $request) = @_;
-	
-	return 0 unless assert_ne($request->issue);
-	return $class->SUPER::can_getTOC($request);
+    my ( $class, $request ) = @_;
+
+    return 0 if is_empty_string( $request->issue );
+    
+    return $class->SUPER::can_getTOC($request);
 }
 
 # --------------------------------------------------------------------------------------------
@@ -108,138 +107,123 @@ sub can_getTOC {
 ## build_link* - Builds a link to a service.  Should return an array reference containing
 ## Result objects with urls and title list records (if applicable).
 ##
-                        
+
 sub build_linkFulltext {
-        my ($class, $records, $resource, $site, $request) = @_;
-                        
-        defined($records) && scalar(@$records) > 0 or
-                return [];
-        defined($resource) or
-                CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-        defined($site) or
-                CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-        defined($request) or  
-                CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
-                        
-        my @results;
-        
-        foreach my $record (@$records) {
-              
-                next unless (assert_ne($record->issn) || assert_ne($record->e_issn));
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-                my ($url, $i_num, $i_tag);
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
 
-                if($record->e_issn) {
-                  $i_num = $record->e_issn;
-                  $i_tag = 'eissn';
-                }
-                else {
-                  $i_num = $record->issn;
-                  $i_tag = 'issn';
-                } 
+    my @results;
 
-                $i_num = substr($i_num,0,4) . '-' . substr($i_num,4,4) if $i_num;
+    foreach my $record (@$records) {
 
-                $url = 'http://www.springerlink.com/openurl.asp?genre=article&';
-                $url .= $i_tag . '=' . $i_num . '&volume=' . $request->volume . '&issue=' . $request->issue; 
-                $url .= '&spage=' . $request->spage;
-  
-                my $result = new CUFTS::Result($url);
-                $result->record($record);
-                
-                push @results, $result;
+        next if is_empty_string( $record->issn   )
+             && is_empty_string( $record->e_issn );
+
+        my $url = 'http://www.springerlink.com/openurl.asp?genre=article&';
+
+        if ( $record->e_issn ) {
+            $url .= 'eissn=' . dashed_issn( $record->e_issn );
         }
-                        
-        return \@results;
-}                       
+        else {
+            $url .= 'issn=' . dashed_issn( $record->issn );
+        }
 
+        $url .= '&volume=' . $request->volume
+              . '&issue='  . $request->issue
+              . '&spage='  . $request->spage;
+
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
+}
 
 sub build_linkTOC {
-        my ($class, $records, $resource, $site, $request) = @_;
-        
-        defined($records) && scalar(@$records) > 0 or
-                return [];
-        defined($resource) or
-                CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-        defined($site) or
-                CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-        defined($request) or
-                CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-                
-        my @results;
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-        foreach my $record (@$records) {
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-                my ($url, $i_num, $i_tag);
+    my @results;
 
-                if($record->e_issn) {
-                  $i_num = $record->e_issn;
-                  $i_tag = 'eissn';
-                }
-                else {
-                  $i_num = $record->issn;
-                  $i_tag = 'issn';
-                } 
+    foreach my $record (@$records) {
 
-                next unless assert_ne($i_num);
+        next if is_empty_string( $record->issn   )
+             && is_empty_string( $record->e_issn );
 
-                $i_num = substr($i_num,0,4) . '-' . substr($i_num,4,4) if $i_num;
+        my $url = 'http://www.springerlink.com/openurl.asp?genre=issue&';
 
-                $url = 'http://www.springerlink.com/openurl.asp?genre=issue&';
-                $url .= $i_tag . '=' . $i_num . '&volume=' . $request->volume . '&issue=' . $request->issue; 
-        
-                my $result = new CUFTS::Result($url);
-                $result->record($record);
-                
-                push @results, $result;
+        if ( $record->e_issn ) {
+         $url .= 'eissn=' . dashed_issn( $record->e_issn );
         }
-        
-        return \@results;
+        else {
+         $url .= 'issn=' . dashed_issn( $record->issn );
+        }
+
+        $url .= '&volume=' . $request->volume
+              . '&issue='  . $request->issue;
+
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
 
 sub build_linkJournal {
-	my ($class, $records, $resource, $site, $request) = @_;
-	
-	defined($records) && scalar(@$records) > 0 or 
-		return [];
-	defined($resource) or 
-		CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-	defined($site) or 
-		CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-	defined($request) or 
-		CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-	my @results;
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
-	foreach my $record (@$records) {
+    my @results;
 
-                my ($url, $i_num, $i_tag);
+    foreach my $record (@$records) {
 
-                if($record->e_issn) {
-                  $i_num = $record->e_issn;
-                  $i_tag = 'eissn';
-                }
-                else {
-                  $i_num = $record->issn;
-                  $i_tag = 'issn';
-                } 
+        my $url = 'http://www.springerlink.com/openurl.asp?genre=journal&';
 
-		next unless assert_ne($i_num);
+        next if is_empty_string( $record->issn   )
+             && is_empty_string( $record->e_issn );
 
+        if ( $record->e_issn ) {
+            $url .= 'eissn=' . dashed_issn( $record->e_issn );
+        }
+        else {
+            $url .= 'issn=' . dashed_issn( $record->issn );
+        }
 
-                $i_num = substr($i_num,0,4) . '-' . substr($i_num,4,4) if $i_num;
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
 
-                $url = 'http://www.springerlink.com/openurl.asp?genre=journal&';
-                $url .= $i_tag . '=' . $i_num;
+        push @results, $result;
+    }
 
-		my $result = new CUFTS::Result($url);
-		$result->record($record);
-		
-		push @results, $result;
-	}
-
-	return \@results;
+    return \@results;
 }
-
 
 1;

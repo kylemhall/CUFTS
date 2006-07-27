@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -22,7 +22,8 @@ package CUFTS::Resources::Gale_CWI;
 
 use base qw(CUFTS::Resources::GenericJournal);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
@@ -31,78 +32,74 @@ use strict;
 ##
 
 sub title_list_fields {
-	return [qw(
-		id
-		title
-		issn
-		ft_start_date
-		ft_end_date
-	)];
+    return [
+        qw(
+            id
+            title
+            issn
+            ft_start_date
+            ft_end_date
+        )
+    ];
 }
-
 
 ## title_list_field_map - Hash ref mapping fields from the raw title lists to
 ## internal field names
 ##
 
 sub title_list_field_map {
-	return {
-		'Title' 		=> 'title',
-		'ISSN' 			=> 'issn',
-		'First Issue'		=> 'ft_start_date',
-		'Last Issue'		=> 'ft_end_date',
-	};
+    return {
+        'Title'       => 'title',
+        'ISSN'        => 'issn',
+        'First Issue' => 'ft_start_date',
+        'Last Issue'  => 'ft_end_date',
+    };
 }
-
 
 sub clean_data {
-	my ($class, $record) = @_;
+    my ( $class, $record ) = @_;
 
-	$record->{'___FullText'} eq 'Yes' or
-		return ['Fulltext not available for title'];
+    $record->{'___FullText'} eq 'Yes'
+        or return ['Fulltext not available for title'];
 
-	$record->{'___Type'} eq 'Journal' || $record->{'___Type'} eq 'Newsletter' or
-		return ['Publication type not suitable for loading'];
+    $record->{'___Type'} eq 'Journal' || $record->{'___Type'} eq 'Newsletter'
+        or return ['Publication type not suitable for loading'];
 
-	if (substr($record->{'ft_start_date'}, 4, 2) eq '00' || substr($record->{'ft_start_date'}, 4, 2) eq 'No') {	
-		$record->{'ft_start_date'} = substr($record->{'ft_start_date'}, 0, 4);
-	} elsif (substr($record->{'ft_start_date'}, 6, 2) eq '00' || substr($record->{'ft_start_date'}, 6, 2) eq 'No') {
-		$record->{'ft_start_date'} = substr($record->{'ft_start_date'}, 0, 6);
-		substr($record->{'ft_start_date'}, 4, 0) = '-';
-	} else {
-		substr($record->{'ft_start_date'}, 4, 0) = '-';
-		substr($record->{'ft_start_date'}, 7, 0) = '-';
-	}	
+    if (   substr( $record->{'ft_start_date'}, 4, 2 ) eq '00'
+        || substr( $record->{'ft_start_date'}, 4, 2 ) eq 'No' )
+    {
+        $record->{'ft_start_date'} = substr( $record->{'ft_start_date'}, 0, 4 );
+    }
+    elsif (substr( $record->{'ft_start_date'}, 6, 2 ) eq '00'
+        || substr( $record->{'ft_start_date'}, 6, 2 ) eq 'No' )
+    {
+        $record->{'ft_start_date'} = substr( $record->{'ft_start_date'}, 0, 6 );
+        substr( $record->{'ft_start_date'}, 4, 0 ) = '-';
+    }
+    else {
+        substr( $record->{'ft_start_date'}, 4, 0 ) = '-';
+        substr( $record->{'ft_start_date'}, 7, 0 ) = '-';
+    }
 
-	if (substr($record->{'ft_end_date'}, 4, 2) eq '00' || substr($record->{'ft_end_date'}, 4, 2) eq 'No') {	
-		$record->{'ft_end_date'} = substr($record->{'ft_end_date'}, 0, 4);
-	} elsif (substr($record->{'ft_end_date'}, 6, 2) eq '00' || substr($record->{'ft_end_date'}, 6, 2) eq 'No') {
-		$record->{'ft_end_date'} = substr($record->{'ft_end_date'}, 0, 6);
-		substr($record->{'ft_end_date'}, 4, 0) = '-';
-	} else {
-		substr($record->{'ft_end_date'}, 4, 0) = '-';
-		substr($record->{'ft_end_date'}, 7, 0) = '-';
-	}	
+    if (   substr( $record->{'ft_end_date'}, 4, 2 ) eq '00'
+        || substr( $record->{'ft_end_date'}, 4, 2 ) eq 'No' )
+    {
+        $record->{'ft_end_date'} = substr( $record->{'ft_end_date'}, 0, 4 );
+    }
+    elsif (substr( $record->{'ft_end_date'}, 6, 2 ) eq '00'
+        || substr( $record->{'ft_end_date'}, 6, 2 ) eq 'No' )
+    {
+        $record->{'ft_end_date'} = substr( $record->{'ft_end_date'}, 0, 6 );
+        substr( $record->{'ft_end_date'}, 4, 0 ) = '-';
+    }
+    else {
+        substr( $record->{'ft_end_date'}, 4, 0 ) = '-';
+        substr( $record->{'ft_end_date'}, 7, 0 ) = '-';
+    }
 
-	$record->{'title'} =~ s/\s*\(.+?\)\s*$//g;
-	
-	return $class->SUPER::clean_data($record);
+    $record->{'title'} =~ s/\s*\(.+?\)\s*$//g;
+
+    return $class->SUPER::clean_data($record);
 }
-
-
-
-## overridable_resource_details - Controls which of the *global* resource details
-## are displayed on the *local* resource pages to possibly be overridden
-## 
-  
-sub overridable_resource_details {
-        my ($class) = @_;  
-        return [ @{$class->SUPER::overridable_resource_details},
-                 qw(
-                        database_url
-                 )
-        ];
-}	
-
 
 1;
