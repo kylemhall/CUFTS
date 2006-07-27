@@ -46,6 +46,7 @@ my @modules = qw(
     Class::DBI
     Class::DBI::AbstractSearch
     Class::DBI::Plugin::CountSearch
+    Class::DBI::Plugin::FastDelete
     Class::DBI::Plugin::Type
     Class::DBI::Sweet
     Date::Calc
@@ -65,6 +66,7 @@ my @modules = qw(
     Text::CSV
     URI::Escape
     URI::OpenURL
+    XML::RAI
 );
 
 my @optional_modules = qw(Apache::DBI);
