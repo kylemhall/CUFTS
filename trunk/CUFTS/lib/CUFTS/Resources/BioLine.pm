@@ -22,7 +22,8 @@ package CUFTS::Resources::BioLine;
 
 use base qw(CUFTS::Resources::Base::Journals);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
@@ -37,7 +38,7 @@ sub title_list_fields {
             title
             issn
             db_identifier
-            )
+        )
     ];
 }
 
@@ -49,9 +50,10 @@ sub can_getTOC {
     my ( $class, $request ) = @_;
 
     return 0
-        unless ( assert_ne( $request->issue )
-        && assert_ne( $request->volume )
-        && assert_ne( $request->year ) );
+        if is_empty_string( $request->issue  )
+        || is_empty_string( $request->volume )
+        || is_empty_string( $request->year   );
+
     return $class->SUPER::can_getTOC($request);
 }
 
@@ -66,10 +68,11 @@ sub build_linkTOC {
 
     defined($records) && scalar(@$records) > 0
         or return [];
-    defined($resource) 
+    defined($resource)
         or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
     defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+        or
+        CUFTS::Exception::App->throw('No site defined in build_linkJournal');
     defined($request)
         or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
@@ -98,20 +101,16 @@ sub build_linkJournal {
     defined($records) && scalar(@$records) > 0
         or return [];
     defined($resource)
-        or CUFTS::Exception::App->throw(
-        'No resource defined in build_linkJournal');
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
     defined($site)
-        or
-        CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
     defined($request)
-        or CUFTS::Exception::App->throw(
-        'No request defined in build_linkJournal');
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
     my @results;
 
     foreach my $record (@$records) {
-        my $result = new CUFTS::Result(
-            'http://www.bioline.org.br/' . $record->db_identifier );
+        my $result = new CUFTS::Result('http://www.bioline.org.br/' . $record->db_identifier );
         $result->record($record);
 
         push @results, $result;

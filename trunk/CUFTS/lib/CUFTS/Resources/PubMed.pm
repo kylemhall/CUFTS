@@ -24,7 +24,6 @@ package CUFTS::Resources::PubMed;
 ## Use PubMed lookups to fill in metadata if a PMID is present
 ##
 
-
 use base qw(CUFTS::Resources);
 
 use CUFTS::Exceptions;

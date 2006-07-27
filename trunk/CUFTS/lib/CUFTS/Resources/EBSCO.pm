@@ -104,14 +104,30 @@ sub clean_data {
     if ( defined( $record->{'___EMBARGO'} ) ) {
         if ( $record->{'___EMBARGO'} =~ /(\d+)\s+(\w+)/ ) {
             if ( $2 eq 'months' ) {
-                $record->{'embargo_months'} = $1;
+                $record->{embargo_months} = $1;
             }
             elsif ( $2 eq 'days' ) {
-                $record->{'embargo_days'} = $1;
+                $record->{embargo_days} = $1;
             }
 
         }
     }
+
+    # Clear embargo months/days if there's no fulltext start/end dates
+
+    
+    if ( is_empty_string($record->{ft_start_date}) && is_empty_string($record->{ft_end_date}) ) {
+
+        if ( not_empty_string($record->{embargo_months}) ) {
+            delete $record->{embargo_months};
+        }
+
+        if ( not_empty_string($record->{embargo_days}) ) {
+            delete $record->{embargo_days};
+        }
+
+    }
+    
 
     my $errors = $class->SUPER::clean_data($record);
     push @errors, @$errors if defined($errors);

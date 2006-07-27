@@ -22,7 +22,7 @@ package CUFTS::Resources::blank;
 
 use base qw(CUFTS::Resources::Base::Journals);
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
 
 use strict;
 

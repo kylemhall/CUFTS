@@ -25,7 +25,8 @@
 
 package CUFTS::Resources::Base::DOI;
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 
 use strict;
 
@@ -44,7 +45,7 @@ sub build_linkFulltext {
 	defined($request) or 
 		CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
 
-	if (assert_ne($request->doi)) {
+	if ( not_empty_string($request->doi) ) {
 		my $url;
 		$url .= 'http://dx.doi.org/';
 		$url .= uri_escape($request->doi, "^A-Za-z0-9\-_.!~*'()\/");
@@ -61,7 +62,7 @@ sub build_linkFulltext {
 sub can_getFulltext {
 	my ($class, $request) = @_;
 
-	return 1 if assert_ne($request->doi);
+	return 1 if not_empty_string($request->doi);
 	return 0;	
 }
 

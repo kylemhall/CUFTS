@@ -24,4 +24,9 @@ use base qw(CUFTS::Resources::Base::SearchEngine);
 
 use strict;
 
+INIT {
+ eval { CUFTS::ResourcesLoader->add_module('Google::GoogleSearch'); };
+}
+
+
 1;

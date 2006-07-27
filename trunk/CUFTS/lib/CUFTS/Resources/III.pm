@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -21,31 +21,33 @@
 package CUFTS::Resources::III;
 
 use base qw(CUFTS::Resources::Base::Catalog);
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
+use CUFTS::Util::Simple;
 use CUFTS::Result;
+
 use strict;
 
 sub local_resource_details {
-	return [qw(url_base)];
+    return [qw(url_base)];
 }
 
 sub search_getHoldings {
-	my ($class, $resource, $site, $request) = @_;
+    my ( $class, $resource, $site, $request ) = @_;
 
-	assert_ne($resource->url_base) or
-		CUFTS::Exception::App->throw('No url_base defined for III resource.');
-		
-	my $url;
-	if (assert_ne($request->issn)) {
-		$url = 'i?SEARCH=' . $request->issn;
-	} else {
-		return undef;
-	}
+    not_empty_string( $resource->url_base )
+        or CUFTS::Exception::App->throw('No url_base defined for III resource.');
 
-	my $result = new CUFTS::Result($url);
+    my $url;
+    if ( is_empty_string( $request->issn ) ) {
+        $url = 'i?SEARCH=' . $request->issn;
+    }
+    else {
+        return undef;
+    }
 
-	return [$result];
+    my $result = new CUFTS::Result($url);
+
+    return [$result];
 }
-
 
 1;
