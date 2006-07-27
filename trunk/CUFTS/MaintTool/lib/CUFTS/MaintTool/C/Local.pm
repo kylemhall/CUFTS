@@ -3,6 +3,8 @@ package CUFTS::MaintTool::C::Local;
 use strict;
 use base 'Catalyst::Base';
 
+use CUFTS::Util::Simple;
+
 my $form_validate_local = {
 	required => ['name', 'provider', 'module', 'resource_type'],
 	optional => [
@@ -109,8 +111,9 @@ sub menu : Local {
 	$active and
 		$search{active} = 'true';
 
-	my @local_resources = $c->session->{local_menu_filter} ? CUFTS::DB::LocalResources->search_where({ -nest => [\%search, {resource => { '!=' => undef }}], site => $c->{stash}->{current_site}->id })
-	                                                       : CUFTS::DB::LocalResources->search_where({ %search, site => $c->{stash}->{current_site}->id });
+	my @local_resources = $c->session->{local_menu_filter} 
+	                      ? CUFTS::DB::LocalResources->search_where({ -nest => [\%search, {resource => { '!=' => undef }}], site => $c->{stash}->{current_site}->id })
+	                      : CUFTS::DB::LocalResources->search_where({ %search, site => $c->{stash}->{current_site}->id });
 
 	# Merge resources into "magic" resource that we can treat like a real CDBI resource except for DB interaction
 
@@ -126,11 +129,11 @@ sub menu : Local {
 	
 	my $sort = $c->session->{local_menu_sort} || 'name';
 	if ($sort eq 'rank') {
-		@$resources = sort {(int($b->$sort || 0) <=> int($a->$sort || 0)) or lc($a->name) cmp lc($b->name)} @$resources;
+		@$resources = sort { (int($b->$sort || 0) <=> int($a->$sort || 0)) or lc($a->name) cmp lc($b->name) } @$resources;
 	} elsif ($sort ne 'name') {
-	 	@$resources = sort {lc($a->$sort) cmp lc($b->$sort) or lc($a->name) cmp lc($b->name)} @$resources;
+	 	@$resources = sort { lc($a->$sort) cmp lc($b->$sort) or lc($a->name) cmp lc($b->name) } @$resources;
 	} else {
-		@$resources = sort {lc($a->$sort) cmp lc($b->$sort)} @$resources;
+		@$resources = sort { lc($a->$sort) cmp lc($b->$sort) } @$resources;
 	}
 		
 	$c->stash->{filter} = $c->session->{local_menu_filter};
@@ -171,12 +174,16 @@ sub edit : Local {
 			# Remove services and recreate links, then update and save the resource
 			
 			eval {
-				if (defined($local_resource)) {
+				if ( defined($local_resource) ) {
+
 					$local_resource->update_from_form($c->form);
 					CUFTS::DB::LocalResources_Services->search({local_resource => $local_resource->id})->delete_all;
+
 				} else {
-					defined($global_resource) and
+
+					if ( defined($global_resource) ) {
 						$c->form->valid->{resource} = $global_resource->id;
+					}
 
 					$c->form->valid->{site} = $c->stash->{current_site}->id;
 
@@ -190,7 +197,9 @@ sub edit : Local {
 				if ($local_resource->auto_activate) {
 					$local_resource->activate_titles();
 				}
+				
 			};
+			
 			if ($@) {
 				my $err = $@;
 				CUFTS::DB::DBI->dbi_rollback;
