@@ -212,6 +212,7 @@ sub edit : Local {
 	}
 
 	$c->stash->{section} = 'general';
+	$c->stash->{module_list} = [CUFTS::ResourcesLoader->list_modules()];
 	
 	if (defined($global_resource)) {
 		$c->stash->{services} = [$global_resource->services];

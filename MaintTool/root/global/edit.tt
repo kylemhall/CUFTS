@@ -12,7 +12,14 @@
 <option value="[% resource_type.id %]" [% 'selected="selected"' IF resource.resource_type.id == resource_type.id %]>[% resource_type.type | html %]</option>
 [% END %]
 </select>[% PROCESS form_results.tt frf='resource_type' %]</td></tr>
-<tr><td class="label1" align="right">module</td><td class="field1"><input name="module" type="text" value="[% resource.module | html %]" size="50" maxlength="256">[% PROCESS form_results.tt frf='module' %]</td></tr>
+<tr><td class="label1" align="right">module</td><td class="field1">
+<select name="module">
+[% FOREACH module IN module_list %]
+<option value="[% module | html %]" [% 'selected="selected"' IF resource.module == module OR ( !resource.module.defined AND module == 'blank' )%]>[% module | html %]</option>
+[% END %]
+</select>
+[% PROCESS form_results.tt frf='module' %]</td>
+</tr>
 <tr><td class="label0" align="right">active</td><td class="field0"><input type="checkbox" name="active" value="true" [% 'checked="checked"' IF resource.active %]></td></tr>
 </table>
 </td></tr>

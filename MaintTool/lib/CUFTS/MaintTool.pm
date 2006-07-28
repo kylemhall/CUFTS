@@ -4,6 +4,8 @@ use strict;
 use Catalyst qw/Session Session::Store::FastMmap Session::State::Cookie FormValidator CUFTS::MaintTool::FillInForm Static::Simple/;
 use lib '../lib';
 
+use CUFTS::ResourcesLoader;
+
 use CUFTS::Config;
 
 our $VERSION = '2.00.00';
