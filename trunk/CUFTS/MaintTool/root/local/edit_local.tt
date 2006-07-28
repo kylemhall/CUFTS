@@ -13,7 +13,12 @@
 <option value="[% resource_type.id %]" [% 'selected="selected"' IF local_resource.resource_type.id == resource_type.id %] >[% resource_type.type %]</option>
 [% END %]
 </select></td></tr>
-<tr><td class="label1" align="right">module</td><td class="field1"><input type="text" size="30" name="module" value="[% HTML.escape(local_resource.module) %]">[% PROCESS form_results.tt frf='module' %]</td></tr>
+<tr><td class="label1" align="right">module</td><td class="field1"><select name="module">
+[% FOREACH module IN module_list %]
+<option value="[% module | html %]" [% 'selected="selected"' IF local_resource.module == module OR ( !local_resource.module.defined AND module == 'blank' )%]>[% module | html %]</option>
+[% END %]
+</select>
+[% PROCESS form_results.tt frf='module' %]</td></tr>
 <tr><td class="label0" align="right">proxy</td><td class="field0"><input type="checkbox" name="proxy" value="true" [% 'checked="checked"' IF local_resource.proxy %]></td></tr>
 <tr><td class="label1" align="right">dedupe</td><td class="field1"><input type="checkbox" name="dedupe" value="true" [% 'checked="checked"' IF local_resource.dedupe %]></td></tr>
 <tr><td class="label0" align="right">rank</td><td class="field0"><input type="text" size="3" name="rank" value="[% HTML.escape(local_resource.rank) %]"></td></tr>

@@ -144,6 +144,7 @@ sub edit : Local {
 	}
 
 	$c->stash->{resource} = $resource;
+	$c->stash->{module_list} = [CUFTS::ResourcesLoader->list_modules()];
 	$c->stash->{resource_types} = [CUFTS::DB::ResourceTypes->retrieve_all()];
 	$c->stash->{services} = [CUFTS::DB::Services->retrieve_all()];
 	$c->stash->{template} = 'global/edit.tt';
