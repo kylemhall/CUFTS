@@ -86,6 +86,9 @@ sub clean_data {
     sub get_wilson_date {
 
         my ( $string, $type ) = @_;
+
+        return undef if is_empty_string( $string );
+
         my $best_date;
         my @dates = split /\s*;\s*/, $string;
 
