@@ -107,7 +107,7 @@ sub clean_data {
         
         # Remove end periods if the year matches the current year
 
-        my $current_year = localtime()[5] + 1900;
+        my $current_year = (localtime)[5] + 1900;
         if ( int($year) >= $current_year ) {
             
             delete $record->{iss_ft_end};
