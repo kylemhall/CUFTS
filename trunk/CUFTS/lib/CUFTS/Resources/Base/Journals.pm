@@ -364,16 +364,16 @@ sub _find_partial_match {
 
     my $search = { 'resource' => $resource_id };
 
-    if ( not_empty_string($record->{'issn'}) ) {
-        $search->{'issn'} = $record->{'issn'};
-    }
-    if ( not_empty_string($search->{'eissn'}) ) {
-        $search->{'eissn'} = $record->{'eissn'};
-    }
-    if ( !exists($search->{'issn'}) && !exists($search->{'eissn'}) ) {
-        $search->{'title'} = $record->{'title'};
-    }
+    $search->{'issn'} = not_empty_string($record->{'issn'})
+                        ? $record->{'issn'}
+                        : undef;
 
+    $search->{'e_issn'} = not_empty_string($record->{'e_issn'})
+                        ? $record->{'e_issn'}
+                        : undef;
+
+    $search->{'title'} = $record->{'title'};
+ 
     my @titles = $module->search($search);
 
     return scalar(@titles) == 1 ? $titles[0] : undef;
