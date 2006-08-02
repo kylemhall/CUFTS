@@ -127,84 +127,12 @@ foreach my $dat_file_name (@dat_files) {
     	}
 	}	
 
-	##
-	## Email all the sites who have this resource active.
-	##
 
-	my @local_resources = CUFTS::DB::LocalResources->search('active' => 't', 'resource' => $resource_id, 'auto_activate' => 'f');
-	foreach my $local_resource  (@local_resources) {
-		my $site = $local_resource->site;
-		next if is_empty_string($site->email);
+    ##
+    ## Email sites who are affected by update
+    ##
 
-		my $local_resource_id = $local_resource->id;
-
-		my $site_id = $site->id;
-		my $host = defined($CUFTS::Config::CUFTS_SMTP_HOST) ? $CUFTS::Config::CUFTS_SMTP_HOST : 'localhost';
-		my $msg = MIME::Lite->new(
-			From    => $CUFTS::Config::CUFTS_MAIL_FROM,
-			To      => $site->email,
-			Subject => "CUFTS UPDATE ALERT: " . $resource->name,
-			Type    => 'multipart/mixed',
-		);
-		
-		if ( defined($msg) ) {
-
-    		$msg->attach(
-    			Type => 'TEXT',
-    			Data => 'You have received this message because one of your CUFTS local resources has been updated. Please read the attached list to see if any of the titles you have enabled in CUFTS have changed. This may require re-enabling individual titles to ensure continued linking for your users. If you have any questions, please contact researcher-support@sfu.ca.' . "\n\n" .
-    				'Resource: ' . $resource->name . "\n" .
-    				'Processed: ' . $results->{'processed_count'} . "\n" .
-    				'New: ' . $results->{'new_count'} . "\n" .
-    				'Modified: ' . $results->{'modified_count'} . "\n" . 
-    				'Deleted: ' . $results->{'deleted_count'} . "\n"
-    		) or CUFTS::Exception::App->throw("Unable to attach text message to MIME::Lite object: $!");
-		
-    		my $filename = ($CUFTS::Config::CUFTS_TTILES_LOG_DIR || '/tmp/') . "new_titles_${resource_id}_" . substr($results->{'timestamp'}, 0, 19);
-    		if (-e "$filename") {
-    			$msg->attach(
-    				Type => 'text/plain',
-    				Path => $filename,
-    				Filename => "new_titles_${resource_id}_" . substr($results->{'timestamp'}, 0, 19),
-    				Disposition => 'attachment'
-    			) or CUFTS::Exception::App->throw("Unable to attach new titles file to MIME::Lite object: $!");
-    		}
-		
-    		$filename = ($CUFTS::Config::CUFTS_TTILES_LOG_DIR || '/tmp/') . "modified_titles_local_${local_resource_id}_${site_id}_" . substr($results->{'timestamp'}, 0, 19);
-    		print "$filename\n";
-    		if (-e "$filename") {
-    			print "found\n";
-    			$msg->attach(
-    				Type => 'text/plain',
-    				Path => $filename,
-    				Filename => "modified_titles_local_${local_resource_id}_${site_id}_" . substr($results->{'timestamp'}, 0, 19),
-    				Disposition => 'attachment'
-    			) or CUFTS::Exception::App->throw("Unable to attach modified titles file to MIME::Lite object: $!");
-    		}
-
-    		$filename = ($CUFTS::Config::CUFTS_TTILES_LOG_DIR || '/tmp/') . "deleted_titles_local_${local_resource_id}_${site_id}_" . substr($results->{'timestamp'}, 0, 19);
-    		print STDERR "$filename\n";
-    		if (-e "$filename") {
-    			print STDERR "found\n";
-    			$msg->attach(
-    				Type => 'text/plain',
-    				Path => $filename,
-    				Filename => "deleted_titles_local_${local_resource_id}_${site_id}_" . substr($results->{'timestamp'}, 0, 19),
-    				Disposition => 'attachment'
-    			) or CUFTS::Exception::App->throw("Unable to attach deleted titles file to MIME::Lite object: $!");
-    		}
-			
-    		eval {
-    		    MIME::Lite->send('smtp', $host);
-    		    $msg->send;
-    		};
-    		if ($@) {
-    		    warn("Unable to send message using MIME::Lite: $@");
-    		}
-    	}
-    	else {
-    	    warn("Unable to create MIME::Lite object: $!");
-    	}
-	}
+    CUFTS::Resources->email_changes( $resource, $results );
 
 	CUFTS::DB::DBI->dbi_commit;
 

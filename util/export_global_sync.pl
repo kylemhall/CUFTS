@@ -160,6 +160,14 @@ RESOURCE:
 
     }
     
+    open OUTPUT, ">$tmp_dir/update.xml" or
+        die "Unable to create XML output file: $!";
+        
+    print OUTPUT "<xml>\n" . $resource_xml . "</xml>\n";
+    
+    close OUTPUT;
+    
+    
 }
 
 
@@ -220,7 +228,7 @@ sub create_resource_xml {
     
     $output .= "</services>\n";
     
-    $output .= "</resource>\n"
+    $output .= "</resource>\n";
     
     return $output;
 }
