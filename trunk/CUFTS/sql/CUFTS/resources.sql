@@ -16,6 +16,13 @@ CREATE TABLE resources (
 
 	title_count	INTEGER,
 
+    resource_identifier VARCHAR(256),
+    database_url        VARCHAR(1024),
+    auth_name           VARCHAR(256),
+    auth_passwd         VARCHAR(256),
+    url_base            VARCHAR(1024),
+    proxy_suffix        VARCHAR(1024),
+
 	created		TIMESTAMP NOT NULL DEFAULT NOW(),
 	modified	TIMESTAMP NOT NULL DEFAULT NOW()
 );
