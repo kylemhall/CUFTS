@@ -34,6 +34,7 @@ __PACKAGE__->table('resources');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
+	key
 	name
 
 	provider
