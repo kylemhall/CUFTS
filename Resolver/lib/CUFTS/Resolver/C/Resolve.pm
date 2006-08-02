@@ -4,6 +4,7 @@ use strict;
 use base 'Catalyst::Base';
 
 use CUFTS::Util::Simple;
+use CUFTS::ResourcesLoader;
 use CUFTS::Resolve;
 use CUFTS::Request;
 
