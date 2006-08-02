@@ -1,5 +1,8 @@
 CREATE TABLE resources (
-	id		SERIAL PRIMARY KEY,
+	id		    SERIAL PRIMARY KEY,
+
+	key         VARCHAR(256),
+	
 	name		VARCHAR(256) NOT NULL,
 
 	resource_type	INTEGER NOT NULL,	/* id for resource type */

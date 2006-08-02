@@ -7,7 +7,7 @@ my $form_validate = {
 	required => ['name', 'resource_type', 'module'],
 	optional => [
 		# Standard fields
-		'provider', 'active', 'resource_services', 'submit', 'cancel',
+		'key', 'provider', 'active', 'resource_services', 'submit', 'cancel',
 		# Resource details...
 		'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'notes_for_local',
 	],
@@ -73,16 +73,17 @@ sub menu : Local {
 			
 		$search{-nest} =
 			[
-			 name => {ilike => "\%$filter\%"},
-			 provider => {ilike => "\%$filter\%"},
+			 name => { ilike => "\%$filter\%" },
+			 provider => { ilike => "\%$filter\%" },
 			];
 	}
 	
 	defined($c->session->{global_menu_show}) && $c->session->{global_menu_show} eq 'show active' and
 		$search{active} = 'true';
 
-	my @resources = scalar(keys %search) > 0 ? CUFTS::DB::Resources->search_where(\%search) : 
-	                                           CUFTS::DB::Resources->retrieve_all;
+	my @resources = scalar(keys %search) > 0 
+	                ? CUFTS::DB::Resources->search_where(\%search) 
+	                : CUFTS::DB::Resources->retrieve_all;
 
 	# Delete the title list filter, it should be clear when we go to 
 	# browse a new list
