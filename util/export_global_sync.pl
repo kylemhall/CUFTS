@@ -37,6 +37,7 @@ if ( defined($check_timestamp) ) {
 
     if ( $check_timestamp =~ / (\d{4}) - (\d{2}) - (\d{2}) /xsm ) {
         $check_timestamp = "$1$2$3";
+        print "Checking for title updates after: $check_timestamp\n";
     }
     else {
         die("Timestamp does not match YYYY-MM-DD format: $check_timestamp");
@@ -104,7 +105,7 @@ RESOURCE:
                 print "Updated after timestamp check date.\n";
             }
             else {
-                print "Not updated after timestamp check date.\n";
+                print "Not updated after timestamp check date: $scanned\n";
                 next RESOURCE;
             }
 
@@ -167,6 +168,7 @@ RESOURCE:
     
     close OUTPUT;
     
+    `tar cvzf $tmp_dir/update.tgz $tmp_dir/*`;
     
 }
 
@@ -221,8 +223,13 @@ sub create_resource_xml {
     ##
     
     $output .= "<services>\n";
-    
-    foreach my $service ( $local_resource->services ) {
+
+    my @services = $local_resource->services;
+    if ( !scalar(@services) ) {
+        @services = $resource->services;
+    }
+
+    foreach my $service ( @services ) {
         $output .= "<service>" . encode_entities( $service->name) . "</service>\n";
     }
     
