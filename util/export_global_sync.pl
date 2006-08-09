@@ -168,7 +168,9 @@ RESOURCE:
     
     close OUTPUT;
     
-    `cd $tmp_dir; tar --create --gzip  --file $tmp_dir/update.tgz .`;
+    `cd $tmp_dir; tar --create --gzip  --file ${tmp_dir}/update.tgz .`;
+ 
+    print "Your update file is done:\n${tmp_dir}/update.tgz\n";
     
 }
 
