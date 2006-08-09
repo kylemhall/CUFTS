@@ -168,7 +168,7 @@ RESOURCE:
     
     close OUTPUT;
     
-    `tar cvzf $tmp_dir/update.tgz $tmp_dir/*`;
+    `cd $tmp_dir; tar --create --gzip  --file $tmp_dir/update.tgz .`;
     
 }
 
