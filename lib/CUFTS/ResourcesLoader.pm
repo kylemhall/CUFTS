@@ -54,6 +54,7 @@ BEGIN {
         GenericJournal
         GenericJournalDOI
         Highwire
+        HighwireFree
         History_Coop
         IEEE
         III
