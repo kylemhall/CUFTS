@@ -101,7 +101,17 @@ sub import {
 
         my $results = $module->load_global_title_list($resource, "${tmp_dir}/$key");
 
-        warn(Dumper($results));
+    	print 'Resource: ' . $resource->name . "\n";
+    	print 'Processed: ' . $results->{'processed_count'} . "\n";
+    	print 'Errors: ' . $results->{'error_count'} . "\n";
+    	print 'New: ' . $results->{'new_count'} . "\n";
+    	print 'Modified: ' . $results->{'modified_count'} . "\n";
+    	print 'Deleted: ' . $results->{'deleted_count'} . "\n";
+    	print 'Update Timestamp: ' . $results->{'timestamp'} . "\n\nErrors\n-------\n";
+    	foreach my $error (@{$results->{'errors'}}) {
+    		print "$error\n";
+    	}
+    	print "-------\n";
 
         CUFTS::Resources->email_changes( $resource, $results );
 
