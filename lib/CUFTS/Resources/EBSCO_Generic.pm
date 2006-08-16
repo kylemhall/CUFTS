@@ -89,7 +89,7 @@ sub clean_data {
 
     if ( defined( $record->{'___Full Text'} ) ) {
 
-        if ( $record->{'___Full Text'} =~ m{^ \s* (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
+        if ( $record->{'___Full Text'} =~ m{^ \s* (\d{1,2}) / (\d{1,2}) / (\d{4}) }xsm ) {
             $record->{ft_start_date} = "$3/$1/$2";
         }
         elsif ( $record->{'___Full Text'} =~ m{^ \s* (\d{4}) }xsm ) {
@@ -100,7 +100,7 @@ sub clean_data {
 
     if ( defined( $record->{'___Full Text'} ) ) {
     
-        if ( $record->{'___Full Text'} =~ m{ to \s+ (\d{2}) / (\d{2}) / (\d{4}) \s* $}xsm ) {
+        if ( $record->{'___Full Text'} =~ m{ to \s+ (\d{1,2}) / (\d{1,2}) / (\d{4}) \s* $}xsm ) {
             $record->{ft_end_date} = "$3/$1/$2";
         }
         elsif ( $record->{'___Full Text'} =~ m{ to \s+ (\d{4}) }xsm ) {
@@ -111,7 +111,7 @@ sub clean_data {
     
     if ( defined( $record->{'___Searchable Cited References'} ) ) {
     
-        if ( $record->{'___Searchable Cited References'} =~ m{^ \s* (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
+        if ( $record->{'___Searchable Cited References'} =~ m{^ \s* (\d{1,2}) / (\d{1,2}) / (\d{1,4}) }xsm ) {
             $record->{cit_start_date} = "$3/$1/$2";
         }
         elsif ( $record->{'___Searchable Cited References'} =~ m{^ \s* (\d{4}) }xsm ) {
@@ -122,7 +122,7 @@ sub clean_data {
     
     if ( defined( $record->{'___Searchable Cited References'} ) ) {
     
-        if ( $record->{'___Searchable Cited References'} =~ m{ to \s+ (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
+        if ( $record->{'___Searchable Cited References'} =~ m{ to \s+ (\d{1,2}) / (\d{1,2}) / (\d{4}) }xsm ) {
             $record->{cit_end_date} = "$3/$1/$2";
         }
         elsif ( $record->{'___Searchable Cited References'} =~ m{ to \s+ (\d{4}) }xsm ) {
