@@ -79,7 +79,7 @@ sub title_list_field_map {
 sub skip_record {
     my ( $class, $record ) = @_;
     
-    return 1 if $record->{'___Source Type'} =~ /book|monograph/i;
+#    return 1 if $record->{'___Source Type'} =~ /book|monograph/i;
 
     return 0
 }
