@@ -58,10 +58,92 @@ sub title_list_fields {
             issn
             ft_start_date
             ft_end_date
-            db_identifier
-            journal_url
+            cit_start_date
+            cit_end_date
+            embargo_months
+            publisher
         )
     ];
+}
+
+sub title_list_field_map {
+    return {
+        'Publication Name'            => 'title',
+        'ISSN'                        => 'issn',
+        'ISSN/ISBN'                   => 'issn',
+        'Publisher'                   => 'publisher',
+        'Full Text Delay (in months)' => 'embargo_months',
+    };
+}
+
+sub skip_record {
+    my ( $class, $record ) = @_;
+    
+    return 1 if $record->{'___Source Type'} =~ /book|monograph/i;
+
+    return 0
+}
+
+sub clean_data {
+    my ( $class, $record ) = @_;
+
+    if ( defined( $record->{'___Full Text'} ) ) {
+
+        if ( $record->{'___Full Text'} =~ m{^ \s* (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
+            $record->{ft_start_date} = "$3/$1/$2";
+        }
+        elsif ( $record->{'___Full Text'} =~ m{^ \s* (\d{4}) }xsm ) {
+            $record->{ft_start_date} = $1;
+        }
+
+    }
+
+    if ( defined( $record->{'___Full Text'} ) ) {
+    
+        if ( $record->{'___Full Text'} =~ m{ to \s+ (\d{2}) / (\d{2}) / (\d{4}) \s* $}xsm ) {
+            $record->{ft_end_date} = "$3/$1/$2";
+        }
+        elsif ( $record->{'___Full Text'} =~ m{ to \s+ (\d{4}) }xsm ) {
+            $record->{ft_end_date} = $1;
+        }
+
+    }
+    
+    if ( defined( $record->{'___Searchable Cited References'} ) ) {
+    
+        if ( $record->{'___Searchable Cited References'} =~ m{^ \s* (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
+            $record->{cit_start_date} = "$3/$1/$2";
+        }
+        elsif ( $record->{'___Searchable Cited References'} =~ m{^ \s* (\d{4}) }xsm ) {
+            $record->{cit_start_date} = $1;
+        }
+
+    }
+    
+    if ( defined( $record->{'___Searchable Cited References'} ) ) {
+    
+        if ( $record->{'___Searchable Cited References'} =~ m{ to \s+ (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
+            $record->{cit_end_date} = "$3/$1/$2";
+        }
+        elsif ( $record->{'___Searchable Cited References'} =~ m{ to \s+ (\d{4}) }xsm ) {
+            $record->{cit_end_date} = $1;
+        }
+
+    }
+    
+
+    if ( defined( $record->{embargo_months} ) ) {
+        $record->{embargo_months} = int( $record->{embargo_months} + 0.99 );
+    }
+
+    $record->{title}     = trim_string($record->{title},     '"');
+    $record->{publisher} = trim_string($record->{publisher}, '"');
+
+    # Remove trailing *
+
+    $record->{title} =~ s/\*$//;
+
+    return $class->SUPER::clean_data($record);
 }
 
 sub global_resource_details {
@@ -99,16 +181,6 @@ sub resource_details_help {
         = "This is a code used by EBSCO to identify your site.  It is passed to their Article Matcher system in order to determine which databases and articles you should have access to.\n\nExample: s9612765.main.web";
 
     return $help_hash;
-}
-
-sub title_list_field_map {
-    return {
-        title         => 'title',
-        issn          => 'issn',
-        ft_start_date => 'ft_start_date',
-        ft_end_date   => 'ft_end_date',
-        url_base      => 'journal_url',
-    };
 }
 
 sub can_getTOC {
