@@ -279,6 +279,9 @@ if ($no_psql) {
 				print "Loading global databases... this may take a while...\n";
 				`util/import_global_sync.pl sql/CUFTS/init/examples.tgz`;
 				print "done!\n";
+                print "Building first journals auth table...\n"
+				`util/build_journals_auth.pl`;
+				print "done!\n";
 			}
 
 		}
