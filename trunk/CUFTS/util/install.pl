@@ -66,6 +66,7 @@ my @modules = qw(
     Text::CSV
     URI::Escape
     URI::OpenURL
+    XML::Parser::Lite::Tree
     XML::RAI
 );
 
@@ -272,11 +273,11 @@ if ($no_psql) {
 			}
 			print "\n\nDone with basic database setup.\n";
 
-			print "\nInitialize the database with global resources and journal lists?\nCaution - this will trash any data you have already loaded.\nLoad data?\n";
+			print "\nInitialize the database with example global resources and journal lists?\n";
 			my $input = $term->readline('[Y/n]: ');
 			unless ($input =~ /^\s*n/i) {
-				print "Loading global databases... this may take a while...\nIf you entered a database password you may be prompted again here...\n";
-				`zcat sql/CUFTS/global/* | psql -q --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
+				print "Loading global databases... this may take a while...\n";
+				`util/import_global_sync.pl sql/CUFTS/init/examples.tgz`;
 				print "done!\n";
 			}
 
