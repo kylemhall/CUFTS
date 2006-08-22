@@ -19,8 +19,13 @@
 <tr><td>
 <table style="width: 100%;" class="outlined">
 <tr><td class="heading-bar">domains</td><td  style="text-align: right; width: 10%; background: white;"><a href="[% url("$url_base/site/ips") %]">edit</a>&nbsp;&nbsp;</tr>
-[% FOREACH domain IN current_site.domains %]
+[% SET count = 0 %]
+[% SET domains = current_site.domains %]
+[% IF domains.defined AND domains != '' %]
+ [% IF domains.exists('id') %][% domains = [domains] %][% END %]
+ [% FOREACH domain IN current_site.domains %]
 	<tr><td class="field[% loop.count % 2 %]" colspan="2">[% domain.domain %]</td></tr>
+ [% END %]
 [% END %]
 </table>
 </td></tr>
@@ -28,8 +33,14 @@
 <tr><td>
 <table style="width: 100%;" class="outlined"> 
 <tr><td class="heading-bar">IP networks</td><td style="text-align: right; width: 10%; background: white;"><a href="[% url("$url_base/site/ips") %]">edit</a>&nbsp;&nbsp;</td></tr>
-[% FOREACH ip IN current_site.ips %]
-	<tr><td class="field[% loop.count % 2 %]" colspan="2">[% ip.network %]</td></tr>
+[% SET ips = current_site.ips %]
+[% IF ips.defined AND ips != '' %]
+ [% IF ips.exists('id') %][% ips = [ips] %][% END %]
+ [% FOREACH ip IN ips.sort('ip_low') %]
+  <tr>
+   <td colspan="2" class="field[% loop.count % 2 %]">[% ip.ip_low %] - [% ip.ip_high %]</td>
+  </tr>
+ [% END %]
 [% END %]
 </table>
 </td></tr>

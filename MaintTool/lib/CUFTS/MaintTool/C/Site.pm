@@ -3,6 +3,8 @@ package CUFTS::MaintTool::C::Site;
 use strict;
 use base 'Catalyst::Base';
 
+use CUFTS::Util::Simple;
+
 my $edit_form_validate = {
 	required => ['name'],
 	optional => ['email', 'proxy_prefix', 'proxy_prefix_alternate', 'proxy_WAM', 'show_ERM', 'submit', 'cancel'],
@@ -11,12 +13,13 @@ my $edit_form_validate = {
 };
 
 my $ips_form_validate = {
-	optional => ['submit', 'cancel', 'domainnew', 'ipnew'],
-	optional_regexp => qr/^(ip|domain)\d+/,
+	optional => ['submit', 'cancel', 'domainnew', 'ip_low_new','ip_high_new'],
+	optional_regexp => qr/^(ip|domain)/,
 	filters => ['trim'],
 	constraint_regexp_map => {
-		qr/ip\d+/ => qr/^\d+\.\d+\.\d+\.\d+(\/\d+)?/,
-		qr/domain\d+/ => qr/^[=\w\.]+$/,
+		qr/^ip_low_/ => qr/^\d+\.\d+\.\d+\.\d+/,
+		qr/^ip_high_/ => qr/^\d+\.\d+\.\d+\.\d+/,
+		qr/^domain\d+/ => qr/^[=\w\.]+$/,
 	},
 };
 
@@ -111,6 +114,7 @@ sub ips : Local {
 		
 			# Remove ips/domains and recreate links, then update and save the site
 			
+            my $err_flag = 0;
 			eval {
 				CUFTS::DB::SiteDomains->search('site' => $c->stash->{current_site}->id)->delete_all;
 				CUFTS::DB::SiteIPs->search('site' => $c->stash->{current_site}->id)->delete_all;
@@ -122,19 +126,34 @@ sub ips : Local {
 						$value =~ /^\./ or 
 							$value = '.' . $value;
 						$c->stash->{current_site}->add_to_domains({'domain' => $value});
-					} elsif ($param =~ /^ip/) {
-						$c->stash->{current_site}->add_to_ips({'network' => $value});
+					} elsif ($param =~ /^ip_low_(.+)/) {
+					    my $low = $value;
+					    my $high = $c->form->valid->{"ip_high_$1"};
+					    
+					    if ( is_empty_string($low) || is_empty_string($high) ) {
+					        push @{$c->stash->{errors}}, "IP ranges must include high and low values.\n";
+					        $err_flag = 1;
+					        next;
+					    }
+					    
+						$c->stash->{current_site}->add_to_ips( {'ip_low' => $low, 'ip_high' => $high} );
 					}
 				}
 			};
-			if ($@) {
-				my $err = $@;
-				CUFTS::DB::DBI->dbi_rollback;
-				die($err);
-			}
+
+            if ( !$err_flag ) {
+    			if ($@) {
+    				my $err = $@;
+    				CUFTS::DB::DBI->dbi_rollback;
+    				die($err);
+    			}
 			
-			CUFTS::DB::DBI->dbi_commit;
-			return $c->redirect('/site/edit');
+    			CUFTS::DB::DBI->dbi_commit;
+    			return $c->redirect('/site/edit');
+    		}
+    		else {
+    		    CUFTS::DB::DBI->dbi_rollback;
+    		}
 		}
 	}
 	

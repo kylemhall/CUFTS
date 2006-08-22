@@ -2,7 +2,8 @@ CREATE TABLE site_ips (
 	id		SERIAL PRIMARY KEY,
 
 	site		INTEGER NOT NULL,
-	network		CIDR NOT NULL,
+	ip_low		INET NOT NULL,
+	ip_high     INET NOT NULL,
 
 	created		TIMESTAMP NOT NULL DEFAULT NOW(),
 	modified	TIMESTAMP NOT NULL DEFAULT NOW()

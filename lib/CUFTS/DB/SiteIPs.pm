@@ -32,7 +32,8 @@ __PACKAGE__->columns(All => qw(
 	id
 
 	site
-	network
+	ip_low
+	ip_high
 
 	created
 	modified
@@ -43,10 +44,15 @@ __PACKAGE__->sequence('site_ips_id_seq');
 
 __PACKAGE__->has_a('site', 'CUFTS::DB::Sites');
 
-__PACKAGE__->set_sql('network' => qq{
+sub search_network {
+    my ($class, $ip) = @_;
+    return $class->search__network($ip, $ip);
+}
+
+__PACKAGE__->set_sql('_network' => qq{
 SELECT __ESSENTIAL__
 FROM __TABLE__
-WHERE ? <<= network
+WHERE ? >= ip_low AND ? <= ip_high
 });
 
 1;
