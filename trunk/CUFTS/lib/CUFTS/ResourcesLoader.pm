@@ -50,6 +50,7 @@ BEGIN {
         Erudit
         Extenza
         Gale_CWI
+        Gale_II
         Gale
         GenericJournal
         GenericJournalDOI
