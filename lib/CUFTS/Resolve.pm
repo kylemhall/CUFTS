@@ -260,7 +260,7 @@ sub get_sites {
                      ? @$site_keys
                      : split ',', $site_keys;
     }
-    if ( defined($request) ) {
+    if ( defined($request) && defined($request->pid) ) {
         if ( defined($request->pid->{CUFTSSite}) ) {
             push @site_keys, split(',', $request->pid->{CUFTSSite});
         }
@@ -305,7 +305,7 @@ sub get_site_from_domain {
 
 sub get_site_from_ip {
     my ( $self, $ip ) = @_;
-
+    
     my @IPs = CUFTS::DB::SiteIPs->search_network($ip);
     return $IPs[0]->site if scalar(@IPs);
 
