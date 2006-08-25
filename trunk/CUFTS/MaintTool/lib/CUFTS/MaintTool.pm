@@ -41,6 +41,7 @@ sub begin : Private {
 
     # Don't force login on static content
     return 1 if ( $c->req->{path} =~ /^static/ );
+    return 1 if ( $c->req->{path} =~ /^public/ );
 
     # Set up current user and site info in the stash
 
