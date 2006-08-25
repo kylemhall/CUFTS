@@ -23,6 +23,9 @@
 </form>
 
 [% IF journal_auths.defined %]
+ [% IF journal_auth.size == 0 %]
+  No journals were found.
+ [% END %]
  [% FOREACH journal_auth IN journal_auths %]
  <div style="margin-bottom: 3px;">
     <a href="[% url("$url_base/public/search/journal/$journal_auth.id") %]">[% journal_auth.title %]</a>
