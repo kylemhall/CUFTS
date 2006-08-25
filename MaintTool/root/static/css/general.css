@@ -100,8 +100,7 @@ td.heading {
 	background: #004997;
 	font-weight: bold;
 	color: white;
-	padding-right: 5px;
-	padding-left: 5px;
+	padding: 2px 5px;
 	white-space: nowrap;
 }
 
@@ -510,4 +509,82 @@ div#journal-auth-edit-rss {
     margin-top: 1em;
     border: 1px solid #004997;
     background: #EEEEEE;
+}
+
+
+
+
+div.public-journal-auth {
+    border: 1px solid #004997;
+    padding: 5px;
+    background: #EEEEEE;
+    float:  left;
+    width: 99%;
+}
+
+table#public-journal-holdings {
+	border: 1px solid #004997;
+	padding: 1px;
+	width:  100%;
+}
+
+tr.public-journal-holdings-heading td {
+	background: #004997;
+	font-weight: bold;
+	color: white;
+	padding: 2px 5px;
+	white-space: nowrap;
+}
+
+tr.public-journal-holdings-field0 td {
+	padding: 4px 5px 1px 5px;
+	color: black;
+	background: white;
+	border: 1px solid #004997;
+}
+
+tr.public-journal-holdings-field1 td {
+	padding: 4px 5px 1px 5px;
+	background: #D0DEED;
+	color: black;
+	border: 1px solid #004997;
+}
+
+span.public-journal-title {
+	color: #004997;
+	font-size: 120%;
+	font-weight: bold;
+	margin-bottom: 3px;
+}
+
+a#toggle-more {
+    margin-left: 10px;
+    font-size: 80%;
+}
+
+span.public-journal-issns {
+}
+
+div#public-journal-more {
+    float: left; 
+    background: white;
+    width:  99%;
+    padding:  4px;
+    margin:  3px auto 5px auto;
+    border:  solid 1px #CCCCCC;
+    font-size:  90%;
+}
+div.public-journal-info-heading {
+    font-weight:  bold;
+}
+
+div#public-journal-alternate-titles {
+}
+
+div.public-journal-float {
+    float:  left;
+    margin-right:  1em;
+}
+
+div#public-journal-marc {
 }
