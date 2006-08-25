@@ -24,8 +24,16 @@ sub get_title {
     }
 
     my $field245 = $record->field('245');
-    my $title = join ' ', map { $field245->subfield($_) }, @$fields;
+    my @data;
+
+    foreach my $subfield ( @$fields ) {
+        my @subfield_data = $field245->subfield( $subfield );
+        push @data, @subfield_data;
+    } 
+    
+    my $title = join ' ', @data;
     $title = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_title( $title ) );
+    
     return $title;
 }
 
