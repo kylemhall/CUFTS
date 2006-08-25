@@ -17,9 +17,15 @@ sub get_batch {
 }
 
 sub get_title {
-    my ( $self, $record ) = @_;
+    my ( $self, $record, $fields ) = @_;
 
-    my $title = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_title( $record->title ) );
+    if ( !defined($fields) ) {
+        $fields = [ qw(a b c f g h k n p s) ];
+    }
+
+    my $field245 = $record->field('245');
+    my $title = join ' ', map { $field245->subfield($_) }, @$fields;
+    $title = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_title( $title ) );
     return $title;
 }
 
@@ -39,9 +45,9 @@ sub get_sort_title {
     my $title;
     my $title_field = $record->field('245');
     if (defined($title_field)) {
-        $title = substr( $record->title, $record->field('245')->indicator('2') );
+        $title = substr( $self->get_title( $record ), $record->field('245')->indicator('2') );
     } else {
-        $title = $record->title;
+        $title = $self->get_title( $record );
     }
     $title = CUFTS::CJDB::Util::marc8_to_latin1($title);
     $title = $self->clean_title($title);
