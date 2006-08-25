@@ -235,10 +235,9 @@ sub create_summary {
     }
     $output .=  "</electronic_holdings>\n";
     
-    foreach my $network ( map { $_->network } $site->ips ) {
-        my $ip = Net::IP->new($network);
-        my $start = $ip->ip;
-        my $end   = $ip->last_ip;
+    foreach my $ip ( $site->ips ) {
+        my $start = $ip->ip_low;
+        my $end   = $ip->ip_high;
         $output .=  "<patron_ip_range>${start}-${end}</patron_ip_range>\n";
     }
     
