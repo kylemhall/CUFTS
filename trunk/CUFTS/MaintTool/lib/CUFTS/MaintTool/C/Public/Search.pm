@@ -10,6 +10,7 @@ use CUFTS::DB::JournalsAuthISSNs;
 
 my $form_validate = {
 	required => [ 'search_field', 'search_text', 'search' ],
+	optional => [ 'fulltext' ],
 	filters => ['trim'],
 };	
 
@@ -36,11 +37,20 @@ sub default : Private {
                     @journal_auths = CUFTS::DB::JournalsAuth->search_by_title( $c->form->valid->{search_text} . '%' );
             }
 
-            if ( scalar(@journal_auths) == 1 ) {
-               return $c->forward('/public/search/journal', [ $journal_auths[0]->id ] );
+            my $fulltext = '';
+            if ( $c->form->valid->{fulltext} ) {
+                @journal_auths = grep { $_->has_fulltext } @journal_auths;   
+                $fulltext = 'fulltext';
             }
 
+            if ( scalar(@journal_auths) == 1 ) {
+               return $c->forward('/public/search/journal', [ $journal_auths[0]->id, $fulltext ] );
+            }
+
+            @journal_auths = sort { lc($a->title) cmp lc($b->title) } @journal_auths;
+            
             $c->stash->{journal_auths} = \@journal_auths;
+            $c->stash->{fulltext} = $fulltext;
             $c->stash->{error} = 'autofillin';
         }
 
@@ -51,11 +61,19 @@ sub default : Private {
 
 
 sub journal : Local {
-    my ( $self, $c, $journal_auth_id ) = @_;
+    my ( $self, $c, $journal_auth_id, $fulltext ) = @_;
 
     my @holdings;
     my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($journal_auth_id);
-    my @journals = CUFTS::DB::Journals->search( 'journal_auth' => $journal_auth->id );
+    
+    my $search = { 'journal_auth' => $journal_auth->id };
+    
+    if ( $fulltext eq 'fulltext' ) {
+        $search->{'-nest'} = [ map { $_, {'!=', undef} } @CUFTS::Config::CUFTS_JOURNAL_FT_FIELDS ];
+    }
+    
+    my @journals = CUFTS::DB::Journals->search( $search );
+    
     @journals = sort { $a->resource->provider cmp $b->resource->provider or $a->resource->name cmp $b->resource->name } @journals;
     push @holdings, \@journals;
 

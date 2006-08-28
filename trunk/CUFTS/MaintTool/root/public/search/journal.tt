@@ -83,12 +83,12 @@
      <td>[% holding.cit_end_date %]</td>
      <td style="white-space: nowrap;">[% holding.ft_start_date %]
      [% IF holding.vol_ft_start.defined %]
-      &nbsp;&nbsp;[% holding.vol_ft_start %]
+      [% holding.vol_ft_start %]
       [% IF holding.iss_ft_start.defined %]([% holding.iss_ft_start %])[% END %]
      [% END %]</td>
      <td style="white-space: nowrap;">[% holding.ft_end_date %]
     [% IF holding.vol_ft_end.defined %]
-     &nbsp;&nbsp;[% holding.vol_ft_end %]
+     [% holding.vol_ft_end %]
      [% IF holding.iss_ft_end.defined %]([% holding.iss_ft_end %])[% END %]
      [% END %]</td>
      <td>[% IF holding.embargo_days %][% holding.embargo_days %] days[% END %][% IF holding.embargo_months %][% holding.embargo_months %] months[% END %]</td>
