@@ -57,9 +57,6 @@ __PACKAGE__->has_many('issns',  'CUFTS::DB::JournalsAuthISSNs'  => 'journal_auth
 __PACKAGE__->has_many('local_journals',  'CUFTS::DB::LocalJournals' => 'journal_auth', { cascade => 'None'} );
 __PACKAGE__->has_many('global_journals' => 'CUFTS::DB::Journals', { cascade => 'None'} );
 
-
-1;
-
 sub search_by_issns {
 	my ($class, @issns) = @_;
 	
@@ -111,7 +108,7 @@ sub search_by_exact_title_with_no_issns {
 
 
 sub search_by_title_with_no_issns {
-	my ($class, $title) = @_;
+	my ( $class, $title ) = @_;
 	
 	my $sql = 'SELECT DISTINCT ON (journals_auth.id) journals_auth.* FROM journals_auth JOIN journals_auth_titles ON (journals_auth_titles.journal_auth = journals_auth.id) LEFT OUTER JOIN journals_auth_issns ON (journals_auth.id = journals_auth_issns.journal_auth) WHERE journals_auth_issns.issn IS NULL AND journals_auth.title ILIKE ?';
 
@@ -123,6 +120,28 @@ sub search_by_title_with_no_issns {
 
 	return @results;
 }	
+
+sub has_fulltext {
+    my ( $self, $journal_auth_id ) = @_;
+
+    if ( !ref($self) && !defined($journal_auth_id) ) {
+        die("Error: has_fulltext called on class, but no journal auth id was passed in.");
+    }
+
+    $journal_auth_id = $self->id;  # $self
+    
+    my $sql = "SELECT COUNT(*) FROM journals WHERE journal_auth = ? AND (";
+    $sql .= join ' OR ', map { "$_ IS NOT NULL" } @CUFTS::Config::CUFTS_JOURNAL_FT_FIELDS;
+    $sql .= ')';
+    
+    my $dbh = $self->db_Main();
+	my $sth = $dbh->prepare_cached($sql);
+	$sth->execute($journal_auth_id);
+	my @result = $sth->fetchrow_array;
+    $sth->finish;
+
+    return $result[0];
+}
 
 
 __PACKAGE__->set_sql('by_title' => qq{
@@ -139,6 +158,7 @@ sub marc_object {
 	return $obj;
 }
 
+1;
 
 __END__
 
