@@ -10,12 +10,13 @@
    Search:
    <select name="search_field">
     <option value="title">titles</option>
-    <option value="issn">ISSN</option>
+    <option value="issn">ISSNs</option>
    </select>
    for
    <input type="text" name="search_text" size="40" maxlength="255" />
   </td>
  </tr>
+<tr><td class="field1">Limit to fulltext: <input type="checkbox" name="fulltext" value="1" /></td></tr>
  <tr>
   <td class="field1" style="padding: 4px 5px;"><input type="submit" name="search" value="search" /></td>
  </tr>
@@ -28,7 +29,7 @@
  [% END %]
  [% FOREACH journal_auth IN journal_auths %]
  <div style="margin-bottom: 3px;">
-    <a href="[% url("$url_base/public/search/journal/$journal_auth.id") %]">[% journal_auth.title %]</a>
+    <a href="[% url("$url_base/public/search/journal/$journal_auth.id/$fulltext") %]">[% journal_auth.title %]</a>
   [% SET issns = [] %]
   [% FOREACH issn IN journal_auth.issns %]
    [% issns.push(issn.issn_dash) %]
