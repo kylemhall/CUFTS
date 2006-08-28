@@ -81,6 +81,9 @@ sub load_journal {
 
     my @issns = $self->get_clean_issn_list($record);
 
+    $__CJDB_LOADER_DEBUG and print "issns: " . join(',', @issns) . "\n";
+
+
     # Consider modifying simple titles like "Journal" and "Review" by adding
     # an association.  This might need to be a site option later on.
 
@@ -600,7 +603,7 @@ sub get_journals_auth {
         $journals_auth->add_to_issns( { 'issn' => $issn } );
     }
 
-    return $journals_auth;
+    return $journals_auth->id;
     
 }
 
