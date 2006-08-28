@@ -249,7 +249,9 @@ sub search_distinct_by_tags {
 
 sub display_links {
     my ($self) = @_;
-    return CJDB::DB::Links->search_display($self->id);
+    my @results = CJDB::DB::Links->search_display($self->id);
+    
+    return \@results;
 }
 
 
