@@ -44,7 +44,7 @@ my $marc_fields = {
 	           repeats   => 1,
 	         },
 	'650' => {
-	           subfields => [ qw(a b v x y z) ],
+	           subfields => [ qw(a b z y x v) ],
 	           size      => [ 40, 40, 10, 10, 10, 10 ],
 	           repeats   => 1,
 	         },
@@ -244,24 +244,24 @@ sub edit_marc : Local {
                 $c->stash->{max_seen_fields}->{$field_type} = -1;
 
 				while ($c->form->valid->{"${row}-${field_type}-exists"}) {
-					my $subfields = {};
+					my @subfields;
 					my $indicators = [];
 					
 					foreach my $subfield (@{$marc_fields->{$field_type}->{subfields}}) {
 						my $value = $c->form->valid->{"${row}-${field_type}${subfield}"};
 						next unless defined($value) && $value ne '';
-						$subfields->{$subfield} = $value;
+						push @subfields, ($subfield, $value);
 					}
 					$indicators->[0] = $c->form->valid->{"${row}-${field_type}-1"};
 					$indicators->[1] = $c->form->valid->{"${row}-${field_type}-2"};
 					$row++;
 					
-					next unless scalar(keys %$subfields);  # Don't save blank fields, they're to be "deleted"
+					next unless scalar(@subfields);  # Don't save blank fields, they're to be "deleted"
 
                     $c->stash->{max_seen_fields}->{$field_type} = $row;
 
 					my $field;
-					eval { $field = MARC::Field->new($field_type, @$indicators, %$subfields); };
+					eval { $field = MARC::Field->new($field_type, @$indicators, @subfields); };
 					if ($@) {
 						warn($@);
 						push @{$c->stash->{errors}}, $@;
