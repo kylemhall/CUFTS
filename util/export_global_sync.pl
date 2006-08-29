@@ -131,7 +131,7 @@ RESOURCE:
         ## Skip if this record does not match a supplied resource key
         ##
 
-        if ( defined($options{resource_key}) && !grep { $key eq $! } split /,/ $options{resource_key} ) {
+        if ( defined($options{resource_key}) && !grep { $key eq $! } split /,/, $options{resource_key} ) {
             print "Key does not match requested resource keys.\n";
             next RESOURCE;
         }
