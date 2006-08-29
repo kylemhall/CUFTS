@@ -20,7 +20,7 @@ sub get_title {
     my ( $self, $record, $fields ) = @_;
 
     if ( !defined($fields) ) {
-        $fields = [ qw(a b c f g h k n p s) ];
+        $fields = $self->MARC_title_subfield_order();
     }
 
     my $field245 = $record->field('245');
@@ -167,13 +167,28 @@ sub get_coverage {
 }
 
 sub get_MARC_subjects {
-    my ( $self, $record ) = @_;
+    my ( $self, $record, $fields ) = @_;
+
+    if ( !defined($fields) ) {
+        $fields = $self->MARC_subject_subfield_order();
+    }
 
     my @subjects;
 
     my @marc_subjects = $record->field('6..');
-    foreach my $subject (@marc_subjects) {
-        push @subjects, CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_subject( $subject->as_string ) );
+    
+    foreach my $subject_field (@marc_subjects) {
+
+        my @data;
+
+        foreach my $subfield ( @$fields ) {
+            my @subfield_data = $subject_field->subfield( $subfield );
+            push @data, @subfield_data;
+        } 
+
+        my $subject = join ' ', @data;
+        $subject = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_subject( $subject ) );
+
     }
 
     return @subjects;
@@ -370,6 +385,14 @@ sub strip_subject_periodicals {
 
     # Default to yes.
     return 1;
+}
+
+sub MARC_subject_subfield_order {
+    return [ qw( a b c d e z y x v 2 3 4 6 8 ) ];
+}
+
+sub MARC_title_subfield_order {
+    return [ qw( a b c f g h k n p s ) ];
 }
 
 1;
