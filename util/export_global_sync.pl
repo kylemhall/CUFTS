@@ -30,7 +30,7 @@ my $tmp_dir = '/tmp/global_export';
 
 
 my %options;
-GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s' );
+GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_key=s' );
 
 my $check_timestamp = $options{timestamp};
 if ( defined($check_timestamp) ) {
@@ -124,6 +124,15 @@ RESOURCE:
         }
         if ( $key =~ / [^a-zA-Z_] /xsm ) {
             print "Invalid characters detected in key ($key), skipping resource.\n";
+            next RESOURCE;
+        }
+    
+        ##
+        ## Skip if this record does not match a supplied resource key
+        ##
+
+        if ( defined($options{resource_key}) && !grep { $key eq $! } split /,/ $options{resource_key} ) {
+            print "Key does not match requested resource keys.\n";
             next RESOURCE;
         }
 
