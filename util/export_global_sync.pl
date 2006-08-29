@@ -129,7 +129,7 @@ RESOURCE:
             print "No key defined, skipping resource.\n";
             next RESOURCE;
         }
-        if ( $key =~ / [^a-zA-Z_] /xsm ) {
+        if ( $key =~ / [^a-zA-Z_0-9] /xsm ) {
             print "Invalid characters detected in key ($key), skipping resource.\n";
             next RESOURCE;
         }
