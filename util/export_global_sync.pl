@@ -30,9 +30,11 @@ my $tmp_dir = '/tmp/global_export';
 
 
 my %options;
-GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_key=s' );
+GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_keys=s' );
 
 my $check_timestamp = $options{timestamp};
+my $resource_keys = $options{resource_keys};
+
 if ( defined($check_timestamp) ) {
 
     if ( $check_timestamp =~ / (\d{4}) - (\d{2}) - (\d{2}) /xsm ) {
@@ -43,6 +45,11 @@ if ( defined($check_timestamp) ) {
         die("Timestamp does not match YYYY-MM-DD format: $check_timestamp");
     }
     
+}
+
+my @resource_keys;
+if ( defined($resource_keys) ) {
+    @resource_keys = split /,/, $resource_keys;
 }
 
 export();
@@ -131,7 +138,7 @@ RESOURCE:
         ## Skip if this record does not match a supplied resource key
         ##
 
-        if ( defined($options{resource_key}) && !grep { $key eq $! } split /,/, $options{resource_key} ) {
+        if ( scalar(@resource_keys) && !grep { $key eq $_ } @resource_keys ) {
             print "Key does not match requested resource keys.\n";
             next RESOURCE;
         }
