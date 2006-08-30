@@ -8,6 +8,8 @@ use MARC::Batch;
 use CUFTS::CJDB::Util;
 use CUFTS::Util::Simple;
 
+use Data::Dumper;
+
 use strict;
 
 sub get_batch {
@@ -25,6 +27,10 @@ sub get_title {
 
     my $field245 = $record->field('245');
     my @data;
+
+    if ( !defined($field245) ) {
+        warn("245 field missing from record: \n" . Dumper($record) );
+    }
 
     foreach my $subfield ( @$fields ) {
         my @subfield_data = $field245->subfield( $subfield );
