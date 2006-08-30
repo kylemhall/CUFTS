@@ -30,6 +30,7 @@ sub get_title {
 
     if ( !defined($field245) ) {
         warn("245 field missing from record: \n" . Dumper($record) );
+        return undef;
     }
 
     foreach my $subfield ( @$fields ) {
