@@ -28,7 +28,7 @@ sub get_title {
     my $field245 = $record->field('245');
     my @data;
 
-    if ( !defined($field245) ) {
+    if ( !ref($field245) ) {
         warn("245 field missing from record: \n" . Dumper($record) );
         return undef;
     }
