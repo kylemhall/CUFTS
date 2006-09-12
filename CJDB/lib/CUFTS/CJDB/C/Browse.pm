@@ -273,6 +273,13 @@ sub show : Local {
 
 	my $browse_field = $c->req->params->{browse_field};
 	
+    my $search_term = $c->req->params->{search_terms};
+
+	if ( !defined($search_term) || ( !ref($search_term) && $search_term eq '' ) ) {
+	    $c->stash->{empty_search} = 'Please enter a search term.';
+	    return $c->forward('/browse');
+	}
+	
 	if ($browse_field eq 'title') {
 		return $c->forward('/browse/titles');
 	} elsif ($browse_field eq 'subject') {
