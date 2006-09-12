@@ -24,10 +24,16 @@ form {
 
 /* Page header background, useful for a repeating image/solid background colour */
 
+/* No longer used by default because the path to the image file isn't easy
+   to determine in a CSS file.  This is now in a style tag in the page_header
+   template 
+
 #page-header-background {
 	width: 100%;
 	background: url(/static/images/cjdb_header_repeat.gif) repeat-x;
 }
+
+*/
 
 /* Page title - words at the top of every page */
 
