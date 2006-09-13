@@ -588,3 +588,34 @@ div.public-journal-float {
 
 div#public-journal-marc {
 }
+
+
+table.public-compare {
+	border: 1px solid black;
+	padding: 1px;
+	width:  100%;
+}
+
+table.public-compare td {
+    border:  1px solid black;
+    padding:  2px;
+}
+tr.public-compare-heading td {
+    font-weight:  bold;
+}
+
+td.public-compare-resource0 {
+    background:  #EEEEEE;
+}
+
+td.public-compare-resource1 {
+    background:  #DDDDDD;
+}
+
+td.public-compare-resource2 {
+    background:  #CCCCCC;
+}
+
+td.public-compare-resource3 {
+    background:  #BBBBBB;
+}
