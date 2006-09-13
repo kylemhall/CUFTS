@@ -242,6 +242,17 @@ sub data : Local {
 		my @file_list = grep !/^lccn_subjects$/, grep !/^\./, readdir FILES;
 		$c->stash->{print_files} = \@file_list;
 
+        # Get print file sizes
+        
+        my @file_sizes;
+        foreach my $file ( @file_list ) {
+            my $file_size = -s "$upload_dir/$file";
+            push @file_sizes, $file_size;
+        }
+        $c->stash->{print_file_sizes} = \@file_sizes;
+
+        # Get the call number file information
+
 		if (-e "$upload_dir/lccn_subjects") {
 			my $mtime = (stat "$upload_dir/lccn_subjects")[9];
 			my ($sec, $min, $hour, $mday, $mon, $year) = localtime($mtime);
@@ -249,6 +260,7 @@ sub data : Local {
 			$mon++;
 			$c->stash->{call_number_file} = sprintf("%04i-%02i-%02i %02i:%02i:%02i", $year, $mon, $mday, $hour, $min, $sec);
 		}
+
 	}
 
 	$c->stash->{MARC_url} = $CUFTS::Config::CJDB_URL;

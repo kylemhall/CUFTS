@@ -1,4 +1,5 @@
 [% USE url %]
+[% USE num_format = format('%0.03f') %]
 
 [% PROCESS site/navbar.tt %]
 
@@ -16,13 +17,15 @@
 
  [% IF print_files.size %]
   [% FOREACH print_file IN print_files %]
+   [% SET index = loop.count - 1 %]
+   [% SET file_size = print_file_sizes.$index / 1048576 %]
    [% SET class = 'field' _ (loop.count % 2) %] 
    <tr>
     <td class="[% class %]" style="width: 1%; text-align: center"><input type="checkbox" name="delete" value="[% print_file %]" /></td>
     <td class="[% class %]" style="width: 1%; text-align: center"><input id="rebuild[% loop.count %]" type="checkbox" name="rebuild" value="[% print_file %]" [% IF current_site.rebuild_cjdb.split('\|').in(print_file) %]checked="checked"[% END %] onClick="if (this.checked) { $('marc[% loop.count %]').checked = false; }" /></td>
     <td class="[% class %]" style="width: 1%; text-align: center"><input id="marc[% loop.count %]"type="checkbox" name="MARC" value="[% print_file %]" [% IF current_site.rebuild_MARC.split('\|').in(print_file) %]checked="checked"[% END %] onClick="if (this.checked) { $('rebuild[% loop.count %]').checked = false; }"/></td>
     <td class="[% class %]" style="width: 1%; text-align: center"><input type="checkbox" name="test" value="[% print_file %]" [% IF current_site.test_MARC_file.split('\|').in(print_file) %]checked="checked"[% END %] /></td>
-    <td class="[% class %]">[% print_file %]</td>
+    <td class="[% class %]">[% print_file %] ([% num_format(file_size) %] MB)</td>
    </tr>
   [% END %]
  [% ELSE %]
