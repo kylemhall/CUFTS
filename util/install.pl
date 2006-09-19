@@ -643,7 +643,7 @@ sub create_apache_config_modperl2 {
     PerlLoadModule CUFTS::MaintTool
     PerlLoadModule CUFTS::Resolver
     PerlLoadModule CUFTS::CJDB
-    PerlTransHandler Apache2::Const::OK
+#    PerlTransHandler Apache2::Const::OK
 
     <Location /CUFTS/MaintTool>
             SetHandler modperl
