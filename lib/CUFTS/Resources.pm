@@ -375,7 +375,7 @@ sub title_list_skip_lines {
 	$lines = int($lines);
 	if ($lines > 0) {
 		foreach my $x (1..$lines) {
-			$class->title_list_read_row;
+			$class->title_list_read_row($IN);
 		}
 	}
 
