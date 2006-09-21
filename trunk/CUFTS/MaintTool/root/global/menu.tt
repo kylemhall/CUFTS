@@ -8,7 +8,7 @@
 </div>
 
 <table class="grid">
-<tr><td class="heading" align="left">&nbsp;</td><td class="heading">resource</td><td class="heading">provider</td><td class="heading">type</td><td align="left" class="heading">titles</td><td align="center" class="heading">active</td><td align="right" class="heading">title list scanned</td></tr>
+<tr><td class="heading" align="left">&nbsp;</td><td class="heading">id</td><td class="heading">resource</td><td class="heading">provider</td><td class="heading">type</td><td align="left" class="heading">titles</td><td align="center" class="heading">active</td><td align="right" class="heading">title list scanned</td></tr>
 [% FOREACH resource IN resources.sort('name') %]
  [% SET class = (resource.active ? 'active-field' : 'inactive-field') _ (loop.count % 2) %]
  <tr>
@@ -17,6 +17,8 @@
   <a href="[% url("$url_base/global/edit/$resource.id") %]">edit</a> | 
   <a href="[% url("$url_base/global/delete/$resource.id") %]" onClick="return confirmDelete()">delete</a>
  </td>
+
+ <td class="[% class %]">[% resource.id %]</td>
 
  <td class="[% class %]">[% resource.name | html %]</td>
 
