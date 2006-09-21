@@ -219,7 +219,7 @@ sub get_rss {
     return undef;
 }
 
-sub get_miscelaneous {
+sub get_miscellaneous {
     my ( $self, $record ) = @_;
 
     return undef;

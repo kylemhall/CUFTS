@@ -441,9 +441,9 @@ sub load_extras {
         $journal->rss($rss);
     }
 
-    my $misc = $self->get_miscelaneous($record);
+    my $misc = $self->get_miscellaneous($record);
     if ( defined($misc) ) {
-        $journal->miscelaneous($misc);
+        $journal->miscellaneous($misc);
     }
 
     $journal->update;
