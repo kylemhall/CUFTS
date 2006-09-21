@@ -7,7 +7,7 @@ CREATE TABLE cjdb_journals (
 	image           VARCHAR(2048),
 	image_link      VARCHAR(2048),
 	rss             VARCHAR(2048),
-	miscelaneous    VARCHAR(2048),
+	miscellaneous    VARCHAR(2048),
 	journals_auth   INTEGER,
 	site            INTEGER NOT NULL,
 	created         TIMESTAMP NOT NULL DEFAULT NOW()
