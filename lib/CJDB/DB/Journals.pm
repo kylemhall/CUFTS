@@ -44,7 +44,7 @@ __PACKAGE__->columns(All => qw(
     image
     image_link
     rss
-    miscelaneous
+    miscellaneous
 
 	journals_auth
 
