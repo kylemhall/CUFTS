@@ -18,7 +18,7 @@
   <a href="[% url("$url_base/global/delete/$resource.id") %]" onClick="return confirmDelete()">delete</a>
  </td>
 
- <td class="[% class %]">[% resource.id %]</td>
+ <td class="[% class %]" style="text-align: right;">[% resource.id %]</td>
 
  <td class="[% class %]">[% resource.name | html %]</td>
 
