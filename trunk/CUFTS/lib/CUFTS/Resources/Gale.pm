@@ -59,7 +59,8 @@ sub clean_data {
     my ( $class, $record ) = @_;
     my @errors;
 
-    $record->{'title'} =~ s/\s*\(.+?\)\s*$//;
+    $record->{'title'} =~ s/^ " (.+) " $/$1/xsm;       # Remove quotes around journal title
+    $record->{'title'} =~ s/ \s* \( .+? \) \s* $//xsm; # Remove trailing city names
 
     return $class->SUPER::clean_data($record);
 }
