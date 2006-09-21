@@ -5,6 +5,7 @@ CREATE TABLE cjdb_journals (
 	stripped_sort_title VARCHAR(1024) NOT NULL,
 	call_number     VARCHAR(128),
 	image           VARCHAR(2048),
+	image_link      VARCHAR(2048),
 	rss             VARCHAR(2048),
 	miscelaneous    VARCHAR(2048),
 	journals_auth   INTEGER,
