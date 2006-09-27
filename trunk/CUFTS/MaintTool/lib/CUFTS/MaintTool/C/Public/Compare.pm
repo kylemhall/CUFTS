@@ -20,7 +20,7 @@ sub auto : Private {
 sub default : Private {
     my ( $self, $c ) = @_;
 
-    my @resources = CUFTS::DB::Resources->search( { id => { '!=', undef } }, { order_by => 'name' } );
+    my @resources = CUFTS::DB::Resources->search( { active => 'true' }, { order_by => 'name' } );
 
     $c->stash->{resources} = \@resources;
     $c->stash->{template}  = 'public/compare/default.tt';
