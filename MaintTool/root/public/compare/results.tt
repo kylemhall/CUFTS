@@ -1,0 +1,51 @@
+[% USE url %]
+
+
+Duplicates
+
+<table id="public-compare-duplicates" class="public-compare">
+ <tr class="public-compare-heading">
+  <td colspan="2">&nbsp;</td>
+  [% FOREACH resource IN resources %]
+   <td class="public-compare-resource[% loop.count %]" colspan="5">[% resource.name %] - [% resource.provider %]</td>
+  [% END %]
+ </tr>
+ <tr class="public-compare-heading">
+  <td>title</td><td>issns</td>
+  [% FOREACH resource IN resources %]
+   <td class="public-compare-resource[% loop.count %]">citation start</td>
+   <td class="public-compare-resource[% loop.count %]">citation end</td>
+   <td class="public-compare-resource[% loop.count %]">fulltext start</td>
+   <td class="public-compare-resource[% loop.count %]">fulltext end</td>
+   <td class="public-compare-resource[% loop.count %]">embargo</td>
+  [% END %]
+ </tr>
+
+[% FOREACH record IN order %]
+ [% SET id = record.1 %]
+ [% SET ja = data.$id.journal_auth %]
+ <tr>
+  <td>
+   [% ja.title %]
+  </td>
+  <td>
+   [% FOREACH issn IN ja.issns %]
+    [% issn.issn_dash %]
+   [% END %]
+  </td>
+  [% FOREACH resource IN resources %]
+   [% SET resource_id   = resource.id %]
+   [% SET journal       = data.$id.resources.$resource_id %]
+   <td class="public-compare-resource[% loop.count %]">[% journal.cit_start_date %]</td>
+   <td class="public-compare-resource[% loop.count %]">[% journal.cit_end_date %]</td>
+   <td class="public-compare-resource[% loop.count %]">[% journal.ft_start_date %]</td>
+   <td class="public-compare-resource[% loop.count %]">[% journal.ft_end_date %]</td>
+   <td class="public-compare-resource[% loop.count %]">
+    [% IF journal.embargo_days %][% journal.embargo_days %] days[% END %]
+    [% IF journal.embargo_months %][% journal.embargo_months %] months[% END %]
+   </td>
+
+  [% END %]  
+ </tr>
+[% END %]
+</table>
