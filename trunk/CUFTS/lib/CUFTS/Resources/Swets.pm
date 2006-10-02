@@ -123,6 +123,12 @@ sub clean_data {
         }
     }
 
+    # Remove the electronic ISSN field if it is a duplicate of the ISSN
+
+    if ( $record->{e_issn} eq $record->{issn} ) {
+        delete $record->{e_issn};
+    }
+
     return $class->SUPER::clean_data($record);
 }
 
