@@ -7,7 +7,18 @@ __PACKAGE__->config->{WRAPPER} = 'layout.tt';
 
 use Template::Stash;
 
-$Template::Stash::LIST_OPS->{ in } = sub {
+$Template::Stash::HASH_OPS->{ in } = sub {
+  return __in( [ shift @_ ], @_ );
+};
+
+$Template::Stash::SCALAR_OPS->{ in } = sub {
+  return __in( [ shift @_ ], @_ );
+};
+
+
+$Template::Stash::LIST_OPS->{ in } = \&__in;
+
+sub __in {
 	my ($list, $val, $field) = @_;
 	return 0 unless scalar(@$list);
 	defined($val) or 
@@ -21,7 +32,7 @@ $Template::Stash::LIST_OPS->{ in } = sub {
 	} else {
 		return((grep {$_ eq $val} @$list) ? 1 : 0);
 	}
-};
+}
 
 $Template::Stash::LIST_OPS->{ simple_difference } = sub {
 	my ($a, $b) = @_;
