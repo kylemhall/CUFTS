@@ -68,7 +68,7 @@ sub search_distinct_combined {
 
 	$sql .= ') AS combined_associations';
 
-	warn($sql);
+#	warn($sql);
 	
 	my @bind;
 	foreach my $search_term (@search) {
