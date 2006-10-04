@@ -38,6 +38,10 @@ sub title_list_fields {
             cit_end_date
             ft_start_date
             ft_end_date
+            vol_ft_start
+            vol_ft_end
+            iss_ft_start
+            iss_ft_end
             embargo_months
             embargo_days
             journal_url
@@ -59,6 +63,10 @@ sub title_list_field_map {
         'fulltext_end'   => 'ft_end_date',
         'ft_start_date'  => 'ft_start_date',
         'ft_end_date'    => 'ft_end_date',
+        'vol_ft_start'   => 'vol_ft_start',
+        'vol_ft_end'     => 'vol_ft_end',
+        'iss_ft_start'   => 'iss_ft_start',
+        'iss_ft_end'     => 'iss_ft_end',
         'citation_start' => 'cit_start_date',
         'citation_end'   => 'cit_end_date',
         'cit_start_date' => 'cit_start_date',
