@@ -73,6 +73,7 @@ JOURNAL:
                 }
 
                 $data{ $journal_auth_id }->{ resources }->{ $journal->resource->id } = $journal;
+                $data{ $journal_auth_id }->{ resource_count }++;
 
                 if ( !exists( $titles{$journal_auth_id} ) ) {
                     $titles{ $journal_auth_id } = $journal->journal_auth->title;   
