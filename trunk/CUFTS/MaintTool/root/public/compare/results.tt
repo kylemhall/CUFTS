@@ -21,11 +21,13 @@ Duplicates
   [% END %]
  </tr>
 
+[% SET dupe_count = 0 %]
 [% FOREACH record IN order %]
  [% SET id = record.1 %]
  [% IF data.$id.resource_count < 2 %]
   [% NEXT %]
  [% END %]
+ [% SET dupe_count = dupe_count + 1 %]
  [% SET ja = data.$id.journal_auth %]
  <tr>
   <td>
@@ -52,3 +54,5 @@ Duplicates
  </tr>
 [% END %]
 </table>
+
+Found [% dupe_count %] duplicate holdings.
