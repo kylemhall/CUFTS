@@ -23,6 +23,9 @@ Duplicates
 
 [% FOREACH record IN order %]
  [% SET id = record.1 %]
+ [% IF data.$id.resource_count < 2 %]
+  [% NEXT %]
+ [% END %]
  [% SET ja = data.$id.journal_auth %]
  <tr>
   <td>
