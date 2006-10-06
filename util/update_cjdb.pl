@@ -430,20 +430,26 @@ sub load_cufts {
 
                 if ( scalar(@CJDB_records) == 0 && defined( $MARC_cache->{$journal_auth->id}->{MARC} ) ) {
                     my $record = get_MARC_data( $site, $loader, $MARC_cache->{$journal_auth->id}->{MARC}, $journal_auth->id );
-                    defined($record)
-                        and push @CJDB_records, $record;
+                    if ( defined($record) ) {
+                        add_ja_titles( $site, $loader, $journal_auth, $record );
+                        push @CJDB_records, $record;
+                    }
                 }
 
                 if ( scalar(@CJDB_records) == 0 ) {
                     my $record = get_ja_MARC_data( $site, $journal_auth );
-                    defined($record)
-                        and push @CJDB_records, $record;
+                    if ( defined($record) ) {
+                        add_ja_titles( $site, $loader, $journal_auth, $record );
+                        push @CJDB_records, $record;
+                    }
                 }
 
                 if ( scalar(@CJDB_records) == 0 ) {
                     my $record = build_basic_record( $site, $journal_auth );
-                    defined($record)
-                        and push @CJDB_records, $record;
+                    if ( defined($record) ) {
+                        add_ja_titles( $site, $loader, $journal_auth, $record );
+                        push @CJDB_records, $record;
+                    }
                 }
 
                 foreach my $CJDB_record (@CJDB_records) {
@@ -604,6 +610,54 @@ sub build_basic_record {
     }
 
     return $journal;
+}
+
+sub add_ja_titles {
+    my ( $site, $loader, $journal_auth, $record ) = @_;
+    
+ALT_TITLE:
+    foreach my $title ( $journal_auth->titles ) {
+        $title = trim_string( $title->title );
+
+        # Drop articles
+
+        $title = $loader->strip_articles($title);
+
+        # Remove trailing (...)  eg. (Toronto, ON)
+
+        $title =~ s/ \( .+? \)  \s* \.? \s* $//xsm;
+
+        my $stripped_title = $loader->strip_title($title);
+
+        # Make sure we have a non-empty title
+
+        next ALT_TITLE if    is_empty_string($title)
+                          || is_empty_string($stripped_title);
+
+
+        # Skip alternate titles that match common single words
+        # like "Journal" and "Review".
+
+SKIP_WORD:
+        foreach my $skip_word ( 'review', 'journal' ) {
+            next ALT_TITLE if $stripped_title eq $skip_word;
+        }
+
+        next if length($title) > 1024;
+
+        my $record = {
+            'journal'      => $record->id,
+            'site'         => $site->id,
+            'search_title' => $stripped_title,
+        };
+
+        my @check_titles = CJDB::DB::Titles->search( $record );
+        next ALT_TITLE if ( scalar(@check_titles) );
+
+        $record->{'title'} = $title,
+
+        CJDB::DB::Titles->create($record);
+    }
 }
 
 sub get_ja_MARC_data {
