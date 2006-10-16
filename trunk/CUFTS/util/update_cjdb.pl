@@ -207,7 +207,7 @@ sub load_print {
 
         my $ja_id =   $no_save
                     ? $loader->match_journals_auth($record)
-                    : process_print_record( $record, $loader );
+                    : process_print_record( $record, $loader, $site );
         
 
         if ( defined($ja_id) && !exists($MARC_cache->{$ja_id}) ) {
@@ -238,7 +238,7 @@ sub load_print {
 
             my $ja_id =   $no_save
                         ? $loader->match_journals_auth($record)
-                        : process_print_record( $record, $loader );
+                        : process_print_record( $record, $loader, $site );
 
             if ( defined($ja_id) && !exists($MARC_cache->{$ja_id}) ) {
                 $MARC_cache->{$ja_id}->{MARC} = $record;
@@ -278,7 +278,7 @@ sub load_print_module {
 }
 
 sub process_print_record {
-    my ( $record, $loader ) = @_;
+    my ( $record, $loader, $site ) = @_;
 
     my $journal = $loader->load_journal($record);
     return if !defined($journal);
@@ -286,6 +286,8 @@ sub process_print_record {
     $loader->load_extras( $record, $journal );
 
     $loader->load_titles( $record, $journal );
+    
+    add_ja_titles( $site, $loader, $journal_auth, $journal );
 
     $loader->load_MARC_subjects( $record, $journal );
 
@@ -613,7 +615,7 @@ sub build_basic_record {
 }
 
 sub add_ja_titles {
-    my ( $site, $loader, $journal_auth, $record ) = @_;
+    my ( $site, $loader, $journal_auth, $journal ) = @_;
     
 ALT_TITLE:
     foreach my $title ( $journal_auth->titles ) {
@@ -646,7 +648,7 @@ SKIP_WORD:
         next if length($title) > 1024;
 
         my $record = {
-            'journal'      => $record->id,
+            'journal'      => $journal->id,
             'site'         => $site->id,
             'search_title' => $stripped_title,
         };
