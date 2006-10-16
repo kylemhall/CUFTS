@@ -287,7 +287,7 @@ sub process_print_record {
 
     $loader->load_titles( $record, $journal );
     
-    add_ja_titles( $site, $loader, $journal_auth, $journal );
+    add_ja_titles( $site, $loader, $journal->journal_auth, $journal );
 
     $loader->load_MARC_subjects( $record, $journal );
 
