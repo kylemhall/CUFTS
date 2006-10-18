@@ -69,6 +69,52 @@ sub title_list_split_row {
     return \@fields;
 }
 
+
+## preprocess_file - Join the multi-line style of title list into one title list
+##                   write a temp file and open it.  In this case, we're just deleting
+##                   tons of duplicate lines
+
+sub preprocess_file {
+    my ( $class, $IN ) = @_;
+
+    use File::Temp;
+
+    my ( $fh, $filename ) = File::Temp::tempfile();
+    my %seen;
+
+	my $headings_array = $class->title_list_parse_row($IN);
+	defined($headings_array) && ref($headings_array) eq 'ARRAY' or
+		die("Unable to preprocess headings line");
+	
+	print $fh join '|', @$headings_array;
+	print $fh "\n";
+	
+	while ( my $row = $class->title_list_parse_row($IN) ) {
+
+		next if $row =~ /^#/;    	# Skip comment lines
+		next unless $row =~ /\S/; 	# Skip blank lines
+		
+		my $record = $class->title_list_build_record($headings_array, $row);			
+
+        my @fulltext_ranges = split /\s*;\s*/, $record->{'Full Text Start/End Date'};
+        my @index_ranges    = split /\s*;\s*/, $record->{'Indexing Start/End Date'};
+        
+        foreach my $fulltext ( @fulltext_ranges ) {
+            $record->{'Full Text Start/End Date'} = $fulltext;
+            $record->{'Indexing Start/End Date'}  = shift @index_ranges;
+            
+            print $fh join '|', map { $record->{$_} } @$headings_array;
+            print $fh "\n";
+        }
+    }
+
+    close *$IN;
+    seek *$fh, 0, 0;
+
+    return $fh;
+}
+
+
 sub clean_data {
     my ( $class, $record ) = @_;
 
