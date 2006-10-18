@@ -89,7 +89,7 @@ sub build_linkJournal {
     foreach my $record (@$records) {
         next if is_empty_string( $record->issn );
 
-        my $url = 'http://www.emeraldinsight.com/' . dashed_issn( $record->issn ) . 'htm';
+        my $url = 'http://www.emeraldinsight.com/' . dashed_issn( $record->issn ) . '.htm';
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
