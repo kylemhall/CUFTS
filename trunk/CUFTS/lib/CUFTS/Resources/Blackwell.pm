@@ -47,9 +47,6 @@ sub title_list_fields {
             iss_ft_start
             iss_ft_end
 
-            embargo_months
-            embargo_days
-
             journal_url
         )
     ];
