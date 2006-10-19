@@ -20,10 +20,11 @@
 
 package CUFTS::Resources::Blackwell;
 
-use base qw(CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::GenericJournalDOI);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use Date::Calc qw(Delta_Days Today);
 
 use strict;
 
@@ -60,16 +61,10 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'ISSN'                => 'issn',
-        'EISSN'               => 'e_issn',
-        'TITLE'               => 'title',
-        'URL'                 => 'journal_url',
-        'FIRST ONLINE YEAR'   => 'ft_start_date',
-        'FIRST ONLINE VOLUME' => 'vol_ft_start',
-        'FIRST ONLINE ISSUE'  => 'iss_ft_start',
-        'LAST ONLINE YEAR'    => 'ft_end_date',
-        'LAST ONLINE VOLUME'  => 'vol_ft_end',
-        'LAST ONLINE ISSUE'   => 'iss_ft_end',
+        'Print ISSN'   => 'issn',
+        'Online ISSN'  => 'e_issn',
+        'Publication'  => 'title',
+        'URL'          => 'journal_url',
     };
 }
 
@@ -125,93 +120,106 @@ sub overridable_resource_details {
     ];
 }
 
+sub title_list_skip_lines_count { return 1; }
 
-## build_link* - Builds a link to a service.  Should return an array reference containing
-## Result objects with urls and title list records (if applicable).
-##
+sub clean_data {
+    my ( $class, $record ) = @_;
+    
+    if ( $record->{'___First Online Issue'} =~ / Vol\. \s+ ([^,]+), \s+ No\. \s+ ([^,]+), (.+) /xsm ) {
+        my ( $vol, $no, $date ) = ( $1, $2, $3 );
 
-sub build_linkFulltext {
-    my ( $class, $records, $resource, $site, $request ) = @_;
+        # Parse out vol varients: 1   1-2   1&2   s1
+        $record->{vol_ft_start}  = parse_vol_iss($vol, 0);
+        $record->{iss_ft_start}  = parse_vol_iss($no,  0);
+        $record->{ft_start_date} = parse_date($date, 0); 
 
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $url = $resource->base_url . $request->issn;
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
+    }
+    elsif ( $record->{'___First Online Issue'} ne 'Online early issue' ) {
+        warn("Unable to parse holding line: " . $record->{'___First Online Issue'} );
     }
 
-    return \@results;
+    if ( $record->{'___Last Online Issue'} =~ / Vol\. \s+ ([^,]+), \s+ No\. \s+ ([^,]+), (.+) /xsm ) {
+        my ( $vol, $no, $date ) = ( $1, $2, $3 );
+
+        # Parse out vol varients: 1   1-2   1&2   s1
+        $record->{vol_ft_end}  = parse_vol_iss($vol, 1);
+        $record->{iss_ft_end}  = parse_vol_iss($no,  1);
+        $record->{ft_end_date} = parse_date($date, 1);
+        if ( !defined($record->{ft_end_date}) ) {
+            delete $record->{vol_ft_end};
+            delete $record->{iss_ft_end};
+        }
+
+    }
+    elsif ( $record->{'___Last Online Issue'} ne 'Online early issue' ) {
+        warn("Unable to parse holding line: " . $record->{'___Last Online Issue'} );
+    }
+
+    return $record;
 }
 
-sub build_linkTOC {
-    my ( $class, $records, $resource, $site, $request ) = @_;
 
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+sub parse_vol_iss {
+    my ( $string, $end ) = @_;
 
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $url = $resource->base_url . $request->issn;
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
+    # Parse out varients: 1   1-2   1&2   s1
+    
+    $string =~ tr/a-zA-Z//;
+    my @vals = split /[^\d]/, $string;
+    
+    return $end ? $vals[$#vals] : $vals[0];
 }
+    
 
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
+sub parse_date {
+    my ( $string, $end ) = @_;
+    
+    if ( $string =~ /^ \s* (.*) \s+ (\d{4}) /xsm ) {
+        my ( $month, $year ) = ( $1, $2 );
+        
+        my @months = split /[^a-z]+/, lc($month);
+        $month = $end ? $months[$#months] : $months[0];
+        my $numeric_month;
 
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+        if ( !defined($month) ) {
+            $month = ''
+        };
 
-    my @results;
+        if    ( $month =~ /^\s*jan/i )     { $numeric_month =  '01' }
+        elsif ( $month =~ /^\s*feb/i )     { $numeric_month =  '02' }
+        elsif ( $month =~ /^\s*mar/i )     { $numeric_month =  '03' }
+        elsif ( $month =~ /^\s*a[pv]r/i )  { $numeric_month =  '04' }
+        elsif ( $month =~ /^\s*may/i )     { $numeric_month =  '05' }
+        elsif ( $month =~ /^\s*jun/i )     { $numeric_month =  '06' }
+        elsif ( $month =~ /^\s*jul/i )     { $numeric_month =  '07' }
+        elsif ( $month =~ /^\s*aug/i )     { $numeric_month =  '08' }
+        elsif ( $month =~ /^\s*sep/i )     { $numeric_month =  '09' }
+        elsif ( $month =~ /^\s*oct/i )     { $numeric_month =  '10' }
+        elsif ( $month =~ /^\s*nov/i )     { $numeric_month =  '11' }
+        elsif ( $month =~ /^\s*dec/i )     { $numeric_month =  '12' }
+        else {
+            $numeric_month = $end ? 12 : 1;
+        }
+        my $day = $end ? ( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 )[$numeric_month - 1] : '01';
 
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
+        my $date = "$year-$numeric_month-$day";
+        if ( !$end ) {
+            return $date;
 
-        my $url = $resource->base_url . $request->issn;
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
+        }
+        
+        if ( Delta_Days( $year, $numeric_month, $day, Today() ) > 180 ) {
+            return $date
+        }
+        else {
+            return undef;
+        }
     }
-
-    return \@results;
+    else {
+        warn("Unable to parse date from: $string");
+        return undef;
+    }
+    
 }
 
 1;
