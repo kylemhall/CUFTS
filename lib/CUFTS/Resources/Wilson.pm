@@ -103,7 +103,7 @@ sub preprocess_file {
             $record->{'Full Text Start/End Date'} = $fulltext;
             $record->{'Indexing Start/End Date'}  = shift @index_ranges;
             
-            print $fh join '|', map { $record->{$_} } @$headings_array;
+            print $fh join '|', map { '' . $record->{$_} } @$headings_array;
             print $fh "\n";
         }
     }
@@ -137,6 +137,10 @@ sub clean_data {
         if ( $string =~ m{ (\d{4}) / (\d{2}) }xsm ) {
 
             my ( $year, $month ) = ( $1, $2 );
+
+            if ( !int($month) ) {
+                $month = 1;
+            }
 
             if ( $month > 12 ) {
                 $month = $type eq 'end' ? 12 : 1;
