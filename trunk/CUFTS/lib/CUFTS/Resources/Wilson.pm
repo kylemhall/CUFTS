@@ -103,7 +103,7 @@ sub preprocess_file {
             $record->{'Full Text Start/End Date'} = $fulltext;
             $record->{'Indexing Start/End Date'}  = shift @index_ranges;
             
-            print $fh join '|', map { defined($record->{$_}) ? defined($record->{$_}) : ''  } @$headings_array;
+            print $fh join '|', map { defined($record->{$_}) ? $record->{$_} : ''  } @$headings_array;
             print $fh "\n";
         }
     }
