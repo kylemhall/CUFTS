@@ -20,7 +20,7 @@
 
 package CUFTS::Resources::Extenza;
 
-use base qw(CUFTS::Resources::GenericJournalDOI);
+use base qw(CUFTS::Resources::Base::SFXLoader CUFTS::Resources::Base::DOI);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
@@ -49,43 +49,49 @@ sub overridable_resource_details {
     return undef;
 }
 
-sub title_list_field_map {
-    return {
-        'TITLE'         => 'title',
-        'ISSN'          => 'issn',
-        'EISSN'         => 'e_issn',
-        'URL'           => 'journal_url',
-        'FIRST ONLINE YEAR'   => 'ft_start_date',
-        'FIRST ONLINE VOLUME' => 'vol_ft_start',
-        'FIRST ONLINE ISSUE'  => 'iss_ft_start',
-        'LAST ONLINE YEAR'    => 'ft_end_date',
-        'LAST ONLINE VOLUME'  => 'vol_ft_end',
-        'LAST ONLINE ISSUE'   => 'iss_ft_end'
-    };
+sub can_getTOC {
+    return 0;
 }
 
 sub clean_data {
     my ( $class, $record ) = @_;
+    
+    if ( defined($record->{issn}) && $record->{issn} !~ /\d{4}-?\d{3}[xX\d]/ ) {
+        delete $record->{issn};
+    }
 
-    $record->{title}       = trim_string($record->{title},       '"');
-    $record->{journal_url} = trim_string($record->{journal_url}, '"');
-
-    $record->{title} =~ s/\s+\(.+?\)$//;
-
-    foreach my $field ( qw( vol_ft_start vol_ft_end iss_ft_start iss_ft_end ) ) {
-        next if !defined($record->{$field});
-        
-        if ( $record->{$field} !~ /^\d+$/ ) {
-            delete $record->{$field};
-        }
-        
+    if ( defined($record->{e_issn}) && $record->{e_issn} !~ /\d{4}-?\d{3}[xX\d]/ ) {
+        delete $record->{e_issn};
     }
 
     return $class->SUPER::clean_data($record);
 }
 
-sub can_getTOC {
-    return 0;
+
+sub build_linkJournal {
+    my ( $class, $records, $resource, $site, $request ) = @_;
+
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+
+    my @results;
+
+    foreach my $record (@$records) {
+        next if is_empty_string( $record->journal_url );
+
+        my $result = new CUFTS::Result( $record->journal_url );
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
 }
 
 1;
