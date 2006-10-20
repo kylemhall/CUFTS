@@ -119,7 +119,7 @@ sub clean_data {
     my ( $class, $record ) = @_;
 
     ( $record->{cit_start_date}, $record->{cit_end_date} ) = split /\s+-\s+/, $record->{'___Indexing Start/End Date'};
-    ( $record->{ft_start_date}, $record->{ft_end_date} )   = split /\s+-\s+/, $record->{'___Full Text Start/End Date'};
+    ( $record->{ft_start_date},  $record->{ft_end_date} )  = split /\s+-\s+/, $record->{'___Full Text Start/End Date'};
 
     $record->{cit_start_date} = get_wilson_date( $record->{cit_start_date}, 'start' );
     $record->{cit_end_date}   = get_wilson_date( $record->{cit_end_date},   'end' );
@@ -134,38 +134,23 @@ sub clean_data {
 
         return undef if is_empty_string( $string );
 
-        my $best_date;
-        my @dates = split /\s*;\s*/, $string;
+        if ( $string =~ m{ (\d{4}) / (\d{2}) }xsm ) {
 
-        foreach my $date (@dates) {
-            
-            next if $date !~ m{ (\d{4}) / (\d{2}) }xsm;
-            
             my ( $year, $month ) = ( $1, $2 );
-            
-            $month > 0 
-                or $month = 1;
 
-            my $merged_date = "$year$month";
-
-            defined($best_date)
-                or $best_date = $merged_date;
-
-            if ( $type eq 'start' && $merged_date < $best_date ) {
-                $best_date = $merged_date;
-            }
-            elsif ( $type eq 'end' and $merged_date > $best_date ) {
-                $best_date = $merged_date;
+            if ( $month > 12 ) {
+                $month = $type eq 'end' ? 12 : 1;
             }
 
+            return sprintf("%04i-%02i", $year, $month);
         }
-
-        if ( defined($best_date) && $best_date =~ /(\d{4})(\d{2})/ ) {
-            return "$1-$2";
+        elsif ( $string =~ m{ \d{4} }xsm ) {
+            return $1;
         }
         else {
             return undef;
         }
+
     }
 
     return $class->SUPER::clean_data($record);
