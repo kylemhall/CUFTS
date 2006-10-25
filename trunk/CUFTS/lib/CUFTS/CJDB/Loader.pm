@@ -273,19 +273,19 @@ sub load_MARC_subjects {
 
     my $count = 0;
     foreach my $subject (@subjects) {
-        my $record = {
+        my $new_subject = {
             'journal'        => $journal->id,
             'site'           => $site_id,
             'subject'        => $subject,
             'search_subject' => $self->strip_title($subject),
         };
 
-        my @subjects = CJDB::DB::Subjects->search($record);
+        my @subjects = CJDB::DB::Subjects->search($new_subject);
         next if scalar(@subjects);
 
-        $record->{'origin'} = 'MARC';
+        $new_subject->{'origin'} = 'MARC';
 
-        CJDB::DB::Subjects->create($record);
+        CJDB::DB::Subjects->create($new_subject);
 
         $count++;
     }
