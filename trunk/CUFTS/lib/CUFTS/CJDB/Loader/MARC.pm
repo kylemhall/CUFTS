@@ -196,6 +196,7 @@ sub get_MARC_subjects {
         my $subject = join ' ', @data;
         $subject = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_subject( $subject ) );
 
+        push @subjects, $subject;
     }
 
     return @subjects;
