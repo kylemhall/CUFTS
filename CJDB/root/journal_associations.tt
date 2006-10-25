@@ -1,5 +1,5 @@
-[% SET journal_associations = journal.associations.list %]
-[% IF journal_associations.size > 0 && journal_associations.first.association != '' %]
+[% SET journal_associations = journal.associations.force_list %]
+[% IF journal_associations.size > 0 && journal_associations.first != '' %]
  <div id="associations" class="details">
  <div id="associations-heading" class="details-headings">Associations/Organizations</div>
  [% FOREACH association IN journal_associations %]

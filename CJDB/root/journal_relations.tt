@@ -1,5 +1,5 @@
-[% SET journal_relations = journal.relations.list %]
-[% IF journal_relations.size > 0 && journal_relations.first.relation != '' %]
+[% SET journal_relations = journal.relations.force_list %]
+[% IF journal_relations.size > 0 && journal_relations.first != '' %]
  <div id="relations" class="details">
   <div id="relations-heading" class="details-headings">Related Titles</div>
   [% FOREACH relation IN journal_relations %]
