@@ -1,4 +1,4 @@
-[% SET journal_titles = journal.titles %]
+[% SET journal_titles = journal.titles.force_list %]
 [% SET final_titles = [] %]
 [% FOREACH title IN journal_titles %]
  [% NEXT IF title.main == 1 %]
