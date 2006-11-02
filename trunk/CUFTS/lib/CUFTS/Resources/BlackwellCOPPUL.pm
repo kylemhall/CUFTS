@@ -18,13 +18,12 @@
 ## with CUFTS; if not, write to the Free Software Foundation, Inc., 59
 ## Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package CUFTS::Resources::Blackwell;
+package CUFTS::Resources::BlackwellCOPPUL;
 
-use base qw(CUFTS::Resources::Base::SFXLoader);
+use base qw(CUFTS::Resources::GenericJournal);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
-use Date::Calc qw(Delta_Days Today);
 
 use URI::Escape;
 
