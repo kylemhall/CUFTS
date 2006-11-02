@@ -22,6 +22,7 @@ package CUFTS::ResourcesLoader;
 
 use strict;
 
+
 my @resource_modules;
 
 BEGIN {
@@ -32,6 +33,7 @@ BEGIN {
         BioMed
         BioOne
         Blackwell
+        BlackwellCOPPUL
         blank
         Cambridge
         CH_PCI
