@@ -42,6 +42,7 @@ sub title_list_fields {
             cit_start_date
             cit_end_date
             embargo_days
+            db_identifier
         )
     ];
 }
@@ -57,27 +58,16 @@ sub title_list_get_field_headings {
 
     my @real_headings;
     foreach my $heading (@$headings_array) {
-        if    ( $heading =~ /^Title/i ) { $heading = 'title' }
-        elsif ( $heading =~ /^ISSN/i )  { $heading = 'issn' }
-        elsif ( $heading =~ /^Full\s+Text\s+First/i ) {
-            $heading = 'ft_start_date';
-        }
-        elsif ( $heading =~ /^Full\s+Text\s+Last/i ) {
-            $heading = 'ft_end_date';
-        }
-        elsif ( $heading =~ /^Page\s+Image\s+First/i ) {
-            $heading = '___image_start_date';
-        }
-        elsif ( $heading =~ /^Page\s+Image\s+Last/i ) {
-            $heading = '___image_end_date';
-        }
-        elsif ( $heading =~ /^Citation\s+First/i ) {
-            $heading = 'cit_start_date';
-        }
-        elsif ( $heading =~ /^Citation\s+Last/i ) {
-            $heading = 'cit_end_date';
-        }
-        elsif ( $heading =~ /^Embargo\s+Days/i ) { $heading = 'embargo_days' }
+        if    ( $heading =~ /^Title/i )                { $heading = 'title'               }
+        elsif ( $heading =~ /^ISSN/i )                 { $heading = 'issn'                }
+        elsif ( $heading =~ /^Full\s+Text\s+First/i )  { $heading = 'ft_start_date'       }
+        elsif ( $heading =~ /^Full\s+Text\s+Last/i )   { $heading = 'ft_end_date'         }
+        elsif ( $heading =~ /^Page\s+Image\s+First/i ) { $heading = '___image_start_date' }
+        elsif ( $heading =~ /^Page\s+Image\s+Last/i )  { $heading = '___image_end_date'   }
+        elsif ( $heading =~ /^Citation\s+First/i )     { $heading = 'cit_start_date'      }
+        elsif ( $heading =~ /^Citation\s+Last/i )      { $heading = 'cit_end_date'        }
+        elsif ( $heading =~ /^Embargo\s+Days/i )       { $heading = 'embargo_days'        }
+        elsif ( $heading =~ /PM\s*ID/ )                { $heading = 'db_identifier'       }
         else { $heading = "___$heading" }
 
         push @real_headings, $heading;
@@ -129,17 +119,21 @@ sub clean_data {
         if ( $record->{'embargo_days'} =~ /ft=(\d+)/ ) {
             $record->{'embargo_days'} = $1;
         }
+        elsif ( $record->{'embargo_days'} =~ /img=(\d+)/ ) {
+            $record->{'embargo_days'} = $1;
+        }
         else {
             delete( $record->{'embargo_days'} );
         }
     }
 
-    defined( $record->{'ft_end_date'} )
-        && $record->{'ft_end_date'} =~ /current/i
-        and delete( $record->{'ft_end_date'} );
-    defined( $record->{'cit_end_date'} )
-        && $record->{'cit_end_date'} =~ /current/i
-        and delete( $record->{'cit_end_date'} );
+    if ( defined( $record->{'ft_end_date'} ) && $record->{'ft_end_date'} =~ /current/i ) {
+        delete( $record->{'ft_end_date'} );
+    }
+        
+    if ( defined( $record->{'cit_end_date'} ) && $record->{'cit_end_date'} =~ /current/i ) {
+        delete( $record->{'cit_end_date'} );
+    }
 
     if ( defined( $record->{'ft_start_date'} ) ) {
         substr( $record->{'ft_start_date'}, 4, 0 ) = '-';
@@ -210,7 +204,7 @@ sub build_linkFulltext {
         }
 
         ##
-        ## Hack for Wall Street Journal - it doesn not have vol/iss indexed and 
+        ## Hack for Wall Street Journal - it doesn't have vol/iss indexed and 
         ## does not return results if you include them in the search.
         ##
 
@@ -307,7 +301,11 @@ sub build_linkJournal {
 
     foreach my $record (@$records) {
         my $url;
-        if ( not_empty_string( $record->issn ) ) {
+        if ( not_empty_string( $record->db_identifier ) ) {
+            $url = 'http://openurl.proquest.com/openurl?url_ver=Z39.88-2004&res_dat=xri:pqd&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&genre=issue&rft_dat=xri:pqd:PMID=';
+            $url .= $record->db_identifier;
+        }
+        elsif ( not_empty_string( $record->issn ) ) {
             $url = 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:pqd&rft_val_fmt=ori:fmt:kev:mtx:journal&svc_id=xri:pqil:context=title&issn=';
             $url .= $record->issn;
         }
