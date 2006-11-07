@@ -377,9 +377,9 @@ sub load_cufts {
 
             # Skip if citations are turned off and we have no fulltext coverage data
 
-            if (   !defined( $new_link->{'fulltext_coverage'} )
-                && !defined( $new_link->{'embargo'} )
-                && !defined( $new_link->{'current'} )
+            if (   is_empty_string( $new_link->{'fulltext_coverage'} )
+                && is_empty_string( $new_link->{'embargo'} )
+                && is_empty_string( $new_link->{'current'} )
                 && !$site->cjdb_show_citations )
             {
                 next JOURNAL;
