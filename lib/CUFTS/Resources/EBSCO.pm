@@ -257,11 +257,15 @@ sub produce_ebsco_xml {
     my ( $class, $record, $resource, $site, $request ) = @_;
 
     if ( is_empty_string( $resource->resource_identifier ) ) {
-        CUFTS::Exception::App->throw('No resource_identifier defined for EBSCO linking.');
+        warn('No resource_identifier defined for EBSCO linking.');
+        return undef;
+#        CUFTS::Exception::App->throw('No resource_identifier defined for EBSCO linking.');
     }
         
     if ( is_empty_string( $resource->auth_name ) ) {
-        CUFTS::Exception::App->throw('No auth_name defined for EBSCO linking.');
+        warn('No auth_name defined for EBSCO linking.');
+        return undef;
+#        CUFTS::Exception::App->throw('No auth_name defined for EBSCO linking.');
     }
 
     my $xml_string = "XML=<?xml version=\"1.0\"?>\n";
