@@ -77,6 +77,10 @@ sub end : Private {
         $c->response->content_type('text/html; charset=iso-8859-1');
     }
 
+    if ( defined($c->stash->{current_account}) ) {
+        $c->response->headers->header( 'Cache-Control' => 'private' );
+    }
+
     $c->forward('CUFTS::MaintTool::V::TT');
 }
 
