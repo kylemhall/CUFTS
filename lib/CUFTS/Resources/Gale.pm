@@ -146,16 +146,21 @@ sub build_linkTOC {
 
     my @results;
     foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
         next if is_empty_string( $request->volume )
              && is_empty_string( $request->issue  );
 
-        my $issn = $record->issn;
-        substr( $issn, 4, 0 ) = '-';
-
         my $url = $resource->url_base;
-        $url .= "ke_sn+$issn";
+
+        if ( is_empty_string($record->issn) ) {
+            my $title = $record->title;
+            $title =~ tr/ /+/;
+            $url .= "ke_jn+%22$title%22";
+        }
+        else {
+            my $issn = $record->issn;
+            substr( $issn, 4, 0 ) = '-';
+            $url .= "ke_sn+$issn";
+        }
 
         if ( not_empty_string($request->volume) ) {
             $url .= '+AND+vo+' . $request->volume;
@@ -197,14 +202,21 @@ sub build_linkFulltext {
 
     my @results;
     foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
         next if is_empty_string( $request->volume )
              && is_empty_string( $request->issue  );
 
         my $url = $resource->url_base;
 
-        $url .= 'ke_sn+' . dashed_issn( $record->issn );
+        if ( is_empty_string($record->issn) ) {
+            my $title = $record->title;
+            $title =~ tr/ /+/;
+            $url .= "ke_jn+%22$title%22";
+        }
+        else {
+            my $issn = $record->issn;
+            substr( $issn, 4, 0 ) = '-';
+            $url .= "ke_sn+$issn";
+        }
 
         if ( not_empty_string($request->volume) ) {
             $url .= '+AND+vo+' . $request->volume;
