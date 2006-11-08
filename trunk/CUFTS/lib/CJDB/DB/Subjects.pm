@@ -71,14 +71,14 @@ sub search_distinct_combined {
 
 	$sql .= ') AS combined_subjects';
 
-	warn($sql);
+#	warn($sql);
 	
 	my @bind;
 	foreach my $search_term (@search) {
 		push @bind, ($site, $search_term);
 	}
 
-	warn(join ',', @bind);
+#	warn(join ',', @bind);
 	
 	my $dbh = $class->db_Main();
 	my $sth = $dbh->prepare_cached($sql);
