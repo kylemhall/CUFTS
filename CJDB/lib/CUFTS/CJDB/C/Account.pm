@@ -13,7 +13,13 @@ sub logout : Local {
 	delete $c->stash->{current_account};
 
 	$c->req->params($c->session->{prev_params});
-	return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
+	
+	my $forward_to = '/' . $c->session->{prev_action};
+	if ( $forward_to eq '/') {
+	    $forward_to = '/browse';
+	}
+	
+	return $c->forward($forward_to, $c->session->{prev_arguments});
 }
 
 
