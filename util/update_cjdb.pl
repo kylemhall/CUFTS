@@ -380,7 +380,9 @@ sub load_cufts {
             if (   is_empty_string( $new_link->{'fulltext_coverage'} )
                 && is_empty_string( $new_link->{'embargo'} )
                 && is_empty_string( $new_link->{'current'} )
-                && !$site->cjdb_show_citations )
+                && (
+                    !$site->cjdb_show_citations || is_empty_string( $new_link->{'citation_coverage'} )
+                )
             {
                 next JOURNAL;
             }
