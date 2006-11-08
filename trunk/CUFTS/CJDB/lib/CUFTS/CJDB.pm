@@ -175,11 +175,9 @@ sub end : Private {
         $c->response->content_type('text/html; charset=iso-8859-1');
     }
 
-    if ( defined( $c->stash->{current_account}) ) {
-        $c->response->headers->header( 'Cache-Control' => 'private' );
-    }
-
-    $c->response->headers->expires( time + 3600 );  # Expire pages in 1 hour by default
+    $c->response->headers->header( 'Cache-Control' => 'no-cache' );
+    $c->response->headers->header( 'Pragma' => 'no-cache' );
+    $c->response->headers->expires( time  );
 
     $c->forward('CUFTS::CJDB::V::TT');
 }
