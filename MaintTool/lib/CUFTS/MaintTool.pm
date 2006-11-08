@@ -78,7 +78,9 @@ sub end : Private {
     }
 
     if ( defined($c->stash->{current_account}) ) {
-        $c->response->headers->header( 'Cache-Control' => 'private' );
+        $c->response->headers->header( 'Cache-Control' => 'no-cache' );
+        $c->response->headers->header( 'Pragma' => 'no-cache' );
+        $c->response->headers->expires( time );
     }
 
     $c->forward('CUFTS::MaintTool::V::TT');
@@ -183,6 +185,8 @@ sub redirect {
         $location = $c->stash->{url_base} . $location;
     }
 
+    $c->response->headers->header( 'Cache-Control' => 'no-cache' );
+    
     return $c->res->redirect($location);
 }
 
