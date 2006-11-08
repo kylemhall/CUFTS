@@ -179,6 +179,8 @@ sub end : Private {
         $c->response->headers->header( 'Cache-Control' => 'private' );
     }
 
+    $c->response->headers->expires( time + 3600 );  # Expire pages in 1 hour by default
+
     $c->forward('CUFTS::CJDB::V::TT');
 }
 
@@ -202,6 +204,10 @@ sub redirect {
     if ( $c->stash->{url_base} ) {
         $location = $c->stash->{url_base} . $location;
     }
+
+    $c->response->headers->header( 'Cache-Control' => 'no-cache' );
+    $c->response->headers->header( 'Pragma' => 'no-cache' );
+    $c->response->headers->expires( time );
 
     $c->res->redirect($location);
 }
