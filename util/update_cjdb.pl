@@ -382,7 +382,7 @@ sub load_cufts {
                 && is_empty_string( $new_link->{'current'} )
                 && (
                     !$site->cjdb_show_citations || is_empty_string( $new_link->{'citation_coverage'} )
-                )
+                ) )
             {
                 next JOURNAL;
             }
