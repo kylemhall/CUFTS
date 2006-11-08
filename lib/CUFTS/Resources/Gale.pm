@@ -155,14 +155,14 @@ sub build_linkTOC {
         substr( $issn, 4, 0 ) = '-';
 
         my $url = $resource->url_base;
-        $url .= "sn_$issn";
+        $url .= "ke_sn+$issn";
 
         if ( not_empty_string($request->volume) ) {
-            $url .= '_AND_vo_' . $request->volume;
+            $url .= '+AND+vo+' . $request->volume;
         }
 
         if ( not_empty_string($request->issue) ) {
-            $url .= '_AND_iu_' . $request->issue;
+            $url .= '+AND+iu+' . $request->issue;
         }
 
         if ( not_empty_string( $resource->proxy_suffix ) ) {
