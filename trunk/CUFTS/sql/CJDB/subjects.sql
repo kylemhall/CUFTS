@@ -9,3 +9,4 @@ CREATE TABLE cjdb_subjects (
 );
 
 CREATE INDEX cjdb_sub_journal ON cjdb_subjects (journal);
+CREATE INDEX cjdb_subjects_site_ss ON cjdb_subjects (site, search_subject varchar_pattern_ops);
