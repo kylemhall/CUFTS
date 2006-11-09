@@ -168,6 +168,12 @@ sub auto : Private {
 sub end : Private {
     my ( $self, $c ) = @_;
 
+    if ( scalar @{ $c->error } ) {
+        warn("Rolling back database changes due to error flag.");
+        CJDB::DB::DBI->dbi_rollback();
+        CUFTS::DB::DBI->dbi_rollback();
+    }
+
     return 1 if $c->response->status =~ /^3\d\d$/;
     return 1 if $c->response->body;
 
