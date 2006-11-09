@@ -7,3 +7,4 @@ CREATE TABLE cjdb_associations (
 );
 
 CREATE INDEX cjdb_assc_journal ON cjdb_associations (journal);
+CREATE INDEX cjdb_associations_site_sa ON cjdb_associations (site, search_association varchar_pattern_ops);
