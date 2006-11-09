@@ -1,7 +1,7 @@
 package CUFTS::MaintTool;
 
 use strict;
-use Catalyst qw/Session Session::Store::FastMmap Session::State::Cookie FormValidator CUFTS::MaintTool::FillInForm Static::Simple/;
+use Catalyst qw/Static::Simple Session Session::Store::FastMmap Session::State::Cookie FormValidator CUFTS::MaintTool::FillInForm/;
 use lib '../lib';
 
 use CUFTS::ResourcesLoader;
