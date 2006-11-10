@@ -179,6 +179,8 @@ sub end : Private {
         );
         $c->forward('CUFTS::CJDB::V::TT');
 
+        warn( join("\n",  @{ $c->error }) );
+
         $c->{error} = [];
     }
 

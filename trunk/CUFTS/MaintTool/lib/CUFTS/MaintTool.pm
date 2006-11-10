@@ -80,6 +80,8 @@ sub end : Private {
         );
         $c->forward('CUFTS::MaintTool::V::TT');
 
+        warn( join("\n",  @{ $c->error }) );
+
         $c->{error} = [];
         
     }
