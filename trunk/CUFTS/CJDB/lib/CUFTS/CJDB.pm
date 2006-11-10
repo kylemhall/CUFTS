@@ -172,6 +172,14 @@ sub end : Private {
         warn("Rolling back database changes due to error flag.");
         CJDB::DB::DBI->dbi_rollback();
         CUFTS::DB::DBI->dbi_rollback();
+
+        $c->stash(
+            template      => 'fatal_error.tt',
+            fatal_errors  => $c->error,
+        );
+        $c->forward('CUFTS::CJDB::V::TT');
+
+        $c->{error} = [];
     }
 
     return 1 if $c->response->status =~ /^3\d\d$/;
