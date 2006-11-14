@@ -81,8 +81,10 @@ sub search_distinct_by_exact_subjects {
 	foreach my $search (@$search) {
 		$count++;
 
+        # Use LIKE in search because of varchar pattern op indexes
+
 		$sql .= " JOIN cjdb_subjects AS subjects${count} ON (subjects${count}.journal = cjdb_journals.id) ";
-		$where .= " AND subjects${count}.search_subject = ? ";
+		$where .= " AND subjects${count}.search_subject LIKE ? ";
 		
 		push @bind, $search;
 	}
@@ -115,8 +117,10 @@ sub search_distinct_by_exact_associations {
 	foreach my $search (@$search) {
 		$count++;
 
+        # Use LIKE in search because of varchar pattern op indexes
+
 		$sql .= " JOIN cjdb_associations AS cjdb_associations${count} ON (cjdb_associations${count}.journal = cjdb_journals.id) ";
-		$where .= " AND cjdb_associations${count}.search_association = ? ";
+		$where .= " AND cjdb_associations${count}.search_association LIKE ? ";
 		
 		push @bind, $search;
 	}
@@ -253,11 +257,6 @@ sub display_links {
     
     return \@results;
 }
-
-
-
-
-
 
 
 __PACKAGE__->set_sql('distinct_by_title' => qq{
