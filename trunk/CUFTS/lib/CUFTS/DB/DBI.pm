@@ -45,8 +45,7 @@ sub _croak {
 	return; 
 }
 
-
-__PACKAGE__->set_db('Main', @CUFTS::Config::CUFTS_DB_CONNECT);
+__PACKAGE__->connection($CUFTS::Config::CUFTS_DB_STRING,  $CUFTS::Config::CUFTS_USER, $CUFTS::Config::CUFTS_PASSWORD, $CUFTS::Config::CUFTS_DB_ATTR);
 
 ##
 ## Experimental and untested
@@ -105,25 +104,6 @@ sub ignore_changes {
 	return $self;
 }
 
-# override default to avoid using Ima::DBI closure
-sub db_Main {
-    my $dbh;
-    if ( $ENV{'MOD_PERL'} and !$Apache::ServerStarting ) {
-        $dbh = Apache->request()->pnotes('dbh');
-    }
-    if ( !$dbh ) {
-        # $config is my config object. replace with your own settings...
-        $dbh = DBI->connect_cached(
-            $CUFTS::Config::CUFTS_DB_STRING,  $CUFTS::Config::CUFTS_USER,
-            $CUFTS::Config::CUFTS_PASSWORD, $CUFTS::Config::CUFTS_DB_ATTR
-        );
-        __PACKAGE__->_remember_handle('Main'); # so dbi_commit works
-        if ( $ENV{'MOD_PERL'} and !$Apache::ServerStarting ) {
-            Apache->request()->pnotes( 'dbh', $dbh );
-        }
-    }
-    return $dbh;
-}
 
 sub dbi_rollback {
     my $self = shift(@_);
