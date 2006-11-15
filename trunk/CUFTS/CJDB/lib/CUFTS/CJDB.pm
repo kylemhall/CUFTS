@@ -18,6 +18,9 @@ CUFTS::CJDB->config(
     regex_base           => '',
     default_max_columns  => 20,
     default_min_per_page => 50,
+    'View::TT' => {
+        WRAPPER       => 'layout.tt',
+    },
 );
 
 CUFTS::CJDB->config->{session} = {
@@ -56,7 +59,7 @@ sub prepare_path {
             die( "Unable to find site matching key: $site_key" );
         }
         
-        $c->stash->{site_template_dir} = '/sites/' . $c->stash->{current_site}->id . "/${template_type}";
+        $c->stash->{additional_template_paths} = [ $c->config->{root} . '/sites/' . $c->stash->{current_site}->id . "/${template_type}" ];
         
         $c->req->base->path( $c->req->base->path . "${regex_base}${site_key}" );
         $c->req->path($path);
@@ -137,7 +140,12 @@ sub auto : Private {
             my $resource_id = $resource->id;
             my $global_resource = $resource->resource;
 
-            $resources_display{$resource_id}->{cjdb_note} = $resource->cjdb_note;
+            $resources_display{$resource_id}->{cjdb_note} = not_empty_string($resource->cjdb_note)
+                                                            ? $resource->cjdb_note
+                                                            : defined($global_resource)
+                                                            ? $global_resource->cjdb_note
+                                                            : '';
+                                                            
             $resources_display{$resource_id}->{name} = not_empty_string($resource->name) 
                                                        ? $resource->name
                                                        : defined($global_resource)
@@ -170,7 +178,6 @@ sub end : Private {
 
     if ( scalar @{ $c->error } ) {
         warn("Rolling back database changes due to error flag.");
-        CJDB::DB::DBI->dbi_rollback();
         CUFTS::DB::DBI->dbi_rollback();
 
         $c->stash(
