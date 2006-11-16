@@ -208,10 +208,10 @@ UPDATE local_journals SET journal_url = local_journal_details.value FROM local_j
 ALTER TABLE local_journals ADD COLUMN urlbase VARCHAR(1024);
 UPDATE local_journals SET urlbase = local_journal_details.value FROM local_journal_details WHERE local_journal_details.local_journal = local_journals.id AND field = 'urlbase';
 
-ALTER TABLE local_journals ADD COLUMN publisher VARCHAR(256);
+ALTER TABLE local_journals ADD COLUMN publisher VARCHAR(1024);
 UPDATE local_journals SET publisher = local_journal_details.value FROM local_journal_details WHERE local_journal_details.local_journal = local_journals.id AND field = 'publisher';
 
-ALTER TABLE local_journals ADD COLUMN abbreviation VARCHAR(256);
+ALTER TABLE local_journals ADD COLUMN abbreviation VARCHAR(1024);
 UPDATE local_journals SET abbreviation = local_journal_details.value FROM local_journal_details WHERE local_journal_details.local_journal = local_journals.id AND field = 'abbreviation';
 
 ALTER TABLE local_journals ADD COLUMN current_months VARCHAR(256);
@@ -237,10 +237,10 @@ UPDATE journals SET journal_url = journal_details.value FROM journal_details WHE
 ALTER TABLE journals ADD COLUMN urlbase VARCHAR(1024);
 UPDATE journals SET urlbase = journal_details.value FROM journal_details WHERE journal_details.journal = journals.id AND field = 'urlbase';
 
-ALTER TABLE journals ADD COLUMN publisher VARCHAR(256);
+ALTER TABLE journals ADD COLUMN publisher VARCHAR(1024);
 UPDATE journals SET publisher = journal_details.value FROM journal_details WHERE journal_details.journal = journals.id AND field = 'publisher';
 
-ALTER TABLE journals ADD COLUMN abbreviation VARCHAR(256);
+ALTER TABLE journals ADD COLUMN abbreviation VARCHAR(1024);
 UPDATE journals SET abbreviation = journal_details.value FROM journal_details WHERE journal_details.journal = journals.id AND field = 'abbreviation';
 
 ALTER TABLE journals ADD COLUMN current_months VARCHAR(256);
