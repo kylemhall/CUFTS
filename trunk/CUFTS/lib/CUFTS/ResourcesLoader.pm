@@ -56,6 +56,7 @@ BEGIN {
         Gale
         GenericJournal
         GenericJournalDOI
+        Google::GoogleSearch
         Highwire
         HighwireFree
         History_Coop
@@ -74,6 +75,7 @@ BEGIN {
         NRC
         OCLC
         Ovid
+        OvidLinking
         Oxford
         Proquest_CNS
         Proquest
