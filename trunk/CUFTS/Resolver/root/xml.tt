@@ -4,7 +4,9 @@
 [% FOREACH compiled_result IN results %]
 	[% SET resource = compiled_result.resource %]
 	[% SET resource_name = resource.name %]
+	
 	<resource name="[% resource_name | html %]" rank="[% resource.rank || '0' %]" provider="[% resource.provider | html %]">
+	[% IF resource.cjdb_note %]<cjdb_note>[% resource.cjdb_note | html %]</cjdb_note>[% END %]
 	[% FOREACH service_name IN compiled_result.services.keys.sort %]
 		[% SET service = compiled_result.services.$service_name.service %]
 		<service name="[% service_name | html %]">
@@ -16,12 +18,13 @@
 				[% IF record.defined %]
 					[% IF record.ft_start_date %]<ft_start_date>[% record.ft_start_date | html %]</ft_start_date>[% END %]
 					[% IF record.ft_end_date %]<ft_end_date>[% record.ft_end_date | html %]</ft_end_date>[% END %]
+					[% IF record.cjdb_note %]<cjdb_note>[% record.cjdb_note | html %]</cjdb_note>[% END %]
 				[% END %]
 			</result>
 		[% END %]
 		</service>
 	[% END %]
-	<site>[% compiled_result.resource.site.key %]</site>
+	<site>[% resource.site.key %]</site>
 	</resource>
 [% END %]
 </CUFTS>
