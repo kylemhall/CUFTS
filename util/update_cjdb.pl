@@ -737,25 +737,25 @@ sub create_brief_MARC {
     my $MARC_record = MARC::Record->new();
 
     $MARC_record->leader('00000nms  22001577a 4500');
-    
+
     # ISSNs
-    
+
 	foreach my $issn ( map {$_->issn} $journals_auth->issns ) {
-		$MARC_record->append_fields( MARC::Field->new('022', '#', '#', 'a' => $issn) );
+		$MARC_record->append_fields( MARC::Field->new( '022', '#', '#', 'a' => $issn ) );
 	}
-    
+
     # Title
-    
+
     my $title = $journals_auth->title;
     $seen{title}{ lc($title) }++;
     my $article_count = CUFTS::CJDB::Util::count_articles($title);
-	$MARC_record->append_fields( MARC::Field->new('245', '0', $article_count, 'a' => $title) );
-    
+	$MARC_record->append_fields( MARC::Field->new( '245', '0', $article_count, 'a' => latin1_to_marc8($title) ) );
+
     # Alternate titles
-    
+
     foreach my $title_field ($journals_auth->titles) {
 		next if $seen{title}{ lc($title_field->title) }++;
-		$MARC_record->append_fields( MARC::Field->new('246', '0', '#', 'a' => $title_field->title) );
+		$MARC_record->append_fields( MARC::Field->new( '246', '0', '#', 'a' => latin1_to_marc8($title_field->title) ) );
 	}
 	
     return $MARC_record;
@@ -860,7 +860,7 @@ CJDB_RECORD:
 
         my $field_856 = MARC::Field->new( '856', '4', '0', 'u' => $base_url . $journals_auth_id );
         if ( not_empty_string($site->marc_dump_856_link_label) ) {
-            $field_856->add_subfields( 'z' => $site->marc_dump_856_link_label );
+            $field_856->add_subfields( 'z' => latin1_to_marc8($site->marc_dump_856_link_label) );
         }
 	    $MARC_record->append_fields( $field_856 );
 
@@ -870,7 +870,7 @@ CJDB_RECORD:
             foreach my $field_num ( '245', '246' ) {
                 my @title_fields = $MARC_record->field( $field_num );
                 foreach my $title_field ( @title_fields ) {
-                    $title_field->add_subfields( 'h', $site->marc_dump_medium_text );
+                    $title_field->add_subfields( 'h', latin1_to_marc8($site->marc_dump_medium_text) );
                 }
             }
         }
@@ -925,7 +925,7 @@ CJDB_RECORD:
     	            $site->marc_dump_holdings_field,
     	            $site->marc_dump_holdings_indicator1,
     	            $site->marc_dump_holdings_indicator2,
-    	            $site->marc_dump_holdings_subfield => $holdings
+    	            $site->marc_dump_holdings_subfield => latin1_to_marc8($holdings)
     	        );
         	    $MARC_record->append_fields( $holdings_field );
             }
@@ -965,5 +965,9 @@ sub clear_site {
     }
 
     return 1;
+}
+
+sub latin1_to_marc8 {
+    return CUFTS::CJDB::Util::latin1_to_marc8(@_);
 }
 
