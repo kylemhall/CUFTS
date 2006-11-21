@@ -20,6 +20,8 @@
 
 package CUFTS::Resources::ProquestMicromedia;
 
+use CUFTS::Resources::ProquestLinking;
+
 use base qw(CUFTS::Resources::ProquestLinking);
 
 use CUFTS::Exceptions;
