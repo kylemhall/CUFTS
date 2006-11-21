@@ -20,7 +20,7 @@
 
 package CUFTS::Resources::ProquestMicromedia;
 
-use base qw(CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::ProquestLinking);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
@@ -71,125 +71,6 @@ sub title_list_field_map {
         'embargo_days'   => 'embargo_days',
         'db_identifier'  => 'db_identifier',
     };
-}
-
-sub can_getFulltext {
-    my ( $class, $request ) = @_;
-
-    return 0 if is_empty_string( $request->spage );
-    
-    return $class->SUPER::can_getFulltext($request);
-}
-
-sub build_linkFulltext {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my @params = ('service=pq');
-        defined( $request->volume )
-            and push @params, 'volume=' . $request->volume;
-        defined( $request->issue )
-            and push @params, 'issue=' . $request->issue;
-        defined( $request->date )
-            and push @params, 'date=' . $request->date;
-
-        push @params, 'issn=' . $record->issn;
-        push @params, 'spage='. $request->spage;
-
-        my $url = $base_url;
-        $url .= join '&', @params;
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
-}
-
-sub build_linkTOC {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my @params = ('service=pq');
-        defined( $request->volume )
-            and push @params, 'volume=' . $request->volume;
-        defined( $request->issue )
-            and push @params, 'issue=' . $request->issue;
-        defined( $request->date )
-            and push @params, 'date=' . $request->date;
-
-        push @params, 'issn=' . $record->issn;
-
-        my $url = $base_url;
-        $url .= join '&', @params;
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
-}
-
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-        my @params = ('service=pq');
-
-        push @params, 'issn=' . $record->issn;
-
-        my $url = $base_url;
-        $url .= join '&', @params;
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
 }
 
 1;
