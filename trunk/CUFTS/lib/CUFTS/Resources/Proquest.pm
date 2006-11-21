@@ -20,6 +20,8 @@
 
 package CUFTS::Resources::Proquest;
 
+use CUFTS::Resources::ProquestLinking;
+
 use base qw(CUFTS::Resources::ProquestLinking);
 
 use CUFTS::Exceptions;
