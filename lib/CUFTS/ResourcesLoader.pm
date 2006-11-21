@@ -77,7 +77,6 @@ BEGIN {
         Ovid
         OvidLinking
         Oxford
-        Proquest_CNS
         Proquest
         ProquestMicromedia
         PubMed
