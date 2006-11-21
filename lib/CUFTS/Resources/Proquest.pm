@@ -102,8 +102,7 @@ sub clean_data {
         elsif (
             ( $record->{'ft_end_date'} !~ /current/i )
             && ( ( $record->{'___image_end_date'} =~ /current/i )
-                || ( $record->{'___image_end_date'}
-                    > $record->{'ft_end_date'} ) )
+                || ( $record->{'___image_end_date'} > $record->{'ft_end_date'} ) )
             )
         {
             $record->{'ft_end_date'} = $record->{'___image_end_date'};
@@ -197,13 +196,13 @@ sub build_linkFulltext {
 
     foreach my $record (@$records) {
 
-        my @params = ('service=pq');
+        my %params = ( 'service' => 'pq' );
 
         if ( not_empty_string( $record->issn ) ) {
-            push @params, 'issn='  . $record->issn;
+            $params{issn} = $record->issn;
         }
         else {
-            push @params, 'title='  . uri_escape( $record->title );
+            $params{title} = uri_escape( $record->title );
         }
 
         ##
@@ -212,26 +211,31 @@ sub build_linkFulltext {
         ##
 
         if ( $record->issn ne '00999660' ) {
-            defined( $request->volume )
-                and push @params, 'volume=' . $request->volume;
-            defined( $request->issue )
-                and push @params, 'issue=' . $request->issue;
+            if ( not_empty_string( $request->volume ) ) {
+                $params{volume} = $request->volume;
+            }
+            if ( not_empty_string( $request->issue ) ) {
+                $params{issue} = $request->issue;
+            }
         }
 
-        if ( defined($request->day) ) {
-            push @params, 'date=' . $request->date;
-        }
-        elsif ( defined($request->year) ) {
-            push @params, 'date=' . $request->year;
+        if ( !exists( $params{volume} ) && !exists( $params{issue} ) ) {
+            if ( not_empty_string( $request->day) ) {
+                $params{date} = $request->date;
+            }
+            elsif ( not_empty_string( $request->year ) ) {
+                $params{date} = $request->year;
+            }
         }
 
-        push @params, 'spage=' . $request->spage;
+        $params{spage} = $request->spage;
 
-        defined( $request->atitle )
-            and push @params, 'atitle=' . uri_escape( $request->atitle );
+        if ( not_empty_string( $request->atitle ) ) {
+            $params{atitle} = uri_escape( $request->atitle );
+        }
 
         my $url = $base_url;
-        $url .= join '&', @params;
+        $url .= join '&', map { $_ . '=' . $params{$_} } keys %params;
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
@@ -258,26 +262,44 @@ sub build_linkTOC {
 
     foreach my $record (@$records) {
 
-        my @params = ('service=pq');
+        my %params = ( 'service' => 'pq' );
 
         if ( not_empty_string( $record->issn ) ) {
-            push @params, 'issn='  . $record->issn;
+            $params{issn} = $record->issn;
         }
         else {
-            push @params, 'title='  . uri_escape( $record->title );
+            $params{title} = uri_escape( $record->title );
         }
 
-        defined( $request->volume )
-            and push @params, 'volume=' . $request->volume;
-        defined( $request->issue )
-            and push @params, 'issue=' . $request->issue;
-        defined( $request->year )
-            and push @params, 'date=' . $request->year;
+        ##
+        ## Hack for Wall Street Journal - it doesn't have vol/iss indexed and 
+        ## does not return results if you include them in the search.
+        ##
 
-        push @params, 'issn=' . $record->issn;
+        if ( $record->issn ne '00999660' ) {
+            if ( not_empty_string( $request->volume ) ) {
+                $params{volume} = $request->volume;
+            }
+            if ( not_empty_string( $request->issue ) ) {
+                $params{issue} = $request->issue;
+            }
+        }
+
+        if ( !exists( $params{volume} ) && !exists( $params{issue} ) ) {
+            if ( not_empty_string( $request->day) ) {
+                $params{date} = $request->date;
+            }
+            elsif ( not_empty_string( $request->year ) ) {
+                $params{date} = $request->year;
+            }
+        }
+
+        if ( not_empty_string( $request->atitle ) ) {
+            $params{atitle} = uri_escape( $request->atitle );
+        }
 
         my $url = $base_url;
-        $url .= join '&', @params;
+        $url .= join '&', map { $_ . '=' . $params{$_} } keys %params;
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
