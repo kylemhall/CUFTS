@@ -75,7 +75,7 @@ sub search_distinct_combined {
 		push @bind, ($site, $search_term);
 	}
 
-	warn(join ',', @bind);
+#	warn(join ',', @bind);
 	
 	my $dbh = $class->db_Main();
 	my $sth = $dbh->prepare_cached($sql);
