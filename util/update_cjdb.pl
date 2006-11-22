@@ -968,6 +968,17 @@ sub clear_site {
 }
 
 sub latin1_to_marc8 {
-    return CUFTS::CJDB::Util::latin1_to_marc8(@_);
+    my ( $string ) = @_;
+    
+    my $output;
+    eval {
+        $output = CUFTS::CJDB::Util::latin1_to_marc8($string);
+    }
+    if ( $@ ) {
+        warn("Error processing marc8 conversion for: $string\nERROR: $@ ");
+        return $string;
+    }
+
+    return $output;
 }
 
