@@ -85,8 +85,10 @@ sub search_distinct_by_exact_subjects {
 
 		$sql .= " JOIN cjdb_subjects AS subjects${count} ON (subjects${count}.journal = cjdb_journals.id) ";
 		$where .= " AND subjects${count}.search_subject LIKE ? ";
+		$where .= " AND subjects${count}.site = ? ";
 		
 		push @bind, $search;
+		push @bind, $site;
 	}
 
 	$sql .= $where;
@@ -121,8 +123,10 @@ sub search_distinct_by_exact_associations {
 
 		$sql .= " JOIN cjdb_associations AS cjdb_associations${count} ON (cjdb_associations${count}.journal = cjdb_journals.id) ";
 		$where .= " AND cjdb_associations${count}.search_association LIKE ? ";
+		$where .= " AND cjdb_associations${count}.site = ? ";
 		
 		push @bind, $search;
+		push @bind, $site;
 	}
 
 	$sql .= $where;
