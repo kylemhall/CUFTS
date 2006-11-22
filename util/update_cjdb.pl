@@ -973,7 +973,7 @@ sub latin1_to_marc8 {
     my $output;
     eval {
         $output = CUFTS::CJDB::Util::latin1_to_marc8($string);
-    }
+    };
     if ( $@ ) {
         warn("Error processing marc8 conversion for: $string\nERROR: $@ ");
         return $string;
