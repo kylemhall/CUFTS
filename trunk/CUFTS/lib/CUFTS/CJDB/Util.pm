@@ -87,7 +87,7 @@ sub count_articles {
 sub latin1_to_marc8 {
     my ($line) = @_;
 
-    $line =~ s/([\x80-\xFF])/chr(0xC0|ord($1)>>6).chr(0x80|ord($1)&0x3F)/eg;
+#    $line =~ s/([\x80-\xFF])/chr(0xC0|ord($1)>>6).chr(0x80|ord($1)&0x3F)/eg;
 
     return MARC::Charset::utf8_to_marc8($line);
 }
