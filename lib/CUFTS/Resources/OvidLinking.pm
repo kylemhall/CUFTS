@@ -268,7 +268,7 @@ sub build_linkJournal {
         else {
             my $url_base = $resource->url_base || $default_url_base;
 
-            my $url = "http://${url_base}/ovidweb.cgi?T=JS&MODE=ovid&NEWS=n&PAGE=TOC";
+            $url = "http://${url_base}/ovidweb.cgi?T=JS&MODE=ovid&NEWS=n&PAGE=TOC";
             $url .= '&D=' . $resource->resource_identifier . '&SEARCH=';
 
             if ( not_empty_string( $record->issn ) ) {
