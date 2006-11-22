@@ -262,8 +262,8 @@ sub build_linkJournal {
         
         my $url;
         
-        if ( not_empty_string($record->{journal_url}) ) {
-            $url = $record->{journal_url};
+        if ( not_empty_string($record->journal_url ) ) {
+            $url = $record->journal_url;
         }
         else {
             my $url_base = $resource->url_base || $default_url_base;
