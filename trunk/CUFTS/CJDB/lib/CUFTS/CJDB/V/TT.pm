@@ -1,18 +1,14 @@
 package CUFTS::CJDB::V::TT;
 
 use strict;
-use base qw/Catalyst::Base/;
-use Template;
-use Template::Timer;
-use CUFTS::CJDB::Template::Provider;
+use base qw/Catalyst::View::TT/;
 
-our $VERSION = '0.12';
-
-__PACKAGE__->mk_accessors('template');
-
+use Template::Config;
+$Template::Config::STASH = 'Template::Stash::XS';
 
 __PACKAGE__->config->{WRAPPER} = 'layout.tt';
-#__PACKAGE__->config->{COMPILE_DIR} = '/tmp/CJDB_template_cache';
+
+our $VERSION = '0.13';
 
 $Template::Stash::LIST_OPS->{ in } = sub {
 	my ($list, $val, $field) = @_;
@@ -64,82 +60,6 @@ $Template::Stash::LIST_OPS->{map_join} = sub {
 };
 
 $Template::Stash::SCALAR_OPS->{uri_escape} = sub { my $text = shift; $text =~ s/([^a-zA-Z0-9_.-])/uc sprintf("%%%02x",ord($1))/eg; return $text; };
- 
-
-
-sub new {
-    my $self = shift;
-    my $c    = shift;
-    $self = $self->NEXT::new(@_);
-    my $root   = $c->config->{root};
-    $Template::Config::STASH = 'Template::Stash::XS';
-    my %config = (
-        EVAL_PERL    => 0,
-        LOAD_TEMPLATES => [ CUFTS::CJDB::Template::Provider->new({INCLUDE_PATH => [ $root, "$root/base" ],}) ],
-        %{ $self->config() }
-    );
-
-#    if ( $c->debug && not exists $config{CONTEXT} ) {
-#       $config{CONTEXT} = Template::Timer->new(%config);
-#    }
-
-    $self->template( Template->new( \%config ) );    
-
-    return $self;
-}
-
-
-sub process {
-	my $self = shift;
-	my $c    = shift;
-
-	my $root = $c->config->{root};
-
-	$self->template->context->load_templates->[0]->include_path([ $root . $c->stash->{site_template_dir}, $root, "$root/base"]);
-
-    my $template = $c->stash->{template} || $c->request->match;
-
-    unless ($template) {
-        $c->log->debug('No template specified for rendering') if $c->debug;
-        return 0;
-    }
-
-    if ($c->debug) {
-        $c->log->debug('Template include path: ' . join(',', @{$self->template->context->load_templates->[0]->include_path}));
-        $c->log->debug(qq/Rendering template "$template"/);
-    }
-    
-    my $output;
-
-
-    unless (
-        $self->template->process(
-            $template,
-            {
-                base => $c->req->base,
-                c    => $c,
-                name => $c->config->{name},
-                %{ $c->stash }
-            },
-            \$output
-        )
-      )
-    {
-        my $error = $self->template->error;
-        $error = qq/Couldn't render template "$error"/;
-        $c->log->error($error);
-        $c->error($error);
-        return 0;
-    }
-    
-    unless ( $c->response->content_type ) {
-        $c->response->content_type('text/html; charset=utf-8');
-    }
-
-    $c->response->body($output);
-
-    return 1;
-}
 
 
 =head1 NAME
