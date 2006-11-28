@@ -17,9 +17,9 @@ my $ips_form_validate = {
 	optional_regexp => qr/^(ip|domain)/,
 	filters => ['trim'],
 	constraint_regexp_map => {
-		qr/^ip_low_/ => qr/^\d+\.\d+\.\d+\.\d+/,
-		qr/^ip_high_/ => qr/^\d+\.\d+\.\d+\.\d+/,
-		qr/^domain\d+/ => qr/^[=\w\.]+$/,
+		qr/^ip_low_/   => qr/^\d+\.\d+\.\d+\.\d+/,
+		qr/^ip_high_/  => qr/^\d+\.\d+\.\d+\.\d+/,
+		qr/^domain\d+/ => qr/^[-\w\.]+$/,  # /
 	},
 };
 
