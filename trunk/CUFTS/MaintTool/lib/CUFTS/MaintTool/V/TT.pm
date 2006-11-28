@@ -1,11 +1,17 @@
 package CUFTS::MaintTool::V::TT;
 
 use strict;
+#use Template::Config;
+#$Template::Config::STASH = 'Template::Stash::XS';
+
 use base 'Catalyst::View::TT';
 
-__PACKAGE__->config->{WRAPPER} = 'layout.tt';
+use CUFTS::CJDB::Util;
 
-use Template::Stash;
+__PACKAGE__->config->{WRAPPER} = 'layout.tt';
+__PACKAGE__->config->{FILTERS} = {
+    'marc8' => \&CUFTS::CJDB::Util::marc8_to_latin1,
+};
 
 $Template::Stash::HASH_OPS->{ in } = sub {
   return __in( [ shift @_ ], @_ );

@@ -5,6 +5,7 @@ use base 'Catalyst::Base';
 use MARC::Record;
 use CUFTS::Util::Simple;
 use CUFTS::JournalsAuth;
+use CUFTS::CJDB::Util;
 
 my $marc_fields = {
 	'022' => { 
@@ -250,6 +251,7 @@ sub edit_marc : Local {
 					foreach my $subfield (@{$marc_fields->{$field_type}->{subfields}}) {
 						my $value = $c->form->valid->{"${row}-${field_type}${subfield}"};
 						next unless defined($value) && $value ne '';
+						$value = CUFTS::CJDB::Util::latin1_to_marc8($value);
 						push @subfields, ($subfield, $value);
 					}
 					$indicators->[0] = $c->form->valid->{"${row}-${field_type}-1"};
