@@ -527,13 +527,16 @@ sub bulk_local : Local {
 			
 			if (my $upload = $c->req->upload('file')) {
 
+                my $tmp; 
+
 				eval {
-				    $c->stash->{bulk_results} = $local_resource->do_module('load_title_list', $local_resource, $upload->tempname, 1);
+				     $tmp = $local_resource->do_module('load_title_list', $local_resource, $upload->tempname, 1);
 				};
     			if ($@) {
     				$c->stash->{errors} = [ $@ ];
     				CUFTS::DB::DBI->dbi_rollback;
     			} else {
+    			    $c->stash->{bulk_results} = $tmp;
 				    $c->stash->{template} = 'local/titles/bulk_local_results.tt';
 				}
 
