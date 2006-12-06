@@ -73,6 +73,8 @@ sub title_list_field_map {
         'ISSN/ISBN'                   => 'issn',
         'Publisher'                   => 'publisher',
         'Full Text Delay (in months)' => 'embargo_months',
+        'Full Text*'                  => '___Full Text',
+        'Full Text**'                 => '___Full Text',
     };
 }
 
@@ -87,23 +89,22 @@ sub skip_record {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    if ( defined( $record->{'___Full Text'} ) ) {
+    my $fulltext = $record->{'___Full Text'};
 
-        if ( $record->{'___Full Text'} =~ m{^ \s* (\d{1,2}) / (\d{1,2}) / (\d{4}) }xsm ) {
+    if ( not_empty_string( $fulltext ) ) {
+
+        if ( $fulltext =~ m{^ \s* (\d{1,2}) / (\d{1,2}) / (\d{4}) }xsm ) {
             $record->{ft_start_date} = "$3/$1/$2";
         }
-        elsif ( $record->{'___Full Text'} =~ m{^ \s* (\d{4}) }xsm ) {
+        elsif ( $fulltext =~ m{^ \s* (\d{4}) }xsm ) {
             $record->{ft_start_date} = $1;
         }
 
-    }
-
-    if ( defined( $record->{'___Full Text'} ) ) {
     
-        if ( $record->{'___Full Text'} =~ m{ to \s+ (\d{1,2}) / (\d{1,2}) / (\d{4}) \s* $}xsm ) {
+        if ( $fulltext =~ m{ to \s+ (\d{1,2}) / (\d{1,2}) / (\d{4}) \s* $}xsm ) {
             $record->{ft_end_date} = "$3/$1/$2";
         }
-        elsif ( $record->{'___Full Text'} =~ m{ to \s+ (\d{4}) }xsm ) {
+        elsif ( $fulltext =~ m{ to \s+ (\d{4}) }xsm ) {
             $record->{ft_end_date} = $1;
         }
 
@@ -324,8 +325,7 @@ sub build_linkJournal {
 
         my $url = "http://search.ebscohost.com/direct.asp?db=${db}&scope=site&";
 
-        $url .= $class->_build_journal_search_field( $record->title,
-            $record->issn );
+        $url .= $class->_build_journal_search_field( $record->title, $record->issn );
 
         my $result = new CUFTS::Result;
         $result->url($url);
