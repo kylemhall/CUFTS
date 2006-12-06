@@ -46,6 +46,19 @@ __PACKAGE__->columns(All => qw(
 
 __PACKAGE__->sequence('stats_id_seq');
 
+sub normalize_column_values {
+	my ($self, $values) = @_;
+	
+	# Check ISSNs for dashes and strip them out
+
+	if ( exists($values->{title}) && defined($values->{title}) ) {
+	    $values->{title} = substr( 0, 512, $values->{title} );
+	}
+	
+	return 1;   # ???
+}
+
+
 __PACKAGE__->set_sql('top50journals' => qq{
 	SELECT issn, title, COUNT(*) as requests FROM
 	__TABLE__
