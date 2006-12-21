@@ -84,6 +84,7 @@ BEGIN {
         SageCSA
         SIRSI
         Springer
+        Taylor
         Swets
         Wiley
         Wilson
