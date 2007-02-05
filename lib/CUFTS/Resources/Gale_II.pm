@@ -169,6 +169,7 @@ sub local_resource_details {
         @{ $class->SUPER::local_resource_details },
         qw(
             auth_name
+            proxy_suffix
         )
     ];
 }
