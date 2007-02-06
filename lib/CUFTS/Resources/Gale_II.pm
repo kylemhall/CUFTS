@@ -24,6 +24,7 @@ use base qw(CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use URI::Escape;
 
 use strict;
 
@@ -197,20 +198,28 @@ sub resource_details_help {
 sub build_linkDatabase {
     my ( $class, $records, $resource, $site, $request ) = @_;
 
-    my $url_base = $resource->url_base or return [];
-
     my @results;
 
     foreach my $record (@$records) {
 
-        my $url = $url_base;
+        my $url = $resource->database_url;
+        if ( is_empty_string($url) ) { 
+            $url = $resource->url_base;
+        }
+        if ( is_empty_string($url) ) {
+            return [];
+        }
 
         if ( $resource->auth_name ) {
             $url .= $resource->auth_name;
         }
 
         if ( $resource->resource_identifier ) {
-            $url .= '?db=' . $resource->resource_identifier;
+            if ( $url =~ /IOURL/ ) {
+                $url .= '?prod=' . $resource->resource_identifier;
+            } else {
+                $url .= '?db=' . $resource->resource_identifier;
+            }
         }
 
         my $result = new CUFTS::Result($url);
@@ -222,11 +231,50 @@ sub build_linkDatabase {
     return \@results;
 }
 
+sub build_linkJournal {
+    my ( $class, $records, $resource, $site, $request ) = @_;
+
+    my @results;
+
+    foreach my $record (@$records) {
+
+        my $url = $resource->database_url;
+        if ( is_empty_string($url) ) { 
+            $url = $resource->url_base;
+        }
+        if ( is_empty_string($url) ) {
+            return [];
+        }
+
+        if ( $resource->auth_name ) {
+            $url .= $resource->auth_name;
+        }
+
+        if ( $resource->resource_identifier ) {
+            if ( $url =~ /IOURL/ ) {
+                $url .= '?prod=' . $resource->resource_identifier;
+            } else {
+                $url .= '?db=' . $resource->resource_identifier;
+            }
+        }
+
+        $url .= '&title=' . uri_escape($record->title);
+
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
+}
+
+
 sub can_getFulltext {
     return 0;
 }
 
 sub can_getJournal {
-    return 0;
+    return 1;
 }
 1;
