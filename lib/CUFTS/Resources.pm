@@ -1121,5 +1121,31 @@ sub email_changes {
     return 1;
 }
 
+
+# --------------------------------------------------- 
+
+
+my $__required = {}; 
+
+sub __require { 
+    my ($class) = @_; 
+    return 1 if defined($__required->{$class}) && $__required->{$class} == 1; 
+    $class =~ /[^a-zA-Z:_]/ and 
+        CUFTS::Exception::App::CGI->throw("Invalid class name passed into __require_class - \"$class\""); 
+
+    eval "require $class"; 
+    if ($@) { 
+        CUFTS::Exception::App::CGI->throw("Error requiring class = \"$@\""); 
+    } 
+
+    $__required->{$class} = 1; 
+    return 1; 
+} 
+ 	 
+	 
+sub __module_name { 
+    return $CUFTS::Config::CUFTS_MODULE_PREFIX . $_[0]; 
+}
+
 1;
 
