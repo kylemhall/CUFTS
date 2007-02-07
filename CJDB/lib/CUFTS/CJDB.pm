@@ -1,7 +1,7 @@
 package CUFTS::CJDB;
 
 use strict;
-use Catalyst qw/Static::Simple Session Session::Store::FastMmap Session::State::Cookie FormValidator FillInForm/;
+use Catalyst qw/Static::Simple Session Session::Store::FastMmap Session::State::Cookie Cache Cache::Store::FastMmap FormValidator FillInForm/;
 use lib '../lib';
 use CUFTS::Config;
 use CUFTS::CJDB::Util;
@@ -21,13 +21,21 @@ CUFTS::CJDB->config(
     'View::TT' => {
         WRAPPER       => 'layout.tt',
     },
+    cache => {
+        backend => {
+            store => 'FastMmap',
+            share_file  => '/tmp/CUFTS_CJDB_cache',
+            cache_size  => '2m',
+            expire_time => '10m',
+        },
+    },
+    session => {
+        expires => 36000,
+        rewrite => 0,
+        storage => '/tmp/CUFTS_CJDB_sessions',
+    },
 );
 
-CUFTS::CJDB->config->{session} = {
-    expires => 36000,
-    rewrite => 0,
-    storage => '/tmp/CUFTS_CJDB_sessions',
-};
 
 CUFTS::CJDB->setup;
 
@@ -132,7 +140,7 @@ sub auto : Private {
 
     my $site_id = $c->stash->{current_site}->id;
 
-    if ( !($c->stash->{resources_display} = $c->session->{resources_display}->{$site_id}) ) {
+    if ( !($c->stash->{resources_display} = $c->cache->get( "resources_display_${site_id}" ) ) ) {
         my %resources_display;
         my $resources_iter = CUFTS::DB::LocalResources->search( { 'site' => $site_id, 'active' => 't' } );
 
@@ -151,6 +159,7 @@ sub auto : Private {
                                                        : defined($global_resource)
                                                        ? $global_resource->name 
                                                        : '';
+                                                       
             if (!$c->stash->{current_site}->cjdb_display_db_name_only) {
                 my $provider = not_empty_string($resource->provider) 
                                ? $resource->provider
@@ -161,8 +170,8 @@ sub auto : Private {
             }
         }
         
-        $c->stash->{resources_display}               = \%resources_display;
-        $c->session->{resources_display}->{$site_id} = \%resources_display;
+        $c->stash->{resources_display} = \%resources_display;
+        $c->cache->set( "resources_display_${site_id}", \%resources_display );
     }
     
     return 1;
@@ -177,18 +186,7 @@ sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( scalar @{ $c->error } ) {
-        warn("Rolling back database changes due to error flag.");
-        CUFTS::DB::DBI->dbi_rollback();
-
-        $c->stash(
-            template      => 'fatal_error.tt',
-            fatal_errors  => $c->error,
-        );
-        $c->forward('CUFTS::CJDB::V::TT');
-
-        warn( join("\n",  @{ $c->error }) );
-
-        $c->{error} = [];
+        $self->_end_error_handling($c);
     }
 
     return 1 if $c->response->status =~ /^3\d\d$/;
@@ -202,7 +200,29 @@ sub end : Private {
     $c->response->headers->header( 'Pragma' => 'no-cache' );
     $c->response->headers->expires( time  );
 
+    # Catch errors in site templates and handle properly.
+
+    eval { $c->forward('CUFTS::CJDB::V::TT'); };
+    if ( scalar @{ $c->error } ) {
+        $self->_end_error_handling($c);
+    }
+}
+
+sub _end_error_handling {
+    my ( $self, $c ) = @_;
+
+    warn("Rolling back database changes due to error flag.");
+    warn( join("\n",  @{ $c->error }) );
+
+    CUFTS::DB::DBI->dbi_rollback();
+
+    $c->stash(
+        template      => 'fatal_error.tt',
+        fatal_errors  => $c->error,
+    );
     $c->forward('CUFTS::CJDB::V::TT');
+
+    $c->{error} = [];
 }
 
 sub browse : Local {
