@@ -185,7 +185,7 @@ sub build_linkJournal {
     foreach my $record (@$records) {
 
         my $db         = $resource->resource_identifier;
-        my $journal_id = $record->details->db_identifier;
+        my $journal_id = $record->db_identifier;
         next if is_empty_string($db) || is_empty_string($journal_id);
         
         $db = lc($db);
@@ -362,7 +362,7 @@ EOT
 sub preparse_ebsco_fulltext($) {
     my ( $class, $text, $record, $resource, $site, $request ) = @_;
 
-    #	warn("\n\nDEBUG EBSCO RESULTS: $text\n\n");
+#	warn("\n\nDEBUG EBSCO RESULTS: $text\n\n");
 
     my @match_list = ( $text =~ m#(<object-information>.+?</object-information>)#sgi );
     my @sorted;
@@ -373,15 +373,13 @@ sub preparse_ebsco_fulltext($) {
                 $a1 = $1;
             }
             else {
-                CUFTS::Exception::App->throw(
-                    "Bad data passed to sort in preparse_ebsco_fulltext");
+                CUFTS::Exception::App->throw("Bad data passed to sort in preparse_ebsco_fulltext");
             }
             if ( $b =~ m#<match-percent>(\d+)</match-percent>#is ) {
                 $b1 = $1;
             }
             else {
-                CUFTS::Exception::App->throw(
-                    "Bad data passed to sort in preparse_ebsco_fulltext");
+                CUFTS::Exception::App->throw("Bad data passed to sort in preparse_ebsco_fulltext");
             }
             $a1 cmp $b1;
         } @match_list;
