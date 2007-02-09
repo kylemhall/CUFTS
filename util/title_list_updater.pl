@@ -38,6 +38,7 @@ use CUFTS::DB::Sites;
 use CUFTS::Util::Simple;
 
 use CUFTS::Resources;
+use CUFTS::ResourcesLoader;
 
 use Net::SMTP;
 use MIME::Lite;
@@ -81,14 +82,7 @@ foreach my $dat_file_name (@dat_files) {
 	my $account = CUFTS::DB::Accounts->retrieve($account_id) or
 		CUFTS::Exceptin::App->throw("Unable to retrieve account '$account_id' for title list updating");
 
-	my $module = $resource->module or
-		_error("Module not defined in resource '$resource_id'");
-	
-	$module = CUFTS::Resources::__module_name($module);
-
-	eval "require $module";
-	
-	my $results = $module->load_global_title_list($resource, "$title_list_dir/$title_list_file_name");
+	my $results = $resource->do_module('load_global_title_list', $resource, "$title_list_dir/$title_list_file_name");
 	
 	##
 	## Email the person who submitted the job request.
