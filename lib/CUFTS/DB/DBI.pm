@@ -29,9 +29,26 @@ use Class::DBI::AbstractSearch;
 use Class::DBI::Iterator;
 use Class::DBI::Plugin::CountSearch;
 use Class::DBI::Plugin::Type;
-use Class::DBI::Relationship::HasDetails;
 
 use strict;
+
+use overload
+	'""'     => sub { shift->stringify_self },
+	bool     => sub { not shift->_undefined_primary },
+	fallback => 1;
+
+sub stringify_self {
+	my $self = shift;
+	return (ref $self || $self) unless $self;    # empty PK
+	my @cols = $self->columns('Stringify');
+	@cols = $self->primary_columns unless @cols;
+	return join "/", $self->get(@cols);
+}
+
+sub _undefined_primary {
+	my $self = shift;
+	return grep !defined, $self->_attrs($self->primary_columns);
+}
 
 #
 # Override the Class::DBI _croak() method to throw an exception instead of croaking
@@ -79,9 +96,7 @@ sub get_now {
 		$row[0];
 	};
 	if ($@) {
-		return $class->_croak(
-			"Can't select for $class using '$sth->{Statement}': $@",
-			err => $@);
+		return $class->_croak("Can't select for $class using '$sth->{Statement}': $@", err => $@);
 	}
 	return $val;
 }
@@ -97,10 +112,6 @@ sub ignore_changes {
 	my $self = shift;
 	delete $self->{__Changed};
 
-	if ($self->can('details')) {
-		$self->details->ignore_changes;
-	}
-	
 	return $self;
 }
 

@@ -23,7 +23,6 @@ package CUFTS::DB::Sites;
 use strict;
 use base 'CUFTS::DB::DBI';
 
-use CUFTS::DB::SiteDetails;
 use CUFTS::DB::Accounts_Sites;
 use CUFTS::DB::SiteIPs;
 use CUFTS::DB::SiteDomains;
@@ -45,21 +44,6 @@ __PACKAGE__->columns(
 
         active
 
-        created
-        modified
-        )
-);
-__PACKAGE__->columns( Essential => __PACKAGE__->columns );
-
-__PACKAGE__->sequence('sites_id_seq');
-
-__PACKAGE__->has_many( 'accounts', [ 'CUFTS::DB::Accounts_Sites' => 'account' ], 'site' );
-__PACKAGE__->has_many( 'ips'     => 'CUFTS::DB::SiteIPs' );
-__PACKAGE__->has_many( 'domains' => 'CUFTS::DB::SiteDomains' );
-
-__PACKAGE__->has_details( 'details', 'CUFTS::DB::SiteDetails' => 'site' );
-__PACKAGE__->details_columns(
-    qw(
         cjdb_results_per_page
         cjdb_unified_journal_list
         cjdb_show_citations
@@ -100,7 +84,42 @@ __PACKAGE__->details_columns(
         google_scholar_other_link_label
         google_scholar_openurl_base
         google_scholar_other_xml
-    )
+
+
+        created
+        modified
+
+        )
 );
+
+__PACKAGE__->columns( Essential => qw(
+    id
+
+    key
+    name
+
+    proxy_prefix
+    proxy_prefix_alternate
+    proxy_WAM
+    email
+
+    cjdb_authentication_module
+    cjdb_authentication_server
+    cjdb_results_per_page
+    cjdb_unified_journal_list
+    cjdb_show_citations
+    cjdb_hide_citation_coverage
+
+    active
+
+    created
+    modified
+));
+
+__PACKAGE__->sequence('sites_id_seq');
+
+__PACKAGE__->has_many( 'accounts', [ 'CUFTS::DB::Accounts_Sites' => 'account' ], 'site' );
+__PACKAGE__->has_many( 'ips'     => 'CUFTS::DB::SiteIPs' );
+__PACKAGE__->has_many( 'domains' => 'CUFTS::DB::SiteDomains' );
 
 1;

@@ -20,7 +20,6 @@
 
 package CUFTS::DB::Journals;
 
-use CUFTS::DB::JournalDetails;
 use CUFTS::DB::LocalJournals;
 use CUFTS::DB::Resources;
 
@@ -53,6 +52,16 @@ __PACKAGE__->columns(All => qw(
 	embargo_months
 	embargo_days
 
+	db_identifier	
+	toc_url
+	journal_url
+	urlbase
+	publisher
+	abbreviation
+	current_months
+	current_years
+	cjdb_note
+
 	journal_auth
 
 	created
@@ -69,22 +78,6 @@ __PACKAGE__->has_many('localjournals', 'CUFTS::DB::LocalJournals' => 'journal');
 __PACKAGE__->has_a('resource', 'CUFTS::DB::Resources');
 __PACKAGE__->has_a('journal_auth', 'CUFTS::DB::JournalsAuth');
 
-__PACKAGE__->has_details('details', 'CUFTS::DB::JournalDetails' => 'journal');
-
-__PACKAGE__->details_columns(qw/
-	db_identifier	
-	toc_url
-	journal_url
-	urlbase
-	publisher
-	abbreviation
-	current_months
-	current_years
-	cjdb_note
-/);
-
-
-# -----
 
 sub normalize_column_values {
 	my ($self, $values) = @_;

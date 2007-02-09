@@ -21,7 +21,6 @@
 package CUFTS::DB::LocalResources;
 
 use CUFTS::DB::LocalJournals;
-use CUFTS::DB::LocalResourceDetails;
 use CUFTS::DB::HiddenFields;
 use CUFTS::DB::LocalResources_Services;
 use CUFTS::DB::Resources;
@@ -62,27 +61,8 @@ __PACKAGE__->columns(All => qw(
 		
 	title_list_scanned
 
-	created
-	modified
-));                                                                                                        
-__PACKAGE__->columns(Essential => __PACKAGE__->columns());
-
-__PACKAGE__->sequence('local_resources_id_seq');
-
-__PACKAGE__->has_a('resource_type' => 'CUFTS::DB::ResourceTypes');
-__PACKAGE__->has_a('resource' => 'CUFTS::DB::Resources');
-__PACKAGE__->has_a('site' => 'CUFTS::DB::Sites');
-
-__PACKAGE__->has_many('services', ['CUFTS::DB::LocalResources_Services' => 'service'], 'local_resource');
-__PACKAGE__->has_many('hidden_fields', ['CUFTS::DB::HiddenFields' => 'field'], 'resource');
-__PACKAGE__->has_many('local_journals' => 'CUFTS::DB::LocalJournals');
-
-__PACKAGE__->add_trigger('before_delete' => \&delete_titles);
-
-__PACKAGE__->has_details('details', 'CUFTS::DB::LocalResourceDetails' => 'local_resource');
-__PACKAGE__->details_columns(qw/
 	cjdb_note
-	
+
 	erm_basic_name
 	erm_basic_vendor
 	erm_basic_publisher
@@ -99,9 +79,9 @@ __PACKAGE__->details_columns(qw/
 	erm_datescosts_notes
 
 	erm_statistics_notes
-	
+
 	erm_admin_notes
-	
+
 	erm_terms_simultaneous_users
 	erm_terms_allows_ill
 	erm_terms_ill_notes
@@ -110,11 +90,63 @@ __PACKAGE__->details_columns(qw/
 	erm_terms_allows_coursepacks
 	erm_terms_coursepacks_notes
 	erm_terms_notes
-	
+
 	erm_contacts_notes
-	
+
 	erm_misc_notes
-/);
+
+	created
+	modified
+));                      
+
+                                                                                  
+__PACKAGE__->columns(Essential => qw(
+	id
+
+	site
+	
+	name
+
+	resource
+	
+	provider
+	resource_type
+
+	module
+
+	proxy
+	dedupe
+	auto_activate
+	rank
+
+	resource_identifier
+	database_url
+	auth_name
+	auth_passwd
+	url_base
+	proxy_suffix
+
+	active
+		
+	title_list_scanned
+
+	cjdb_note
+
+	created
+	modified
+));
+
+__PACKAGE__->sequence('local_resources_id_seq');
+
+__PACKAGE__->has_a('resource_type' => 'CUFTS::DB::ResourceTypes');
+__PACKAGE__->has_a('resource' => 'CUFTS::DB::Resources');
+__PACKAGE__->has_a('site' => 'CUFTS::DB::Sites');
+
+__PACKAGE__->has_many('services', ['CUFTS::DB::LocalResources_Services' => 'service'], 'local_resource');
+__PACKAGE__->has_many('hidden_fields', ['CUFTS::DB::HiddenFields' => 'field'], 'resource');
+__PACKAGE__->has_many('local_journals' => 'CUFTS::DB::LocalJournals');
+
+__PACKAGE__->add_trigger('before_delete' => \&delete_titles);
 
 
 sub record_count {
@@ -152,10 +184,6 @@ sub do_module {
 			
 	$module = $CUFTS::Config::CUFTS_MODULE_PREFIX . $module;
 	
-	eval "use $module";
-	die if $@;
-
-	no strict 'refs';
 	return $module->$method(@args);
 }	
 
@@ -174,19 +202,13 @@ sub _tivate_titles {
 
 	my $module = $CUFTS::Config::CUFTS_MODULE_PREFIX;
 	$module .= defined($self->module) ? $self->module : $global_resource->module;
-	eval "use $module";
-	die if $@;
 
 	my $local_titles_module = $module->local_db_module or
 		die("No local title module for resource when attempting bulk activation");
-	eval "use $local_titles_module";
-	die if $@;
 
 	if (defined($global_resource)) {
 		my $global_titles_module = $module->global_db_module or
 			die("No global title module for resource when attempting bulk activation");
-		eval "use $global_titles_module";
-		die if $@;
 
 		my $global_titles = $global_titles_module->search( resource => $global_resource->id );
 		my $local_to_global_field = $module->local_to_global_field;
