@@ -56,7 +56,7 @@ while (my $site = $site_iter->next) {
 		$smtp->quit();
 	}
 			
-	$site->details->set('test_MARC_file', undef);
+	$site->set('test_MARC_file', undef);
 	$site->update;
 	$site->dbi_commit;
 
