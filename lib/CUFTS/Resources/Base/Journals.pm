@@ -276,9 +276,9 @@ sub clean_data_dates {
 sub _find_existing_title {
     my ( $class, $resource_id, $record, $local ) = @_;
 
-    $^W    = 0;
+#    $^W    = 0;
     $local = ( $local == 1 || $local eq 'local' ) ? 'local' : 'global';
-    $^W    = 1;
+#    $^W    = 1;
 
     no strict 'refs';
 
@@ -309,7 +309,7 @@ sub _find_existing_title {
 
     # Turn off warnings because of the large number of eq matches against undef fields below.
 
-    $^W = 0;
+#    $^W = 0;
 
 TITLE:
     foreach my $title (@titles) {
@@ -328,17 +328,10 @@ TITLE:
                 unless $title->$column eq $record->{$column};
         }
 
-        # Check detail columns
-        foreach my $column ( $title->details->columns ) {
-
-#			print STDERR $title->details->$column . ' -- ' . $record->{$column} . "\n";
-            next TITLE
-                unless $title->details->$column eq $record->{$column};
-        }
         push @matched_titles, $title;
     }
 
-    $^W = 1;
+#    $^W = 1;
 
     scalar(@matched_titles) > 1
         and CUFTS::Exception::App->throw('Multiple matching title rows found while updating.');
@@ -352,9 +345,9 @@ TITLE:
 sub _find_partial_match {
     my ( $class, $resource_id, $record, $local ) = @_;
 
-    $^W    = 0;
+#    $^W    = 0;
     $local = ( $local == 1 || $local eq 'local' ) ? 'local' : 'global';
-    $^W    = 1;
+#    $^W    = 1;
 
     no strict 'refs';
 
@@ -384,11 +377,9 @@ sub _modify_record {
 
     $class->log_modified_title( $resource, $old_record, $new_record, $timestamp, $local );
 
-    my @columns = ( $old_record->columns, $old_record->details_columns );
+#    $^W = 0; # Turn off warnings because of the large number of eq matches against undef fields below.
 
-    $^W = 0; # Turn off warnings because of the large number of eq matches against undef fields below.
-
-    foreach my $column (@columns) {
+    foreach my $column ( $old_record->columns ) {
         next
             if grep { $column eq $_ } qw{ id created modified scanned resource active journal_auth };
 
@@ -402,7 +393,7 @@ sub _modify_record {
         }
     }
 
-    $^W = 1;
+#    $^W = 1;
 
     if ( $local eq 'local' ) {
         $old_record->active('t');
@@ -581,8 +572,6 @@ sub _search_active {
         if defined( $class->global_db_module );
     my $local_module = $class->local_db_module
         if defined( $class->local_db_module );
-    $class->__require($global_module) if defined($global_module);
-    $class->__require($local_module)  if defined($local_module);
 
     my $global = defined( $resource->resource ) ? 1 : 0;
     my $search_module = $global ? $global_module : $local_module;
@@ -938,19 +927,12 @@ sub activate_all {
     foreach my $local_resource (@local_resources) {
 
         my $global_titles_module = $class->global_db_module
-            or CUFTS::Exception::App::CGI->throw(
-            "Attempt to view local title list for resource type without global list module.  Resource id: $resource_id"
-            );
-        $class->__require($global_titles_module);
+            or CUFTS::Exception::App::CGI->throw("Attempt to view local title list for resource type without global list module.  Resource id: $resource_id");
 
         my $local_titles_module = $class->local_db_module
-            or CUFTS::Exception::App::CGI->throw(
-            "Attempt to view local title list for resource type without local list module.  Resource id: $resource_id"
-            );
-        $class->__require($local_titles_module);
+            or CUFTS::Exception::App::CGI->throw("Attempt to view local title list for resource type without local list module.  Resource id: $resource_id");
 
-        my $global_titles
-            = $global_titles_module->search( 'resource' => $resource_id );
+        my $global_titles = $global_titles_module->search( 'resource' => $resource_id );
         my $local_to_global_field = $class->local_to_global_field;
 
         local $local_titles_module->db_Main->{AutoCommit};
