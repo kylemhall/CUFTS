@@ -741,7 +741,7 @@ sub create_brief_MARC {
 
     # ISSNs
 
-	foreach my $issn ( map {$_->issn} $journals_auth->issns ) {
+	foreach my $issn ( map {$_->issn_dash} $journals_auth->issns ) {
 		$MARC_record->append_fields( MARC::Field->new( '022', '#', '#', 'a' => $issn ) );
 	}
 
