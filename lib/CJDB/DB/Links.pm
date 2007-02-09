@@ -71,11 +71,9 @@ sub local_resource {
 }
 
 __PACKAGE__->set_sql(display => qq{
-    SELECT * FROM cjdb_links
-    LEFT OUTER JOIN (
-        SELECT local_journal, value AS journal_cjdb_note FROM local_journal_details WHERE field = 'cjdb_note'
-    ) AS lj
-    ON cjdb_links.local_journal = lj.local_journal
+    SELECT cjdb_links.*, local_journals.cjdb_note AS journal_cjdb_note FROM cjdb_links
+    LEFT OUTER JOIN local_journals 
+    ON cjdb_links.local_journal = local_journals.id
     WHERE cjdb_links.journal = ?;
 });
 
