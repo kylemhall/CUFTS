@@ -506,18 +506,26 @@ sub get_cufts_ft_coverage {
         }
 
         $ft_coverage .= ' - ';
-        $ft_coverage .= $local_journal->ft_end_date;
 
-        if (   defined( $local_journal->vol_ft_end ) || defined( $local_journal->iss_ft_end ) ) {
-            $ft_coverage .= ' (';
-            defined( $local_journal->vol_ft_end )
-                and $ft_coverage .= 'v.' . $local_journal->vol_ft_end;
-            if ( defined( $local_journal->iss_ft_end ) ) {
+	my $end_date = $local_journal->ft_end_date;
+	$end_date =~ s/\-//g;
+	
+	my $current_date = get_current_date();
+	if ( $end_date <= $current_date ) {
+
+            $ft_coverage .= $local_journal->ft_end_date;
+
+            if (   defined( $local_journal->vol_ft_end ) || defined( $local_journal->iss_ft_end ) ) {
+                $ft_coverage .= ' (';
                 defined( $local_journal->vol_ft_end )
-                    and $ft_coverage .= ' ';
-                $ft_coverage .= 'i.' . $local_journal->iss_ft_end;
+                    and $ft_coverage .= 'v.' . $local_journal->vol_ft_end;
+                if ( defined( $local_journal->iss_ft_end ) ) {
+                    defined( $local_journal->vol_ft_end )
+                        and $ft_coverage .= ' ';
+                    $ft_coverage .= 'i.' . $local_journal->iss_ft_end;
+                }
+                $ft_coverage .= ')';
             }
-            $ft_coverage .= ')';
         }
     }
 
@@ -982,4 +990,13 @@ sub latin1_to_marc8 {
 
     return $output;
 }
+
+sub get_current_date {
+	my ( $day, $mon, $year ) = (localtime())[3..5];
+	$mon += 1;
+	$year += 1900;
+	
+	return sprintf( "%04i%02i%02i", $year, $mon, $day );
+}
+
 
