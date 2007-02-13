@@ -21,6 +21,9 @@ CREATE TABLE resources (
     url_base            VARCHAR(1024),
     proxy_suffix        VARCHAR(1024),
 
+    notes_for_local     TEXT,
+    cjdb_note           TEXT,
+
     created     TIMESTAMP NOT NULL DEFAULT NOW(),
     modified    TIMESTAMP NOT NULL DEFAULT NOW()
 );
