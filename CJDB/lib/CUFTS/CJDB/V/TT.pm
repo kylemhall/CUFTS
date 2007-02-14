@@ -6,9 +6,7 @@ use base qw/Catalyst::View::TT/;
 use Template::Config;
 $Template::Config::STASH = 'Template::Stash::XS';
 
-__PACKAGE__->config->{WRAPPER} = 'layout.tt';
-
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 $Template::Stash::LIST_OPS->{ in } = sub {
 	my ($list, $val, $field) = @_;
