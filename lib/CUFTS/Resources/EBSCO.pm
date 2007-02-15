@@ -283,7 +283,9 @@ EOT
 
     $xml_string .= '   <user-id>' . $resource->auth_name . "</user-id>\n";
     $xml_string .= "   <authenticated-databases>\n";
-    $xml_string .= '    <db>' . $resource->resource_identifier . "</db>\n";
+    my $db = $resource->resource_identifier;
+    $db =~ s/&.+$//;  # remove possible trailing "&site=bsi"
+    $xml_string .= "    <db>$db</db>\n";
 
     $xml_string .= <<EOT
    </authenticated-databases>
@@ -398,9 +400,9 @@ sub fulltext_ebsco {
     my ( $class, $text, $record, $resource, $site, $request ) = @_;
 
     my @results;
-    while ( $text =~ m#<object-information>(.+?)</object-information>#g ) {
+    while ( $text =~ m#<object-information>(.+?)</object-information>#sgi ) {
         my $object = $1;
-        next unless $object =~ m#<URL>(.+?)</URL>#;
+        next unless $object =~ m#<URL>(.+?)</URL>#s;
 
         my $url = HTML::Entities::decode($1);
 
