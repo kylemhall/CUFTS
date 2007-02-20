@@ -244,18 +244,22 @@ sub load_titles {
                || is_empty_string($title->[1]);
                
         next if length($title) > 1024;
-        
-        my $record = {
-            'journal'      => $journal->id,
-            'site'         => $site_id,
-            'search_title' => $title->[0],
-            'title'        => $title->[1],
-        };
-        if ( $title->[2] ) {
-            $record->{'main'} = 1;
-        }
 
-        CJDB::DB::Titles->find_or_create($record);
+        my $title_id = CJDB::DB::Titles->find_or_create(
+            {
+                title        => $title->[1],
+                search_title => $title->[0],
+            }
+        )->id;
+        
+        CJDB::DB::JournalsTitles->find_or_create(
+            {
+                journal => $journal->id,
+                title   => $title_id,
+                main    => $title->[2] ? 1 : 0,
+                site    => $site_id,
+            }
+        );
 
         $count++;
     }
