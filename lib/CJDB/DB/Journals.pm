@@ -22,7 +22,7 @@ package CJDB::DB::Journals;
 
 use strict;
 use base 'CJDB::DB::DBI';
-use CJDB::DB::Titles;
+use CJDB::DB::JournalsTitles;
 use CJDB::DB::Links;
 use CJDB::DB::Subjects;
 use CJDB::DB::Relations;
@@ -53,9 +53,10 @@ __PACKAGE__->columns(All => qw(
 	created
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
+__PACKAGE__->columns(TEMP => qw( result_title ) );
 __PACKAGE__->sequence('cjdb_journals_id_seq');
 
-__PACKAGE__->has_many('titles', 'CJDB::DB::Titles' => 'journal');
+__PACKAGE__->has_many('titles', [ 'CJDB::DB::JournalsTitles' => 'title' ] );
 __PACKAGE__->has_many('links', 'CJDB::DB::Links' => 'journal');
 __PACKAGE__->has_many('subjects', 'CJDB::DB::Subjects' => 'journal');
 __PACKAGE__->has_many('associations', 'CJDB::DB::Associations' => 'journal');
@@ -263,6 +264,8 @@ sub display_links {
 }
 
 
+# Not moved to new database layout, see if it breaks (might not be used anywhere)
+
 __PACKAGE__->set_sql('distinct_by_title' => qq{
 	SELECT DISTINCT cjdb_journals.*
 	FROM cjdb_journals JOIN cjdb_titles ON (cjdb_journals.id = cjdb_titles.journal)
@@ -271,5 +274,114 @@ __PACKAGE__->set_sql('distinct_by_title' => qq{
 });
 
 
-	
+
+sub search_distinct_title_by_journal_main {
+    my ($class, $site, $title, $offset, $limit) = @_;
+
+    $limit  ||= 'ALL';
+    $offset ||= 0;
+
+    my $sql = qq{
+        SELECT cjdb_journals.*, titles_sorted.title AS result_title FROM (
+            SELECT DISTINCT ON (cjdb_journals_titles.journal) cjdb_titles.title, cjdb_titles.search_title, cjdb_journals_titles.journal AS journal_id 
+            FROM cjdb_titles
+            JOIN cjdb_journals_titles ON (cjdb_titles.id = cjdb_journals_titles.title)
+            WHERE cjdb_journals_titles.site = ?
+            AND cjdb_titles.search_title LIKE ?
+            ORDER BY cjdb_journals_titles.journal, cjdb_journals_titles.main DESC
+        ) AS titles_sorted
+        JOIN cjdb_journals ON (cjdb_journals.id = titles_sorted.journal_id)
+        ORDER BY titles_sorted.search_title
+        LIMIT $limit OFFSET $offset
+    };
+
+    my $sth = $class->db_Main()->prepare($sql, {pg_server_prepare => 0});
+    my @results = $class->sth_to_objects( $sth, [$site, $title] );
+    return \@results;
+}    
+
+sub search_re_distinct_title_by_journal_main {
+    my ($class, $site, $title, $offset, $limit) = @_;
+
+    $limit  ||= 'ALL';
+    $offset ||= 0;
+
+    my $sql = qq{
+        SELECT cjdb_journals.*, titles_sorted.title AS result_title FROM (
+            SELECT DISTINCT ON (cjdb_journals_titles.journal) cjdb_titles.title, cjdb_titles.search_title, cjdb_journals_titles.journal AS journal_id 
+            FROM cjdb_titles
+            JOIN cjdb_journals_titles ON (cjdb_titles.id = cjdb_journals_titles.title)
+            WHERE cjdb_journals_titles.site = ?
+            AND cjdb_titles.search_title ~ ?
+            ORDER BY cjdb_journals_titles.journal, cjdb_journals_titles.main DESC
+        ) AS titles_sorted
+        JOIN cjdb_journals ON (cjdb_journals.id = titles_sorted.journal_id)
+        ORDER BY titles_sorted.search_title
+        LIMIT $limit OFFSET $offset
+    };
+
+    my $sth = $class->db_Main()->prepare($sql, {pg_server_prepare => 0});
+    my @results = $class->sth_to_objects( $sth, [$site, $title] );
+    return \@results;
+}    
+
+
+sub search_distinct_title_by_journal_main_combined {
+    my ($class, $join_type, $site, $search, $offset, $limit) = @_;
+
+    # Return an empty set if there were no search terms
+
+    return [] if scalar(@$search) == 0;
+
+    $limit  ||= 'ALL';
+    $offset ||= 0;
+
+    my @search_terms = map { '[[:<:]]' . $_ . '[[:>:]]' } @$search;
+    
+    my $search_string;
+
+    foreach my $x (0 .. $#search_terms - 1) {
+        $search_string .= ' cjdb_titles.search_title ~ ? ' . $join_type;
+    }
+    $search_string .= ' cjdb_titles.search_title ~ ?';
+
+
+    my $sql = qq{
+        SELECT cjdb_journals.*, titles_sorted.title AS result_title FROM (
+            SELECT DISTINCT ON (cjdb_journals_titles.journal) cjdb_titles.title, cjdb_titles.search_title, cjdb_journals_titles.journal AS journal_id 
+            FROM cjdb_titles
+            JOIN cjdb_journals_titles ON (cjdb_titles.id = cjdb_journals_titles.title)
+            WHERE cjdb_journals_titles.site = ?
+            AND ( $search_string )
+            ORDER BY cjdb_journals_titles.journal, cjdb_journals_titles.main DESC
+        ) AS titles_sorted
+        JOIN cjdb_journals ON (cjdb_journals.id = titles_sorted.journal_id)
+        ORDER BY titles_sorted.search_title
+        LIMIT $limit OFFSET $offset
+    };
+
+    my @bind = ($site, @search_terms);
+
+    warn($sql);
+
+    my $sth = $class->db_Main()->prepare($sql, {pg_server_prepare => 0});
+    my @results = $class->sth_to_objects($sth, \@bind);
+
+    return \@results;
+}
+
+sub search_distinct_title_by_journal_main_any {
+    my ($class, $site, $search, $offset, $limit) = @_;
+
+    return $class->search_distinct_title_by_journal_main_combined('OR', $site, $search, $offset, $limit);
+}
+
+sub search_distinct_title_by_journal_main_all {
+    my ($class, $site, $search, $offset, $limit) = @_;
+
+    return $class->search_distinct_title_by_journal_main_combined('AND', $site, $search, $offset, $limit);
+}
+
+
+
 1;
