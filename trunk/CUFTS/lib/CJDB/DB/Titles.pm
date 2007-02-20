@@ -22,128 +22,119 @@ package CJDB::DB::Titles;
 
 use strict;
 use base 'CJDB::DB::DBI';
-use CJDB::DB::Journals;
+use CJDB::DB::JournalsTitles;
 
 __PACKAGE__->table('cjdb_titles');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
-	id
-
-	journal
-
-	title
-	search_title
-
-	site
-	
-	main
-));                                                                                                        
+    id
+    title
+    search_title
+));                                                                                                    
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 __PACKAGE__->sequence('cjdb_titles_id_seq');
-
-__PACKAGE__->has_a('journal' => 'CJDB::DB::Journals');
+__PACKAGE__->has_many('journals', [ 'CJDB::DB::JournalsTitles' => 'journal' ] );
 
 
 sub search_titlelist {
-	my ($class, $site, $title, $offset, $limit) = @_;
-	
-	$limit ||= 'ALL';
-	$offset ||= 0;
-	
-	my $sql = "SELECT DISTINCT on (search_title) title FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title LIKE ? ORDER BY search_title LIMIT $limit OFFSET $offset";
-	my $dbh = $class->db_Main();
-        my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
-	
-	$sth->execute($site, $title);
-	my $results = $sth->fetchall_arrayref;
-	return $results;
-}		
+    my ($class, $site, $title, $offset, $limit) = @_;
+
+    $limit  ||= 'ALL';
+    $offset ||= 0;
+
+    my $sql = "SELECT DISTINCT on (search_title) title FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title LIKE ? ORDER BY search_title LIMIT $limit OFFSET $offset";
+    my $dbh = $class->db_Main();
+    my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
+
+    $sth->execute($site, $title);
+    my $results = $sth->fetchall_arrayref;
+    return $results;
+}
 
 
 sub search_distinct_by_journal_main {
-	my ($class, $site, $title, $offset, $limit) = @_;
-	
-	$limit ||= 'ALL';
-	$offset ||= 0;
-	
-	my $sql = "SELECT * FROM (SELECT DISTINCT on (journal) * FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title LIKE ? ORDER BY journal, main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
-	my $dbh = $class->db_Main();
-        my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
-	
-	$sth->execute($site, $title);
-	my @results = $class->sth_to_objects($sth);
-	return \@results;
-}		
+    my ($class, $site, $title, $offset, $limit) = @_;
+
+    $limit ||= 'ALL';
+    $offset ||= 0;
+
+    my $sql = "SELECT * FROM (SELECT DISTINCT on (journal) * FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title LIKE ? ORDER BY journal, main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
+    my $dbh = $class->db_Main();
+    my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
+
+    $sth->execute($site, $title);
+    my @results = $class->sth_to_objects($sth);
+    return \@results;
+}    
 
 sub search_re_distinct_by_journal_main {
-	my ($class, $site, $title, $offset, $limit) = @_;
-	
-	$limit ||= 'ALL';
-	$offset ||= 0;
-	
-	my $sql = "SELECT * FROM (SELECT DISTINCT on (journal) * FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title ~ ? ORDER BY journal, main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
-	my $dbh = $class->db_Main();
-        my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
-	
-	$sth->execute($site, $title);
-	my @results = $class->sth_to_objects($sth);
-	return \@results;
-}		
+    my ($class, $site, $title, $offset, $limit) = @_;
+
+    $limit  ||= 'ALL';
+    $offset ||= 0;
+
+    my $sql = "SELECT * FROM (SELECT DISTINCT on (journal) * FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title ~ ? ORDER BY journal, main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
+    my $dbh = $class->db_Main();
+    my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
+
+    $sth->execute($site, $title);
+    my @results = $class->sth_to_objects($sth);
+    return \@results;
+}    
 
 
 sub search_distinct_by_journal_main_combined {
-	my ($class, $join_type, $site, $search, $offset, $limit) = @_;
+    my ($class, $join_type, $site, $search, $offset, $limit) = @_;
 
-	defined($join_type) && ($join_type =~ /^(INTERSECT|UNION|EXCEPT)$/) or
-		CJDB::Exception::DB->throw("Bad join type in search_distinct_by_journal_main_combined: $join_type");
+    defined($join_type) && ($join_type =~ /^(INTERSECT|UNION|EXCEPT)$/) or
+        CJDB::Exception::DB->throw("Bad join type in search_distinct_by_journal_main_combined: $join_type");
 
 
-	# Return an empty set if there were no search terms
+    # Return an empty set if there were no search terms
 
-	scalar(@$search) == 0 and
-		return [];
+    return [] if scalar(@$search) == 0;
 
-	$limit ||= 'ALL';
-	$offset ||= 0;
+    $limit ||= 'ALL';
+    $offset ||= 0;
 
-	foreach my $x (0..$#$search) {
-		$search->[$x] = '\m' . $search->[$x] . '\M';
-	}
+    foreach my $x (0..$#$search) {
+        $search->[$x] = '\m' . $search->[$x] . '\M';
+    }
 
-	my $search_string = 'SELECT * FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title ~ ?';
+    my $search_string = 'SELECT * FROM cjdb_titles WHERE cjdb_titles.site = ? AND cjdb_titles.search_title ~ ?';
 
-	my $sql = 'SELECT * FROM (SELECT DISTINCT ON (journal) * FROM (';
-	
-	$sql .= $search_string;
-	foreach my $count (1 .. (scalar(@$search) - 1)) {
-		$sql .= " $join_type $search_string";
-	}
+    my $sql = 'SELECT * FROM (SELECT DISTINCT ON (journal) * FROM (';
 
-	$sql .= ") AS combined_journals ORDER BY journal,main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
+    $sql .= $search_string;
+    foreach my $count (1 .. (scalar(@$search) - 1)) {
+        $sql .= " $join_type $search_string";
+    }
 
-	my @bind;
-	foreach my $search_term (@$search) {
-		push @bind, ($site, $search_term);
-	}
+    $sql .= ") AS combined_journals ORDER BY journal,main DESC) AS titles_sorted ORDER BY titles_sorted.search_title LIMIT $limit OFFSET $offset";
 
-	my $dbh = $class->db_Main();
-	my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
-	$sth->execute(@bind);
-	my @results = $class->sth_to_objects($sth);	
-	
-	return \@results;
+    my @bind;
+    foreach my $search_term (@$search) {
+        push @bind, ($site, $search_term);
+    }
+
+    my $dbh = $class->db_Main();
+    my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
+    $sth->execute(@bind);
+    my @results = $class->sth_to_objects($sth);
+
+    return \@results;
 }
 
 sub search_distinct_by_journal_main_union {
-	my ($class, $site, $search, $offset, $limit) = @_;
-	
-	return $class->search_distinct_by_journal_main_combined('UNION', $site, $search, $offset, $limit);
+    my ($class, $site, $search, $offset, $limit) = @_;
+
+    return $class->search_distinct_by_journal_main_combined('UNION', $site, $search, $offset, $limit);
 }
 
 sub search_distinct_by_journal_main_intersect {
-	my ($class, $site, $search, $offset, $limit) = @_;
-	
-	return $class->search_distinct_by_journal_main_combined('INTERSECT', $site, $search, $offset, $limit);
+    my ($class, $site, $search, $offset, $limit) = @_;
+
+    return $class->search_distinct_by_journal_main_combined('INTERSECT', $site, $search, $offset, $limit);
 }
 
 1;
