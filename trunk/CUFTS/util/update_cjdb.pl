@@ -603,12 +603,19 @@ sub build_basic_record {
     my $journal    = CJDB::DB::Journals->create($record);
     my $journal_id = $journal->id;
 
-    CJDB::DB::Titles->create(
-        {   'journal'      => $journal_id,
-            'site'         => $site->id,
-            'search_title' => $stripped_sort_title,
-            'title'        => $sort_title,
-            'main'         => 1,
+    my $title_id = CJDB::DB::Titles->find_or_create(
+        {
+            search_title => $stripped_sort_title,
+            title        => $sort_title,
+        }
+    )->id;
+
+    CJDB::DB::JournalsTitles->find_or_create(
+        {
+            title   => $title_id,
+            journal => $journal->id,
+            site    => $site->id,
+            main    => 1,
         }
     );
 
@@ -658,18 +665,21 @@ SKIP_WORD:
 
         next if length($title) > 1024;
 
-        my $record = {
-            'journal'      => $journal->id,
-            'site'         => $site->id,
-            'search_title' => $stripped_title,
-        };
+        my $title_id = CJDB::DB::Titles->find_or_create(
+            {
+                search_title => $stripped_title,
+                title        => $title,
+            }
+        )->id;
 
-        my @check_titles = CJDB::DB::Titles->search( $record );
-        next ALT_TITLE if ( scalar(@check_titles) );
+        CJDB::DB::JournalsTitles->find_or_create(
+            {
+                title   => $title_id,
+                journal => $journal->id,
+                site    => $site->id,
+            }
+        );
 
-        $record->{'title'} = $title,
-
-        CJDB::DB::Titles->create($record);
     }
 }
 
@@ -967,7 +977,7 @@ sub clear_site {
     # being called.
 
     my $dbh = CJDB::DB::DBI->db_Main;
-    foreach my $table ( qw(cjdb_associations cjdb_journals cjdb_links cjdb_subjects cjdb_titles cjdb_issns cjdb_relations) ) {
+    foreach my $table ( qw(cjdb_associations cjdb_journals cjdb_links cjdb_subjects cjdb_journals_titles cjdb_issns cjdb_relations) ) {
         print "Deleting from table $table... ";
         $dbh->do("DELETE FROM $table WHERE site=$site_id");
         print "done\n";
