@@ -175,15 +175,15 @@ sub titles : Local {
         $start_record = $c->req->params->{start_record} || 0;
             
         # Build list of start/end titles and indexes
-    
+
         my $x = 0;
         while ($x < $search_details->{count}) {
             my $y = min( ($x + $search_details->{per_page} - 1), ($search_details->{count} - 1) );
-            push @{$search_details->{indexes}}, [$x, $titles->[$x]->title, $titles->[$y]->title];
+            push @{$search_details->{indexes}}, [$x, $titles->[$x]->result_title, $titles->[$y]->result_title];
             $x += $search_details->{per_page};
         }
 
-        my $slice_max = min($#$titles, ($start_record + $search_details->{per_page} - 1));    
+        my $slice_max = min( $#$titles, ($start_record + $search_details->{per_page} - 1) );    
         @$titles = @$titles[$start_record .. $slice_max];
 
         $c->session->{search_details}->{$c->stash->{current_site}->id}->{title}->{$search_type}->{$search_term} = $search_details;
@@ -194,7 +194,7 @@ sub titles : Local {
     $c->stash->{start_record}   = $start_record;
     $c->stash->{browse_type}    = 'titles';
     $c->stash->{browse_field}   = 'title';
-    $c->stash->{search_terms}   = [$c->req->params->{search_terms}];
+    $c->stash->{search_terms}   = [ $c->req->params->{search_terms} ];
     $c->stash->{show_unified}   = $c->stash->{current_site}->cjdb_unified_journal_list eq 'unified' ? 1 : 0;
 
     $c->stash->{template} = 'browse_journals.tt';
