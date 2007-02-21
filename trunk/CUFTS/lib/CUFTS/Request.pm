@@ -263,6 +263,12 @@ sub _cleanup {
         $self->title( $self->jtitle );
     }
 
+    # Default to article genre
+
+    if ( is_empty_string( $self->genre ) ) {
+        $self->genre('article');
+    }
+
     return $self;
 }
 
