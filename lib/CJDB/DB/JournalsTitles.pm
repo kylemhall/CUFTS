@@ -37,7 +37,7 @@ __PACKAGE__->columns(
 ));
 
 __PACKAGE__->columns( Essential => __PACKAGE__->columns );
-__PACKAGE__->sequence('new_cjdb_journal_title_id_seq');
+__PACKAGE__->sequence('cjdb_journals_titles_id_seq');
 
 __PACKAGE__->has_a( 'journal' => 'CJDB::DB::Journals' );
 __PACKAGE__->has_a( 'title'   => 'CJDB::DB::Titles' );
