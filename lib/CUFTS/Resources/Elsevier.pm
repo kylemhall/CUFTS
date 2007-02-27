@@ -24,6 +24,8 @@ use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use Date::Calc qw(Delta_Days Today);
+
 
 use strict;
 
@@ -56,10 +58,17 @@ sub resource_details_help {
 
 sub title_list_field_map {
     return {
-        'Publication Title' => 'title',
-        'ISSN'              => 'issn',
-        'Doc URL'           => 'journal_url',
+        'Publication Name'  => 'title',
+        'Issn'              => 'issn',
+        'Home Page URL'     => 'journal_url',
         'Publisher'         => 'publisher',
+
+        'Coverage Begins Volume' => 'vol_ft_start',
+        'Coverage Begins Issue'  => 'iss_ft_start',
+        'Coverage Begins Date'   => 'ft_start_date',
+        'Coverage Ends Volume'   => 'vol_ft_end',
+        'Coverage Ends Issue'    => 'iss_ft_end',
+        'Coverage Ends Date'     => 'ft_end_date',
     };
 }
 
@@ -78,62 +87,38 @@ sub title_list_split_row {
     return \@fields;
 }
 
+sub skip_record {
+    my ( $class, $record ) = @_;
+    
+    return 1 if not_empty_string( $record->{'___Remarks'} ) 
+             && $record->{'___Remarks'} =~ /not\s+available/i;
+    return 0;
+}
+
+
 sub clean_data {
     my ( $class, $record ) = @_;
-
-    if ( defined( $record->{'___Coverage Begins'} ) ) {
-        if ( $record->{'___Coverage Begins'} =~ / vol [^0-9]+ ([0-9]+) /xsmi ) {
-            $record->{vol_ft_start} = $1;
-        }
-        if ( $record->{'___Coverage Begins'} =~ / iss [^0-9]+ ([0-9]+)/xsmi ) {
-            $record->{iss_ft_start} = $1;
-        }
-
-        if ( $record->{'___Coverage Begins'} =~ / \( \s* (\d+) \s+ (\w+) \s+ (\d{4}) \s* \) /xsmi )
-        {
+    
+    if ( not_empty_string( $record->{ft_start_date} ) ) {
+        if ( $record->{ft_start_date} =~ /(\d+)-(\w+)-(\d{4})/ ) {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
-            $month = get_month( $month, 'start' );
-            $record->{ft_start_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
-        }
-        elsif ( $record->{'___Coverage Begins'} =~ / \( \s* ([a-zA-Z]+) \s* -? \s* [a-zA-Z]* \s+ (\d{4}) \s* \) /xsmi )
-        {
-            my ( $month, $year ) = ( $1, $2 );
-            $month = get_month( $month, 'start' );
-            $record->{ft_start_date} = sprintf( "%04d-%02d", $year, $month );
-        }
-        elsif ( $record->{'___Coverage Begins'} =~ / \( \s* (\d{4}) /xsmi ) {
-            $record->{ft_start_date} = $1;
+            $month = get_month($month, 'start');
+            $record->{ft_start_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
         }
     }
 
-    if ( defined( $record->{'___Coverage Ends'} ) ) {
-        if ( $record->{'___Coverage Ends'} =~ / vol [^0-9]+ [0-9]+ - ([0-9]+) /xsmi ) {
-            $record->{vol_ft_end} = $1;
-        }
-        elsif ( $record->{'___Coverage Ends'} =~ / vol [^0-9]+ ([0-9]+) /xsmi ) {
-            $record->{vol_ft_end} = $1;
-        }
-        if ( $record->{'___Coverage Ends'} =~ / iss [^0-9]+ [0-9]+ - ([0-9]+) /xsmi ) {
-            $record->{iss_ft_end} = $1;
-        }
-        elsif ( $record->{'___Coverage Ends'} =~ / iss [^0-9]+ ([0-9]+) /xsmi ) {
-            $record->{iss_ft_end} = $1;
-        }
-
-        if ( $record->{'___Coverage Ends'} =~ / \( \s* (\d+) \s+ (\w+) \s+ (\d{4}) \s* \) /xsm )
-        {
+    if ( not_empty_string( $record->{ft_end_date} ) ) {
+        if ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d{4})/ ) {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
-            $month = get_month( $month, 'end' );
-            $record->{ft_end_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
-        }
-        elsif ( $record->{'___Coverage Ends'} =~ / \( \s* [a-zA-Z]*? \s* -? \s* ([a-zA-Z]+) \s+ (\d{4}) \s* \) /xsm )
-        {
-            my ( $month, $year ) = ( $1, $2 );
-            $month = get_month( $month, 'end' );
-            $record->{ft_end_date} = sprintf( "%04d-%02d", $year, $month );
-        }
-        elsif ( $record->{'___Coverage Ends'} =~ / (\d{4}) \s* \) /xsm ) {
-            $record->{ft_end_date} = $1;
+            $month = get_month($month, 'end');
+            if ( Delta_Days( $year, $month, $day, Today() ) > 240 ) {
+                $record->{ft_end_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
+            }
+            else {
+                delete $record->{ft_end_date};
+                delete $record->{vol_ft_end};
+                delete $record->{iss_ft_end};
+            }
         }
     }
 
