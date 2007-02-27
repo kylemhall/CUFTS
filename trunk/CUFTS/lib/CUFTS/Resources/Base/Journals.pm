@@ -228,6 +228,22 @@ sub clean_data {
     {
         push @errors, 'Neither ISSN or title are defined';
     }
+    
+    # Clean up volume and issue ranges
+    
+    foreach my $field ( qw( vol_ft_start iss_ft_start vol_cit_start iss_cit_start ) ) {
+        if ( not_empty_string($record->{$field}) ) {
+            $record->{$field} =~ s/-.*$//;
+        }
+    }
+
+    foreach my $field ( qw( vol_ft_end iss_ft_end vol_cit_end iss_cit_end ) ) {
+        if ( not_empty_string($record->{$field}) ) {
+            $record->{$field} =~ s/^.*-//;
+        }
+    }
+    
+    
 
     push @errors, @{ $class->clean_data_dates($record) };
     push @errors, @{ $class->SUPER::clean_data($record) };
@@ -276,9 +292,9 @@ sub clean_data_dates {
 sub _find_existing_title {
     my ( $class, $resource_id, $record, $local ) = @_;
 
-#    $^W    = 0;
+    $^W    = 0;
     $local = ( $local == 1 || $local eq 'local' ) ? 'local' : 'global';
-#    $^W    = 1;
+    $^W    = 1;
 
     no strict 'refs';
 
@@ -288,14 +304,14 @@ sub _find_existing_title {
 
     my $search = { 'resource' => $resource_id };
     
-    if ( not_empty_string($record->{'issn'}) ) {
-        $search->{'issn'} = $record->{'issn'};
+    if ( not_empty_string($record->{issn}) ) {
+        $search->{issn} = $record->{issn};
     }
-    if ( not_empty_string($search->{'eissn'}) ) {
-        $search->{'eissn'} = $record->{'eissn'};
+    if ( not_empty_string($search->{eissn}) ) {
+        $search->{eissn} = $record->{eissn};
     }
-    if ( !exists($search->{'issn'}) && !exists($search->{'eissn'}) ) {
-        $search->{'title'} = $record->{'title'};
+    if ( !exists($search->{issn}) && !exists($search->{eissn}) ) {
+        $search->{title} = $record->{title};
     }
 
     my @titles = $module->search($search);
@@ -307,47 +323,44 @@ sub _find_existing_title {
     # Run through all the columns because there may be a column removed from the new
     # record which would cause it to match otherwise
 
-    # Turn off warnings because of the large number of eq matches against undef fields below.
-
-#    $^W = 0;
 
 TITLE:
     foreach my $title (@titles) {
 
         # Check normal columns, skip date/id ones, and resource id
 
+COLUMN:
         foreach my $column ( $title->columns ) {
-            next
-                if grep { $column eq $_ } (
-                'id',       'created', 'modified', 'scanned',
-                'resource', 'active'
-                );
+            next COLUMN
+                if grep { $column eq $_ } qw( id created modified scanned resource active journal_auth );
 
-        #			print STDERR $title->$column . ' -- ' . $record->{$column} . "\n";
+            next COLUMN
+                if is_empty_string($record->{$column}) && is_empty_string($title->$column);
+
             next TITLE
-                unless $title->$column eq $record->{$column};
+                if is_empty_string($record->{$column}) || is_empty_string($title->$column);
+
+            next TITLE
+                if $title->$column ne $record->{$column};
         }
 
         push @matched_titles, $title;
     }
 
-#    $^W = 1;
-
     scalar(@matched_titles) > 1
         and CUFTS::Exception::App->throw('Multiple matching title rows found while updating.');
 
-    my $title;
-    $title = $matched_titles[0] if scalar(@matched_titles) == 1;
-
-    return $title;
+    return scalar(@matched_titles) == 1 
+           ? $matched_titles[0] 
+           : undef;
 }
 
 sub _find_partial_match {
     my ( $class, $resource_id, $record, $local ) = @_;
 
-#    $^W    = 0;
+    $^W    = 0;
     $local = ( $local == 1 || $local eq 'local' ) ? 'local' : 'global';
-#    $^W    = 1;
+    $^W    = 1;
 
     no strict 'refs';
 
@@ -377,11 +390,11 @@ sub _modify_record {
 
     $class->log_modified_title( $resource, $old_record, $new_record, $timestamp, $local );
 
-#    $^W = 0; # Turn off warnings because of the large number of eq matches against undef fields below.
+    $^W = 0; # Turn off warnings because of the large number of eq matches against undef fields below.
 
     foreach my $column ( $old_record->columns ) {
         next
-            if grep { $column eq $_ } qw{ id created modified scanned resource active journal_auth };
+            if grep { $column eq $_ } qw( id created modified scanned resource active journal_auth );
 
         if ( $old_record->$column ne $new_record->{$column} ) {
             if ( not_empty_string( $new_record->{$column} ) ) {
@@ -393,7 +406,7 @@ sub _modify_record {
         }
     }
 
-#    $^W = 1;
+    $^W = 1;
 
     if ( $local eq 'local' ) {
         $old_record->active('t');
