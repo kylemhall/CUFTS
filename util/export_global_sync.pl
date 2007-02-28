@@ -207,7 +207,7 @@ sub create_resource_xml {
         title_count
     );
     
-    foreach my $column ( $resource->columns, $resource->details_columns ) {
+    foreach my $column ( $resource->columns ) {
         next if grep { $_ eq $column } @skip_fields;
         
         my $value;
