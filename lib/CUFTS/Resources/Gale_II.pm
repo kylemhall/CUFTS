@@ -52,8 +52,9 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'Journal Name' => 'title',
-        'ISSN'         => 'issn',
+        'Journal Name'   => 'title',
+        'ISSN'           => 'issn',
+        'Embargo (Days)' => 'embargo_days',
     };
 }
 
@@ -75,6 +76,15 @@ sub clean_data {
         $record->{cit_end_date} = substr( $temp_date, 0, 4 ) . '-' . substr( $temp_date, 4, 2 );
     }
 
+    # Gale can't seem to keep their columns consistent, so try an alternative
+
+    if ( !exists($record->{'___Full-text Start'}) ) {
+       $record->{'___Full-text Start'} = $record->{'___Full-Text Start'}
+    }
+    if ( !exists($record->{'___Full-text End'}) ) {
+       $record->{'___Full-text End'} = $record->{'___Full-Text End'}
+    }
+
     if ( defined( $record->{'___Full-text Start'} )
         && $record->{'___Full-text Start'} =~ /(\w{3})-(\d{2})/ )
     {
@@ -85,6 +95,8 @@ sub clean_data {
     {
         $ft_end_date = get_date( $1, $2 );
     }
+
+    # Check the Image dates to see if they are better than the fulltext ones
 
     if ( defined( $record->{'___Image Start'} )
         && $record->{'___Image Start'} =~ /(\w{3})-(\d{2})/ )
@@ -104,13 +116,13 @@ sub clean_data {
     }
 
     if ( defined($ft_start_date) && $ft_start_date ne '0' ) {
-        $record->{'ft_start_date'} = substr( $ft_start_date, 0, 4 ) . '-' . substr( $ft_start_date, 4, 2 );
+        $record->{ft_start_date} = substr( $ft_start_date, 0, 4 ) . '-' . substr( $ft_start_date, 4, 2 );
     }
     if ( defined($ft_end_date) && $ft_end_date ne '0' ) {
-        $record->{'ft_end_date'} = substr( $ft_end_date, 0, 4 ) . '-' . substr( $ft_end_date, 4, 2 );
+        $record->{ft_end_date} = substr( $ft_end_date, 0, 4 ) . '-' . substr( $ft_end_date, 4, 2 );
     }
 
-    $record->{'title'} =~ s/\s*\(.+?\)\s*$//g;
+    $record->{title} =~ s/\s*\(.+?\)\s*$//g;
 
     return $class->SUPER::clean_data($record);
 
@@ -277,4 +289,5 @@ sub can_getFulltext {
 sub can_getJournal {
     return 1;
 }
+
 1;
