@@ -1,0 +1,60 @@
+[% USE url %]
+[% PROCESS site/navbar.tt %]
+
+<form method="post">
+<table class="outlined">
+ <tr><td class="heading-bar" colspan="2">CJDB account</td></tr>
+ <tr>
+  <td class="label0">id</td>
+  <td class="field0">[% account.id %]<input type="hidden" name="id" value="[% account.id %]" /></td>
+ </tr>
+ <tr>
+  <td class="label1">login key</td>
+  <td class="field1"><input type="text" name="key" value="[% account.key %]" />[% PROCESS form_results.tt frf='key' %]</td>
+ </tr>
+ <tr>
+  <td class="label0">name</td>
+  <td class="field0"><input type="text" name="name" value="[% account.name %]" />[% PROCESS form_results.tt frf='name' %]</td>
+ </tr>
+ <tr>
+  <td class="label1">email</td>
+  <td class="field1"><input type="text" name="email" value="[% account.email %]" />[% PROCESS form_results.tt frf='email' %]</td>
+ </tr>
+ <tr>
+  <td class="label0">level</td>
+  <td class="field0"><input type="text" name="level" value="[% account.level %]" /></td>
+ </tr>
+ <tr>
+  <td class="label1">active</td>
+  <td class="field1"><input type="checkbox" name="active" value="1" account.active ? 'checked="checked"' : '' %] /></td>
+ </tr>
+ <tr>
+  <td class="field0" colspan="2"><input type="submit" name="submit" value="submit" /></td>
+ </tr>
+</table>
+</form>
+
+<br />
+
+<table class="outlined">
+ <tr><td class="heading">tag</td><td class="heading">type</td><td class="heading">count</td></tr>
+ [% FOREACH tag IN tags %]
+  [% SET class = "field" _ (loop.count % 2) %]
+  <tr>
+   <td class="[% class %]">[% tag.0 %]</a></td>
+   <td class="[% class %]">
+    [%- SWITCH tag.1 -%]
+     [%- CASE 0 -%]
+     private
+     [%- CASE 1 -%]
+     public
+     [%- CASE 2 -%]
+     local public
+     [%- CASE -%]
+     error
+    [%- END -%]
+   </td>
+   <td class="[% class %]">[% tag.2 %]</td>
+  </tr>
+ [% END %]
+</table>
