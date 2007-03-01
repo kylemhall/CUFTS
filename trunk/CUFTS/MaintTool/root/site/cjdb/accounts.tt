@@ -20,7 +20,7 @@
 
 <br />
 
-[% IF accounts.defined %]
+[% IF accounts %]
  <table class="outlined">
   <tr><td class="heading">login</td><td class="heading">name</td><td class="heading">email</td><td class="heading">level</td><td class="heading">active</td></tr>
   [% FOREACH account IN accounts %]
