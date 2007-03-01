@@ -72,6 +72,32 @@ my $form_data_validate = {
 	filters  => ['trim'],
 };
 
+my $form_accounts_validate = {
+    required => [ qw (
+        search_field
+        search_value
+        submit
+    ) ],
+    filters => ['trim'],
+};
+
+my $form_account_validate = {
+    required => [ qw (
+        id
+        key
+        name
+        email
+    ) ],
+    optional => [ qw(
+        level
+        active
+        submit
+    ) ],
+    missing_optional_valid => 1,
+    filters => ['trim'],
+};
+
+
 sub settings : Local {
 	my ($self, $c) = @_;
 
@@ -273,6 +299,86 @@ sub data : Local {
 	$c->stash->{section} = 'cjdb_data';
 	$c->stash->{template} = 'site/cjdb/data.tt';
 }	
+
+
+sub accounts : Local {
+	my ($self, $c) = @_;
+
+	if ($c->req->params->{submit}) {
+		$c->form($form_accounts_validate);
+		unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
+
+		    my $search_value = $c->form->valid->{search_value};
+		    my $search_field = $c->form->valid->{search_field};
+		    
+		    my @accounts = CJDB::DB::Accounts->search(
+		        {
+		            $search_field => { ilike => "\%$search_value\%" },
+		            site          => $c->stash->{current_site}->id,
+		        },
+		        { order_by => $search_field }
+		    );
+		
+		    $c->stash->{accounts} = \@accounts;
+
+		}
+    }
+    
+    $c->stash->{search_field} = $c->req->params->{search_field};
+    $c->stash->{search_value} = $c->req->params->{search_value};
+
+	$c->stash->{section}  = 'cjdb_accounts';
+    $c->stash->{template} = 'site/cjdb/accounts.tt';
+}
+
+
+sub account : Local {
+	my ($self, $c, $account_id) = @_;
+
+    my $account = CJDB::DB::Accounts->retrieve($account_id);
+    if ( $account->site != $c->stash->{current_site}->id ) {
+        die("Error: Attempting to access a user who is not associated with the current site.");
+    }
+
+	if ($c->req->params->{submit}) {
+
+		$c->form($form_account_validate);
+	    unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
+
+            # Check for duplicate key
+            
+            if ( $c->form->valid->{key} != $account->key ) {
+                my @key_check = CJDB::DB::Accounts->search(
+                    {
+                        key => $c->form->valid->{key},
+                        site => $c->stash->{current_site}->id,
+                    }
+                );
+                if ( scalar(@key_check) ) {
+                    $c->stash->{errors} = [ 'Login "' . $c->form->valid->{key} . '" already in use for this site.' ];
+                }
+            }
+
+            if ( !scalar($c->stash->{errors}) ) {
+                eval {
+            		$account->update_from_form($c->form);
+            	};
+            	if ($@) {
+            		my $err = $@;
+            		CUFTS::DB::DBI->dbi_rollback;
+            		die($err);
+            	}
+            	CUFTS::DB::DBI->dbi_commit;
+        		push @{$c->stash->{results}}, 'CJDB account updated.';
+            }
+	    }
+	}
+	
+	$c->stash->{account}  = $account;
+    $c->stash->{tags}     = CJDB::DB::Tags->get_mytags_list($account_id);
+	$c->stash->{section}  = 'cjdb_accounts';
+    $c->stash->{template} = 'site/cjdb/account.tt';
+}
 
 
 

@@ -34,6 +34,13 @@
 [% END %]
 </ul>
 
+[% IF section == 'cjdb_accounts' %]
+ <li id="navbar-list-active"><span>CJDB Accounts</span></li>
+[% ELSE %]
+ <li id="navbar-list"><a id="navbar-link" href="[% url("$url_base/site/cjdb/accounts") %]">CJDB Accounts</a></li>
+[% END %]
+</ul>
+
 [% IF section == 'googlescholar' %]
  <li id="navbar-list-active"><span>Google Scholar</span></li>
 [% ELSE %]
