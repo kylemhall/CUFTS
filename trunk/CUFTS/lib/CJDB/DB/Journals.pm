@@ -134,7 +134,7 @@ sub search_distinct_by_exact_associations {
 	$sql .= " ORDER BY cjdb_journals.stripped_sort_title, cjdb_journals.id LIMIT $limit OFFSET $offset";
 
 	my $dbh = $class->db_Main();
-        my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
+    my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
 	
 	$sth->execute(@bind);
 	my @results = $class->sth_to_objects($sth);
@@ -164,7 +164,7 @@ ORDER BY cjdb_journals.stripped_sort_title, cjdb_journals.id
 LIMIT $limit OFFSET $offset;
 
 	my $dbh = $class->db_Main();
-        my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
+    my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
 	
 	$sth->execute($issn, $site);
 	my @results = $class->sth_to_objects($sth);
@@ -345,7 +345,6 @@ sub search_distinct_title_by_journal_main_combined {
     }
     $search_string .= ' cjdb_titles.search_title ~ ?';
 
-
     my $sql = qq{
         SELECT cjdb_journals.*, titles_sorted.title AS result_title FROM (
             SELECT DISTINCT ON (cjdb_journals_titles.journal) cjdb_titles.title, cjdb_titles.search_title, cjdb_journals_titles.journal AS journal_id 
@@ -361,9 +360,6 @@ sub search_distinct_title_by_journal_main_combined {
     };
 
     my @bind = ($site, @search_terms);
-
-    warn($sql);
-
     my $sth = $class->db_Main()->prepare($sql, {pg_server_prepare => 0});
     my @results = $class->sth_to_objects($sth, \@bind);
 
