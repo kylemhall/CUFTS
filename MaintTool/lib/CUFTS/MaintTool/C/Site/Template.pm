@@ -47,6 +47,8 @@ sub menu : Local {
         journal_subjects.tt
         journal_tags.tt
         journal_titles.tt
+        journals_link_label.tt
+        journals_link_name.tt
         layout.tt
         lcc_browse.tt
         lcc_browse_content.tt
