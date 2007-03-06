@@ -26,7 +26,7 @@
  </tr>
  <tr>
   <td class="label1">active</td>
-  <td class="field1"><input type="checkbox" name="active" value="1" account.active ? 'checked="checked"' : '' %] /></td>
+  <td class="field1"><input type="checkbox" name="active" value="1" [% account.active ? 'checked="checked"' : '' %] /></td>
  </tr>
  <tr>
   <td class="field0" colspan="2"><input type="submit" name="submit" value="submit" /></td>
