@@ -19,7 +19,7 @@ CREATE TABLE cjdb_journals_titles (
 );
 
 CREATE INDEX cjdb_journ_ttl_j_idx ON cjdb_journals_titles ( journal );
-CREATE INDEX cjdb_journ_ttl_t_s_idx ON cjdb_journals_titles ( title, site );
+CREATE INDEX cjdb_journ_ttl_s_t_idx ON cjdb_journals_titles ( site, title );
 
 INSERT INTO cjdb_titles (title, search_title)
 SELECT DISTINCT ON (title, search_title) title, search_title 
