@@ -277,19 +277,26 @@ sub load_MARC_subjects {
 
     my $count = 0;
     foreach my $subject (@subjects) {
+    
+        my $cjdb_subject = CJDB::DB::Subjects->find_or_create(
+            {
+                subject        => $subject,
+                search_subject => $self->strip_title($subject),
+            }
+        );
+    
         my $new_subject = {
-            'journal'        => $journal->id,
-            'site'           => $site_id,
-            'subject'        => $subject,
-            'search_subject' => $self->strip_title($subject),
+            journal  => $journal->id,
+            site     => $site_id,
+            subject  => $cjdb_subject->id,
         };
 
-        my @subjects = CJDB::DB::Subjects->search($new_subject);
+        my @subjects = CJDB::DB::JournalsSubjects->search($new_subject);
         next if scalar(@subjects);
 
-        $new_subject->{'origin'} = 'MARC';
+        $new_subject->{origin} = 'MARC';
 
-        CJDB::DB::Subjects->create($new_subject);
+        CJDB::DB::JournalsSubjects->create($new_subject);
 
         $count++;
     }
@@ -318,19 +325,26 @@ sub load_LCC_subjects {
 
     my $count = 0;
     foreach my $subject (@total_subjects) {
-        my $record = {
-            'journal'        => $journal->id,
-            'site'           => $site_id,
-            'subject'        => $subject,
-            'search_subject' => $self->strip_title($subject),
+    
+        my $cjdb_subject = CJDB::DB::Subjects->find_or_create(
+            {
+                subject        => $subject,
+                search_subject => $self->strip_title($subject),
+            }
+        );
+    
+        my $new_subject = {
+            journal  => $journal->id,
+            site     => $site_id,
+            subject  => $cjdb_subject->id,
         };
 
-        my @subjects = CJDB::DB::Subjects->search($record);
+        my @subjects = CJDB::DB::JournalsSubjects->search($new_subject);
         next if scalar(@subjects);
 
-        $record->{'origin'} = 'LCC';
+        $new_subject->{origin} = 'LCC';
 
-        CJDB::DB::Subjects->create($record);
+        CJDB::DB::JournalsSubjects->create($new_subject);
 
         $count++;
     }
@@ -345,24 +359,23 @@ sub get_LCC_subjects {
 
     my $call_numbers = $self->get_call_numbers($record);
     foreach my $call_number (@$call_numbers) {
+    
         if ( defined($call_number) && $call_number =~ /([A-Z]{1,3}) \s* ([\d]+)/xsm ) {
             my ( $class, $number ) = ( $1, $2 );
             my $subject_search = {
-                'number_high' => { '>=', $number },
-                'number_low'  => { '<=', $number },
-                'class_high'  => { '>=', $class },
-                'class_low'   => { '<=', $class }
+                number_high => { '>=', $number },
+                number_low  => { '<=', $number },
+                class_high  => { '>=', $class },
+                class_low   => { '<=', $class }
             };
 
-            if ( CJDB::DB::LCCSubjects->count_search( { 'site' => $site_id } )
-                > 0 )
-            {
-                $subject_search->{'site'} = $site_id;
+            if ( CJDB::DB::LCCSubjects->count_search( { site => $site_id } ) > 0 ) {
+                $subject_search->{site} = $site_id;
             }
 
-            push @subjects,
-                CJDB::DB::LCCSubjects->search_where($subject_search);
+            push @subjects, CJDB::DB::LCCSubjects->search_where($subject_search);
         }
+
     }
 
     return \@subjects;
@@ -385,14 +398,22 @@ sub load_associations {
     my $count = 0;
 
     foreach my $association (@associations) {
-        CJDB::DB::Associations->find_or_create(
-            {   'journal'            => $journal->id,
-                'site'               => $site_id,
-                'association'        => $association,
-                'search_association' => $self->strip_title($association),
+    
+        my $cjdb_association = CJDB::DB::Associations->find_or_create(
+            {
+                association        => $association,
+                search_association => $self->strip_title($association),
             }
         );
 
+        CJDB::DB::JournalsAssociations->find_or_create(
+            {
+                association  => $cjdb_association->id,
+                journal      => $journal->id,
+                site         => $site_id,
+            }
+        );
+        
         $count++;
     }
 
@@ -412,12 +433,13 @@ sub load_relations {
     foreach my $relation (@relations) {
         next if !defined( $relation->{title} );
 
-        CJDB::DB::Relations->find_or_create(
-            {   'journal'  => $journal->id,
-                'site'     => $site_id,
-                'relation' => $relation->{relation},
-                'title'    => $relation->{title},
-                'issn'     => $relation->{issn},
+        CJDB::DB::Relations->find_or_create( 
+            {
+                journal  => $journal->id,
+                site     => $site_id,
+                relation => $relation->{relation},
+                title    => $relation->{title},
+                issn     => $relation->{issn},
             }
         );
 

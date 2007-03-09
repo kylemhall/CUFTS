@@ -210,24 +210,24 @@ sub subjects : Local {
     my $search_type = $c->req->params->{search_type};
     $search_term = CUFTS::CJDB::Util::strip_title($search_term);
 
-    my @subjects;
+    my $subjects;
 
     if ($search_type eq 'startswith') {
         $search_term .= '%';
-        @subjects = CJDB::DB::Subjects->search_distinct($site_id, $search_term);
+        @$subjects = CJDB::DB::Subjects->search_distinct($site_id, $search_term);
     } elsif ($search_type eq 'exact') {
-        @subjects = CJDB::DB::Subjects->search_distinct($site_id, $search_term);
+        @$subjects = CJDB::DB::Subjects->search_distinct($site_id, $search_term);
     } elsif ($search_type eq 'any') {
         my @search_terms = split / /, $search_term;
-        @subjects = CJDB::DB::Subjects->search_distinct_union($site_id, @search_terms);
+        $subjects = CJDB::DB::Subjects->search_distinct_union($site_id, @search_terms);
     } elsif ($search_type eq 'all') {
         my @search_terms = split / /, $search_term;
-        @subjects = CJDB::DB::Subjects->search_distinct_intersect($site_id, @search_terms);
+        $subjects = CJDB::DB::Subjects->search_distinct_intersect($site_id, @search_terms);
     } else {
         die("Unrecognized subject search type: $search_type");
     }
 
-    $c->stash->{subjects}     = \@subjects;
+    $c->stash->{subjects}     = $subjects;
     $c->stash->{search_terms} = $c->req->params->{search_terms};
     $c->stash->{search_type}  = $c->req->params->{search_type};
 
@@ -243,24 +243,24 @@ sub associations : Local {
     my $search_type = $c->req->params->{search_type};
     $search_term = CUFTS::CJDB::Util::strip_title($search_term);
 
-    my @associations;
+    my $associations;
 
     if ($search_type eq 'startswith') {
         $search_term .= '%';
-        @associations = CJDB::DB::Associations->search_distinct($site_id, $search_term);
+        @$associations = CJDB::DB::Associations->search_distinct($site_id, $search_term);
     } elsif ($search_type eq 'exact') {
-        @associations = CJDB::DB::Associations->search_distinct($site_id, $search_term);
+        @$associations = CJDB::DB::Associations->search_distinct($site_id, $search_term);
     } elsif ($search_type eq 'any') {
         my @search_terms = split / /, $search_term;
-        @associations = CJDB::DB::Associations->search_distinct_union($site_id, @search_terms);
+        $associations = CJDB::DB::Associations->search_distinct_union($site_id, @search_terms);
     } elsif ($search_type eq 'all') {
         my @search_terms = split / /, $search_term;
-        @associations = CJDB::DB::Associations->search_distinct_intersect($site_id, @search_terms);
+        $associations = CJDB::DB::Associations->search_distinct_intersect($site_id, @search_terms);
     } else {
         die("Unrecognized association search type: $search_type");
     }
 
-    $c->stash->{associations} = \@associations;
+    $c->stash->{associations} = $associations;
     $c->stash->{search_terms} = $c->req->params->{search_terms};
     $c->stash->{search_type}  = $c->req->params->{search_type};
     $c->stash->{template}     = 'browse_associations.tt';
