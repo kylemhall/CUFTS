@@ -329,6 +329,13 @@ sub load_cufts {
                active   => 'true',
         } );
 
+        # Get association_id for later use
+
+        my $cjdb_association = CJDB::DB::Associations->find_or_create( {
+           association        => $resource->name,
+           search_association => CUFTS::CJDB::Util::strip_title( $resource->name ),
+        } );
+
         my $count = 0;
 
     JOURNAL:
@@ -458,24 +465,24 @@ sub load_cufts {
                 }
 
                 foreach my $CJDB_record (@CJDB_records) {
+
+                    # Add resource name as an association to the journal
+
+                    CJDB::DB::JournalsAssociations->find_or_create( {
+                        association  => $cjdb_association->id,
+                        site         => $site->id,
+                        journal      => $CJDB_record->id,
+                    } );
+
+                    # Create links in each CJDB record
+
                     foreach my $link (@links) {
 
-                        # Add resource name as an association
-
                         my %temp_link = %{$link};    # Grab a copy because we edit it, but it may be reused if there's multiple CJDB records
-
-                        CJDB::DB::Associations->find_or_create( {
-                           journal            => $CJDB_record->id,
-                           association        => $resource->name,
-                           search_association => CUFTS::CJDB::Util::strip_title( $resource->name ),
-                           site               => $site->id,
-                        } );
-
-                        # Create links
-
                         $temp_link{'journal'} = $CJDB_record->id;
                         CJDB::DB::Links->create( \%temp_link );
                     }
+
                 }
             }
         }
@@ -590,11 +597,11 @@ sub build_basic_record {
 
     my $stripped_sort_title = strip_title($sort_title);
 
-    $record->{'title'}               = $title;
-    $record->{'sort_title'}          = $sort_title;
-    $record->{'stripped_sort_title'} = $stripped_sort_title;
-    $record->{'site'}                = $site->id;
-    $record->{'journals_auth'}       = $journal_auth->id;
+    $record->{title}               = $title;
+    $record->{sort_title}          = $sort_title;
+    $record->{stripped_sort_title} = $stripped_sort_title;
+    $record->{site}                = $site->id;
+    $record->{journals_auth}       = $journal_auth->id;
     
     if ( not_empty_string($journal_auth->rss) ) {
         $record->{'rss'} = $journal_auth->rss;
@@ -977,7 +984,7 @@ sub clear_site {
     # being called.
 
     my $dbh = CJDB::DB::DBI->db_Main;
-    foreach my $table ( qw(cjdb_associations cjdb_journals cjdb_links cjdb_subjects cjdb_journals_titles cjdb_issns cjdb_relations) ) {
+    foreach my $table ( qw(cjdb_journals_associations cjdb_journals cjdb_links cjdb_journals_subjects cjdb_journals_titles cjdb_issns cjdb_relations) ) {
         print "Deleting from table $table... ";
         $dbh->do("DELETE FROM $table WHERE site=$site_id");
         print "done\n";

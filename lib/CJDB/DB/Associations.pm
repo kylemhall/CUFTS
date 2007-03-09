@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CJDB is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -25,77 +25,69 @@ use base 'CJDB::DB::DBI';
 use CJDB::DB::Journals;
 
 __PACKAGE__->table('cjdb_associations');
-__PACKAGE__->columns(Primary => 'id');
-__PACKAGE__->columns(All => qw(
-	id
+__PACKAGE__->columns( Primary => 'id' );
+__PACKAGE__->columns(
+    All => qw(
+        id
+        association
+        search_association
+    )
+);
+__PACKAGE__->columns( Essential => __PACKAGE__->columns );
+__PACKAGE__->sequence('cjdb_associations_id_seq1');
+__PACKAGE__->has_many('journals', [ 'CJDB::DB::JournalsAssociations' => 'journal' ] );
 
-	journal
-	association
-	search_association
-
-	site
-));                                                                                                        
-__PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('cjdb_associations_id_seq');
-__PACKAGE__->has_a('journal' => 'CJDB::DB::Journals');
-
-__PACKAGE__->set_sql('distinct' => qq{
-	SELECT DISTINCT ON (search_association) cjdb_associations.* FROM cjdb_associations
-	WHERE site = ? AND search_association LIKE ?
-	ORDER BY search_association
-});
-
+__PACKAGE__->set_sql(
+    'distinct' => qq{
+        SELECT DISTINCT ON (search_association) cjdb_associations.* FROM cjdb_associations
+        JOIN cjdb_journals_associations ON ( cjdb_journals_associations.association = cjdb_associations.id )
+        WHERE site = ? 
+        AND search_association LIKE ?
+        ORDER BY search_association
+    }
+);
 
 sub search_distinct_combined {
-	my ($class, $join_type, $site, @search) = @_;
+    my ( $class, $join_type, $site, @search ) = @_;
 
-	defined($join_type) && ($join_type =~ /^(INTERSECT|UNION|EXCEPT)$/) or
-		CJDB::Exception::DB->throw("Bad join type in search_distinct_combined: $join_type");
+    # Return an empty set if there were no search terms
 
-	# Return an empty set if there were no search terms
+    return [] if scalar(@search) == 0;
 
-	scalar(@search) == 0 and
-		return [];
+    my @search_terms = map { '[[:<:]]' . $_ . '[[:>:]]' } @search;
 
-	my $search_string = 'SELECT * FROM cjdb_associations WHERE cjdb_associations.site = ? AND cjdb_associations.search_association ~ ?';
+    my $search_string;
 
-	my $sql = 'SELECT DISTINCT ON (search_association) * FROM (';
-	
-	$sql .= $search_string;
-	foreach my $count (1 .. (scalar(@search) - 1)) {
-		$sql .= " $join_type $search_string";
-	}
+    foreach my $x (0 .. $#search_terms - 1) {
+        $search_string .= ' cjdb_associations.search_association ~ ? ' . $join_type;
+    }
+    $search_string .= ' cjdb_associations.search_association ~ ?';
 
-	$sql .= ') AS combined_associations';
-
-#	warn($sql);
-	
-	my @bind;
-	foreach my $search_term (@search) {
-		push @bind, ($site, $search_term);
-	}
-
-#	warn(join ',', @bind);
-	
-	my $dbh = $class->db_Main();
-	my $sth = $dbh->prepare_cached($sql);
-	$sth->execute(@bind);
-	my @results = $class->sth_to_objects($sth);	
-	
-	return @results;
+    my $sql = qq{
+        SELECT DISTINCT ON (cjdb_associations.search_association, cjdb_associations.id) cjdb_associations.*
+        FROM cjdb_associations
+        JOIN cjdb_journals_associations ON (cjdb_associations.id = cjdb_journals_associations.association)
+        WHERE cjdb_journals_associations.site = ? AND
+        ( $search_string )
+        ORDER BY search_association;
+    };
+    
+    my @bind = ($site, @search_terms);
+    my $sth = $class->db_Main()->prepare( $sql );
+    my @results = $class->sth_to_objects( $sth, \@bind );
+    return \@results;
 }
 
 sub search_distinct_union {
-	my ($class, $site, @search) = @_;
-	
-	return $class->search_distinct_combined('UNION', $site, @search);
+    my ( $class, $site, @search ) = @_;
+
+    return $class->search_distinct_combined( 'OR', $site, @search );
 }
 
 sub search_distinct_intersect {
-	my ($class, $site, @search) = @_;
-	
-	return $class->search_distinct_combined('INTERSECT', $site, @search);
-}
+    my ( $class, $site, @search ) = @_;
 
+    return $class->search_distinct_combined( 'AND', $site, @search );
+}
 
 1;

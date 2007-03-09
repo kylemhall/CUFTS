@@ -56,10 +56,10 @@ __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 __PACKAGE__->columns(TEMP => qw( result_title ) );
 __PACKAGE__->sequence('cjdb_journals_id_seq');
 
-__PACKAGE__->has_many('titles', [ 'CJDB::DB::JournalsTitles' => 'title' ] );
+__PACKAGE__->has_many('titles', [ 'CJDB::DB::JournalsTitles' => 'title' ]);
 __PACKAGE__->has_many('links', 'CJDB::DB::Links' => 'journal');
-__PACKAGE__->has_many('subjects', 'CJDB::DB::Subjects' => 'journal');
-__PACKAGE__->has_many('associations', 'CJDB::DB::Associations' => 'journal');
+__PACKAGE__->has_many('subjects', [ 'CJDB::DB::JournalsSubjects' => 'subject' ]);
+__PACKAGE__->has_many('associations', [ 'CJDB::DB::JournalsAssociations' => 'association' ]);
 __PACKAGE__->has_many('relations', 'CJDB::DB::Relations' => 'journal');
 __PACKAGE__->has_many('issns', 'CJDB::DB::ISSNs' => 'journal');
 __PACKAGE__->has_a('journals_auth' => 'CUFTS::DB::JournalsAuth');
@@ -84,9 +84,10 @@ sub search_distinct_by_exact_subjects {
 
         # Use LIKE in search because of varchar pattern op indexes
 
-		$sql .= " JOIN cjdb_subjects AS subjects${count} ON (subjects${count}.journal = cjdb_journals.id) ";
-		$where .= " AND subjects${count}.search_subject LIKE ? ";
-		$where .= " AND subjects${count}.site = ? ";
+		$sql .= " JOIN cjdb_journals_subjects AS cjdb_journals_subjects${count} ON (cjdb_journals_subjects${count}.journal = cjdb_journals.id) ";
+		$sql .= " JOIN cjdb_subjects AS cjdb_subjects${count} ON (cjdb_journals_subjects${count}.subject = cjdb_subjects${count}.id) ";
+		$where .= " AND cjdb_subjects${count}.search_subject LIKE ? ";
+		$where .= " AND cjdb_journals_subjects${count}.site = ? ";
 		
 		push @bind, $search;
 		push @bind, $site;
@@ -94,6 +95,8 @@ sub search_distinct_by_exact_subjects {
 
 	$sql .= $where;
 	$sql .= " ORDER BY cjdb_journals.stripped_sort_title, cjdb_journals.id LIMIT $limit OFFSET $offset";
+
+    warn($sql);
 
 	my $dbh = $class->db_Main();
     my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
@@ -109,7 +112,7 @@ sub search_distinct_by_exact_associations {
 	scalar(@$search) == 0 and
 		return [];
 	
-	$limit ||= 'ALL';
+	$limit  ||= 'ALL';
 	$offset ||= 0;
 
 	my @bind = ($site);	
@@ -122,9 +125,10 @@ sub search_distinct_by_exact_associations {
 
         # Use LIKE in search because of varchar pattern op indexes
 
-		$sql .= " JOIN cjdb_associations AS cjdb_associations${count} ON (cjdb_associations${count}.journal = cjdb_journals.id) ";
+		$sql .= " JOIN cjdb_journals_associations AS cjdb_journals_associations${count} ON (cjdb_journals_associations${count}.journal = cjdb_journals.id) ";
+		$sql .= " JOIN cjdb_associations AS cjdb_associations${count} ON (cjdb_journals_associations${count}.association = cjdb_associations${count}.id) ";
 		$where .= " AND cjdb_associations${count}.search_association LIKE ? ";
-		$where .= " AND cjdb_associations${count}.site = ? ";
+		$where .= " AND cjdb_journals_associations${count}.site = ? ";
 		
 		push @bind, $search;
 		push @bind, $site;
@@ -133,13 +137,11 @@ sub search_distinct_by_exact_associations {
 	$sql .= $where;
 	$sql .= " ORDER BY cjdb_journals.stripped_sort_title, cjdb_journals.id LIMIT $limit OFFSET $offset";
 
-	my $dbh = $class->db_Main();
-    my $sth = $dbh->prepare($sql, {pg_server_prepare => 0});
-	
-	$sth->execute(@bind);
-	my @results = $class->sth_to_objects($sth);
+
+    my $sth = $class->db_Main()->prepare($sql, {pg_server_prepare => 0});
+	my @results = $class->sth_to_objects($sth, \@bind);
 	return \@results;
-}		
+}
 
 
 sub search_by_issn {

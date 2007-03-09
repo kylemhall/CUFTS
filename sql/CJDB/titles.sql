@@ -1,11 +1,8 @@
 CREATE TABLE cjdb_titles (
 	id              SERIAL PRIMARY KEY,
-	journal         INTEGER NOT NULL,
 	title           VARCHAR(1024) NOT NULL,
-	search_title    VARCHAR(1024) NOT NULL,
-	site            INTEGER NOT NULL,
-	main            INTEGER NOT NULL DEFAULT 0
+	search_title    VARCHAR(1024) NOT NULL
 );
 
-CREATE INDEX cjdb_titles_journal ON cjdb_titles (journal);
-CREATE INDEX cjdb_titles_site_st ON cjdb_titles (site, search_title varchar_pattern_ops);
+CREATE INDEX cjdb_titles_st_exact_idx ON cjdb_titles (search_title);
+CREATE INDEX cjdb_titles_st_idx ON cjdb_titles (search_title varchar_pattern_ops);
