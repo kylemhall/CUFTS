@@ -264,6 +264,7 @@ sub get_associations {
     return @associations;
 }
 
+
 sub get_relations {
     my ( $self, $record ) = @_;
 
@@ -279,14 +280,13 @@ sub get_relations {
     foreach my $succeeding (@succeeding) {
         push @relations, $self->_get_relation( $succeeding, 'succeeding' );
     }
-    foreach my $succeeding (@succeeding) {
+    foreach my $other (@other) {
         push @relations, $self->_get_relation( $other, 'other' );
     }
 
-
     return @relations;
-
 }
+
 
 sub _get_relation {
     my ( $self, $field, $relation_type ) = @_;
