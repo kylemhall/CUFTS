@@ -271,6 +271,7 @@ sub get_relations {
 
     my @preceeding = $record->field('780');
     my @succeeding = $record->field('785');
+    my @other      = $record->field('775');
 
     foreach my $preceeding (@preceeding) {
         push @relations, $self->_get_relation( $preceeding, 'preceeding' );
@@ -278,6 +279,10 @@ sub get_relations {
     foreach my $succeeding (@succeeding) {
         push @relations, $self->_get_relation( $succeeding, 'succeeding' );
     }
+    foreach my $succeeding (@succeeding) {
+        push @relations, $self->_get_relation( $other, 'other' );
+    }
+
 
     return @relations;
 
@@ -299,6 +304,10 @@ sub _get_relation {
     $relation->{title} = $title 
                          || $self->clean_title( CUFTS::CJDB::Util::marc8_to_latin1( $field->subfield('a') ) );
 
+    if ( not_empty_string( $field->subfield('b') ) ) {
+        $relation->{title} .= ' ' . $field->subfield('b');
+    }
+
     my $issn = $field->subfield('x');
     $issn = $self->clean_issn($issn);
 
@@ -314,7 +323,7 @@ sub get_ceding_fields_issns {
 
     my @issns;
 
-    foreach my $ceding_field ( $record->field('78.') ) {
+    foreach my $ceding_field ( $record->field('78.'), $record->field('775') ) {
         my $issn = $ceding_field->subfield('x');
 
         if ( defined($issn) ) {

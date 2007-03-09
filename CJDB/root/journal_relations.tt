@@ -9,6 +9,8 @@
      Continues
     [% CASE 'succeeding' %]
      Continued by
+    [% CASE 'other' %]
+      Other edition:
     [% END %]
     <a href="[% url("$url_base/browse/show", browse_field='title', search_type='startswith', search_terms=relation.title) %]">[% relation.title | html %]</a>
     [% IF relation.issn %]
