@@ -114,9 +114,7 @@ sub build_linkJournal {
 
         my $url = $record->journal_url;
 
-        if ( not_empty_string( $resource->proxy_suffix ) ) {
-            $url .= $resource->proxy_suffix;
-        }
+        $url .= __add_proxy_suffix($url, $resource->proxy_suffix);
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
@@ -142,7 +140,7 @@ sub build_linkTOC {
         or CUFTS::Exception::App->throw('No request defined in build_linkTOC');
 
     defined( $resource->url_base )
-        or CUFTS::Exception::App->throw('No url_base defined for resource.');
+        or CUFTS::Exception::App->throw('No url_base defined for resource: ' . $resource->name);
 
     my @results;
     foreach my $record (@$records) {
@@ -170,9 +168,7 @@ sub build_linkTOC {
             $url .= '+AND+iu+' . $request->issue;
         }
 
-        if ( not_empty_string( $resource->proxy_suffix ) ) {
-            $url .= $resource->proxy_suffix;
-        }
+        $url .= __add_proxy_suffix($url, $resource->proxy_suffix);
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
@@ -198,7 +194,7 @@ sub build_linkFulltext {
         or CUFTS::Exception::App->throw('No request defined in build_linkTOC');
 
     defined( $resource->url_base )
-        or CUFTS::Exception::App->throw('No url_base defined for resource.');
+        or CUFTS::Exception::App->throw('No url_base defined for resource: ' . $resource->name);
 
     my @results;
     foreach my $record (@$records) {
@@ -234,16 +230,29 @@ sub build_linkFulltext {
 #            $url .= '+AND+ti+' . $request->atitle;
 #        }
 
-        if ( not_empty_string( $resource->proxy_suffix ) ) {
-            $url .= $resource->proxy_suffix;
-        }
-
+        $url .= __add_proxy_suffix($url, $resource->proxy_suffix);
+        
         my $result = new CUFTS::Result($url);
         $result->record($record);
         push @results, $result;
     }
 
     return \@results;
+}
+
+sub __add_proxy_suffix {
+    my ( $url, $suffix ) = @_;
+    
+    if ( not_empty_string( $suffix ) ) {
+        # if the URL has a "?" in it already, then convert a leading ? from the suffix into a &
+
+        if ( $url =~ /\?/ ) {  
+            $suffix =~ s/^\?/&/;
+        }
+        return $suffix;
+    }
+
+    return '';
 }
 
 1;
