@@ -148,20 +148,23 @@ sub merge_cjdb_journals {
 
 sub merge_cjdb_titles {
     my ( $class, $cjdb_journal, $old_cjdb_journal ) = @_;
-    
-    my @titles = map { $_->search_title } $cjdb_journal->titles;
-    foreach my $title ($old_cjdb_journal->titles) {
 
-        if ( grep { $title->search_title eq $_ } @titles ) {
-            $title->delete();
+    my @titles = map { $_->id } $cjdb_journal->titles;
+
+    foreach my $journaltitle ( CJDB::DB::JournalsTitles->search( journal => $old_cjdb_journal->id ) ) {
+
+        my $title_id = $journaltitle->title->id;
+
+        if ( grep { $title_id eq $_ } @titles ) {
+            $journaltitle->delete();
         }
         else {
-            $title->journal( $cjdb_journal->id );
-            $title->update;
+            $journaltitle->journal( $cjdb_journal->id );
+            $journaltitle->update;
         }
-        
+
     }
-    
+
     return 1;
 }
 
@@ -188,15 +191,17 @@ sub merge_cjdb_links {
 sub merge_cjdb_associations {
     my ( $class, $cjdb_journal, $old_cjdb_journal ) = @_;
 
-    my @associations = map { $_->search_association } $cjdb_journal->associations;
-    foreach my $association ($old_cjdb_journal->associations) {
+    my @associations = map { $_->id } $cjdb_journal->associations;
+    foreach my $journalassociation ( CJDB::DB::JournalsAssociations->search( journal => $old_cjdb_journal->id ) ) {
 
-        if ( grep { $association->search_association eq $_ } @associations ) {
-            $association->delete();
+        my $association_id = $journalassociation->association->id;
+
+        if ( grep { $association_id eq $_ } @associations ) {
+            $journalassociation->delete();
         }
         else {
-            $association->journal( $cjdb_journal->id );
-            $association->update;
+            $journalassociation->journal( $cjdb_journal->id );
+            $journalassociation->update;
         }
         
     }
@@ -207,15 +212,17 @@ sub merge_cjdb_associations {
 sub merge_cjdb_subjects {
     my ( $class, $cjdb_journal, $old_cjdb_journal ) = @_;
 
-    my @subjects = map { $_->search_subject } $cjdb_journal->subjects;
-    foreach my $subject ($old_cjdb_journal->subjects) {
+    my @subjects = map { $_->id } $cjdb_journal->subjects;
+    foreach my $journalsubject ( CJDB::DB::JournalsSubjects->search( journal => $old_cjdb_journal->id ) ) {
 
-        if ( grep { $subject->search_subject eq $_ } @subjects ) {
-            $subject->delete();
+        my $subject_id = $journalsubject->subject->id;
+
+        if ( grep { $subject_id eq $_ } @subjects ) {
+            $journalsubject->delete();
         }
         else {
-            $subject->journal( $cjdb_journal->id );
-            $subject->update;
+            $journalsubject->journal( $cjdb_journal->id );
+            $journalsubject->update;
         }
         
     }
