@@ -2,7 +2,7 @@
 
 [% message %]
 
-<form method="post" action="[% url("$url_base/public/compare/results") %]">
+<form method="get" action="[% url("$url_base/public/compare/results") %]">
 <table class="outlined" style="margin-bottom: 10px;">
  <tr><td class="heading">Compare resources...</td></tr>
  <tr><td class="field1"><select name="compare1">
