@@ -35,18 +35,73 @@ sub title_list_fields {
             issn
             ft_start_date
             ft_end_date
+            cit_start_date
+            cit_end_date
             db_identifier
         )
     ];
 }
+
+sub title_list_field_map {
+    return {
+        'Title'           =>  'title',
+        'ISSN'            =>  'issn',
+        'Coverage Begin'  => 'ft_start_date',
+        'Coverage End'    => 'ft_end_date',
+        'csi'             => 'db_identifier',
+    };
+}
+
+
+sub skip_record {
+    my ( $class, $record ) = @_;
+
+    return 1 if is_empty_string( $record->{'___Coverage Level'} );
+
+    return 1 if is_empty_string( $record->{ft_start_date}  )
+             && is_empty_string( $record->{ft_end_date}    )
+             && is_empty_string( $record->{cit_start_date} )
+             && is_empty_string( $record->{cit_end_date}   );
+
+    return 0;
+}
+
 
 sub clean_data {
     my ( $self, $record ) = @_;
 
     $record->{title} =~ s/\(.+?\)//g;
 
+    if ( not_empty_string( $record->{ft_start_date} ) ) {
+        if ( $record->{ft_start_date} =~ m{ (\d+)/(\d+)/(\d+) }xsm ) {
+            $record->{ft_start_date} = sprintf("%04i-%02i-%02i", $3, $1, $2);
+        }
+        else {
+            delete $record->{ft_start_date};
+        }
+    }
+
+    if ( not_empty_string( $record->{ft_end_date} ) ) {
+        if ( $record->{ft_end_date} =~ m{ (\d+)/(\d+)/(\d+) }xsm ) {
+            $record->{ft_end_date} = sprintf("%04i-%02i-%02i", $3, $1, $2);
+        }
+        else {
+            delete $record->{ft_end_date};
+        }
+    }
+
+    # Unless the Coverage Level includes "Full-text", assume it has abstracts only
+
+    if ( not_empty_string( $record->{'___Coverage Level'} ) && $record->{'___Coverage Level'} !~ /full.?text/i ) {
+        $record->{cit_start_date} = $record->{ft_start_date};
+        $record->{cit_end_date}   = $record->{ft_end_date};
+        delete $record->{ft_start_date};
+        delete $record->{ft_end_date};
+    }
+
     return $self->SUPER::clean_data($record);
 }
+
 
 sub build_linkJournal {
     my ( $class, $records, $resource, $site, $request ) = @_;
