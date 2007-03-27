@@ -37,7 +37,7 @@ sub login : Local {
         if ( not_empty_string($site->cjdb_authentication_module) ) {
             # Get our internal record, then check external system for password
 
-    		$account = CJDB::DB::Accounts->search('site' => $site->id, 'key' => $key)->first;
+    		$account = CJDB::DB::Accounts->search( site => $site->id, key => $key)->first;
     		if ( defined($account) ) {
     		    my $module = 'CUFTS::CJDB::Authentication::' . $site->cjdb_authentication_module;
     		    eval {
@@ -54,15 +54,22 @@ sub login : Local {
             # Use internal authentication
 
     		my $crypted_pass = crypt($password, $key);
-    		$account = CJDB::DB::Accounts->search('site' => $site->id, 'key' => $key, 'password' => $crypted_pass)->first;
+    		$account = CJDB::DB::Accounts->search( site => $site->id, key => $key, password => $crypted_pass)->first;
         }
 		
 		if ( defined($account) ) {
-			$c->stash->{current_account} = $account;
-			$c->session->{ $c->stash->{current_site}->id }->{current_account_id} = $account->id;
+		
+		    if ( $account->active ) {
+			    $c->stash->{current_account} = $account;
+			    $c->session->{ $c->stash->{current_site}->id }->{current_account_id} = $account->id;
 			
-			$c->req->params($c->session->{prev_params});
-			return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
+			    $c->req->params($c->session->{prev_params});
+			    return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
+            }
+            else {
+	            $c->stash->{error} = ['This account has been disabled by library administrators.'];
+	        }
+
 		} else {
 			$c->stash->{error} = ['The password or account was not recognized. Please check that you have entered the correct login name and password. If you are still having problems, please contact your administrator.'];
 		}
