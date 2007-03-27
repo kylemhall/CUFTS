@@ -38,11 +38,11 @@ my $form_settings_validate = {
             }
     ],
     required => [
-        qw{
+        qw(
             cjdb_unified_journal_list
             cjdb_show_citations
             cjdb_display_db_name_only
-            }
+        )
     ],
     filters                => ['trim'],
     missing_optional_valid => 1,
@@ -64,16 +64,16 @@ my $form_data_validate = {
             upload_label
             lccn_data_upload
             upload_lccn
-            )
+        )
     ],
     dependency_groups => {
         'data_upload' => [ 'upload_data',      'cjdb_data_upload' ],
         'lccn_upload' => [ 'lccn_data_upload', 'upload_lccn' ],
     },
     constraints => {
-        'delete'  => qr/^[^\|:;'"\\\/]+$/,
-        'test'    => qr/^[^\|:;'"\\\/]+$/,
-        'rebuild' => qr/^[^\|:;'"\\\/]+$/,
+        delete  => qr/^[^&\|:;'"\\\/]+$/,
+        test    => qr/^[^&\|:;'"\\\/]+$/,
+        rebuild => qr/^[^&\|:;'"\\\/]+$/,
     },
     filters => ['trim'],
 };
@@ -84,27 +84,30 @@ my $form_accounts_validate = {
             search_field
             search_value
             submit
-            )
+        )
     ],
     filters => ['trim'],
 };
 
 my $form_account_validate = {
     required => [
-        qw (
+        qw(
             id
             key
             name
             email
-            )
+        )
     ],
     optional => [
         qw(
             level
             active
             submit
-            )
+        )
     ],
+    defaults => {
+        active => 'false',
+    }
     missing_optional_valid => 1,
     filters                => ['trim'],
 };
@@ -365,15 +368,13 @@ sub account : Local {
 
     my $account = CJDB::DB::Accounts->retrieve($account_id);
     if ( $account->site != $c->stash->{current_site}->id ) {
-        die("Error: Attempting to access a user who is not associated with the current site."
-        );
+        die("Error: Attempting to access a user who is not associated with the current site.");
     }
 
     if ( $c->req->params->{submit} ) {
 
         $c->form($form_account_validate);
-        unless ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown )
-        {
+        unless ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
 
             # Check for duplicate key
 
