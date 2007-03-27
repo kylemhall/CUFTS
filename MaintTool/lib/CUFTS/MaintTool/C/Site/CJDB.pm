@@ -107,7 +107,7 @@ my $form_account_validate = {
     ],
     defaults => {
         active => 'false',
-    }
+    },
     missing_optional_valid => 1,
     filters                => ['trim'],
 };
