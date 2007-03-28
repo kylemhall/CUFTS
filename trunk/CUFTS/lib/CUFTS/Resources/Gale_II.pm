@@ -234,6 +234,7 @@ sub build_linkDatabase {
             }
         }
 
+        $url .= __add_proxy_suffix($url, $resource->proxy_suffix);
         my $result = new CUFTS::Result($url);
         $result->record($record);
 
@@ -271,6 +272,7 @@ sub build_linkJournal {
         }
 
         $url .= '&title=' . uri_escape($record->title);
+        $url .= __add_proxy_suffix($url, $resource->proxy_suffix);
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
@@ -289,5 +291,21 @@ sub can_getFulltext {
 sub can_getJournal {
     return 1;
 }
+
+sub __add_proxy_suffix {
+    my ( $url, $suffix ) = @_;
+    
+    if ( not_empty_string( $suffix ) ) {
+        # if the URL has a "?" in it already, then convert a leading ? from the suffix into a &
+
+        if ( $url =~ /\?/ ) {  
+            $suffix =~ s/^\?/&/;
+        }
+        return $suffix;
+    }
+
+    return '';
+}
+
 
 1;
