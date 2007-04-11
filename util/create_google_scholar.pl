@@ -77,7 +77,7 @@ SITE:
         or mkdir $dir
             or die("Unable to create directory for Google Scholar control file ($dir): $!");
 
-    $dir = $CUFTS::Config::CUFTS_RESOLVER_SITE_DIR . '/GoogleScholar';
+    $dir .= '/GoogleScholar';
     -d $dir
          or mkdir $dir
              or die("Unable to create directory for Google Scholar control file ($dir): $!");
