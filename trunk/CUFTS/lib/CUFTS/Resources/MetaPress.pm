@@ -44,7 +44,9 @@ sub title_list_fields {
             ft_start_date
             ft_end_date
             vol_ft_start
+            iss_ft_start
             vol_ft_end
+            iss_ft_end
 
             publisher
         )
@@ -59,11 +61,21 @@ sub title_list_field_map {
     return {
         'Journal'                => 'title',
         'Print ISSN'             => 'issn',
+        'Print Issn'             => 'issn',
+        'Print Issn/Isbn'        => 'issn',
         'Online ISSN'            => 'e_issn',
+        'Online Issn'            => 'e_issn',
+        'Online Issn/Isbn'       => 'e_issn',
         'Oldest Cover Date'      => 'ft_start_date',
+        'Oldest CoverDate'       => 'ft_start_date',
         'Most Recent Cover Date' => 'ft_end_date',
+        'Newest CoverDate'       => 'ft_end_date',
         'Oldest Volume'          => 'vol_ft_start',
+        'Oldest Issue'           => 'iss_ft_start',
+        'Most Recent Issue'      => 'iss_ft_end',
+        'Newest Issue'           => 'iss_ft_end',
         'Most Recent Volume'     => 'vol_ft_end',
+        'Newest Volume'          => 'vol_ft_end',
         'Publisher'              => 'publisher',
     };
 }
@@ -126,8 +138,11 @@ sub clean_data {
 
     sub parse_date {
         my ($date) = @_;
-        if ( my ( $month, $day, $year ) = $date =~ /(\w+)\s+(\d+)\s+(\d{4})/ )
-        {
+        
+        if ( my ( $month, $day, $year ) = $date =~ m{ \d{1,2} / \d{1,2} / \d{2} }xsm ) {
+            return sprintf( "%04i-%02i-%02i", $year, $month, $day );
+        }
+        elsif ( my ( $month, $day, $year ) = $date =~ /(\w+)\s+(\d+)\s+(\d{4})/ ) {
             if    ( $month =~ /^Jan/i ) { $month = 1 }
             elsif ( $month =~ /^Feb/i ) { $month = 2 }
             elsif ( $month =~ /^Mar/i ) { $month = 3 }
@@ -142,6 +157,7 @@ sub clean_data {
             elsif ( $month =~ /^Dec/i ) { $month = 12 }
             return sprintf( "%04i-%02i-%02i", $year, $month, $day );
         }
+        
         return undef;
     }
 }
