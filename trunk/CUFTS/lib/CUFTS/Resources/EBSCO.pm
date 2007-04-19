@@ -134,9 +134,9 @@ sub clean_data {
 
     # Clear out trailing (...) information in title fields... unless the title starts with a (
 
-    if ( defined( $record->{'title'} ) && $record->{'title'} !~ /^\(/ ) {
-        $record->{'title'} =~ s/ \s* \( .+? \) \s* $//xsm;
-    }
+#    if ( defined( $record->{'title'} ) && $record->{'title'} !~ /^\(/ ) {
+#        $record->{'title'} =~ s/ \s* \( .+? \) \s* $//xsm;
+#    }
 
     return \@errors;
 }
