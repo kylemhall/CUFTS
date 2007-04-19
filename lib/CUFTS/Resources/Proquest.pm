@@ -150,7 +150,7 @@ sub clean_data {
         substr( $record->{ft_end_date}, 7, 0 ) = '-';
     }
 
-    $record->{title} =~ s/\s*\(.+?\)\s*$//g;
+#    $record->{title} =~ s/\s*\(.+?\)\s*$//g;
 
     push @errors, @{ $class->SUPER::clean_data($record) };
 
