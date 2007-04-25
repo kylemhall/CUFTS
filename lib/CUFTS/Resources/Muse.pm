@@ -29,6 +29,7 @@ use base qw(CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use URI::Escape qw(uri_escape);
 
 use strict;
 
@@ -52,37 +53,40 @@ sub title_list_fields {
     ];
 }
 
-sub title_list_get_field_headings {
-    return [
-        qw(
-            title
-            db_identifier
-            journal_url
-            publisher
-            e_issn
-            issn
-            ___preliminary_issue
-            ___start
-            ___end
-        )
-    ];
+sub title_list_extra_requires {
+    require CUFTS::Util::CSVParse;
 }
+
+sub title_list_split_row {
+    my ( $class, $row ) = @_;
+
+    my $csv = CUFTS::Util::CSVParse->new();
+
+    $row = trim_string($row);
+
+    $csv->parse($row)
+        or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
+
+    my @fields = $csv->fields;
+    return \@fields;
+}
+
 
 sub title_list_field_map {
     return {
-        'title'         => 'title',
-        'issn'          => 'issn',
-        'e_issn'        => 'e_issn',
-        'journal_url'   => 'journal_url',
-        'db_identifier' => 'db_identifier',
-        'publisher'     => 'publisher',
-        'ft_start_date' => 'ft_start_date',
-        'ft_end_date'   => 'ft_end_date',
+        'TITLE'           => 'title',
+        'PRINT ISSN'      => 'issn',
+        'ELECTRONIC ISSN' => 'e_issn',
+        'URL'             => 'journal_url',
+        'PUBLISHER'       => 'publisher',
     };
 }
 
 sub clean_data {
     my ( $class, $record ) = @_;
+
+    my $start = $record->{'___FIRST ISSUE ONLINE'};
+    my $end   = $record->{'___FINAL ISSUE ONLINE'};
 
     # Some ISSNs are dirty and have extra spaces in them for some reason
 
@@ -94,69 +98,52 @@ sub clean_data {
         $record->{e_issn} =~ s/[^0-9xX]//g;
     }
 
-    if ( defined( $record->{'___start'} )
-        && $record->{'___start'} =~ / vol\. \s* (\d+) /xsmi )
-    {
+    if ( defined( $start ) && $start =~ / vol\. \s* (\d+) /xsmi ) {
         $record->{vol_ft_start} = $1;
     }
     
-    if ( defined( $record->{'___start'} )
-        && $record->{'___start'} =~ / (?: no\. | issue ) \s* (\d+) /xsmi )
-    {
+    if ( defined( $start ) && $start =~ / (?: no\. | issue ) \s* (\d+) /xsmi ) {
         $record->{iss_ft_start} = $1;
     }
     
-    if ( defined( $record->{'___end'} )
-        && $record->{'___end'} =~ / vol\. \s* (\d+) /xsmi )
-    {
+    if ( defined( $end ) && $end =~ / vol\. \s* (\d+) /xsmi ) {
         $record->{vol_ft_end} = $1;
     }
     
-    if ( defined( $record->{'___end'} )
-        && $record->{'___end'} =~ / (?: issue | no\. ) \s* (\d+) /xsmi )
-    {
+    if ( defined( $end ) && $end =~ / (?: issue | no\. ) \s* (\d+) /xsmi ) {
         $record->{iss_ft_end} = $1;
     }
     
-    if ( defined( $record->{'___start'} )
-        && $record->{'___start'} =~ / \( (.+) \s+ (\d{4}) .* \) /xsm )
-    {
+    if ( defined( $start ) && $start =~ / \( (.+) \s+ (\d{4}) .* \) /xsm ) {
+
         my $month = $1;
         $record->{ft_start_date} = $2;
         if ( my $new_month = get_month($month) ) {
             $record->{ft_start_date} .= "-${new_month}";
-
         }
+
     }
-    elsif ( defined( $record->{'___start'} )
-        && $record->{'___start'} =~ / \( (\d{4}) .* \) /xsm )
-    {
+    elsif ( defined( $start ) && $start =~ / \( (\d{4}) .* \) /xsm ) {
         $record->{ft_start_date} = $1;
     }
-    elsif ( defined( $record->{'___start'} )
-        && $record->{'___start'} =~ / ( (?: 19|20 ) \d{2} ) /xsm )
-    {
+    elsif ( defined( $start ) && $start =~ / ( (?: 19|20 ) \d{2} ) /xsm ) {
         $record->{ft_start_date} = $1;
     }
 
-    if ( defined( $record->{'___end'} )
-        && $record->{'___end'} =~ / \( (.+) \s+ .* (\d{4}) \) /xsm )
-    {
+    if ( defined( $end ) && $end =~ / \( (.+) \s+ .* (\d{4}) \) /xsm ) {
+
         my $month = $1;
         $record->{ft_end_date} = $2;
         if ( my $new_month = get_month($month) ) {
             $record->{'ft_end_date'} .= "-${new_month}";
 
         }
+
     }
-    elsif ( defined( $record->{'___end'} )
-        && $record->{'___end'} =~ / \( .* (\d{4}) \) /xsm )
-    {
+    elsif ( defined( $end ) && $end =~ / \( .* (\d{4}) \) /xsm ) {
         $record->{ft_end_date} = $1;
     }
-    elsif ( defined( $record->{'___end'} )
-        && $record->{'___end'} =~ / ( (?: 19|20 ) \d{2} ) /xsm )
-    {
+    elsif ( defined( $end ) && $end =~ / ( (?: 19|20 ) \d{2} ) /xsm ) {
         $record->{ft_end_date} = $1;
     }
 
@@ -189,11 +176,10 @@ sub clean_data {
 sub can_getTOC {
     my ( $class, $request ) = @_;
 
-    return 0
-        if is_empty_string( $request->issue  )
-        || is_empty_string( $request->volume );
+    return 0 if is_empty_string($request->volume);
+    return 0 if is_empty_string($request->issue);
 
-    return $class->SUPER::can_getTOC($request);
+    return 1;
 }
 
 sub build_linkTOC {
@@ -211,15 +197,9 @@ sub build_linkTOC {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->journal_url   );
-        next if is_empty_string( $record->db_identifier );
-
-        my $url = $record->journal_url;
-        $url .= '/toc/'
-            . $record->db_identifier
-            . $request->volume . '.'
-            . $request->issue . '.html';
-
+        my $url = $class->_build_openurl( $record, $resource, $request );
+        next if !defined($url);
+        
         my $result = new CUFTS::Result($url);
         $result->record($record);
 
@@ -228,6 +208,72 @@ sub build_linkTOC {
 
     return \@results;
 }
+
+sub can_getFulltext {
+    my ( $class, $request ) = @_;
+
+    return 0 if is_empty_string($request->volume);
+    return 0 if is_empty_string($request->issue);
+    return 0 if is_empty_string($request->spage);
+
+    return 1;
+}
+
+sub build_linkFulltext {
+    my ( $class, $records, $resource, $site, $request ) = @_;
+
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
+
+    my @results;
+
+    foreach my $record (@$records) {
+        my $url = $class->_build_openurl( $record, $resource, $request );
+        next if !defined($url);
+        
+        $url .= "&spage=" . $request->spage;
+        
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
+}
+
+
+sub _build_openurl {
+    my ( $class, $record, $resource, $request ) = @_;
+
+    my $url = "http://muse.jhu.edu/cgi-bin/resolve_openurl.cgi?genre=article";
+
+    $url .= "&title=" . uri_escape($record->title);
+
+    if ( not_empty_string($record->issn) ) {
+        $url .= "&issn=" . $record->issn;
+    }
+    elsif ( not_empty_string($record->e_issn) ) {
+        $url .= "&issn=" . $record->e_issn;
+    }
+
+    if ( not_empty_string($request->volume) ) {
+        $url .= "&volume=" . $request->volume;
+    }
+
+    if ( not_empty_string($request->issue) ) {
+        $url .= "&issue=" . $request->issue;
+    }
+
+    return $url;
+}
+
 
 sub build_linkJournal {
     my ( $class, $records, $resource, $site, $request ) = @_;
