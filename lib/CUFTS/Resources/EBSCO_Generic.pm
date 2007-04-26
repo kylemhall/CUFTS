@@ -71,8 +71,10 @@ sub title_list_field_map {
         'Publication Name'            => 'title',
         'ISSN'                        => 'issn',
         'ISSN/ISBN'                   => 'issn',
+        'ISSN / ISBN'                 => 'issn',
         'Publisher'                   => 'publisher',
         'Full Text Delay (in months)' => 'embargo_months',
+        'Full Text Delay (Months)'    => 'embargo_months',
         'Full Text*'                  => '___Full Text',
         'Full Text**'                 => '___Full Text',
     };
