@@ -90,14 +90,32 @@ sub clean_data {
         }
 
         if (    $start =~ / \( \s* ([A-Za-z]+) \s+ (\d+) \s* ,? \s* (\d{4}) \s* \) /xsm ) {
-            $record->{ft_start_date} = sprintf( "%04i-%02i-%02i", $3, get_month( $1, 'start' ), $2 );
+            my $month = get_month( $1, 'start' );
+            if ( defined($month) ) {
+                $record->{ft_start_date} = sprintf( "%04i-%02i-%02i", $3, $month, $2 );
+            }
+            else {
+                $record->{ft_start_date} = sprintf( "%04i", $3 );
+            }
         }
         elsif ( $start =~ / \( \s* ([A-Za-z]+) [^A-Za-z]+ [A-Za-z]+ ,? \s* (\d{4}) \s* \) /xsm )
         {
-            $record->{ft_start_date} = sprintf( "%04i-%02i", $2, get_month( $1, 'start' ) );
+            my $month = get_month( $1, 'start' );
+            if ( defined($month) ) {
+                $record->{ft_start_date} = sprintf( "%04i-%02i", $2, $month );
+            }
+            else {
+                $record->{ft_start_date} = sprintf( "%04i", $2 );
+            }
         }
         elsif ( $start =~ / \( \s* ([A-Za-z]+) \s* ,? \s* (\d{4}) \s* \) /xsm ) {
-            $record->{ft_start_date} = sprintf( "%04i-%02i", $2, get_month( $1, 'start' ) );
+            my $month = get_month( $1, 'start' );
+            if ( defined($month) ) {
+                $record->{ft_start_date} = sprintf( "%04i-%02i", $2, $month );
+            }
+            else {
+                $record->{ft_start_date} = sprintf( "%04i", $2 );
+            }
         }
         elsif ( $start =~ / \( \s* (\d{4}) \s* \) /xsm ) {
             $record->{ft_start_date} = $1;
@@ -123,14 +141,32 @@ sub clean_data {
         }
 
         if ( $end =~ / \( \s* ([A-Za-z]+) \s+ (\d+) \s* ,? \s* (\d{4}) \s* \) /xsm ) {
-            $record->{ft_end_date} = sprintf( "%04i-%02i-%02i", $3, get_month( $1, 'end' ), $2 );
+            my $month = get_month( $1, 'end' );
+            if ( defined($month) ) {
+                $record->{ft_end_date} = sprintf( "%04i-%02i-%02i", $3, $month, $2 );
+            }
+            else {
+                $record->{ft_end_date} = sprintf( "%04i", $3 );
+            }
         }
         elsif ( $end =~ / \( \s* [A-Za-z]+ \s* [^A-Za-z\s] \s* ([A-Za-z]+) \s* ,? \s* (\d{4}) \s* \)/xsm )
         {
-            $record->{ft_end_date} = sprintf( "%04i-%02i", $2, get_month( $1, 'end' ) );
+            my $month = get_month( $1, 'end' );
+            if ( defined($month) ) {
+                $record->{ft_end_date} = sprintf( "%04i-%02i", $2, $month );
+            }
+            else {
+                $record->{ft_end_date} = sprintf( "%04i", $2 );
+            }
         }
         elsif ( $end =~ / \( \s* ([A-Za-z]+) \s* ,? \s* (\d{4}) \s* \)/xsm ) {
-            $record->{ft_end_date} = sprintf( "%04i-%02i", $2, get_month( $1, 'end' ) );
+            my $month = get_month( $1, 'end' );
+            if ( defined($month) ) {
+                $record->{ft_end_date} = sprintf( "%04i-%02i", $2, $month );
+            }
+            else {
+                $record->{ft_end_date} = sprintf( "%04i", $2 );
+            }
         }
         elsif ( $end =~ / \( \s* (\d{4}) \s* \) /xsm ) {
             $record->{ft_end_date} = $1;
@@ -171,7 +207,8 @@ sub clean_data {
         elsif ( $month =~ /^Third/i )  { return $period eq 'start' ? 6 : 12 }
         elsif ( $month =~ /^Fourth/i ) { return $period eq 'start' ? 9 : 12 }
         else {
-            CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
+            warn("Unable to find month match in fulltext date: $month");
+            return undef;
         }
     }
 
