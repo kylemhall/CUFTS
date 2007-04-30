@@ -24,6 +24,7 @@ use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use HTML::Entities;
 use Date::Calc qw(Delta_Days Today);
 
 
@@ -62,7 +63,6 @@ sub title_list_field_map {
         'Issn'              => 'issn',
         'Home Page URL'     => 'journal_url',
         'Publisher'         => 'publisher',
-
         'Coverage Begins Volume' => 'vol_ft_start',
         'Coverage Begins Issue'  => 'iss_ft_start',
         'Coverage Begins Date'   => 'ft_start_date',
@@ -90,8 +90,8 @@ sub title_list_split_row {
 sub skip_record {
     my ( $class, $record ) = @_;
     
-    return 1 if not_empty_string( $record->{'___Remarks'} ) 
-             && $record->{'___Remarks'} =~ /not\s+available/i;
+    return 1 if not_empty_string( $record->{'___Entitlement Status'} ) 
+             && $record->{'___Entitlement Status'} =~ /not\s+available/i;
     return 0;
 }
 
@@ -100,16 +100,18 @@ sub clean_data {
     my ( $class, $record ) = @_;
     
     if ( not_empty_string( $record->{ft_start_date} ) ) {
-        if ( $record->{ft_start_date} =~ /(\d+)-(\w+)-(\d{4})/ ) {
+        if ( $record->{ft_start_date} =~ /(\d+)-(\w+)-(\d{2})/ ) {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
+            $year += $year > 19 ? 1900 : 2000;
             $month = get_month($month, 'start');
             $record->{ft_start_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
         }
     }
 
     if ( not_empty_string( $record->{ft_end_date} ) ) {
-        if ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d{4})/ ) {
+        if ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d{2})/ ) {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
+            $year += $year > 19 ? 1900 : 2000;
             $month = get_month($month, 'end');
             if ( Delta_Days( $year, $month, $day, Today() ) > 240 ) {
                 $record->{ft_end_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
@@ -121,6 +123,8 @@ sub clean_data {
             }
         }
     }
+
+    $record->{title} = HTML::Entities::decode_entities( $record->{title} );
 
     sub get_month {
         my ( $month, $period ) = @_;
