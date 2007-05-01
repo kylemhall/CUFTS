@@ -5,5 +5,5 @@ CREATE TABLE journals_auth_issns (
 	info		VARCHAR(512)
 );
 
-CREATE UNIQUE INDEX j_auth_issns_idx ON journals_auth_issns (issn);
+CREATE INDEX j_auth_issns_idx ON journals_auth_issns (issn);
 CREATE INDEX j_auth_i_j_a_idx ON journals_auth_issns (journal_auth);
