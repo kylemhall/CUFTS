@@ -156,6 +156,8 @@ sub get_records {
         )
         = split /\|/, $cache_data->result;
 
+    $doi =~ s/\n.+$//msx;  # Remove everything after the first DOI
+    
     is_empty_string( $request->doi ) && not_empty_string($doi)
         and $request->doi($doi);
 
