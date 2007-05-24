@@ -1,5 +1,7 @@
 body {
 	font-family: Helvetica, Arial, sans-serif;
+	margin: 0px;
+	padding: 0px;
 }
 
 form {
@@ -14,7 +16,6 @@ input {
 	font-family: sans-serif;
 	font-size: 80%;
 }
-
 
 td {
 	font-family: Helvetica, Arial, sans-serif;	
@@ -267,10 +268,9 @@ a.heading {
 #navbar {
 	margin: 0;
 	margin-bottom: 1em;
-	padding: 0;
+	padding: 0px 10px;
 	float: left;
 	border-bottom: 1px solid #004997;
-	width: 95%;
 	white-space: nowrap;
 }
 
@@ -618,4 +618,202 @@ td.public-compare-resource2 {
 
 td.public-compare-resource3 {
     background:  #BBBBBB;
+}
+
+span.yes-highlight {
+    color: #1a1;
+}
+
+span.no-highlight {
+    color: #d22;
+}
+
+/* New form style starting with ERM development */
+
+div.alt {
+    background: #d0deed;
+}
+    
+.help-pointer {
+    position: absolute;
+    left: -10px;
+    top: 5px;
+    width: 10px;
+    height: 19px;
+}
+    
+legend {
+    margin-left: 10px;
+    color: #004997;
+    font-weight: bold;
+}
+    
+fieldset {
+/*    float: left;
+    clear: both; */
+    display: block;
+    width: 30em;
+    padding: 0px;
+    margin: 3px 10px 11px 0px;
+    border: 1px solid #004997;
+}
+
+/* Use Javascript to add this class to appropriate inputs since [type=..] doesn't work for most browsers yet */
+.standard-input {
+    padding: 2px;
+    margin: 2px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 80%;
+}
+
+.text-input {
+    width: 30em;
+    border: solid 1px black;
+}
+
+.select-input {
+    width: 30em;
+    border: solid 1px black;
+}
+
+
+
+fieldset input.date {
+    width: 14em;
+}
+
+div.field {
+    clear: both;
+    float: left;
+    position: relative;
+}
+
+div.data {
+    float: left;
+    padding: 3px;
+    width: 35em;
+}
+    
+div.data label {
+    width: 10em;
+    float: left;
+    text-align: left;
+    padding-top: 3px;
+}
+
+div.data input, div.data textarea, div.data select {
+    float: left;
+    text-align: left;
+}
+
+.validate-error {
+    background: #ff9999;
+}
+
+div.help {
+    display: none;
+    position: absolute;
+    float: left;
+    margin: -5px 1px 1px 1px;
+    left: 36.2em;
+    width: 18em;
+    border: 1px solid #c93;
+    padding: 10px 12px;
+    background: #ffc;
+}
+
+textarea {
+    overflow: visible;
+    height: 4em;
+    border: 1px solid black;
+    width: 30em;
+}
+
+label.error {
+    margin: 5px 0px;
+    color: red;
+    font-weight: bold;
+    display: block;
+    clear: both;
+}
+
+input.error {
+    background: #faa;
+}
+
+
+/* NEW LAYOUT */
+
+div#page-header {
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    float: left;
+}
+
+img#page-header-main-image {
+    float: left;
+    border: none;
+    padding: 0px;
+    
+    /* IE hack, Firefox uses !important, IE uses the second width */
+    
+    margin-left: 0px !important;
+    margin-left: -3px;
+}
+
+div#page-layout {
+    clear: both;
+}
+
+
+span#page-header-section {
+    float: right;
+    color: #d0deed;
+    font-weight: bold;
+    margin: 30px 30px 0px 0px;
+}
+
+div#logged-in {
+    float: right;
+    font-size: 80%;
+}
+
+div#navigation-main {
+    float: left;
+    font: normal 14px Verdana, sans-serif;
+    border: none;
+    width: 149px;
+}
+
+div#navigation-main ul {
+    margin: 8px 2px 12px 2px;
+    padding: 0px;
+}
+
+div#navigation-main ul li {
+    list-style: none;
+    margin: 0px;
+    text-align: left;
+    width: 100%;
+}
+
+div#navigation-main a {
+    color: black;
+    padding: 5px 0px 5px 10px;
+    display: block;
+    width: 135px;
+}
+
+div#navigation-main a:hover {
+    background: #e0eefd;
+}
+
+div#content-container {
+    margin-left: 160px;
+    padding-top: 5px;
+}
+
+div#content {
+    padding-top: 1em;
 }
