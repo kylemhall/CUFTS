@@ -1,0 +1,29 @@
+[% RETURN UNLESS javascript_validate %]
+<script type="text/javascript">
+$( function() {
+    
+[% FOREACH form IN javascript_validate %]
+    var validator = $("#[% form.name %]").validate({
+        event: "change",
+        errorPlacement: function(error, element) {
+            error.prependTo( element.parent().siblings('.help') );
+        },
+        rules: {
+            [% FOREACH fieldname IN form.fields.keys %]
+             [%- SET field = form.fields.$fieldname -%]
+             "[% form.field_prefix %][% fieldname %]": {
+                [% FOREACH constraint IN form.fields.$fieldname.keys %]
+                    [% constraint %]: [% form.fields.$fieldname.$constraint %][% ',' IF NOT loop.last %]
+                [% END %]
+             }[% ',' IF NOT loop.last %]
+            [% END %]
+        }
+    });
+
+    $("#[% form.name %] :reset").bind("click", function() {
+        validator.resetForm();
+    });
+    
+[% END %]
+});
+</script>
