@@ -5,12 +5,13 @@ use base 'Catalyst::Base';
 
 sub auto : Private {
 	my ($self, $c) = @_;
-	$c->stash->{header_image} = 'admin.jpg';
 
 	# Everything in this controller should be accessible only to admins
 	
 	$c->stash->{current_account}->administrator or 
 		die('User not authorized for access to administration functions');
+
+    $c->stash->{header_section} = 'Administration';
 
 	return 1;
 }

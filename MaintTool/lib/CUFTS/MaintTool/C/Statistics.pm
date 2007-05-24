@@ -11,8 +11,8 @@ sub menu : Local {
 	$c->req->params->{cancel} and
 		return $c->redirect('/main');
 
-	$c->stash->{header_image} = 'statistics.jpg';
-
+    $c->stash->{header_section} = 'Statistics';
+    
 	if ($c->req->params->{submit}) {
 
 		$c->form({

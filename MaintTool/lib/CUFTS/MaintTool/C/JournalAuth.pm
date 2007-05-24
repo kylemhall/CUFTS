@@ -98,8 +98,8 @@ sub auto : Private {
 	$c->stash->{current_account}->{edit_global} || $c->stash->{current_account}->{administrator} or
 		die('User not authorized for journal auth maintenance');
 
-	$c->stash->{header_image} = 'global_resources.jpg';
-
+    $c->stash->{header_section} = 'Journal Auth';
+    
 	return 1;
 }
 

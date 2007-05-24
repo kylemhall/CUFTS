@@ -1,7 +1,7 @@
 package CUFTS::MaintTool;
 
 use strict;
-use Catalyst qw/Static::Simple Session Session::Store::FastMmap Session::State::Cookie FormValidator CUFTS::MaintTool::FillInForm/;
+use Catalyst qw/Static::Simple Session Session::Store::FastMmap Session::State::Cookie FormValidator CUFTS::MaintTool::FillInForm -Debug/;
 use lib '../lib';
 
 use CUFTS::ResourcesLoader;
@@ -206,6 +206,51 @@ sub redirect {
     
     return $c->res->redirect($location);
 }
+
+
+# Override default FormValidator form so that we can strip the js_constraints used
+# to power the jQuery client side validation
+
+sub form {
+    my ( $c, $form ) = @_;
+
+    if ( defined($form) ) {
+        my %clean_form = %{ $form };
+        delete $clean_form{js_constraints};
+        return $c->NEXT::form( \%clean_form );
+    }
+    else {
+        return $c->NEXT::form();
+    }
+}
+
+# Takes a FormValidator block and tries to convert it to
+# something for use in jQuery validate
+
+sub convert_form_validate {
+    my ( $c, $form, $validate, $prefix ) = @_;
+    
+    my $js_validate = { name => $form, field_prefix => $prefix };
+    
+    foreach my $field ( @{ $validate->{required} } ) {
+        next if $field eq 'submit';  # Skip submit as a required field for javascript checking
+        $js_validate->{fields}->{$field}->{required} = 'true';
+    }
+    
+    if ( defined($validate->{js_constraints}) ) {
+        foreach my $field ( keys %{ $validate->{js_constraints} } ) {
+            my $constraints = $validate->{js_constraints}->{$field};
+            if ( !exists( $js_validate->{fields}->{$field} ) ) {
+                $js_validate->{fields}->{$field} = {};
+            }
+            @{ $js_validate->{fields}->{$field} }{ keys %{ $constraints } } = values %{ $constraints };
+        }
+    }
+    
+    return $js_validate;
+}
+
+
 
 =head1 NAME
 

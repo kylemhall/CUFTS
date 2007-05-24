@@ -32,13 +32,14 @@ $form_validate_new->{required} = ['name', 'key', 'password'];
 
 sub auto : Private {
 	my ($self, $c, $account_id) = @_;
-	$c->stash->{header_image} = 'admin_accounts.jpg';
 
 	if ($account_id != 0) {
 		$c->stash->{account} = CUFTS::DB::Accounts->retrieve($account_id);
 		defined($c->stash->{account}) or
 			die("Unable to load account: $account_id");
 	}
+
+    $c->stash->{header_section} = 'Account Administration';
 
 	return 1;
 }

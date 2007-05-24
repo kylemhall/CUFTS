@@ -14,13 +14,14 @@ my $form_validate = {
 
 sub auto : Private {
 	my ($self, $c, $site_id) = @_;
-	$c->stash->{header_image} = 'admin_sites.jpg';
 
 	if ($site_id != 0) {
 		$c->stash->{site} = CUFTS::DB::Sites->retrieve($site_id);
 		defined($c->stash->{site}) or
 			die("Unable to load site: $site_id");
 	}
+
+    $c->stash->{header_section} = 'Site Administration';
 
 	return 1;
 }

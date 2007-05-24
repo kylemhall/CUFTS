@@ -14,7 +14,7 @@ my $form_validate = {
 sub auto : Private {
     my ( $self, $c ) = @_;
 
-    $c->stash->{header_image} = 'resource_comparison.jpg';
+    $c->stash->{header_section} = 'Resource Comparison';
 }
 
 sub default : Private {

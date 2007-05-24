@@ -25,6 +25,15 @@ sub menu : Local {
     ## Get CJDB template files, active, and sandbox lists
     ##
 
+    my @general_template_list = qw(
+        errors.tt
+        layout.tt
+        page_footer.tt
+        page_header.tt
+        loggedin.tt
+        login.tt
+    );
+    
     my @cjdb_template_list = qw(
         account_create.tt
         account_manage.tt
@@ -37,7 +46,7 @@ sub menu : Local {
         browse_journals_unified_data.tt
         browse_search_description.tt
         browse_subjects.tt
-        errors.tt
+        cjdb_layout.tt
         journal.tt
         journal_associations.tt
         journal_availability.tt
@@ -49,17 +58,12 @@ sub menu : Local {
         journal_titles.tt
         journals_link_label.tt
         journals_link_name.tt
-        layout.tt
         lcc_browse.tt
         lcc_browse_content.tt
-        loggedin.tt
-        login.tt
         manage_tags_info.tt
-        menu.tt
+        cjdb_menu.tt
         mytags.tt
         nav_line.tt
-        page_footer.tt
-        page_header.tt
         page_title.tt
         paging.tt
         selected_journals.tt
@@ -68,18 +72,23 @@ sub menu : Local {
         setup_browse_javascript.tt
         tag_viewing_string.tt
     );
+    
+    my @resource_template_list = qw(
+        resource_layout.tt
+        resource_menu.tt
+    );
 
     my $active_dir  = get_site_base_dir('cjdb_template', $site, '/active');
     my $sandbox_dir = get_site_base_dir('cjdb_template', $site, '/sandbox');
 
     opendir ACTIVE, $active_dir
         or die('Unable to open CJDB site active template directory for reading');
-    my @active_cjdb_templates = grep !/^\./, readdir ACTIVE;
+    my @active_templates = grep !/^\./, readdir ACTIVE;
     closedir ACTIVE;
 
     opendir SANDBOX, $sandbox_dir
         or die('Unable to open CJDB site sandbox template directory for reading');
-    my @sandbox_cjdb_templates = grep !/^\./, readdir SANDBOX;
+    my @sandbox_templates = grep !/^\./, readdir SANDBOX;
     closedir SANDBOX;
 
     ##
@@ -102,12 +111,14 @@ sub menu : Local {
 
     # TODO: Get URL for CJDB for link to sandbox/active?
 
-    $c->stash->{active_cjdb_templates}  = \@active_cjdb_templates;
-    $c->stash->{sandbox_cjdb_templates} = \@sandbox_cjdb_templates;
-    $c->stash->{cjdb_templates}         = \@cjdb_template_list;
+    $c->stash->{active_templates}   = \@active_templates;
+    $c->stash->{sandbox_templates}  = \@sandbox_templates;
+    $c->stash->{general_templates}  = \@general_template_list;
+    $c->stash->{cjdb_templates}     = \@cjdb_template_list;
+    $c->stash->{resource_templates} = \@resource_template_list;
 
     $c->stash->{csses}         = \@css_list;
-    $c->stash->{active_csses} = \@active_css;
+    $c->stash->{active_csses}  = \@active_css;
     $c->stash->{sandbox_csses} = \@sandbox_css;
 
     $c->stash->{template} = 'site/template/menu.tt';
