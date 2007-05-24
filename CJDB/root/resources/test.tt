@@ -1,0 +1,52 @@
+[% FOREACH erm IN erms %]
+<div class="erm-list-record">
+ <h1>[% erm.resource %]</h1>
+ 
+ <div class="erm-list-field">
+  <span class="erm-list-label">Vendor:</span>
+  <span class="erm-list-data">[% erm.vendor %]</span>
+ </div>
+
+[% IF erm.publisher.defined %]
+ <div class="erm-list-field">
+  <span class="erm-list-label">Publisher:</span>
+  <span class="erm-list-data">[% erm.publisher %]</span>
+ </div>
+[% END %]
+
+[% IF erm.description_full.defined %]
+ <div class="erm-list-field">
+  <span class="erm-list-label">Description:</span>
+  <span class="erm-list-data">[% erm.description_full %]</span>
+ </div>
+[% ELSIF erm.description_brief.defined %]
+ <div class="erm-list-field">
+  <span class="erm-list-label">Description:</span>
+  <span class="erm-list-data">[% erm.description_brief %]</span>
+ </div>
+[% END %]
+
+[% IF erm.public_message.defined %]
+ <div class="erm-list-field">
+  <span class="erm-list-label">Note:</span>
+  <span class="erm-list-data">[% erm.public_message %]</span>
+ </div>
+[% END %]
+
+[% IF erm.coverage.defined %]
+<div class="erm-list-field">
+ <span class="erm-list-label">Coverage:</span>
+ <span class="erm-list-data">[% erm.coverage %]</span>
+</div>
+[% END %]
+
+[% IF erm.embargo.defined %]
+<div class="erm-list-field">
+ <span class="erm-list-label">Embargo:</span>
+ <span class="erm-list-data">[% erm.embargo %]</span>
+</div>
+[% END %]
+
+
+</div>
+[% END %]

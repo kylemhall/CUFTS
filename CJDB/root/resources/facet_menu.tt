@@ -1,0 +1,48 @@
+<div id="resources-main-browse">
+ <h2>Browse Resources</h2>
+ <form name="browse">
+  <fieldset>
+   <legend>Subjects</legend>
+   <div class="resources-main-browse-subject">
+    [% FOREACH subject_record IN subject_options %]
+     [% SET subject    = subject_record.subject %]
+     [% SET subject_id = subject_record.id      %]
+     <div class="resources-main-browse-subject-record">
+      <a href="[% url("$url_base/resources/browse/add_facet/subject/$subject/$subject_id") %]">[% subject %]</a>
+     </div>
+    [% END %]
+   </div>
+  </fieldset>
+
+  <fieldset>
+   <legend>Title</legend>
+
+    [% FOREACH letter IN [ 'A' .. 'Z' ] %]
+     <a href="[% url("$url_base/resources/browse/add_facet/name/$letter/$letter") %]">[% letter %]</a>
+    [% END %]
+    <a href="[% url("$url_base/resources/browse/add_facet/name/0-9/[^a-z]") %]">0-9</a>
+
+  </fieldset>
+
+  <fieldset>
+   <legend>Resource Type</legend>
+   [% FOREACH resource_type IN resource_types %]
+    [% SET display = resource_type.resource_type %]
+    [% SET data = resource_type.id %]
+    <a href="[% url("$url_base/resources/browse/add_facet/resource_type/$display/$data") %]">[% display %]</a><br />
+   [% END %]
+  </fieldset>
+
+  <fieldset>
+   <legend>Resource Mediums</legend>
+   [% FOREACH resource_medium IN resource_mediums %]
+    [% SET display = resource_medium.resource_medium %]
+    [% SET data = resource_medium.id %]
+    <a href="[% url("$url_base/resources/browse/add_facet/resource_medium/$display/$data") %]">[% display %]</a><br />
+   [% END %]
+  </fieldset>
+
+
+
+ </form>
+</div>
