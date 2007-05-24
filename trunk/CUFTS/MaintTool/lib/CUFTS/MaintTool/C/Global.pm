@@ -49,7 +49,7 @@ sub auto : Private {
 			die("Unable to load resource: $resource_id");
 	}
 
-	$c->stash->{header_image} = 'global_resources.jpg';
+    $c->stash->{header_section} = 'Global Resources';
 
 	return 1;
 }

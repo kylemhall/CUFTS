@@ -25,8 +25,8 @@ my $ips_form_validate = {
 
 sub auto : Private {
 	my ($self, $c) = @_;
-	$c->stash->{header_image} = 'admin_sites.jpg';
-	return 1;
+    $c->stash->{header_section} = 'Site Settings';
+    return 1;
 }
 
 sub change : Local {
@@ -67,8 +67,8 @@ sub change : Local {
 	# Display a list of sites
 
 	$c->stash->{sites} = \@site_list;
-	$c->stash->{header_image} = 'change_site.jpg';
-	$c->stash->{template} = 'site/change.tt';
+    $c->stash->{header_section} = 'Change Site';
+    $c->stash->{template} = 'site/change.tt';
 }
 
 sub edit : Local {
@@ -97,7 +97,6 @@ sub edit : Local {
 	}
 	
 	$c->stash->{section} = 'general';
-	$c->stash->{header_image} = 'admin_sites.jpg';
 	$c->stash->{template} = 'site/edit.tt';
 }
 
@@ -158,7 +157,6 @@ sub ips : Local {
 	}
 	
 	$c->stash->{section} = 'general';
-	$c->stash->{header_image} = 'admin_sites.jpg';
 	$c->stash->{template} = 'site/ips.tt';
 }
 

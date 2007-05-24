@@ -72,7 +72,7 @@ sub auto : Private {
 		}
 	}
 
-	$c->stash->{header_image} = 'local_resources.jpg';
+	$c->stash->{header_section} = 'Local Resources';
 
 	return 1;
 }
@@ -165,6 +165,26 @@ sub edit : Local {
 	my $global_resource = $c->stash->{global_resource};
 	my $local_resource  = $c->stash->{local_resource};
 
+	if ( !defined($local_resource) ) {
+	    my $new_record = {};
+	    if ( defined($global_resource) ) {
+		    $new_record->{resource} = $global_resource->id;
+	    }
+        eval {
+	        $local_resource = CUFTS::DB::LocalResources->create($new_record);
+	    };
+			
+		if ($@) {
+			my $err = $@;
+			CUFTS::DB::DBI->dbi_rollback;
+			die($err);
+		}
+			
+		CUFTS::DB::DBI->dbi_commit;
+	}
+
+	$c->form->valid->{site} = $c->stash->{current_site}->id;
+
 	if ($c->req->params->{submit}) {
 
 		$c->form(defined($global_resource) ? $form_validate_global : $form_validate_local);
@@ -174,21 +194,8 @@ sub edit : Local {
 			# Remove services and recreate links, then update and save the resource
 			
 			eval {
-				if ( defined($local_resource) ) {
-
-					$local_resource->update_from_form($c->form);
-					CUFTS::DB::LocalResources_Services->search({local_resource => $local_resource->id})->delete_all;
-
-				} else {
-
-					if ( defined($global_resource) ) {
-						$c->form->valid->{resource} = $global_resource->id;
-					}
-
-					$c->form->valid->{site} = $c->stash->{current_site}->id;
-
-					$local_resource = CUFTS::DB::LocalResources->create_from_form($c->form);
-				}
+				$local_resource->update_from_form($c->form);
+				CUFTS::DB::LocalResources_Services->search({local_resource => $local_resource->id})->delete_all;
 				
 				foreach my $service ($c->form->valid('resource_services')) {
 					$local_resource->add_to_services({ service => $service });
