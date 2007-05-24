@@ -1,7 +1,7 @@
 package CUFTS::CJDB;
 
 use strict;
-use Catalyst qw/Static::Simple Session Session::Store::FastMmap Session::State::Cookie Cache Cache::Store::FastMmap FormValidator FillInForm/;
+use Catalyst qw/Static::Simple Session Session::Store::FastMmap Session::State::Cookie Cache Cache::Store::FastMmap FormValidator FillInForm -Debug/;
 use lib '../lib';
 use CUFTS::Config;
 use CUFTS::CJDB::Util;
@@ -18,8 +18,9 @@ CUFTS::CJDB->config(
     regex_base           => '',
     default_max_columns  => 20,
     default_min_per_page => 50,
-    'View::TT' => {
+    'V::TT' => {
         WRAPPER       => 'layout.tt',
+#        COMPILE_DIR   => '/tmp/CUFTS_CJDB_template_cache',
     },
     cache => {
         backend => {
