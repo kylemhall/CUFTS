@@ -1,35 +1,36 @@
-[% RETURN UNLESS current_account %]
+[% UNLESS current_account %]
+    <div style="height: 50px"></div>
+    [% RETURN %]
+[% END %]
 [%- # Setup menu items
-	SET menu = [];
-	menu.push(['/main', 'home']);
-	IF current_site;
-		menu.push(['/local/menu', 'local_resources']);
-		menu.push(['/statistics/menu', 'stats']);
-		menu.push(['/site/edit', 'edit_site']);
-	END;
+    SET menu = [];
+    menu.push(['/main', 'Home']);
+    IF current_site;
+        menu.push(['/local/menu', 'Local Resources']);
+        menu.push(['/erm/', 'ERM']);
+        menu.push(['/site/edit', 'Site Settings']);
+        menu.push(['/statistics/menu', 'Statistics']);
+    END;
 
-	IF current_account.sites.size > 1 OR current_account.administrator;
-		menu.push(['/site/change', 'change_site']);
-	END;
+    IF current_account.sites.size > 1 OR current_account.administrator;
+        menu.push(['/site/change', 'Change Site']);
+    END;
 
-	IF current_account.edit_global OR current_account.administrator;
-		menu.push(['/global/menu', 'global']);
-		menu.push(['/journalauth/search', 'journal_auth']);
-	END;
+    IF current_account.edit_global OR current_account.administrator;
+        menu.push(['/global/menu', 'Global Resources']);
+        menu.push(['/journalauth/search', 'Journal Auth']);
+    END;
 
-	IF current_account.administrator;
-		menu.push(['/admin', 'admin']);
-	END;
+    IF current_account.administrator;
+        menu.push(['/admin', 'Administration']);
+    END;
 
-	menu.push(['/account/edit', 'account']);
-	menu.push(['/logout', 'logout']);
+    menu.push(['/account/edit', 'Account Settings']);
+    menu.push(['/logout', 'Logout']);
 
 -%]
-<img src="[% image_dir %]sidebar/divider.gif" />
-
+<ul>
 [% FOREACH item IN menu %]
- <a href="[% url_base %][% item.0 %]">
-  <img src="[% image_dir %]sidebar/[% item.1 %].gif" onMouseOver="this.src='[% image_dir %]sidebar/[% item.1 %]_over.gif'" onMouseOut="this.src='[% image_dir %]sidebar/[% item.1 %].gif'" />
- </a>
- <img src="[% image_dir %]sidebar/divider.gif">
+ <li><a href="[% url_base %][% item.0 %]">[% item.1 %]</a></li>
 [% END %]
+</ul>
