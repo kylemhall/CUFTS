@@ -47,6 +47,7 @@ sub title_list_fields {
             iss_ft_start
             iss_ft_end
             journal_url
+            publisher
         )
     ];
 }
@@ -61,7 +62,6 @@ sub title_list_split_row {
     my $csv = CUFTS::Util::CSVParse->new();
 
     $row = trim_string($row);
-    $row =~ s{\\,}{ }g;  # Replace \, with a space
 
     $csv->parse($row)
         or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
