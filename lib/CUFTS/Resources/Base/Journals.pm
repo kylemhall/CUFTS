@@ -126,6 +126,7 @@ sub overridable_title_list_fields {
             iss_cit_start
             vol_cit_end
             iss_cit_end
+            journal_url
 
             cjdb_note
             )
@@ -590,14 +591,11 @@ sub _search_active {
     my $search_module = $global ? $global_module : $local_module;
 
     my %search_terms = ( 'resource' => $global ? $resource->resource->id : $resource->id );
-    if ( assert_ne( $request->issn ) || assert_ne( $request->eissn ) ) {
+    my @issns = $request->issns;
+    if ( scalar( @issns ) ) {
         my @issn_search = ('-or');
-        push @issn_search,
-            ( { "issn", $request->issn }, { "e_issn", $request->issn } )
-            if assert_ne( $request->issn );
-        push @issn_search,
-            ( { "issn", $request->eissn }, { "e_issn", $request->eissn } )
-            if assert_ne( $request->eissn );
+        push @issn_search, { issn  => { '-in' => \@issns } };
+        push @issn_search, { e_issn => { '-in' => \@issns } };
         $search_terms{'-nest'} = \@issn_search;
     }
     elsif ( assert_ne( $request->title ) ) {
