@@ -1,7 +1,9 @@
 [% USE url %]
 
-<div id="resources-current-facets">
-[% FOREACH facet IN facets.keys %]
-    <a href="[% url("$url_base/resources/browse/remove_facet/$facet") %]">X</a> [% facet %]: [% facets.$facet.display %]<br />
-[% END %]
+<div id="resources-current-facets" class="resources-current-facets-row">
+ [% IF facets.values.size %]
+  [% facets.values.map_join( 'display', ' AND ' ) %]<br />
+ [% ELSE %]
+  No facets selected.
+ [% END %]
 </div>

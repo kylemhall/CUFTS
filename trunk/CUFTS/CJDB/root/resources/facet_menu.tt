@@ -1,48 +1,151 @@
-<div id="resources-main-browse">
- <h2>Browse Resources</h2>
- <form name="browse">
-  <fieldset>
-   <legend>Subjects</legend>
-   <div class="resources-main-browse-subject">
+<script type="text/javascript">
+ var facet_array;
+
+ function init_facets() {
+     facet_array = new Object();
+
+     [% FOREACH facet IN facets.keys %]
+      facet_array["[% facet %]"] = new Object();
+      facet_array["[% facet %]"]["data"] = "[% facets.$facet.data %]";
+      facet_array["[% facet %]"]["display"] = "[% facets.$facet.display %]";
+     [% END %]
+     update_chosen_facets();
+ }
+
+ function update_chosen_facets() {
+  var ul = $("ul#chosen-facets");
+  ul.empty();
+  $.each( facet_array, function(facet_type, details) {
+   ul.append( "<li><a href=\"/remove_facet/" + facet_type + "/\" onClick=\"remove_facet('" + facet_type + "'); return false;\">X</a> " + details["display"] + "</li>" );
+  } );
+
+  var URL = "[% url("$url_base/resources/browse/count_facets/") %]";
+
+  $.each( facet_array, function(facet_type, details)  {
+      var URL_snippet = facet_type + '/' + details["display"] + '/' + details["data"] + '/';
+      URL = URL + URL_snippet;
+  } );
+
+  $.get( URL, function(data) {
+     $('#facet-count').empty().append(data); 
+  });
+
+ }
+ 
+ function add_facet( facet_type, display, data ) {
+  var facet = facet_array[facet_type];
+  if ( !facet ) {
+      facet_array[facet_type] = new Object();
+      facet = facet_array[facet_type];
+  }
+  facet["data"]    = data;
+  facet["display"] = display;
+  
+  update_chosen_facets();   
+ }
+
+ function remove_facet( facet_type ) {
+  delete facet_array[facet_type];
+  update_chosen_facets();
+ }
+
+ function submit_facet_changes() {
+
+  var URL = "[% url("$url_base/resources/browse/facets/") %]";
+
+  $.each( facet_array, function(facet_type, details)  {
+      var URL_snippet = facet_type + '/' + details["display"] + '/' + details["data"] + '/';
+      URL = URL + URL_snippet;
+  } );
+
+  window.location.replace(URL);
+ }
+ 
+$( function() {
+     init_facets();
+} );
+
+</script>
+
+<form name="browse">
+
+<div id="resources-brief-facets" style="float: left; width: 100%; background: #cdf">
+
+<div style="width: 80%; float: left;">
+[% PROCESS resources/current_facets.tt %]
+</div>
+<div class="resources-current-facets-row" style="width: 10%; float: right;">
+ <a href="" onClick="$('#resource-facet-choice-wrapper').toggle(); return false;">sift</a>
+</div>
+
+<div id="resource-facet-choice-wrapper" style="width: 100%; float: left; display: none; border-top: 1px solid blue; background: #def;">
+
+<div id="resources-brief-browse" style="float: left;  width: 78%;">
+
+ <div class="resources-facet-choice-container" style="width: 99%; height: 4em; border: none;">
+  <h2>Titles</h2>
+  <div id="resources-brief-browse-title" class="resources-facet-choice-list" style="width: 99%; height: 3.9em;">
+   [% FOREACH letter IN [ 'A' .. 'Z' ] %]
+    <a href="[% url("$url_base/resources/browse/add_facet/name/$letter/$letter") %]" onClick="add_facet( 'name', '[% letter %]', '[% letter %]'); return false;">[% letter %]</a>
+   [% END %]
+   <a href="[% url("$url_base/resources/browse/add_facet/name/0-9/[^a-z]") %]"  onClick="add_facet( 'name', '0-9', '[^a-z]'); return false;">0-9</a>
+  </div>
+ </div>
+
+
+  <div class="resources-facet-choice-container" style="clear: left">
+   <h2>Subjects</h2>
+   <div id="resources-brief-browse-subject" class="resources-facet-choice-list">
     [% FOREACH subject_record IN subject_options %]
      [% SET subject    = subject_record.subject %]
      [% SET subject_id = subject_record.id      %]
-     <div class="resources-main-browse-subject-record">
-      <a href="[% url("$url_base/resources/browse/add_facet/subject/$subject/$subject_id") %]">[% subject %]</a>
+     <div class="resources-main-browse-subject-record" id="resources-main-browse-facet-subject-[% subject_id %]">
+      <a href="[% url("$url_base/resources/browse/add_facet/subject/$subject/$subject_id") %]" onClick="add_facet( 'subject', '[% subject %]', '[% subject_id %]'); return false;">[% subject %]</a>
+<!--      <script type="text/javascript">
+       $( $.get( "[% url("$url_base/resources/browse/count_facets/subject/$subject/$subject_id") %]", function(txt) {
+           $("#resources-main-browse-facet-subject-[% subject_id %]").append( "(" + txt + ")");
+       } ) );
+      </script>
+-->
      </div>
     [% END %]
    </div>
-  </fieldset>
-
-  <fieldset>
-   <legend>Title</legend>
-
-    [% FOREACH letter IN [ 'A' .. 'Z' ] %]
-     <a href="[% url("$url_base/resources/browse/add_facet/name/$letter/$letter") %]">[% letter %]</a>
-    [% END %]
-    <a href="[% url("$url_base/resources/browse/add_facet/name/0-9/[^a-z]") %]">0-9</a>
-
-  </fieldset>
-
-  <fieldset>
-   <legend>Resource Type</legend>
+  </div>
+  
+  <div class="resources-facet-choice-container">
+   <h2>Resource Types</h2>
+   <div id="resources-brief-browse-resource-type" class="resources-facet-choice-list">
    [% FOREACH resource_type IN resource_types %]
     [% SET display = resource_type.resource_type %]
     [% SET data = resource_type.id %]
-    <a href="[% url("$url_base/resources/browse/add_facet/resource_type/$display/$data") %]">[% display %]</a><br />
+    <a href="[% url("$url_base/resources/browse/add_facet/resource_type/$display/$data") %]" onClick="add_facet( 'resource_type', '[% display %]', '[% data %]'); return false;">[% display %]</a> <br />
    [% END %]
-  </fieldset>
-
-  <fieldset>
-   <legend>Resource Mediums</legend>
-   [% FOREACH resource_medium IN resource_mediums %]
-    [% SET display = resource_medium.resource_medium %]
-    [% SET data = resource_medium.id %]
-    <a href="[% url("$url_base/resources/browse/add_facet/resource_medium/$display/$data") %]">[% display %]</a><br />
+   </div>
+  </div>
+  
+  
+  
+  <div class="resources-facet-choice-container" style="border-right: none;">
+   <h2>Content Types</h2>
+   <div id="resources-brief-browse-content-type" class="resources-facet-choice-list">
+   [% FOREACH content_type IN content_types %]
+    [% SET display = content_type.content_type %]
+    [% SET data = content_type.id %]
+    <a href="[% url("$url_base/resources/browse/add_facet/resource_medium/$display/$data") %]" onClick="add_facet( 'content_type', '[% display %]', '[% data %]'); return false;">[% display %]</a><br />
    [% END %]
-  </fieldset>
+   </div>
+  </div>
 
-
-
- </form>
 </div>
+
+<div id="resources-facet-change-list" style="width: 19%; padding: 5px; height: 26.5em; background: white; float: right;">
+ <h2>Show:</h2>
+ <ul id="chosen-facets"></ul>
+ <div id="facet-count-container">Estimated result count: <span id="facet-count"></span></div>
+ <input type="submit" name="show" value="show"   onClick="submit_facet_changes(); return false;" />
+ <input type="submit" name="reset" value="reset" onClick="init_facets(); return false;" />
+</div>
+
+</div>
+</div>
+</form>

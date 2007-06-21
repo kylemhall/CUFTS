@@ -1,0 +1,7 @@
+[% USE url %]
+
+<div id="resources-current-facets">
+[% FOREACH facet IN facets.keys %]
+    <a href="[% url("$url_base/resources/browse/remove_facet/$facet") %]">X</a> [% facet %]: [% facets.$facet.display %]<br />
+[% END %]
+</div>
