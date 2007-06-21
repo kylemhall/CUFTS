@@ -1,8 +1,8 @@
 [% RETURN UNLESS javascript_validate %]
 <script type="text/javascript">
-$( function() {
     
 [% FOREACH form IN javascript_validate %]
+$( function() {
     var validator = $("#[% form.name %]").validate({
         event: "change",
         errorPlacement: function(error, element) {
@@ -20,10 +20,10 @@ $( function() {
         }
     });
 
-    $("#[% form.name %] :reset").bind("click", function() {
+    $("#[% form.name %] input").filter(":reset").bind("click", function() {
         validator.resetForm();
     });
+});
     
 [% END %]
-});
 </script>

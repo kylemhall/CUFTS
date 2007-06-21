@@ -543,19 +543,25 @@ jQuery.extend(jQuery.validator, {
 			var first = true;
 			for ( var elementID in this.errorList ) {
 				if( first && this.settings.focusInvalid ) {
+
+					var element = jQuery("#"+elementID);
+
 					// check if the last focused element is invalid
-					if( this.lastActive && this.errorList[this.lastActive.id])
+					if( this.lastActive && this.errorList[this.lastActive.id]) {
 						// focus it
+						element.parents('div.tabs-nav-page').trigger('triggerPage');
 						this.lastActive.focus();
-					// otherwise, find the firt invalid lement
+					}
+					// otherwise, find the first invalid lement
 					else {
 						// IE throws an exception when focusing hidden element
 						try {
 							// focus the first invalid element
-							var element = jQuery("#"+elementID);
 							// radio/checkbox doesn't have an ID
-							if(element.length)
+							if(element.length) {
+								element.parents('div.tabs-nav-page').trigger('triggerPage');
 								element[0].focus();
+							}
 						} catch(e) { this.settings.debug && window.console && console.error(e); }
 					}
 					first = false;
