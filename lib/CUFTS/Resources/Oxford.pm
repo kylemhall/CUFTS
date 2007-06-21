@@ -1,6 +1,6 @@
-## CUFTS::Resources::Ovid
+## CUFTS::Resources::Oxford
 ##
-## Copyright Michelle Gauthier - Simon Fraser University (2003-12-24)
+## Copyright Todd Holbrook - Simon Fraser University (2003-12-24)
 ##
 ## This file is part of CUFTS.
 ##
@@ -20,7 +20,7 @@
 
 package CUFTS::Resources::Oxford;
 
-use base qw(CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::GenericJournalDOI);
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
 use URI::Escape;
@@ -30,16 +30,18 @@ use strict;
 ## title_list_fields - Controls what fields get displayed and loaded from
 ## title lists.
 
-my $base_url = 'http://www3.oup.co.uk/content?';
-
 sub title_list_fields {
     return [
         qw(
             id
             title
             issn
+            e_issn
             ft_start_date
             vol_ft_start
+            iss_ft_start
+            abbreviation
+            journal_url
         )
     ];
 }
@@ -64,135 +66,48 @@ sub title_list_split_row {
 
 sub title_list_field_map {
     return {
-        'Journal Name'         => 'title',
+        'Journal title'        => 'title',
         'Print ISSN'           => 'issn',
-        'Full-text Start Year' => 'ft_start_date',
-        'Start Volume'         => 'vol_ft_start',
+        'Online ISSN'          => 'e_issn',
+        'Short title'          => 'abbreviation',
+        'Homepage URL'         => 'journal_url',
     };
 }
 
-## can_get* - Control whether or not an attempt to create a link is built.  This is run
-## before the database is searched for possible title matches, so catching requests without
-## enough data, etc. early (here) cuts down on database hits
 
-sub can_getFulltext {
-    my ( $class, $request ) = @_;
+sub clean_data {
+    my ( $class, $record ) = @_;
 
-    return 0
-        if is_empty_string( $request->spage  )
-        && is_empty_string( $request->atitle );
-
-    return $class->SUPER::can_getFulltext($request);
-}
-
-sub can_getTOC {
-    my ( $class, $request ) = @_;
-
-    return 0 if is_empty_string( $request->issue );
+    if ( not_empty_string($record->{'___Prefix'}) && $record->{'___Prefix'} ne '-' ) {
+        $record->{title} = $record->{'___Prefix'} . ' ' . $record->{title};
+    }
     
-    return $class->SUPER::can_getTOC($request);
-}
-
-# --------------------------------------------------------------------------------------------
-
-## build_link* - Builds a link to a service.  Should return an array reference containing
-## Result objects with urls and title list records (if applicable).
-##
-
-sub build_linkFulltext {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $url = $base_url . 'genre=article';
-        $url .= '&issn=' . dashed_issn( $record->issn );
-        $url .= '&volume=' . $request->volume;
-        $url .= '&issue=' . $request->issue;
-        $url .= $request->spage
-                ? '&spage=' . $request->spage
-                : '&atitle=' . uri_escape( $request->atitle );
-
-        $url .= '&sid=CUFTS:CUFTS&pid=content:fulltext';
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
+    if ( not_empty_string($record->{issn}) && $record->{issn} eq '-' ) {
+        delete $record->{issn};
     }
 
-    return \@results;
-}
-
-sub build_linkTOC {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkTOC');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkTOC');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkTOC');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $url = $base_url . 'genre=journal';
-        $url .= '&issn=' . dashed_issn( $record->issn );
-        $url .= '&volume=' . $request->volume;
-        $url .= '&issue='  . $request->issue;
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
+    if ( not_empty_string($record->{e_issn}) && $record->{e_issn} eq '-' ) {
+        delete $record->{e_issn};
     }
+    
+    if ( not_empty_string($record->{'___PDF start'}) ) {
+        
+        if ( $record->{'___PDF start'} =~ / (\d+) : (\d*) /xsm ) {
 
-    return \@results;
-}
-
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $url .= $base_url . 'genre=journal';
-        $url    .= '&issn=' . dashed_issn( $record->issn );
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
+            $record->{vol_ft_start} = $1;
+            if ( not_empty_string($2) ) {
+                $record->{iss_ft_start} = $2;
+            }
+            
+        }
+    
+        if ( $record->{'___PDF start'} =~ / \( (\d{4}) \) /xsm ) {
+            $record->{ft_start_date} = $1 . '-01-01';
+        }
+        
     }
-
-    return \@results;
+ 
+    return $class->SUPER::clean_data($record);
 }
 
 1;

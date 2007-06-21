@@ -71,6 +71,8 @@ __PACKAGE__->mk_accessors( qw(
         bibcode
 
         pid
+        
+        other_issns
 ));
 
 sub year {
@@ -270,6 +272,23 @@ sub _cleanup {
     }
 
     return $self;
+}
+
+sub issns {
+    my ( $self ) = @_;
+    
+    my @issns;
+    if ( not_empty_string( $self->issn ) ) {
+        push @issns, $self->issn;
+    };
+    if ( not_empty_string( $self->eissn ) ) {
+        push @issns, $self->eissn;
+    };
+    if ( ref($self->other_issns) eq 'ARRAY' && scalar( @{$self->other_issns} ) ) {
+        push @issns, @{$self->other_issns};
+    }
+    
+    return @issns;
 }
 
 1;

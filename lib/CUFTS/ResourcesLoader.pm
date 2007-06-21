@@ -64,6 +64,7 @@ BEGIN {
         III
         Ingenta
         IngentaConnect
+        JournalAuth
         JSTOR
         Karger
         Kluwer
