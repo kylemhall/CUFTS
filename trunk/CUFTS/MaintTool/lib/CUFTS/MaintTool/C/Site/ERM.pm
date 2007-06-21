@@ -33,7 +33,7 @@ sub edit : Local {
 
     my %value_field = (
         consortia        => 'consortia',
-        content_type     => 'content_type',
+        content_types    => 'content_type',
         cost_bases       => 'cost_base',
         resource_types   => 'resource_type',
         resource_mediums => 'resource_medium',
@@ -107,9 +107,9 @@ sub edit : Local {
                 }
                 
                 if ( $value ne $record->$method ) {
-                    $record->$method( $c->req->params->{$param} );
+                    $record->$method( $value );
                     $record->update;
-                    push @{ $c->stash->{results} }, "Updated: $value";
+                    push @{ $c->stash->{results} }, "Updated: '$value'";
                 }
             }
         }
@@ -136,15 +136,6 @@ sub edit : Local {
 
         if ( !exists($c->stash->{errors}) ) {
             CUFTS::DB::DBI->dbi_commit;
-            
-            # Reload the records from the database to make sure what is displayed matches properly
-            
-            $records = {};
-            foreach my $table ( @tables ) {
-                my $db_class = $db_classes{$table};
-                %{ $records->{$table} } = map { $_->id, $_ } $db_class->search( site => $site_id );
-            }
-
         }
         else {
             delete $c->stash->{results};

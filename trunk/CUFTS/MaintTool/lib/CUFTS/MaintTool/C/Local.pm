@@ -169,6 +169,7 @@ sub edit : Local {
 	    my $new_record = {};
 	    if ( defined($global_resource) ) {
 		    $new_record->{resource} = $global_resource->id;
+		    $new_record->{site}     = $c->stash->{current_site}->id;
 	    }
         eval {
 	        $local_resource = CUFTS::DB::LocalResources->create($new_record);
