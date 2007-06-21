@@ -1,0 +1,427 @@
+[%# PROCESS $erm_menu %]
+
+<script type="text/javascript">
+$( function() {
+    $('#pages-container').tabs();
+} );
+</script>
+
+
+<div id="erm-edit-key">[% erm.key | html %]</div>
+
+<form method="post" name="general-form" id="general-form">
+
+
+<div id="pages-container" class="tabs-nav" style="width: 100%;">
+
+<ul>
+ <li><a href="#page-general"><span>General</span></a></li>
+ <li><a href="#page-datescosts"><span>Dates/Costs</span></a></li>
+ <li><a href="#page-stats"><span>Statistics</span></a></li>
+ <li><a href="#page-admin"><span>Admin</span></a></li>
+</ul>
+
+
+<div id="page-general">
+
+<div style="padding: 1em 0px;">
+ <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
+</div>
+
+<fieldset>
+
+<legend>Basic</legend>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-key">resource identifier</label>
+  <input id="erm-edit-input-key" name="key" value="[% erm.key | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  A unique identifier for this resource that is used when attaching to resources, journals, and subjects.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-main_name">main name</label>
+  <input id="erm-edit-input-main_name" name="main_name" value="[% erm.main_name | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  The main name displayed for this resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-vendor">vendor</label>
+  <input id="erm-edit-input-vendor" name="vendor" value="[% erm.vendor | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  The entity which bills for this subscription.  This may be a database creator, database provider or any other entity you wish to include.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-publisher">publisher</label>
+  <input id="erm-edit-input-publisher" name="publisher" value="[% erm.publisher | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  The company that publishes the resource (if different than vendor).
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-resource_type">resource type</label>
+  <select id="erm-edit-input-resource_type" name="resource_type" style="width: 15em">
+   [% IF resource_type_options.defined %]
+    <option value=""></option>
+    [% FOREACH resource_type_option IN resource_type_options %]
+     <option value="[% resource_type_option.id %]" [% 'selected="selected"' IF erm.resource_type.id == resource_type_option.id %]>[% resource_type_option.resource_type | html %]</option>
+    [% END %]
+   [% ELSE %]
+    <option value="">None available</option>
+   [% END %]
+  </select>
+ </div>
+ <div class="help">
+  Select the best description for how this resource was purchased.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-resource_medium">resource medium</label>
+  <select id="erm-edit-input-resource_medium" name="resource_medium" style="width: 15em">
+   [% IF resource_medium_options.defined %]
+    <option value=""></option>
+    [% FOREACH resource_medium_option IN resource_medium_options %]
+     <option value="[% resource_medium_option.id %]" [% 'selected="selected"' IF erm.resource_medium.id == resource_medium_option.id %]>[% resource_medium_option.resource_medium | html %]</option>
+    [% END %]
+   [% ELSE %]
+    <option value="">None available</option>
+   [% END %]
+  </select>
+ </div>
+ <div class="help">
+  Description of method of access for this resource.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-file_type">file type</label>
+  <input id="erm-edit-input-file_type" name="file_type" value="[% erm.file_type | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Description of the type of file(s) utilized in this resource.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-public_list">public list?</label>
+  <select id="erm-edit-input-public_list" name="public_list" style="width: 4em;">
+   <option value=""></option>
+   <option value="1" [% 'selected="selected"' IF erm.public_list == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.public_list == 0 %]>No</option>
+  </select>
+ </div>
+ <div class="help">
+  Display on public lists?
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-public">public?</label>
+  <select id="erm-edit-input-public" name="public" style="width: 4em;">
+   <option value=""></option>
+   <option value="1" [% 'selected="selected"' IF erm.public == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.public == 0 %]>No</option>
+  </select>
+ </div>
+ <div class="help">
+  Public can view this ERM record?
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-description_brief">brief description</label>
+  <input id="erm-edit-input-description_brief" name="description_brief" value="[% erm.description_brief | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Used to provide brief information on the public display.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-description_full">full description</label>
+  <textarea id="erm-edit-input-description_full" name="description_full">[% erm.description_full | html %]</textarea>
+ </div>
+ <div class="help">
+  Displays a message to users.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-public_message">public message</label>
+  <textarea id="erm-edit-input-public_message" name="public_message">[% erm.public_message | html %]</textarea>
+ </div>
+ <div class="help">
+  Displays a message to users.
+ </div>
+</div>
+
+<!--- ADD EXPIRY FIELD -->
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-user_documentation">user documentation</label>
+  <textarea id="erm-edit-input-user_documentation" name="user_documentation">[% erm.user_documentation | html %]</textarea>
+ </div>
+ <div class="help">
+  Library created help, may link to other help resources (tutorials, viewlets, etc.)
+ </div>
+</div>
+
+
+</fieldset>
+
+
+<fieldset>
+
+<legend>Coverage</legend>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-simultaneous_users">simultaneous users</label>
+  <input id="erm-edit-input-simultaneous_users" name="simultaneous_users" value="[% erm.simultaneous_users | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  How many simultaneous users can access this resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-update_frequency">update frequency</label>
+  <input id="erm-edit-input-update_frequency" name="update_frequency" value="[% erm.update_frequency | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  How often the resource is updated by the vendor.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-coverage">coverage</label>
+  <input id="erm-edit-input-coverage" name="coverage" value="[% erm.coverage | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Free text date range or coverage notes for the resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-embargo_period">embargo period</label>
+  <input id="erm-edit-input-embargo_period" name="embargo_period" value="[% erm.embargo_period | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Length of embargo period, if any.  Leave blank if there is no embargo period.
+ </div>
+</div>
+
+</fieldset>
+
+<fieldset>
+
+<legend>Other</legend>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-active_alert">active alert</label>
+  <input id="erm-edit-input-active_alert" name="active_alert" value="[% erm.active_alert | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  The email address(es) of the person(s) to receive notification of the resource activation.  If no address is given, email will be sent to the general site email address.  Seperate multiple email addresses with commas.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-pick_and_choose">pick and choose</label>
+  <select id="erm-edit-input-pick_and_choose" name="pick_and_choose" style="width: 4em;">
+   <option value=""></option>
+   <option value="1" [% 'selected="selected"' IF erm.pick_and_choose == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.pick_and_choose == 0 %]>No</option>
+  </select>
+ </div>
+ <div class="help">
+  The field is used identify services that let you select the specific journals you wish to purchase form their full collection.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-marc_available">MARC available</label>
+  <select id="erm-edit-input-marc_available" name="marc_available" style="width: 4em;">
+   <option value=""></option>
+   <option value="1" [% 'selected="selected"' IF erm.marc_available == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.marc_available == 0 %]>No</option>
+  </select>
+ </div>
+ <div class="help">
+  Indicates whether MARC records are available for this resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-marc_alert">MARC download notification</label>
+  <input id="erm-edit-input-marc_alert" name="marc_alert" value="[% erm.marc_alert | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  The email address(es) of the person(s) to receive notification of last MARC download.  If no address is given, email will be sent to the general site email address.  Seperate multiple email addresses with commas.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-requirements">requirements</label>
+  <input id="erm-edit-input-requirements" name="requirements" value="[% erm.requirements | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Brief description of any software or hardware requirements.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-maintenance">maintenance</label>
+  <input id="erm-edit-input-maintenance" name="maintenance" value="[% erm.maintenance | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Brief description of the normal maintenance window.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-title_list_url">title list URL</label>
+  <input id="erm-edit-input-title_list_url" name="title_list_url" value="[% erm.title_list_url | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  URL for the current title list for this resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-help_url">help URL</label>
+  <input id="erm-edit-input-help_url" name="help_url" value="[% erm.help_url | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  URL for the vendor help page for this resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-status_url">status URL</label>
+  <input id="erm-edit-input-status_url" name="status_url" value="[% erm.status_url | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  URL for the current server status for this resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-resolver_enabled">resolver enabled</label>
+  <select id="erm-edit-input-resolver_enabled" name="resolver_enabled" style="width: 4em;">
+   <option value=""></option>
+   <option value="1" [% 'selected="selected"' IF erm.resolver_enabled == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.resolver_enabled == 0 %]>No</option>
+  </select>
+ </div>
+ <div class="help">
+  Does the resource work with GODOT and other resolvers?
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-refworks_compatible">RefWorks compatible</label>
+  <select id="erm-edit-input-refworks_compatible" name="refworks_compatible" style="width: 4em;">
+   <option value=""></option>
+   <option value="1" [% 'selected="selected"' IF erm.refworks_compatible == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.refworks_compatible == 0 %]>No</option>
+  </select>
+ </div>
+ <div class="help">
+  Does the resource work with RefWorks?
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-refworks_info_url">RefWorks info URL</label>
+  <input id="erm-edit-input-refworks_info_url" name="refworks_info_url" value="[% erm.refworks_info_url | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Location of help pages specifically for RefWorks and this resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-subscription_notes">subscription notes</label>
+  <textarea id="erm-edit-input-subscription_notes" name="subscription_notes">[% erm.subscription_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Local information regarding the subscription.
+ </div>
+</div>
+
+</fieldset>
+
+<div style="margin-bottom: 1em">
+ <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
+</div>
+
+</div> <!-- tab-general -->
+
+<div id="page-datescosts" style="width: 98%">
+
+<div style="margin: 1em 0px">
+ <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
+</div>
+
+
+    <fieldset>
+     <legend>DatesCosts</legend>
+
+    <div class="form-heading">
+     <label class="delete">delete</label>
+     <label class="field">consortia</label>
+    </div>
+
+</div> <!-- tab-datescosts -->
+
+</div> <!-- tab-container -->
+
+</form>
