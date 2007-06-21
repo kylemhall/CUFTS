@@ -48,6 +48,7 @@ my $form_validate = {
                 refworks_compatible
                 refworks_info_url
                 user_documentation
+                simultaneous_users
                 subscription_type
                 subscription_notes
                 subscription_ownership
