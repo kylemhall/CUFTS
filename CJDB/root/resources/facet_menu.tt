@@ -78,7 +78,7 @@ $( function() {
  <a href="" onClick="$('#resource-facet-choice-wrapper').toggle(); return false;">sift</a>
 </div>
 
-<div id="resource-facet-choice-wrapper" style="width: 100%; float: left; display: none; border-top: 1px solid blue; background: #def;">
+<div id="resource-facet-choice-wrapper" style="width: 100%; float: left; [% 'display: none;' IF records.defined %] border-top: 1px solid blue; background: #def;">
 
 <div id="resources-brief-browse" style="float: left;  width: 78%;">
 
