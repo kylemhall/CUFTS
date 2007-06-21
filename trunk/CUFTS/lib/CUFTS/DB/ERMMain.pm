@@ -130,6 +130,7 @@ __PACKAGE__->has_a('cost_base', 'CUFTS::DB::ERMCostBases');
 __PACKAGE__->has_a('resource_medium', 'CUFTS::DB::ERMResourceMediums');
 __PACKAGE__->has_a('resource_type', 'CUFTS::DB::ERMResourceTypes');
 __PACKAGE__->has_many('subjects', ['CUFTS::DB::ERMSubjectsMain' => 'subject'], 'erm_main');
+__PACKAGE__->has_many('subjectsmain' => 'CUFTS::DB::ERMSubjectsMain');
 __PACKAGE__->has_many('content_types', ['CUFTS::DB::ERMContentTypesMain' => 'content_type'], 'erm_main');
 __PACKAGE__->has_many('names',    ['CUFTS::DB::ERMNames' => 'name'],           'erm_main');
 
@@ -255,6 +256,86 @@ sub facet_search {
     return \@results;
 }
 
+
+
+
+sub facet_count {
+    my ( $class, $site, $fields ) = @_;
+
+    my $config = {
+        joins  => '',
+        order  => [ 'sort_name' ],    # Default order by resource name
+        extra_columns => {
+            'sort_name'   => 'erm_names.search_name',
+            'result_name' => 'erm_names.name',
+        },
+        replace_columns => {
+        },
+        search => {
+            site => $site,
+        },
+    };
+    
+    my $sql = qq{
+        SELECT count(*)
+        FROM (
+            SELECT DISTINCT ON (erm_names.erm_main) erm_main.id
+            FROM erm_main
+            JOIN erm_names ON (erm_names.erm_main = erm_main.id)
+            %JOINS%
+            %WHERE%
+        ) AS erm_results
+    };
+
+    foreach my $field ( keys %$fields ) {
+
+        my $handler = "_facet_search_$field";
+        if ( $class->can($handler) ) {
+            $class->$handler( $field, $fields->{$field}->{data}, $config, \$sql );
+        }
+        else {
+            # default
+            $config->{search}->{$field} = $fields->{$field}->{data};
+        }
+
+    }
+    
+    my $SQLAbstract = SQL::Abstract->new;
+    my ( $where, @bind ) = $SQLAbstract->where( $config->{search} );
+
+    # Untaint $where
+    $where =~ /(.*)/s or die;
+    $where = $1;
+    
+    # Build column list
+    
+    my @columns;
+    foreach my $column ( __PACKAGE__->columns ) {
+        if ( exists($config->{replace_columns}->{$column} ) ) {
+            push @columns, $config->{replace_columns}->{$column};
+        }
+        else {
+            push @columns, "erm_main.${column}";
+        }
+    }
+
+    foreach my $column ( keys %{ $config->{extra_columns} } ) {
+        my $string = $config->{extra_columns}->{$column} . ' AS ' . $column;
+        push @columns, $string;
+    }
+
+    $sql =~ s/%WHERE%/$where/e;
+    $sql =~ s/%JOINS%/$config->{'joins'}/e;
+
+#    warn($sql);
+#    warn(Dumper(\@bind));
+
+    my $sth = $class->db_Main()->prepare( $sql, {pg_server_prepare => 1} );
+    $sth->execute( @bind );
+    return ( $sth->fetchrow_array )[0];
+}
+
+
 sub _facet_search_name {
     my ( $class, $field, $data, $config, $sql ) = @_;
     $data = lc($data);
@@ -270,6 +351,14 @@ sub _facet_search_subject {
     $config->{extra_columns}->{rank} = 'erm_subjects_main.rank';
     $config->{replace_columns}->{description_brief} = 'COALESCE( erm_subjects_main.description, erm_main.description_brief ) AS description_brief';
     $config->{search}->{'erm_subjects_main.subject'} = $data;
+}
+
+sub _facet_search_content_type {
+    my ( $class, $field, $data, $config, $sql ) = @_;
+
+    $config->{joins} .= ' JOIN erm_content_types_main ON ( erm_content_types_main.erm_main = erm_main.id )';
+    
+    $config->{search}->{'erm_content_types_main.content_type'} = $data;
 }
 
 1;
