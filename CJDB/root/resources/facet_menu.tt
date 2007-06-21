@@ -58,7 +58,7 @@
       URL = URL + URL_snippet;
   } );
 
-  window.location.replace(URL);
+  window.location.href = URL;
  }
  
 $( function() {
