@@ -2,7 +2,6 @@
 
 <script type="text/javascript">
 $( function() {
- 
  $('fieldset:not(.nostripe)').find('div.field:odd').addClass('alt');
 
  $('fieldset :input').focus(
@@ -14,9 +13,10 @@ $( function() {
   }
  ).blur(
   function() { $(this).parents('.data').siblings('.help').hide(); }
- ).addClass("standard-input");
+ ).addClass("standard-input"
+ ).filter(':text'
+ ).addClass('text-input')
 
-$('fieldset :text').addClass("text-input");
 $('fieldset select').addClass("select-input");
 
 $('div.help').prepend('<span style="background: url([% image_dir %]help_pointer.gif) left top no-repeat;" class="help-pointer">&nbsp;</span>');
