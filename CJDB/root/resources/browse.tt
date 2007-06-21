@@ -3,13 +3,16 @@
 
 <script type="text/javascript">
 $( function() {
- 
+
  $('div.resource-brief-record:odd').addClass('resource-brief-record-alt');
 
 });
 </script>
 <!-- Move these style to a sheet later -->
 <style>
+    
+html {height: 101%;} 
+
 div.resource-brief-record {
     background: #ddeeff;
     padding: 5px;
@@ -23,28 +26,112 @@ div.resource-brief-field-name {
     font-size: 120%;
     font-weight: bold;
     font-family: 'Trebuchet MS',Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    margin: 3px 1px;
+}
+
+div.resource-brief-details {
+    display: none;
+    position: absolute;
+    background: #ffc;
+    border: 1px solid #c93;
+    padding: 10px 12px;
+    width: 30em;
+    left: 5.2em;
+    margin-top: -22px;
+}
+
+a.trigger {
+}
+
+span.resource-brief-label {
+    width: 5.5em;
+    float: left;
+    font-weight: bold;
+    font-size: 80%;
+}
+
+span.resource-brief-data {
+    float: left;
+    width: 24em;
+}
+
+div.resource-brief-field {
+    float: left;
+    clear: both;
+}
+
+div#resources-brief-facets {
+    border: 1px solid blue;
+    margin-top: 40px;
+}
+
+div#resources-brief-facets h2 {
+    font-family: 'Trebuchet MS',Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    margin: 5px 0px;
+}
+
+div#resources-current-facets {
+}
+
+div.resources-current-facets-row {
+    background: #cdf;
+    font-family: 'Trebuchet MS',Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    padding: 5px 3px;
+    font-size: 120%;
+}
+
+
+div#resources-brief-records {
+    clear: both;
+    padding-top: 10px;
+}
+
+div.resources-facet-choice-container {
+    padding: 0px 5px;
+    width: 30%;
+    height: 22.5em;
+    float: left;
+}
+
+div.resources-facet-choice-list {
+    width: 99%;
+    height: 19.5em;
+    overflow: auto;
+}
+
+ul#chosen-facets {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    height: 15em;
 }
 </style>
 
-[% PROCESS resources/current_facets.tt %]
 [% PROCESS resources/facet_menu.tt %]
+
+<div id="resources-brief-records">
 
 [% FOREACH record IN records %]
 <div class="resource-brief-record">
  <div class="resource-brief-field-name">[% record.name %]</div>
- [% IF !facets.resource_type.defined AND record.resource_type.defined %]
-  <div class="resource-brief-field"><span class="resource-brief-label">resource type:</span><span class="resource-brief-data">[% record.resource_type.resource_type %]</span></div>
- [% END %]
- [% IF !facets.resource_medium.defined AND record.resource_medium.defined %]
-  <div class="resource-brief-field"><span class="resource-brief-label">resource medium:</span><span class="resource-brief-data">[% record.resource_medium.resource_medium %]</span></div>
- [% END %]
- <div class="resource-brief-field"><span class="resource-brief-label">description:</span><span class="resource-brief-data">[% record.description_brief %]</span></div>
- <div class="resource-brief-field"><span class="resource-brief-label">simultaneous users:</span><span class="resource-brief-data">[% record.simultaneous_users %]</span></div>
- <div class="resource-brief-field"><span class="resource-brief-label">coverage:</span><span class="resource-brief-data">[% record.coverage %]</span></div>
- <div class="resource-brief-field"><span class="resource-brief-label">update frequency:</span><span class="resource-brief-data">[% record.update_frequency %]</span></div>
- [% IF record.rank.defined %]
-  <div class="resource-brief-field"><span class="resource-brief-label">rank:</span><span class="resource-brief-data">[% record.rank %]</span></div>
- [% END %]
+ <div class="resource-brief-field-description">[% record.description_brief %]</div>
+ <a class="trigger" id="resource-brief-details-trigger-[% record.id %]" href="[% url("$url_base/resources/$record.id") %]">[ details ]</a>
 
+ <div class="resource-brief-details" id="resource-brief-details-[% record.id %]">
+  <div class="resource-brief-field"><span class="resource-brief-label">Type:</span><span class="resource-brief-data">[% record.resource_type.resource_type %]</span></div>
+  <div class="resource-brief-field"><span class="resource-brief-label">Medium:</span><span class="resource-brief-data">[% record.resource_medium.resource_medium %]</span></div>
+  <div class="resource-brief-field"><span class="resource-brief-label">Content:</span><span class="resource-brief-data">[% record.content_type.content_type %]</span></div>
+  <div class="resource-brief-field"><span class="resource-brief-label">Subjects:</span><span class="resource-brief-data">[% record.subjects.map_join( 'subject', ', ' ) %]</span></div>
+ </div>
+<script type="text/javascript">
+$( function() {
+   $("#resource-brief-details-trigger-[% record.id %]").hover(
+       function() { $("#resource-brief-details-[% record.id %]").show(300) },
+       function() { $("#resource-brief-details-[% record.id %]").hide(300) }
+   );
+} )
+</script>
 </div>
 [% END %]
+
+</div>
