@@ -19,9 +19,6 @@ your own interface.
 What CUFTS Does NOT Do (yet...)
 ===============================
 
-CUFTS does not handle OpenURL 1.0 links yet.  Anyone have a nice OpenURL
-parser they want to donate?
-
 CUFTS does not handle customized resolver interfaces for individual sites...
 yet.
 
