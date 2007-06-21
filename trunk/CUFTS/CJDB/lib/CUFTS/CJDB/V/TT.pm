@@ -2,6 +2,7 @@ package CUFTS::CJDB::V::TT;
 
 use strict;
 use base qw/Catalyst::View::TT/;
+use Scalar::Util qw(blessed);
 
 use Template::Config;
 $Template::Config::STASH = 'Template::Stash::XS';
@@ -54,7 +55,7 @@ $Template::Stash::SCALAR_OPS->{substr} = sub { my ($scalar, $offset, $length) = 
 $Template::Stash::SCALAR_OPS->{ceil} = sub { return (int($_[0]) < $_[0]) ? int($_[0] + 1) : int($_[0]) };  # Cheap
 $Template::Stash::LIST_OPS->{map_join} = sub {
 	my ($list, $field, $join) = @_;
-	return join( $join, map {$_->$field} @$list );
+	return join( $join, map { blessed($_) ? $_->$field : $_->{$field} } @$list );
 };
 
 $Template::Stash::SCALAR_OPS->{uri_escape} = sub { my $text = shift; $text =~ s/([^a-zA-Z0-9_.-])/uc sprintf("%%%02x",ord($1))/eg; return $text; };
