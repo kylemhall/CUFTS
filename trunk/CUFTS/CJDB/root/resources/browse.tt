@@ -120,7 +120,7 @@ ul#chosen-facets {
  <div class="resource-brief-details" id="resource-brief-details-[% record.id %]">
   <div class="resource-brief-field"><span class="resource-brief-label">Type:</span><span class="resource-brief-data">[% record.resource_type.resource_type %]</span></div>
   <div class="resource-brief-field"><span class="resource-brief-label">Medium:</span><span class="resource-brief-data">[% record.resource_medium.resource_medium %]</span></div>
-  <div class="resource-brief-field"><span class="resource-brief-label">Content:</span><span class="resource-brief-data">[% record.content_type.content_type %]</span></div>
+  <div class="resource-brief-field"><span class="resource-brief-label">Content:</span><span class="resource-brief-data">[% record.content_types.map_join('content_type', ', ') %]</span></div>
   <div class="resource-brief-field"><span class="resource-brief-label">Subjects:</span><span class="resource-brief-data">[% record.subjects.map_join( 'subject', ', ' ) %]</span></div>
  </div>
 <script type="text/javascript">
