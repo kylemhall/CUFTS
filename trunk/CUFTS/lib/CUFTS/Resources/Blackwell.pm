@@ -24,7 +24,6 @@ use base qw(CUFTS::Resources::Base::SFXLoader);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
-use Date::Calc qw(Delta_Days Today);
 
 use URI::Escape;
 
