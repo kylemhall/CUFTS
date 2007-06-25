@@ -514,6 +514,10 @@ sub merge_by_issns {
     return 0;
 }
 
+sub load_resources_as_associations {
+    return 1;
+}
+
 sub strip_articles {
     my ( $self, $string ) = @_;
 

@@ -468,12 +468,14 @@ sub load_cufts {
 
                     # Add resource name as an association to the journal
 
-                    CJDB::DB::JournalsAssociations->find_or_create( {
-                        association  => $cjdb_association->id,
-                        site         => $site->id,
-                        journal      => $CJDB_record->id,
-                    } );
-
+                    if ( $loader->load_resources_as_associations() ) {
+                        CJDB::DB::JournalsAssociations->find_or_create( {
+                            association  => $cjdb_association->id,
+                            site         => $site->id,
+                            journal      => $CJDB_record->id,
+                        } );
+                    }
+                    
                     # Create links in each CJDB record
 
                     foreach my $link (@links) {
@@ -867,6 +869,42 @@ CJDB_RECORD:
             $MARC_record = create_brief_MARC( $site, $cjdb_record->journals_auth );
         }
 
+        # Add holdings statements, skip if no electronic so we don't duplicate print only journals uselessly
+
+        my $has_holdings = 0;
+	    if ( not_empty_string($site->marc_dump_holdings_field) && not_empty_string($site->marc_dump_holdings_subfield) ) {
+            foreach my $link ( $cjdb_record->links ) {
+                next if is_empty_string( $link->fulltext_coverage )
+                     && is_empty_string( $link->embargo )
+                     && is_empty_string( $link->current );
+
+                my $holdings = "Available full text from " . ( $resources_display{$link->resource}->{name} || 'Unknown resource' ) . ':';
+
+                if ( not_empty_string( $link->fulltext_coverage ) ) {
+                    $holdings .= ' ' . $link->fulltext_coverage;
+                }
+                if ( not_empty_string( $link->embargo ) ) {
+                    $holdings .= ' '. $link->embargo . ' embargo';
+                }
+                if ( not_empty_string( $link->current ) ) {
+                    $holdings .= ' most recent '. $link->current;
+                }
+                
+                my $holdings_field = MARC::Field->new(
+                    $site->marc_dump_holdings_field,
+                    $site->marc_dump_holdings_indicator1,
+                    $site->marc_dump_holdings_indicator2,
+                    $site->marc_dump_holdings_subfield => latin1_to_marc8($holdings)
+                    );
+                $MARC_record->append_fields( $holdings_field );
+
+                $has_holdings = 1;
+
+            }
+	    }
+        next CJDB_RECORD if !$has_holdings;
+
+
         if ( !defined($MARC_record) ) {
             print "  * Error - unable to create MARC record for dump\n";
             next CJDB_RECORD;
@@ -926,37 +964,6 @@ CJDB_RECORD:
 	        );
     	    $MARC_record->append_fields( $identifier_field );
 	    }
-
-        # Add holdings statements
-
-	    if ( not_empty_string($site->marc_dump_holdings_field) && not_empty_string($site->marc_dump_holdings_subfield) ) {
-            foreach my $link ( $cjdb_record->links ) {
-                next if is_empty_string( $link->fulltext_coverage )
-                     && is_empty_string( $link->embargo )
-                     && is_empty_string( $link->current );
-
-                my $holdings = "Available full text from " . ( $resources_display{$link->resource}->{name} || 'Unknown resource' ) . ':';
-
-                if ( not_empty_string( $link->fulltext_coverage ) ) {
-                    $holdings .= ' ' . $link->fulltext_coverage;
-                }
-                if ( not_empty_string( $link->embargo ) ) {
-                    $holdings .= ' '. $link->embargo . ' embargo';
-                }
-                if ( not_empty_string( $link->current ) ) {
-                    $holdings .= ' most recent '. $link->current;
-                }
-                
-    	        my $holdings_field = MARC::Field->new(
-    	            $site->marc_dump_holdings_field,
-    	            $site->marc_dump_holdings_indicator1,
-    	            $site->marc_dump_holdings_indicator2,
-    	            $site->marc_dump_holdings_subfield => latin1_to_marc8($holdings)
-    	        );
-        	    $MARC_record->append_fields( $holdings_field );
-            }
-	    }
-
         
         print MARC_OUTPUT  $MARC_record->as_usmarc();
         print ASCII_OUTPUT $MARC_record->as_formatted(), "\n\n";
