@@ -37,6 +37,7 @@ sub title_list_fields {
             ft_end_date
             cit_start_date
             cit_end_date
+            journal_url
             db_identifier
         )
     ];
@@ -44,11 +45,12 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'Title'           =>  'title',
-        'ISSN'            =>  'issn',
-        'Coverage Begin'  => 'ft_start_date',
-        'Coverage End'    => 'ft_end_date',
-        'csi'             => 'db_identifier',
+        'Title'            => 'title',
+        'ISSN'             => 'issn',
+        'Coverage Begin'   => 'ft_start_date',
+        'Coverage End'     => 'ft_end_date',
+        'csi'              => 'db_identifier',
+        'Title Search URL' => 'journal_url',
     };
 }
 
@@ -118,13 +120,9 @@ sub build_linkJournal {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->db_identifier );
+        next if is_empty_string( $record->journal_url );
 
-        my $url = 'http://cisweb.lexis-nexis.com/sourceselect/returnToSearch.asp?csisrc=';
-        $url .= $record->db_identifier;
-        $url .= '&srcpdn=academic&cc=&spn=&product=universe&unix=http://web.lexis-nexis.com/universe';
-
-        my $result = new CUFTS::Result($url);
+        my $result = new CUFTS::Result( $record->journal_url );
         $result->record($record);
 
         push @results, $result;
@@ -132,6 +130,7 @@ sub build_linkJournal {
 
     return \@results;
 }
+
 
 sub build_linkDatabase {
     my ( $class, $records, $resource, $site, $request ) = @_;
