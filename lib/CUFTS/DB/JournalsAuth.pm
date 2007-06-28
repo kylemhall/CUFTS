@@ -28,6 +28,7 @@ use CUFTS::DB::JournalsAuthISSNs;
 use CUFTS::DB::Journals;
 use CUFTS::DB::LocalJournals;
 use MARC::Record;
+use MARC::File::USMARC;
 
 __PACKAGE__->table('journals_auth');
 __PACKAGE__->columns(Primary => 'id');
@@ -154,7 +155,7 @@ sub marc_object {
 	defined($self->marc) or
 		return undef;
 
-	my $obj = MARC::Record->new_from_usmarc($self->marc);
+	my $obj = MARC::File::USMARC->decode($self->marc);
 	return $obj;
 }
 
