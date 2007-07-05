@@ -11,7 +11,7 @@
 <tr><td class="label1" align="right">phone</td><td class="field1"><input type="text" name="phone" size="50" maxlength="256" value="[% account.phone | html %]"></td></tr>
 <tr><td class="label0" align="right">password</td><td class="field0"><input type="password" name="password" size="50" maxlength="256" value="">[% PROCESS form_results.tt frf='password', fr_msg='Passwords must match' %]</td></tr>
 <tr><td class="label1" align="right">password (verify)</td><td class="field1"><input type="password" name="verify_password" size="50" maxlength="256" value=""></td></tr>
-<tr><td class="label0" align="right">administrator</td><td class="field0"><input type="checkbox" name="administrator" value="true" [% 'checked="checked"' IF account.administrator %]></td></tr>
+<tr><td class="label0" align="right">system administrator</td><td class="field0"><input type="checkbox" name="administrator" value="true" [% 'checked="checked"' IF account.administrator %]></td></tr>
 <tr><td class="label1" align="right">edit global</td><td class="field1"><input type="checkbox" name="edit_global" value="true" [% 'checked="checked"' IF account.edit_global %]></td></tr>
 <tr><td class="label0" align="right">active</td><td class="field0"><input type="checkbox" name="active" value="true" [% 'checked="checked"' IF account.active %]></td></tr>
 </table>
