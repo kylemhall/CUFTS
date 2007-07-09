@@ -58,7 +58,7 @@ in
   </div>
   <div id="journal-auth-marc-[% journal_auth.id %]" class="journal-auth-marc-dump">
    [% IF journal_auth.marc %]
-    <pre>[% journal_auth.marc_object.as_formatted | marc8 | html %]</pre>
+    <pre>[%# journal_auth.marc_object.as_formatted | marc8 | html %]</pre>
    [% ELSE %]
     No MARC data
    [% END %]

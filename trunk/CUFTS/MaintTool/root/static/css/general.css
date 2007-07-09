@@ -633,15 +633,7 @@ span.no-highlight {
 div.alt {
     background: #d0deed;
 }
-    
-.help-pointer {
-    position: absolute;
-    left: -10px;
-    top: 5px;
-    width: 10px;
-    height: 19px;
-}
-    
+
 legend {
     margin-left: 10px;
     color: #004997;
@@ -712,7 +704,7 @@ div.data input, div.data textarea, div.data select {
 }
 
 div.help {
-    display: none;
+/*    display: none; */
     position: absolute;
     float: left;
     margin: -5px 1px 1px 1px;
@@ -721,6 +713,15 @@ div.help {
     border: 1px solid #c93;
     padding: 10px 12px;
     background: #ffc;
+}
+
+
+.help-pointer {
+    position: absolute;
+    left: -10px;
+    top: 5px;
+    width: 10px;
+    height: 19px;
 }
 
 textarea {

@@ -19,7 +19,7 @@ $( function() {
 
 $('fieldset select').addClass("select-input");
 
-$('div.help').prepend('<span style="background: url([% image_dir %]help_pointer.gif) left top no-repeat;" class="help-pointer">&nbsp;</span>');
+$('div.help').hide().prepend('<span style="background: url([% image_dir %]help_pointer.gif) left top no-repeat;" class="help-pointer">&nbsp;</span>');
 
 });
 </script>
