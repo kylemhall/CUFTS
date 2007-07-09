@@ -1,0 +1,6 @@
+<div id="resource">
+ <div id="resource-name">[% erm.name %]</div>
+ <div id="resource-vendor">[% erm.vendor %]</div>
+
+
+</div>

@@ -5,6 +5,7 @@ use base 'Catalyst::Base';
 use CUFTS::Util::Simple;
 
 use Data::Dumper;
+use JSON::XS;
 
 use CUFTS::DB::LocalResources;
 
@@ -79,7 +80,7 @@ sub facets : Local {
         $facets->{$type}->{data}    = $data;
     }
 
-    $c->stash->{records}  = CUFTS::DB::ERMMain->facet_search( $c->stash->{current_site}->id, $facets );
+    $c->stash->{records}  = CUFTS::DB::ERMMain->facet_search( $c->stash->{current_site}->id, $facets, 1 );
     $c->stash->{facets}   = $facets;
     $c->stash->{template} = 'resources/browse.tt';
 }
@@ -89,6 +90,18 @@ sub remove_facet : Local {
 
     delete $c->session->{resources_browse_facets}->{$type};
     $c->redirect('/resources/');
+}
+
+sub ajax_facets : Local {
+    my ( $self, $c, @facets ) = @_;
+
+    my $facets = {};
+    while ( my ( $type, $display, $data ) = splice( @facets, 0, 3 ) ) {
+        $facets->{$type}->{display} = $display;
+        $facets->{$type}->{data}    = $data;
+    }
+
+    $c->res->body( to_json( CUFTS::DB::ERMMain->facet_search( $c->stash->{current_site}->id, $facets, 1 ) ) );
 }
 
 1;

@@ -67,8 +67,6 @@ $( function() {
 
 </script>
 
-<form name="browse">
-
 <div id="resources-brief-facets" style="float: left; width: 100%; background: #cdf">
 
 <div style="width: 80%; float: left;">
@@ -82,14 +80,23 @@ $( function() {
 
 <div id="resources-brief-browse" style="float: left;  width: 78%;">
 
- <div class="resources-facet-choice-container" style="width: 99%; height: 4em; border: none;">
-  <h2>Titles</h2>
-  <div id="resources-brief-browse-title" class="resources-facet-choice-list" style="width: 99%; height: 3.9em;">
-   [% FOREACH letter IN [ 'A' .. 'Z' ] %]
-    <a href="[% url("$url_base/resources/browse/add_facet/name/$letter/$letter") %]" onClick="add_facet( 'name', '[% letter %]', '[% letter %]'); return false;">[% letter %]</a>
-   [% END %]
-   <a href="[% url("$url_base/resources/browse/add_facet/name/0-9/[^a-z]") %]"  onClick="add_facet( 'name', '0-9', '[^a-z]'); return false;">0-9</a>
+ <div class="resources-facet-choice-container" style="width: 17em; height: 4em; border: none;">
+  <h2>Keyword</h2>
+  <div id="resources-brief-browse-keyword" clsas="resources-facet-choice-list" style="width: 99%; height: 3.9em;">
+   <form onSubmit="return false;"><input style="border: 1px solid black; width: 16em" name="keyword" type="text" onChange="var keywordvalue = $(this).val(); add_facet( 'keyword', 'Keyword: ' + keywordvalue, keywordvalue ); return false;" value="[% facets.keyword.data | html %]" /></form>
   </div>
+ </div>
+ 
+ <div class="resources-facet-choice-container" style="height: 4em; border: none; width: 27em; overflow: show;">
+
+  <h2>Titles</h2>
+  <div id="resources-brief-browse-title" class="resources-facet-choice-list" style="width: 99%; height: 3.9em; white-space: nowrap; overflow: show;">
+   [% FOREACH letter IN [ 'A' .. 'Z' ] %]
+    <a href="[% url("$url_base/resources/browse/add_facet/name/$letter/$letter") %]" onClick="add_facet( 'name', 'Title: [% letter %]', '[% letter %]'); return false;">[% letter %]</a>
+   [% END %]
+   <a href="[% url("$url_base/resources/browse/add_facet/name/0-9/[^a-z]") %]"  onClick="add_facet( 'name', 'Title: 0-9', '[^a-z]'); return false;">0-9</a>
+  </div>
+  
  </div>
 
 
@@ -101,12 +108,6 @@ $( function() {
      [% SET subject_id = subject_record.id      %]
      <div class="resources-main-browse-subject-record" id="resources-main-browse-facet-subject-[% subject_id %]">
       <a href="[% url("$url_base/resources/browse/add_facet/subject/$subject/$subject_id") %]" onClick="add_facet( 'subject', '[% subject %]', '[% subject_id %]'); return false;">[% subject %]</a>
-<!--      <script type="text/javascript">
-       $( $.get( "[% url("$url_base/resources/browse/count_facets/subject/$subject/$subject_id") %]", function(txt) {
-           $("#resources-main-browse-facet-subject-[% subject_id %]").append( "(" + txt + ")");
-       } ) );
-      </script>
--->
      </div>
     [% END %]
    </div>
@@ -142,10 +143,11 @@ $( function() {
  <h2>Show:</h2>
  <ul id="chosen-facets"></ul>
  <div id="facet-count-container">Estimated result count: <span id="facet-count"></span></div>
- <input type="submit" name="show" value="show"   onClick="submit_facet_changes(); return false;" />
- <input type="submit" name="reset" value="reset" onClick="init_facets(); return false;" />
+ <form name="browse">
+  <input type="submit" name="show" value="show"   onClick="submit_facet_changes(); return false;" />
+  <input type="submit" name="reset" value="reset" onClick="init_facets(); return false;" />
+ </form>
 </div>
 
 </div>
 </div>
-</form>
