@@ -6,26 +6,62 @@ $( function() {
     $('#pages-container').tabs();
 } );
 
-var new_content_types = new Object();
-var deleted_content_types = new Object();
-
+var new_subjects_count = 0;
 $( function() {
-    $('#erm-edit-input-content-type-add').bind( 'click', function(event) {
+
+    /* Create new subject entries on demand */
+
+    $('#erm-edit-input-subject-addbutton').bind( 'click', function(event) {
         event.preventDefault();
-        var new_value = $('#erm-edit-input-content-type-add-value').val();
-        new_content_types
-        $('#erm-edit-input-content-type-item').addClass('erm-edit-input-content-type-active');
+        var new_subject = $('#subject-add-factory').clone();
+
+        new_subject.attr( 'id', "subject-add-" + new_subjects_count );
+
+        new_subject.find('select[@name=erm-edit-input-subject-add-subject-]').attr( 'name', 'erm-edit-input-subject-add-subject-' + new_subjects_count );
+        new_subject.find('input[@name=erm-edit-input-subject-add-rank-]').attr( 'name', 'erm-edit-input-subject-add-rank-' + new_subjects_count );
+        new_subject.find('textarea[@name=erm-edit-input-subject-add-description-]').attr( 'name', 'erm-edit-input-subject-add-description-' + new_subjects_count );
         
-    } )
-} );
+        new_subjects_count = new_subjects_count + 1;
+
+        
+        $('#erm-edit-input-subject-addbutton').parent().parent().before( new_subject );
+        new_subject.find('select.subject').bind( 'change', function(event) {
+            if ( $(this).val() == 'delete' ) {
+                $(this).parent().parent().addClass('to_delete').find('input, textarea').attr('disabled', 'disabled');
+            }
+            else {
+                $(this).parent().parent().removeClass('to_delete').find('input, textarea').removeAttr('disabled');
+            }
+        });
+        new_subject.show();
+        new_subject.parent('fieldset:not(.nostripe)').find('div.field').removeClass('alt').filter(':odd').addClass('alt');
+
+    });
+    
+/* Visibly disable a subject if it is going to be deleted */
+
+    $('select.subject').bind( 'change', function(event) {
+        if ( $(this).val() == 'delete' ) {
+            $(this).parent().parent().addClass('to_delete').find('input, textarea').attr('disabled', 'disabled');
+        }
+        else {
+            $(this).parent().parent().removeClass('to_delete').find('input, textarea').removeAttr('disabled');
+        }
+    });
+
+});
 
 </script>
 
+<style>
+    div.to_delete {
+        background: #ccc;
+    }
+</style>
 
 <div id="erm-edit-key">[% erm.key | html %]</div>
 
 <form method="post" name="main-form" id="main-form">
-
 
 <div id="pages-container" class="tabs-nav" style="width: 100%;">
 
@@ -1080,13 +1116,14 @@ $( function() {
     [% FOREACH subject IN erm.subjectsmain %]
      <div class="field" style="padding: 5px 0px;">
       <div class="data">
-        <select name="erm-edit-input-subject-[% subject.id %]-subject" />
+        <select name="erm-edit-input-subject-[% subject.id %]-subject" class="subject" />
+         <option value="delete">Delete this subject entry</option>
          [% FOREACH subject_option IN subjects_options %]
-         <option value="[% subject_option.id %]" [% ' selected="selected"' IF subject.subject == subject_option.id %]>[% subject_option.subject | html %]</option>
+          <option value="[% subject_option.id %]" [% ' selected="selected"' IF subject.subject == subject_option.id %]>[% subject_option.subject | html %]</option>
          [% END %]
         </select>
         <input style="margin-left: 5px; width: 3em; margin-top: 3px;" type="text" name="erm-edit-input-subject-[% subject.id %]-rank" value="[% subject.rank | html %]" />
-        <textarea name="erm-edit-input-subject-[% subject.id %]-subject" style="clear: left; margin-top: 5px; width: 33.5em; height: 7.1em;">[% subject.description %]</textarea>
+        <textarea name="erm-edit-input-subject-[% subject.id %]-description" style="clear: left; margin-top: 5px; width: 33.5em; height: 7.1em;">[% subject.description %]</textarea>
       </div>
       <div class="help">
        Databases are ranked within the subject - the relative ranking on this page is irrelevant.
@@ -1094,9 +1131,31 @@ $( function() {
      </div>
     [% END %]
 
+    <div class="field">
+     <div class="data">
+      <a id="erm-edit-input-subject-addbutton" href="[% url("$url_base/erm/edit/add_subject/1979") %]">Add</a>
+     </div>
+    </div>
+    
+    <div id="subject-add-factory" class="field" style="padding: 5px 0px; display: none">
+     <div class="data">
+       <select name="erm-edit-input-subject-add-subject-" class="subject" />
+        <option value="delete">Delete this subject entry</option>
+        [% FOREACH subject_option IN subjects_options %]
+         <option value="[% subject_option.id %]" [% 'selected="selected"' IF loop.first %]>[% subject_option.subject | html %]</option>
+        [% END %]
+       </select>
+       <input style="margin-left: 5px; width: 3em; margin-top: 3px;" type="text" name="erm-edit-input-subject-add-rank-" value="0" />
+       <textarea name="erm-edit-input-subject-add-description-" style="clear: left; margin-top: 5px; width: 33.5em; height: 7.1em;"></textarea>
+     </div>
+     <div class="help">
+      Databases are ranked within the subject - the relative ranking on this page is irrelevant.
+     </div>
+    </div>
+
     </fieldset>
 
-    <div style="padding: 1em 0px;">
+    <div class="padding: 1em 0px;">
      <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
     </div>
     

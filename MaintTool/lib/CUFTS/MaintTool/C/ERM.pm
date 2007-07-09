@@ -6,126 +6,128 @@ use base 'Catalyst::Base';
 use CUFTS::DB::ERMMain;
 use CUFTS::DB::ERMMainLink;
 use CUFTS::DB::ERMLicense;
+use CUFTS::DB::ERMSubjectsMain;
 
-my $form_validate = {
-    main => {
-        required => [
-            qw(
-                key
-                main_name
-            )
-        ],
-        optional => [
-            qw(
-                submit
-                cancel
+my $form_validate_main = {
+    required => [
+        qw(
+            key
+            main_name
+        )
+    ],
+    optional => [
+        qw(
+            submit
+            cancel
 
-                vendor
-                publisher
-                resource_type
-                resource_medium
-                file_type
-                description_brief
-                description_full
-                update_frequency
-                coverage
-                embargo_period
-                pick_and_choose
-                public
-                public_list
-                public_message
-                subscription_status
-                active_alert
-                marc_available
-                marc_history
-                marc_alert
-                requirements
-                maintenance
-                title_list_url
-                help_url
-                status_url
-                resolver_enabled
-                refworks_compatible
-                refworks_info_url
-                user_documentation
-                simultaneous_users
-                subscription_type
-                subscription_notes
-                subscription_ownership
-                subscription_ownership_notes
+            vendor
+            publisher
+            resource_type
+            resource_medium
+            file_type
+            description_brief
+            description_full
+            update_frequency
+            coverage
+            embargo_period
+            pick_and_choose
+            public
+            public_list
+            public_message
+            subscription_status
+            active_alert
+            marc_available
+            marc_history
+            marc_alert
+            requirements
+            maintenance
+            title_list_url
+            help_url
+            status_url
+            resolver_enabled
+            refworks_compatible
+            refworks_info_url
+            user_documentation
+            simultaneous_users
+            subscription_type
+            subscription_notes
+            subscription_ownership
+            subscription_ownership_notes
 
-                cost_base
-                cost_base_notes
-                gst
-                pst
-                payment_status
-                contract_start
-                contract_end
-                original_term
-                auto_renew
-                renewal_notification
-                notification_email
-                notice_to_cancel
-                requires_review
-                review_notes
-                local_bib
-                local_vendor
-                local_acquisitions
-                consortia
-                consortia_note
-                date_cost_notes
-                pricing_model
-                subscription
-                price_cap
-                license_start_date
+            cost_base
+            cost_base_notes
+            gst
+            pst
+            payment_status
+            contract_start
+            contract_end
+            original_term
+            auto_renew
+            renewal_notification
+            notification_email
+            notice_to_cancel
+            requires_review
+            review_notes
+            local_bib
+            local_vendor
+            local_acquisitions
+            consortia
+            consortia_note
+            date_cost_notes
+            pricing_model
+            subscription
+            price_cap
+            license_start_date
 
-                stats_available
-                stats_url
-                stats_frequency
-                stats_delivery
-                stats_counter
-                stats_user
-                stats_password
-                stats_notes
-                counter_stats
+            stats_available
+            stats_url
+            stats_frequency
+            stats_delivery
+            stats_counter
+            stats_user
+            stats_password
+            stats_notes
+            counter_stats
 
-                open_access
-                admin_subscription_no
-                admin_user
-                admin_password
-                admin_url
-                support_url
-                access_url
-                public_account_needed
-                public_user
-                public_password
-                training_user
-                training_password
-                marc_url
-                ip_authentication
-                referrer_authentication
-                referrer_url
-                openurl_compliant
-                access_notes
-                breaches
-                
-                erm-edit-input-content-types
-            )
-        ],
-        optional_regexp => qr/^erm-edit-input-subject/,
-        constraints            => {
-            contract_end       => qr/^\d{4}-\d{1,2}-\d{1,2}/,
-            contract_start     => qr/^\d{4}-\d{1,2}-\d{1,2}/,
-            license_start_date => qr/^\d{4}-\d{1,2}-\d{1,2}/,
-        },
-        js_constraints => {
-            contract_end       => { dateISO => 'true' },
-            contract_start     => { dateISO => 'true' },
-            license_start_date => { dateISO => 'true' },
-        },
-        filters                => ['trim'],
-        missing_optional_valid => 1,
-    },    
+            open_access
+            admin_subscription_no
+            admin_user
+            admin_password
+            admin_url
+            support_url
+            access_url
+            public_account_needed
+            public_user
+            public_password
+            training_user
+            training_password
+            marc_url
+            ip_authentication
+            referrer_authentication
+            referrer_url
+            openurl_compliant
+            access_notes
+            breaches7
+            
+            erm-edit-input-content-types
+        )
+    ],
+    optional_regexp => qr/^erm-edit-input-subject/,
+    constraints            => {
+        contract_end       => qr/^\d{4}-\d{1,2}-\d{1,2}/,
+        contract_start     => qr/^\d{4}-\d{1,2}-\d{1,2}/,
+        license_start_date => qr/^\d{4}-\d{1,2}-\d{1,2}/,
+    },
+    js_constraints => {
+        contract_end       => { dateISO => 'true' },
+        contract_start     => { dateISO => 'true' },
+        license_start_date => { dateISO => 'true' },
+    },
+    filters                => ['trim'],
+    missing_optional_valid => 1,
+};
+
+my $form_valididate_license = {
     license => {
         required => [
             qw(
@@ -218,7 +220,7 @@ sub default : Private {
                 return $c->redirect( "/erm/create/$type/" );
             }
             else {
-                return $c->redirect( "/erm/edit/$type/$erm_id" );
+                return $c->redirect( "/erm/edit_${type}/$erm_id" );
             }
         }
     }
@@ -267,7 +269,7 @@ sub create : Local {
 
             CUFTS::DB::DBI->dbi_commit;
 
-            return $c->redirect( "/erm/edit/$type/" . $erm->id );
+            return $c->redirect( "/erm/edit_${type}/" . $erm->id );
 
         }
 
@@ -282,40 +284,37 @@ sub create : Local {
 # .. /erm/edit/main/123         (erm_main)
 # .. /erm/edit/license/423523   (erm_license)
 
-sub edit : Local {
-    my ( $self, $c, $type, $erm_id  ) = @_;
+sub edit_main : Local {
+    my ( $self, $c, $erm_id  ) = @_;
 
     $c->req->params->{cancel}
         and return $c->redirect('/erm/');
 
-    my $erm_class = $erm_classes{$type};
-    if ( !defined($erm_class) ) {
-        die("Unmatched erm class: $type");
-    }
     
-    my $erm = $erm_class->search({
+    my $erm = CUFTS::DB::ERMMain->search({
         id   => $erm_id,
         site => $c->stash->{current_site}->id,
     })->first;
 
     if ( !defined($erm) ) {
-        die("Unable to find ERM record '$type': $erm_id for site " . $c->stash->{current_site}->id);
+        die("Unable to find ERMMain record: $erm_id for site " . $c->stash->{current_site}->id);
     }
     my %active_content_types = ( map { $_->id, 1 } $erm->content_types() );
     
     if ( $c->req->params->{submit} ) {
 
-        $c->form( $form_validate->{$type} );
+        $c->form( $form_validate_main );
 
         unless ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
             eval {
                 $erm->update_from_form( $c->form );
 
-                if ( $type eq 'main' ) {
-                    $erm->main_name( $c->form->{valid}->{main_name} );
+                $erm->main_name( $c->form->{valid}->{main_name} );
 
-                    # Handle content type changes
-                    my $content_types_values = $c->form->{valid}->{'erm-edit-input-content-types'};
+                # Handle content type changes
+                
+                my $content_types_values = $c->form->{valid}->{'erm-edit-input-content-types'};
+                if ( defined($content_types_values) ) {
                     if ( !ref($content_types_values) ) {
                         $content_types_values = [ $content_types_values ];
                     }
@@ -328,11 +327,48 @@ sub edit : Local {
                         }
                     }
                     foreach my $content_type_id ( keys %active_content_types ) {
-                        CUFTS::DB::ERMContentTypesMain->search( { erm_main => $erm->id, content_type => $content_type_id } )->delete_all;
+                        CUFTS::DB::ERMContentTypesMain->search( { erm_main => $erm_id, content_type => $content_type_id } )->delete_all;
                     }
-
                 }
+                
+                # Handle subject changes
+                
+                foreach my $param ( keys %{ $c->form->{valid} } ) {
+                    if ( $param =~ /^erm-edit-input-subject-(\d+)-subject$/ ) {
+                        my $erm_main_subject_id    = $1;
+                        my $erm_main_subject_value = $c->form->{valid}->{$param};
 
+                        warn("subject_main_id: $erm_main_subject_id\nvalue: $erm_main_subject_value\n");
+                    
+                        my $erm_subjects_main = CUFTS::DB::ERMSubjectsMain->search({
+                            erm_main => $erm_id,   # include for security - don't grab other sites' subjects
+                            id => $erm_main_subject_id,
+                        })->first();
+                    
+                        if ( $erm_main_subject_value eq 'delete' ) {
+                            warn("Deleting subject");
+                            $erm_subjects_main->delete();
+                        }
+                        else {
+                            warn("Updating subject");
+                            $erm_subjects_main->subject( $erm_main_subject_value );
+                            $erm_subjects_main->rank( $c->form->{valid}->{"erm-edit-input-subject-${erm_main_subject_id}-rank"} );
+                            $erm_subjects_main->description( $c->form->{valid}->{"erm-edit-input-subject-${erm_main_subject_id}-description"} );
+                            $erm_subjects_main->update;
+                        }
+                    }
+                    elsif ( $param =~ /^erm-edit-input-subject-add-subject-(\d+)$/ ) {
+                        warn("Creating new subject");
+                        my $erm_add_id = $1;
+                        CUFTS::DB::ERMSubjectsMain->create({
+                            erm_main    => $erm_id,
+                            subject     => $c->form->{valid}->{"erm-edit-input-subject-add-subject-${erm_add_id}"},
+                            rank        => $c->form->{valid}->{"erm-edit-input-subject-add-rank-${erm_add_id}"},
+                            description => $c->form->{valid}->{"erm-edit-input-subject-add-description-${erm_add_id}"},
+                        });
+                    }
+                
+                }
             };
             
             if ($@) {
@@ -379,10 +415,9 @@ sub edit : Local {
     $c->stash->{active_content_types} = { map { $_->id, 1 } $erm->content_types() };
     $c->stash->{erm}       = $erm;
     $c->stash->{erm_id}    = $erm_id;
-    $c->stash->{type}      = $type;
-    $c->stash->{template}  = "erm/edit/${type}/general.tt";
+    $c->stash->{template}  = "erm/edit/main/general.tt";
 
-    $c->stash->{javascript_validate} = [ $c->convert_form_validate( "${type}-form", $form_validate->{$type}, 'erm-edit-input-' ) ];
+    $c->stash->{javascript_validate} = [ $c->convert_form_validate( "main-form", $form_validate_main, 'erm-edit-input-' ) ];
 }
 
 1;
