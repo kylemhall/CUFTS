@@ -7,6 +7,25 @@ $( function() {
  $('div.resource-brief-record:odd').addClass('resource-brief-record-alt');
 
 });
+
+function ajax_erm_resource_details( record_id ) {
+    var container = $('#resource-brief-details-' + record_id );
+    if ( !container.is('.ajax_loaded') ) {
+        container.addClass('ajax_loaded');
+        container.prepend('<div class="ajax_loading">Loading...</div>');
+        $.getJSON( '[% url("$url_base/resources/ajax_resource/") %]' + record_id, function(json) {
+            var container = $('#resource-brief-details-' + json.id );
+            container.find('div.ajax_loading').remove();
+            container.find('.field-resource_type').append( json.resource_type );
+            container.find('.field-resource_medium').append( json.resource_medium );
+            container.find('.field-content_types').append( json.content_types.join(', ') );
+            container.find('.field-subjects').append( json.subjects.join(', ') );
+        } );
+    }
+    container.show();
+}
+
+
 </script>
 <!-- Move these style to a sheet later -->
 <style>
@@ -43,6 +62,8 @@ div.resource-brief-details {
 a.trigger {
 }
 
+
+
 span.resource-brief-label {
     width: 5.5em;
     float: left;
@@ -58,6 +79,10 @@ span.resource-brief-data {
 div.resource-brief-field {
     float: left;
     clear: both;
+}
+
+div.ajax_loading {
+    background: #faa;
 }
 
 div#resources-brief-facets {
@@ -112,25 +137,30 @@ ul#chosen-facets {
 <div id="resources-brief-records">
 
 [% FOREACH record IN records %]
+ [% SET record_id = record.id %]
 <div class="resource-brief-record">
- <div class="resource-brief-field-name">[% record.name %]</div>
+ <div class="resource-brief-field-name">[% record.result_name %] - [% record.vendor %]</div>
  <div class="resource-brief-field-description">[% record.description_brief %]</div>
- <a class="trigger" id="resource-brief-details-trigger-[% record.id %]" href="[% url("$url_base/resources/$record.id") %]">[ details ]</a>
+ <a class="trigger" id="resource-brief-details-trigger-[% record_id %]" href="[% url("$url_base/resources/resource/$record_id") %]">[ details ]</a>
 
- <div class="resource-brief-details" id="resource-brief-details-[% record.id %]">
-  <div class="resource-brief-field"><span class="resource-brief-label">Type:</span><span class="resource-brief-data">[% record.resource_type.resource_type %]</span></div>
-  <div class="resource-brief-field"><span class="resource-brief-label">Medium:</span><span class="resource-brief-data">[% record.resource_medium.resource_medium %]</span></div>
-  <div class="resource-brief-field"><span class="resource-brief-label">Content:</span><span class="resource-brief-data">[% record.content_types.map_join('content_type', ', ') %]</span></div>
-  <div class="resource-brief-field"><span class="resource-brief-label">Subjects:</span><span class="resource-brief-data">[% record.subjects.map_join( 'subject', ', ' ) %]</span></div>
- </div>
-<script type="text/javascript">
-$( function() {
-   $("#resource-brief-details-trigger-[% record.id %]").hover(
-       function() { $("#resource-brief-details-[% record.id %]").show(300) },
-       function() { $("#resource-brief-details-[% record.id %]").hide(300) }
-   );
-} )
-</script>
+  <div class="resource-brief-details" id="resource-brief-details-[% record_id %]">
+   <div class="resource-brief-field"><span class="resource-brief-label">Resource Type:</span><span id="resource-brief-data field-resource_type" class="resource-brief-data"></span></div>
+   <div class="resource-brief-field"><span class="resource-brief-label">Medium:</span><span class="resource-brief-data field-resource_medium"></span></div>
+   <div class="resource-brief-field"><span class="resource-brief-label">Content:</span><span class="resource-brief-data field-content_types"></span></div>
+   <div class="resource-brief-field"><span class="resource-brief-label">Subjects:</span><span class="resource-brief-data field-subjects"></span></div>
+  </div>
+ <script type="text/javascript">
+ $( function() {
+    $("#resource-brief-details-trigger-[% record_id %]").hover(
+        function() {
+            ajax_erm_resource_details( [% record_id %]);
+        },
+        function() { $("#resource-brief-details-[% record_id %]").hide() }
+    );
+ } )
+ </script>
+
+
 </div>
 [% END %]
 
