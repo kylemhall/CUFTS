@@ -60,6 +60,7 @@ sub title_list_fields {
 sub title_list_field_map {
     return {
         'Journal'                => 'title',
+        'Name'                   => 'title',
         'Print ISSN'             => 'issn',
         'Print Issn'             => 'issn',
         'Print Issn/Isbn'        => 'issn',
