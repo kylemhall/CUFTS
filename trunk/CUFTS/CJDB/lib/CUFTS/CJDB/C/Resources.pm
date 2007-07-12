@@ -40,15 +40,11 @@ sub ajax_resource : Local {
         }
     }
 
-    my @subjects = $erm_obj->subjects;
-    foreach my $subject ( @subjects ) {
-        push @{ $erm_hash->{subjects} }, $subject->subject;
-    }
+    my @subjects = $erm_obj->subjects();
+    @{ $erm_hash->{subjects} } = map { $_->subject } sort { $a->subject cmp $b->subject } @subjects;
 
     my @content_types = $erm_obj->content_types;
-    foreach my $content_type ( @content_types ) {
-        push @{ $erm_hash->{content_types} }, $content_type->content_type;
-    }
+    @{ $erm_hash->{content_types} } = map { $_->content_type } sort { $a->content_type cmp $b->content_type } @content_types;
 
     $c->res->body( to_json( $erm_hash ) );
 }
