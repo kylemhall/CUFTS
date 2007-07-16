@@ -117,13 +117,20 @@ sub clean_data {
             my $year = (localtime())[5] + 1900 - 1;
             if ( $1 >= $year ) {
                 delete $record->{ft_end_date};
+                delete $record->{vol_ft_end};
+                delete $record->{iss_ft_end};
             }
         }
     }
 
     foreach my $field ( qw( vol_ft_start vol_ft_end iss_ft_start iss_ft_end ) ) {
-        if ( defined($record->{$field}) && $record->{$field} eq '-1' ) {
-            delete $record->{$field};
+        if ( defined($record->{$field}) ) {
+            if ( $record->{$field} eq '-1' ) {
+                delete $record->{$field};
+            }
+            else {
+                $record->{$field} =~ tr/0-9//cd;
+            }
         }
     }
 
