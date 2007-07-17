@@ -24,6 +24,7 @@ use strict;
 use base 'CUFTS::DB::DBI';
 
 use Data::Dumper;
+use Benchmark::Timer;
 
 __PACKAGE__->table('erm_main');
 __PACKAGE__->columns(Primary => 'id');
@@ -178,10 +179,16 @@ sub name {
 
 
 sub facet_search {
-    my ( $class, $site, $fields, $offset, $limit ) = @_;
+    my ( $class, $site, $fields, $fast, $offset, $limit ) = @_;
+
+    my @fast_columns = qw(
+        id
+        vendor
+        description_brief
+    );
 
     my $config = {
-        joins  => '',
+        joins  => {},
         order  => [ 'sort_name' ],    # Default order by resource name
         extra_columns => {
             'sort_name'   => 'erm_names.search_name',
@@ -190,7 +197,7 @@ sub facet_search {
         replace_columns => {
         },
         search => {
-            site => $site,
+            'erm_main.site' => $site,
         },
     };
     
@@ -230,7 +237,7 @@ sub facet_search {
     # Build column list
     
     my @columns;
-    foreach my $column ( __PACKAGE__->columns ) {
+    foreach my $column ( $fast ? @fast_columns : __PACKAGE__->columns ) {
         if ( exists($config->{replace_columns}->{$column} ) ) {
             push @columns, $config->{replace_columns}->{$column};
         }
@@ -245,15 +252,19 @@ sub facet_search {
     }
 
     $sql =~ s/%WHERE%/$where/e;
-    $sql =~ s/%JOINS%/$config->{'joins'}/e;
-    $sql =~ s/%ORDER%/join( ', ', @{ $config->{'order'} } )/e;
+    $sql =~ s/%JOINS%/join( ' ', values( %{ $config->{joins} } ) )/e;
+    $sql =~ s/%ORDER%/join( ', ', @{ $config->{order} } )/e;
     $sql =~ s/%COLUMNS%/join( ', ', @columns )/e;
 
-    warn($sql);
-
     my $sth = $class->db_Main()->prepare( $sql, {pg_server_prepare => 1} );
+    if ( $fast ) {
+        my $rv = $sth->execute( @bind );
+        return $sth->fetchall_arrayref({});
+    }
+
     my @results = $class->sth_to_objects( $sth, \@bind );
     return \@results;
+
 }
 
 
@@ -263,7 +274,7 @@ sub facet_count {
     my ( $class, $site, $fields ) = @_;
 
     my $config = {
-        joins  => '',
+        joins  => {},
         order  => [ 'sort_name' ],    # Default order by resource name
         extra_columns => {
             'sort_name'   => 'erm_names.search_name',
@@ -272,7 +283,7 @@ sub facet_count {
         replace_columns => {
         },
         search => {
-            site => $site,
+            'erm_main.site' => $site,
         },
     };
     
@@ -307,25 +318,8 @@ sub facet_count {
     $where =~ /(.*)/s or die;
     $where = $1;
     
-    # Build column list
-    
-    my @columns;
-    foreach my $column ( __PACKAGE__->columns ) {
-        if ( exists($config->{replace_columns}->{$column} ) ) {
-            push @columns, $config->{replace_columns}->{$column};
-        }
-        else {
-            push @columns, "erm_main.${column}";
-        }
-    }
-
-    foreach my $column ( keys %{ $config->{extra_columns} } ) {
-        my $string = $config->{extra_columns}->{$column} . ' AS ' . $column;
-        push @columns, $string;
-    }
-
     $sql =~ s/%WHERE%/$where/e;
-    $sql =~ s/%JOINS%/$config->{'joins'}/e;
+    $sql =~ s/%JOINS%/join( ' ', values( %{ $config->{joins} } ) )/e;
 
 #    warn($sql);
 #    warn(Dumper(\@bind));
@@ -345,7 +339,7 @@ sub _facet_search_name {
 sub _facet_search_subject {
     my ( $class, $field, $data, $config, $sql ) = @_;
 
-    $config->{joins} .= ' JOIN erm_subjects_main ON ( erm_subjects_main.erm_main = erm_main.id )';
+    $config->{joins}->{subject} = ' JOIN erm_subjects_main ON ( erm_subjects_main.erm_main = erm_main.id )';
     
     unshift( @{ $config->{order} }, 'rank DESC' );
     $config->{extra_columns}->{rank} = 'erm_subjects_main.rank';
@@ -356,9 +350,33 @@ sub _facet_search_subject {
 sub _facet_search_content_type {
     my ( $class, $field, $data, $config, $sql ) = @_;
 
-    $config->{joins} .= ' JOIN erm_content_types_main ON ( erm_content_types_main.erm_main = erm_main.id )';
+    $config->{joins}->{content_type} = ' JOIN erm_content_types_main ON ( erm_content_types_main.erm_main = erm_main.id )';
     
     $config->{search}->{'erm_content_types_main.content_type'} = $data;
+}
+
+sub _facet_search_keyword {
+my ( $class, $field, $data, $config, $sql ) = @_;
+
+    if ( !exists( $config->{joins}->{subject} ) ) {
+        $config->{joins}->{subject} = ' LEFT JOIN erm_subjects_main ON ( erm_subjects_main.erm_main = erm_main.id )';
+    }
+    $config->{joins}->{subject_name} = ' JOIN erm_subjects ON ( erm_subjects_main.subject = erm_subjects.id )';
+
+    if ( !exists( $config->{joins}->{consortia} ) ) {
+        $config->{joins}->{consortia} = ' LEFT JOIN erm_consortia ON ( erm_main.consortia = erm_consortia.id )';
+    }
+
+    $config->{search}->{'-nest'} = [
+       'erm_subjects.subject'       => { '~*' => $data },
+       'erm_consortia.consortia'    => { '~*' => $data },
+       'erm_main.description_brief' => { '~*' => $data },
+       'erm_main.description_full'  => { '~*' => $data },
+       'erm_main.key'               => { '~*' => $data },
+       'erm_main.vendor'            => { '~*' => $data },
+       'erm_main.publisher'         => { '~*' => $data },
+       'erm_names.search_name'      => { '~'  => lc($data) },
+    ];
 }
 
 1;
