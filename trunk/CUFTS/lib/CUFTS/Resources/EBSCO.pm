@@ -103,10 +103,10 @@ sub clean_data {
 
     if ( defined( $record->{'___EMBARGO'} ) ) {
         if ( $record->{'___EMBARGO'} =~ /(\d+)\s+(\w+)/ ) {
-            if ( $2 eq 'months' ) {
+            if ( $2 =~ /^month/ ) {
                 $record->{embargo_months} = $1;
             }
-            elsif ( $2 eq 'days' ) {
+            elsif ( $2 =~ /^day/ ) {
                 $record->{embargo_days} = $1;
             }
 
