@@ -20,7 +20,7 @@ CUFTS::CJDB->config(
     default_min_per_page => 50,
     'V::TT' => {
         WRAPPER       => 'layout.tt',
-#        COMPILE_DIR   => '/tmp/CUFTS_CJDB_template_cache',
+        COMPILE_DIR   => '/tmp/CUFTS_CJDB_template_cache',
     },
     cache => {
         backend => {

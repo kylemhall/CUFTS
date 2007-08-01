@@ -1,4 +1,0 @@
-[% USE url %]
-
-[% PROCESS resources/current_facets.tt %]
-[% PROCESS resources/facet_menu.tt %]
