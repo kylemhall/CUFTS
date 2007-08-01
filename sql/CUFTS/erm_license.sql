@@ -6,7 +6,7 @@ CREATE TABLE erm_license (
     -- Terms
 
         full_on_campus_access   BOOLEAN,
-        full_on_campus_notes    VARCHAR(1024),
+        full_on_campus_notes    TEXT,
         allows_remote_access    BOOLEAN,
         allows_proxy_access     BOOLEAN,
         allows_commercial_use   BOOLEAN,
@@ -19,15 +19,15 @@ CREATE TABLE erm_license (
         allows_downloads        BOOLEAN,
         allows_prints           BOOLEAN,
         allows_emails           BOOLEAN,
-        emails_notes            VARCHAR(1024),
+        emails_notes            TEXT,
         allows_archiving        BOOLEAN,
         own_data                BOOLEAN,
-        citation_requirements   VARCHAR(1024),
+        citation_requirements   VARCHAR(2048),
         requires_print          BOOLEAN,
         requires_print_plus     BOOLEAN,
         additional_requirements TEXT,
-        allowable_downtime      VARCHAR(1024),
-        online_terms            TEXT,
+        allowable_downtime      VARCHAR(2048),
+        online_terms            VARCHAR(2048),
         user_restrictions       TEXT,
         terms_notes             TEXT,
 
