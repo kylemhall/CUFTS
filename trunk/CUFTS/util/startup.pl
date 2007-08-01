@@ -5,7 +5,7 @@ use SQL::Abstract;
 use Exception::Class;
 use Exception::Class::DBI;
 use LWP::UserAgent ();
-use Apache::DBI ();
+#use Apache::DBI ();
 use DBI ();
 use URI::Escape;
 use Template;
