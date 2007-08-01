@@ -1,9 +1,0 @@
-[% USE url %]
-
-<div id="resources-current-facets" class="resources-current-facets-row">
- [% IF facets.values.size %]
-  [% facets.values.map_join( 'display', ' AND ' ) | html %]<br />
- [% ELSE %]
-  No facets selected.
- [% END %]
-</div>
