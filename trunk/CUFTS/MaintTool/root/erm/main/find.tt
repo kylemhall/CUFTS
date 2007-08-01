@@ -1,0 +1,50 @@
+[% USE url %]
+
+<script type="text/javascript">
+$( function() {
+
+ $('div.resource-brief-record:odd').addClass('resource-brief-record-alt');
+
+});
+
+function ajax_erm_resource_details( record_id ) {
+    var container = $('#resource-brief-details-' + record_id );
+    if ( !container.is('.ajax_loaded') ) {
+        container.addClass('ajax_loaded');
+        container.prepend('<div class="ajax_loading">Loading...</div>');
+        $.getJSON( '[% url("$url_base/erm/main/ajax_details/") %]' + record_id, function(json) {
+            var container = $('#resource-brief-details-' + json.id );
+            container.find('div.ajax_loading').remove();
+            container.find('#field-resource_type').append( json.resource_type );
+            container.find('#field-resource_medium').append( json.resource_medium );
+            container.find('#field-content_types').append( json.content_types.join(', ') );
+            container.find('#field-subjects').append( json.subjects.join(', ') );
+        } );
+    }
+    container.show();
+}
+
+</script>
+
+[% PROCESS erm/main/facet_menu.tt %]
+
+<div id="resources-brief-records">
+
+[% FOREACH record IN records %]
+ [% SET record_id = record.id %]
+<div class="resource-brief-record">
+ <div class="resource-brief-field-name"><a href="[% url("$url_base/erm/main/edit/$record_id") %]">[% record.result_name %] - [% record.vendor %]</a></div>
+ <div class="resource-brief-field-description">[% record.description_brief %]</div>
+ <a class="trigger" id="resource-brief-details-trigger-[% record_id %]" href="[% url("$url_base/resources/resource/$record_id") %]" onMouseOver="javascript: ajax_erm_resource_details( [% record_id %])" onMouseOut="javascript: $('#resource-brief-details-[% record_id %]').hide()">[ details ]</a>
+
+  <div class="resource-brief-details" id="resource-brief-details-[% record_id %]">
+   <div class="resource-brief-field"><span class="resource-brief-label">Resource Type:</span><span id="field-resource_type" class="resource-brief-data"></span></div>
+   <div class="resource-brief-field"><span class="resource-brief-label">Medium:</span><span id="field-resource_medium" class="resource-brief-data"></span></div>
+   <div class="resource-brief-field"><span class="resource-brief-label">Content:</span><span id="field-content_types" class="resource-brief-data"></span></div>
+   <div class="resource-brief-field"><span class="resource-brief-label">Subjects:</span><span id="field-subjects" class="resource-brief-data"></span></div>
+  </div>
+
+</div>
+[% END %]
+
+</div>

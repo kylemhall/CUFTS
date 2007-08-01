@@ -1,0 +1,11 @@
+[% USE url %]
+
+<form>
+<select name="license">
+ <option value="new">Create new license record...</option>
+[% FOREACH record IN records %]
+ <option value="[% record.id %]">[% record.key %]</option>
+[% END %]
+</select>
+<input type="submit" name="submit" value="submit" />
+</form>

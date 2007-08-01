@@ -99,7 +99,8 @@ sub auto : Private {
 		die('User not authorized for journal auth maintenance');
 
     $c->stash->{header_section} = 'Journal Auth';
-    
+    push( @{ $c->stash->{load_css} }, 'journal_auth.css' );
+
 	return 1;
 }
 

@@ -1118,7 +1118,7 @@ $( function() {
       <div class="data">
         <select name="erm-edit-input-subject-[% subject.id %]-subject" class="subject" />
          <option value="delete">Delete this subject entry</option>
-         [% FOREACH subject_option IN subjects_options %]
+         [% FOREACH subject_option IN subject_options %]
           <option value="[% subject_option.id %]" [% ' selected="selected"' IF subject.subject == subject_option.id %]>[% subject_option.subject | html %]</option>
          [% END %]
         </select>
@@ -1141,7 +1141,7 @@ $( function() {
      <div class="data">
        <select name="erm-edit-input-subject-add-subject-" class="subject" />
         <option value="delete">Delete this subject entry</option>
-        [% FOREACH subject_option IN subjects_options %]
+        [% FOREACH subject_option IN subject_options %]
          <option value="[% subject_option.id %]" [% 'selected="selected"' IF loop.first %]>[% subject_option.subject | html %]</option>
         [% END %]
        </select>

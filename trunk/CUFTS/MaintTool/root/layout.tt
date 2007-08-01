@@ -3,6 +3,10 @@
 <head>
 <title>CUFTS Maintenance Tool</title>
 <link rel="StyleSheet" href="[% css_dir %]general.css" type="text/css" media="screen, print" />
+[% FOREACH css IN load_css %]
+ <link rel="StyleSheet" href="[% "${css_dir}${css}" %]" type="text/css" media="screen, print" />
+[% END %]
+
 <script src="[% js_dir %]default.js"   type="text/javascript"></script>
 <!-- <script src="[% js_dir %]prototype.js" type="text/javascript"></script> -->
 <script src="[% js_dir %]jquery.js"          type="text/javascript"></script>

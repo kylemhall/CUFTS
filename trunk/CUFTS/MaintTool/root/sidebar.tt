@@ -7,8 +7,29 @@
     menu.push(['/main', 'Home']);
     IF current_site;
         menu.push(['/local/menu', 'Local Resources']);
-        menu.push(['/erm/', 'ERM']);
-        menu.push(['/site/edit', 'Site Settings']);
+
+        menu.push([
+            [
+                [ '/erm/main', 'Main' ],
+                [ '/erm/license', 'License' ],
+                [ '/erm/tables/edit', 'Tables' ],
+                [ '/erm/alerts', 'Alerts' ],
+            ],
+            'ERM'
+        
+        ]);
+        
+        menu.push([
+            [
+                [ '/site/edit', 'General' ],
+                [ '/site/template/menu', 'Templates' ],
+                [ '/site/cjdb/settings', 'CJDB Settings' ],
+                [ '/site/cjdb/data', 'CJDB Data' ],
+                [ '/site/cjdb/accounts', 'C*DB Accounts' ],
+                [ '/site/googlescholar/edit', 'Google Scholar' ],
+            ],
+            'Site Settings'
+        ]);
         menu.push(['/statistics/menu', 'Statistics']);
     END;
 
@@ -31,6 +52,27 @@
 -%]
 <ul>
 [% FOREACH item IN menu %]
+ [% IF item.0.size > 1 %]
+  <li><a class="navigation-submenu-trigger" href="">[% item.1 %]</a>
+  <ul style="display: none">
+  [% FOREACH subitem IN item.0 %]
+   <li><a href="[% url_base %][% subitem.0 %]">[% subitem.1 %]</a></li>
+  [% END %]
+  </ul></li>
+ [% ELSE %]
  <li><a href="[% url_base %][% item.0 %]">[% item.1 %]</a></li>
+ [% END %]
 [% END %]
 </ul>
+<script>
+ $( function() { 
+     $('.navigation-submenu-trigger').click(
+         function(event) {
+             event.preventDefault();
+             var to_toggle = $(this).parent().find('ul');
+             $('#navigation-main ul li ul').not(to_toggle).hide();
+             to_toggle.toggle();
+         }
+     );
+ } );
+</script>

@@ -15,6 +15,7 @@ sub auto : Private {
     my ( $self, $c ) = @_;
 
     $c->stash->{header_section} = 'Resource Comparison';
+    push( @{ $c->stash->{load_css} }, 'public_tools.css' );
 }
 
 sub default : Private {

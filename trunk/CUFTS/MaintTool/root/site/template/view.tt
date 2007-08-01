@@ -4,8 +4,6 @@
 [% SET template_contents = template_contents.replace("\n", "<br />\n") %]
 [% SET template_contents = template_contents.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") %]
 
-[% PROCESS site/navbar.tt %]
-
 <div style="margin-bottom: .5em;"><span class="heading">[% template_name | html %]</span></div>
 
 <table class="outlined">

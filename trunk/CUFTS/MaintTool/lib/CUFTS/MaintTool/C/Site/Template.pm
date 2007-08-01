@@ -4,7 +4,7 @@ use strict;
 use base 'Catalyst::Base';
 
 my @valid_states = ( 'active', 'sandbox' );
-my @valid_types  = ( 'css',    'cjdb_template' );
+my @valid_types  = ( 'crdb_css', 'cjdb_css', 'cjdb_template', 'crdb_template' );
 
 my $form_validate = {
     optional => [ 'submit', 'cancel', 'template_contents' ],
@@ -22,18 +22,9 @@ sub menu : Local {
     my $site = $c->stash->{current_site};
 
     ##
-    ## Get CJDB template files, active, and sandbox lists
+    ## Get CJDB and CRDB template files, active, and sandbox lists
     ##
 
-    my @general_template_list = qw(
-        errors.tt
-        layout.tt
-        page_footer.tt
-        page_header.tt
-        loggedin.tt
-        login.tt
-    );
-    
     my @cjdb_template_list = qw(
         account_create.tt
         account_manage.tt
@@ -47,6 +38,7 @@ sub menu : Local {
         browse_search_description.tt
         browse_subjects.tt
         cjdb_layout.tt
+        errors.tt
         journal.tt
         journal_associations.tt
         journal_availability.tt
@@ -58,12 +50,17 @@ sub menu : Local {
         journal_titles.tt
         journals_link_label.tt
         journals_link_name.tt
+        layout.tt
         lcc_browse.tt
         lcc_browse_content.tt
+        loggedin.tt
+        login.tt
         manage_tags_info.tt
         cjdb_menu.tt
         mytags.tt
         nav_line.tt
+        page_footer.tt
+        page_header.tt
         page_title.tt
         paging.tt
         selected_journals.tt
@@ -73,53 +70,105 @@ sub menu : Local {
         tag_viewing_string.tt
     );
     
-    my @resource_template_list = qw(
-        resource_layout.tt
-        resource_menu.tt
+    my @crdb_template_list = qw(
+        account_create.tt
+        account_manage.tt
+        browse.tt
+        browse_js.tt
+        current_facets.tt
+        errors.tt
+        facet_labels.tt
+        facet_menu.tt
+        facet_menu_js.tt
+        fatal_error.tt
+        layout.tt
+        loggedin.tt
+        login.tt
+        main.tt
+        menu.tt
+        nav_line.tt
+        page_footer.tt
+        page_header.tt
+        page_title.tt
+        resource.tt
     );
 
-    my $active_dir  = get_site_base_dir('cjdb_template', $site, '/active');
-    my $sandbox_dir = get_site_base_dir('cjdb_template', $site, '/sandbox');
+    my $cjdb_active_dir  = get_site_base_dir('cjdb_template', $site, '/active');
+    my $cjdb_sandbox_dir = get_site_base_dir('cjdb_template', $site, '/sandbox');
 
-    opendir ACTIVE, $active_dir
+    opendir ACTIVE, $cjdb_active_dir
         or die('Unable to open CJDB site active template directory for reading');
-    my @active_templates = grep !/^\./, readdir ACTIVE;
+    my @cjdb_active_templates = grep !/^\./, readdir ACTIVE;
     closedir ACTIVE;
 
-    opendir SANDBOX, $sandbox_dir
+    opendir SANDBOX, $cjdb_sandbox_dir
         or die('Unable to open CJDB site sandbox template directory for reading');
-    my @sandbox_templates = grep !/^\./, readdir SANDBOX;
+    my @cjdb_sandbox_templates = grep !/^\./, readdir SANDBOX;
+    closedir SANDBOX;
+
+    my $crdb_active_dir  = get_site_base_dir('crdb_template', $site, '/active');
+    my $crdb_sandbox_dir = get_site_base_dir('crdb_template', $site, '/sandbox');
+
+    opendir ACTIVE, $crdb_active_dir
+        or die('Unable to open CRDB site active template directory for reading');
+    my @crdb_active_templates = grep !/^\./, readdir ACTIVE;
+    closedir ACTIVE;
+
+    opendir SANDBOX, $crdb_sandbox_dir
+        or die('Unable to open CRDB site sandbox template directory for reading');
+    my @crdb_sandbox_templates = grep !/^\./, readdir SANDBOX;
     closedir SANDBOX;
 
     ##
     ## Get CSS files, active and sandbox lists
     ##
 
-    my @css_list        = qw( cjdb.css );
-    my $active_css_dir  = get_site_base_dir( 'css', $site, 'active'  );
-    my $sandbox_css_dir = get_site_base_dir( 'css', $site, 'sandbox' );
+    my @cjdb_css_list        = qw( cjdb.css );
+    my $cjdb_active_css_dir  = get_site_base_dir( 'cjdb_css', $site, 'active'  );
+    my $cjdb_sandbox_css_dir = get_site_base_dir( 'cjdb_css', $site, 'sandbox' );
 
-    opendir ACTIVE, $active_css_dir
+    opendir ACTIVE, $cjdb_active_css_dir
         or die('Unable to open CJDB site active CSS directory for reading');
-    my @active_css = grep !/^\./, readdir ACTIVE;
+    my @cjdb_active_css = grep !/^\./, readdir ACTIVE;
     closedir ACTIVE;
 
-    opendir SANDBOX, $sandbox_css_dir
+    opendir SANDBOX, $cjdb_sandbox_css_dir
         or die('Unable to open CJDB site sandbox CSS directory for reading');
-    my @sandbox_css = grep !/^\./, readdir SANDBOX;
+    my @cjdb_sandbox_css = grep !/^\./, readdir SANDBOX;
     closedir SANDBOX;
+
+    my @crdb_css_list        = qw( crdb.css );
+    my $crdb_active_css_dir  = get_site_base_dir( 'crdb_css', $site, 'active'  );
+    my $crdb_sandbox_css_dir = get_site_base_dir( 'crdb_css', $site, 'sandbox' );
+
+    opendir ACTIVE, $crdb_active_css_dir
+        or die('Unable to open CRDB site active CSS directory for reading');
+    my @crdb_active_css = grep !/^\./, readdir ACTIVE;
+    closedir ACTIVE;
+
+    opendir SANDBOX, $crdb_sandbox_css_dir
+        or die('Unable to open CRDB site sandbox CSS directory for reading');
+    my @crdb_sandbox_css = grep !/^\./, readdir SANDBOX;
+    closedir SANDBOX;
+
 
     # TODO: Get URL for CJDB for link to sandbox/active?
 
-    $c->stash->{active_templates}   = \@active_templates;
-    $c->stash->{sandbox_templates}  = \@sandbox_templates;
-    $c->stash->{general_templates}  = \@general_template_list;
-    $c->stash->{cjdb_templates}     = \@cjdb_template_list;
-    $c->stash->{resource_templates} = \@resource_template_list;
+    $c->stash->{cjdb_active_templates}   = \@cjdb_active_templates;
+    $c->stash->{cjdb_sandbox_templates}  = \@cjdb_sandbox_templates;
+    $c->stash->{cjdb_templates}          = \@cjdb_template_list;
 
-    $c->stash->{csses}         = \@css_list;
-    $c->stash->{active_csses}  = \@active_css;
-    $c->stash->{sandbox_csses} = \@sandbox_css;
+    $c->stash->{crdb_templates}          = \@crdb_template_list;
+    $c->stash->{crdb_active_templates}   = \@crdb_active_templates;
+    $c->stash->{crdb_sandbox_templates}  = \@crdb_sandbox_templates;
+
+    $c->stash->{cjdb_csses}         = \@cjdb_css_list;
+    $c->stash->{cjdb_active_csses}  = \@cjdb_active_css;
+    $c->stash->{cjdb_sandbox_csses} = \@cjdb_sandbox_css;
+
+    $c->stash->{crdb_csses}         = \@crdb_css_list;
+    $c->stash->{crdb_active_csses}  = \@crdb_active_css;
+    $c->stash->{crdb_sandbox_csses} = \@crdb_sandbox_css;
 
     $c->stash->{template} = 'site/template/menu.tt';
 }
@@ -265,11 +314,17 @@ sub transfer : Local {
 sub get_base_dir {
     my ($type) = @_;
 
-    if ( $type eq 'css' ) {
+    if ( $type eq 'cjdb_css' ) {
         return $CUFTS::Config::CJDB_CSS_DIR;
     }
     elsif ( $type eq 'cjdb_template' ) {
         return $CUFTS::Config::CJDB_TEMPLATE_DIR;
+    }
+    elsif ( $type eq 'crdb_css' ) {
+        return $CUFTS::Config::CRDB_CSS_DIR;
+    }
+    elsif ( $type eq 'crdb_template' ) {
+        return $CUFTS::Config::CRDB_TEMPLATE_DIR;
     }
 }
 
@@ -278,11 +333,17 @@ sub get_site_base_dir {
     my $site = shift;
     my @path_parts = @_;
 
-    if ( $type eq 'css' ) {
+    if ( $type eq 'cjdb_css' ) {
         unshift @path_parts, ( $CUFTS::Config::CJDB_SITE_CSS_DIR, $site->id, 'static', 'css' );
     }
     elsif ( $type eq 'cjdb_template' ) {
         unshift @path_parts, ( $CUFTS::Config::CJDB_SITE_TEMPLATE_DIR, $site->id );
+    }
+    if ( $type eq 'crdb_css' ) {
+        unshift @path_parts, ( $CUFTS::Config::CRDB_SITE_CSS_DIR, $site->id, 'static', 'css' );
+    }
+    elsif ( $type eq 'crdb_template' ) {
+        unshift @path_parts, ( $CUFTS::Config::CRDB_SITE_TEMPLATE_DIR, $site->id );
     }
     
     my $path;

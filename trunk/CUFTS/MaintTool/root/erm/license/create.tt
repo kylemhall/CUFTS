@@ -3,7 +3,7 @@
 <form name="erm-create" id="erm-create" method="post">
 
  <fieldset>
-  <legend>New ERM Record</legend>
+  <legend>New ERM License Record</legend>
 
   <div class="field">
    <div class="data">
@@ -13,17 +13,6 @@
     This unique identifier is used to find the right ERM record when attaching to resource or title records.
    </div>
   </div>
-
-  [% IF type == 'main' %]
-  <div class="field">
-   <div class="data">
-    <label for="erm-create-name">Resource name</label><input id="erm-create-name" name="name" value="">
-   </div>
-   <div class="help">
-    This is the main resource name displayed to the public.  Alternate names can be added later.
-   </div>
-  </div>
-  [% END %]
 
   <input type="submit" name="save" value="save" />
   <input type="submit" name="cancel" value="cancel" />

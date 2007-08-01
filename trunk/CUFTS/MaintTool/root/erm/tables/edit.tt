@@ -1,7 +1,5 @@
 [% USE HTML %]
 
-[% PROCESS site/navbar.tt %]
-
 [%# Inline style for now.. if we get more of these kind of forms, try to make
     this more general for the main CSS file.
 %]
