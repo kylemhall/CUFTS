@@ -1,8 +1,6 @@
 [% USE url %]
 [% USE num_format = format('%0.03f') %]
 
-[% PROCESS site/navbar.tt %]
-
 <form enctype="multipart/form-data" method="post">
 <table>
 <tr><td>

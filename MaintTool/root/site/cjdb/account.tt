@@ -1,5 +1,4 @@
 [% USE url %]
-[% PROCESS site/navbar.tt %]
 
 <form method="post">
 <table class="outlined">

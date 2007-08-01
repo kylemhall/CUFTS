@@ -1,0 +1,8 @@
+[% USE url %]
+
+<div id="erm-menu">
+ <a href="[% url("$url_base/erm/main/") %]">Main Records</a><br />
+ <a href="[% url("$url_base/erm/license/") %]">License Records</a><br />
+ <a href="[% url("$url_base/erm/license/") %]">Alerts</a><br />
+ <a href="[% url("$url_base/erm/license/") %]">Tables</a><br />
+</div>

@@ -1,7 +1,5 @@
 [% USE url %]
 
-[% PROCESS site/navbar.tt %]
-
 <form method="post">
 <table><tr><td>
 <table style="width: 100%;" class="outlined">

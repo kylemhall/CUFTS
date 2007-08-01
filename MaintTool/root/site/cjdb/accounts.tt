@@ -1,5 +1,4 @@
 [% USE url %]
-[% PROCESS site/navbar.tt %]
 
 <table class="outlined">
  <tr><td class="heading-bar">CJDB account search</td></tr>

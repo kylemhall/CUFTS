@@ -17,6 +17,7 @@ my $form_validate = {
 sub auto : Private {
     my ( $self, $c ) = @_;
 
+    push( @{ $c->stash->{load_css} }, 'public_tools.css' );
     $c->stash->{header_section} = 'Journal Search';
 }
 

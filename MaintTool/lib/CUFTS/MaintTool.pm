@@ -38,6 +38,7 @@ sub begin : Private {
     $c->stash->{image_dir} = "${url_base}/static/images/";
     $c->stash->{css_dir}   = "${url_base}/static/css/";
     $c->stash->{js_dir}    = "${url_base}/static/js/";
+    $c->stash->{load_css}  = [];
 
     # Don't force login on static content
     return 1 if ( $c->req->{path} =~ /^static/ );

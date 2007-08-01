@@ -141,6 +141,16 @@ span.small-heading {
 	font-weight: bold;
 }
 
+span.yes-highlight {
+    color: green;
+    font-weight: bold;
+}
+
+span.no-highlight {
+    color: red;
+    font-weight: bold;
+}
+
 
 td.label {
 	padding-left: 10px;
@@ -421,212 +431,6 @@ td.paging a {
 td.paging a:hover, td.paging a:active { text-decoration: underline }
 
 
-/* Journal Auth Editting */
-
-div.journal-auth-titles {
-    margin: 5px;
-    background: #DDDDDD;
-    padding: 2px;
-}
-
-div#journal-auth-titles-heading {
-    font-weight: bold;
-}
-
-div.journal-auth-rss {
-    margin: 5px;
-    background: #DDDDDD;
-    padding: 2px;
-}
-
-div#journal-auth-rss-heading {
-    font-weight: bold;
-}
-
-
-div.journal-auth-global-resources {
-    margin: 5px;
-    background: #DDDDDD;
-    padding: 2px;
-}
-
-div.journal-auth-record table td {
-    padding-right: 5px;
-    padding-left: 5px;
-}
-
-div#journal-auth-global-resources-heading {
-    font-weight: bold;
-}
-
-div.journal-auth-local-resources {
-    margin: 5px;
-    background: #DDDDDD;
-    padding: 2px;
-}
-
-div#journal-auth-local-resources-heading {
-    font-weight: bold;
-}
-
-div.journal-auth-record {
-    margin-top: 10px;
-    background: #EEEEEE;
-    padding: 5px;
-}
-
-div.journal-auth-marc-dump {
-	margin-left: 10px;
-	margin-right: 10px;
-	background: #D0DEED;
-	padding: 3px;
-}
-	
-
-div#journal-auth-alt-titles-container {
-	margin-top: 1em;
-	border: 1px solid #004997;
-}
-
-div.journal-auth-marc-fields {
-	margin-top: 1em;
-	border: 1px solid #004997;
-}
-
-div#journal-auth-edit-issns {
-    margin-top: 1em;
-    border: 1px solid #004997;
-    background: #EEEEEE;
-}
-
-div#journal-auth-edit-titles {
-    margin-top: 1em;
-    border: 1px solid #004997;
-    background: #EEEEEE;
-}
-
-div#journal-auth-edit-rss {
-    margin-top: 1em;
-    border: 1px solid #004997;
-    background: #EEEEEE;
-}
-
-
-
-
-div.public-journal-auth {
-    border: 1px solid #004997;
-    padding: 5px;
-    background: #EEEEEE;
-    float:  left;
-    width: 99%;
-}
-
-table#public-journal-holdings {
-	border: 1px solid #004997;
-	padding: 1px;
-	width:  100%;
-}
-
-tr.public-journal-holdings-heading td {
-	background: #004997;
-	font-weight: bold;
-	color: white;
-	padding: 2px 5px;
-	white-space: nowrap;
-}
-
-tr.public-journal-holdings-field0 td {
-	padding: 4px 5px 1px 5px;
-	color: black;
-	background: white;
-	border: 1px solid #004997;
-}
-
-tr.public-journal-holdings-field1 td {
-	padding: 4px 5px 1px 5px;
-	background: #D0DEED;
-	color: black;
-	border: 1px solid #004997;
-}
-
-span.public-journal-title {
-	color: #004997;
-	font-size: 120%;
-	font-weight: bold;
-	margin-bottom: 3px;
-}
-
-a#toggle-more {
-    margin-left: 10px;
-    font-size: 80%;
-}
-
-span.public-journal-issns {
-}
-
-div#public-journal-more {
-    float: left; 
-    background: white;
-    width:  99%;
-    padding:  4px;
-    margin:  3px auto 5px auto;
-    border:  solid 1px #CCCCCC;
-    font-size:  90%;
-}
-div.public-journal-info-heading {
-    font-weight:  bold;
-}
-
-div#public-journal-alternate-titles {
-}
-
-div.public-journal-float {
-    float:  left;
-    margin-right:  1em;
-}
-
-div#public-journal-marc {
-}
-
-
-table.public-compare {
-	border: 1px solid black;
-	padding: 1px;
-	width:  100%;
-}
-
-table.public-compare td {
-    border:  1px solid black;
-    padding:  2px;
-}
-tr.public-compare-heading td {
-    font-weight:  bold;
-}
-
-td.public-compare-resource0 {
-    background:  #EEEEEE;
-}
-
-td.public-compare-resource1 {
-    background:  #DDDDDD;
-}
-
-td.public-compare-resource2 {
-    background:  #CCCCCC;
-}
-
-td.public-compare-resource3 {
-    background:  #BBBBBB;
-}
-
-span.yes-highlight {
-    color: #1a1;
-}
-
-span.no-highlight {
-    color: #d22;
-}
 
 /* New form style starting with ERM development */
 
@@ -783,7 +587,7 @@ div#logged-in {
 
 div#navigation-main {
     float: left;
-    font: normal 14px Verdana, sans-serif;
+    font: normal 12px Verdana, sans-serif;
     border: none;
     width: 149px;
 }
@@ -800,7 +604,20 @@ div#navigation-main ul li {
     width: 100%;
 }
 
-div#navigation-main a {
+div#navigation-main ul li ul {
+    margin: 0px;
+    padding: 0px;
+}
+
+
+div#navigation-main ul li ul li a {
+color: black;
+padding: 5px 0px 5px 20px;
+display: block;
+width: 125px;
+}
+
+div#navigation-main ul li a {
     color: black;
     padding: 5px 0px 5px 10px;
     display: block;
@@ -822,69 +639,4 @@ div#content {
 }
 
 
-/* TABS from CJDB */
 
-/* Container for whole tabs/pages group */
-div.tabs-nav {
-    width: 100%;
-    float: left;
-}
-
-/* NOT USED NOW */
-
-/*
-div.tabs-nav-tabs {
-  width: 100%;
-  font-size: 93%;
-  background: #DAE0D2 url("/MaintTool/static/images/tab-bg.gif") repeat-x bottom;
-  line-height: normal;
-  float: left;
-  margin-bottom: 9px;
-}
-
-*/
-
-ul.tabs-nav {
-  margin:0;
-  font-size: 93%;
-  padding:10px 10px 0;
-  list-style:none;
-}
-
-ul.tabs-nav li {
-  float:left;
-  background:url("/MaintTool/static/images/tab-left.gif") no-repeat left top;
-  margin:0;
-  padding:0 0 0 9px;
-}
-
-ul.tabs-nav li a {
-  float:left;
-  display:block;
-  background:url("/MaintTool/static/images/tab-right.gif") no-repeat right top;
-  padding:5px 15px 4px 6px;
-  text-decoration:none;
-  font-weight:bold;
-  color:#667;
-}
-
-ul.tabs-nav li a:hover {
-  color:#444;
-}
-
-ul.tabs-nav li.tabs-nav-active {
-  background-image:url("/MaintTool/static/images/tab-left-current.gif");
-}
-
-ul.tabs-nav li.tabs-nav-active a {
-  background-image:url("/MaintTool/static/images/tab-right-current.gif");
-  color:#222;
-}
-
-div.tabs-nav-page {
-    width: 98%;
-    clear: both;
-    border: 1px solid #667;
-    padding: 5px;
-    background: #ededed;
-}

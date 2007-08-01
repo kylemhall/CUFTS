@@ -1,4 +1,4 @@
-package CUFTS::MaintTool::C::Site::ERM;
+package CUFTS::MaintTool::C::ERM::Tables;
 
 use strict;
 use base 'Catalyst::Base';
@@ -54,7 +54,7 @@ sub edit : Local {
     # Process a form if present
 
     if ( $c->req->params->{cancel} ) {
-        $c->redirect('/site/edit');
+        $c->redirect('/erm');
     }
     elsif ( $c->req->params->{submit} ) {
 
@@ -160,13 +160,13 @@ sub edit : Local {
         @{ $c->stash->{"${table}_count"} } = map { $count_table->count_search( $method => $_ ) } @{ $c->stash->{$table} };
     }
 
-    $c->stash->{template} = 'site/erm/edit.tt';
+    $c->stash->{template} = 'erm/tables/edit.tt';
 
 }
 
 =head1 NAME
 
-CUFTS::MaintTool::C::Site::ERM - Component for ERM related data
+CUFTS::MaintTool::C::ERM::Tables - Component for ERM related data
 
 =head1 SYNOPSIS
 
