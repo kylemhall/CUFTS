@@ -34,7 +34,7 @@ __PACKAGE__->columns(
     )
 );
 __PACKAGE__->columns( Essential => __PACKAGE__->columns );
-__PACKAGE__->sequence('cjdb_associations_id_seq1');
+__PACKAGE__->sequence('cjdb_associations_id_seq');
 __PACKAGE__->has_many('journals', [ 'CJDB::DB::JournalsAssociations' => 'journal' ] );
 
 __PACKAGE__->set_sql(
