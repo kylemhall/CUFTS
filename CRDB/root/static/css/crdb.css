@@ -1,0 +1,360 @@
+/*************************************************
+ 
+  General Settings that apply to the whole site 
+ 
+**************************************************/
+
+body {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 80%;
+	margin: 0;
+}
+
+/* Prevent forms from forcing a line break */
+
+form {
+	display: inline;
+}
+
+/* Generic class for highlighting some text */
+
+.highlight {
+	font-weight: bold;
+}
+
+/* Page header background, useful for a repeating image/solid background colour */
+
+/* No longer used by default because the path to the image file isn't easy
+   to determine in a CSS file.  This is now in a style tag in the page_header
+   template 
+
+#page-header-background {
+	width: 100%;
+	background: url(/static/images/cjdb_header_repeat.gif) repeat-x;
+}
+
+*/
+
+/* Page title - words at the top of every page */
+
+#page-title {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	font-size: 200%;
+	font-variant: small-caps;
+	font-weight: bold;
+	color: #326EAD;
+}
+
+/*  Container for the general page content */
+
+#content {
+	clear: both;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+#page-footer {
+	font-family: Arial;
+	font-size: 80%;
+	text-align: center;
+	margin-top: 10em;
+}
+
+/* Link styling */
+
+a:link, a:visited {
+	 text-decoration: none;
+}
+
+a:active, a:hover {
+	text-decoration: underline;
+}
+
+a {
+	color: blue;
+}
+
+/* Heading styles for various things */
+
+h3 {
+	font-weight: bold;
+}
+
+
+
+/**** Tags ****/
+
+
+/* Container */
+
+div#tags {
+}
+
+/* Container heading */
+
+div#tags-heading {
+}
+
+/* Different levels of tags */
+
+div.tag-0 {
+}
+
+div.tag-50 span.tag-name {
+	font-weight: bold;
+}
+
+div.tag-100 span.tag-name {
+	font-style: italic;
+	font-weight: bold;
+}
+
+/* Tag count */
+
+.tag-count {
+	font-size: 80%;
+}
+
+
+/**** My Tags ****/
+
+
+/* Container */
+
+div#my-tags {
+}
+
+/* Container heading */
+
+div#my-tags-heading {
+}
+
+/* Individual tags */
+
+.tag-mine {
+}
+
+
+/*************************************************
+
+	Page header menu/integrated login
+
+**************************************************/
+
+div#navline {
+	padding-top: 2px;
+	padding-bottom: 3px;
+	vertical-align: middle;
+	border-bottom: solid 1px #004997;
+	float: left;
+}
+
+div#menu {
+	float: left;
+	margin-left: 10px;
+	vertical-align: middle;
+}
+
+div#loginblock {
+	float: right;
+	display: block;
+	margin-right: 10px;
+}
+
+div#loggedin {
+}
+
+div#dologin {
+}
+
+div#dologin input {
+	font-size: 80%;
+}
+
+
+/*************************************************
+
+	My Tags screen
+
+**************************************************/
+
+
+table#manage-tags-table tr.manage-tags-table-heading td {
+	background-color: #CCCCCC;
+	font-size: 80%;
+	font-weight: bold;
+	padding: 0px 3px;
+	white-space: nowrap;
+}
+table#manage-tags-table td {
+	white-space: nowrap;
+}
+
+table#manage-tags-layout td {
+	vertical-align: top;
+}
+
+td#manage-tags-layout-right {
+	padding-left: 15px;
+}
+
+#manage-tags-layout dl {
+	font-size: 80%;
+}
+
+#manage-tags-layout dt {
+	font-weight: bold;
+}
+
+div#mytags {
+	border: 1px #AAAAAA solid;
+	padding: 3px;
+	background: #EEEEEE;
+}
+
+div#mytags ul {
+	padding-left: 2px;
+}
+
+div#mytags ul li {
+	list-style-type: none;
+}
+div#mytags-heading {
+	font-size: 120%;
+	font-weight: bold;
+	font-variant: small-caps;
+	margin-bottom: .5em;
+}
+
+
+/*************************************************
+
+	Account Create/Manage
+
+**************************************************/
+
+
+div#account {
+	padding-top: 1em;
+}
+
+div#account table {
+	background-color: #EEEEEE;
+	border: 1px #AAAAAA solid;
+	padding: 3px;
+}
+
+div#account td.label {
+	font-weight: bold;
+}
+
+div#account td.data {
+}
+
+
+/*************************************************
+
+    Browse screen
+
+**************************************************/
+
+div.resource-brief-record {
+    background: #ddeeff;
+    padding: 5px;
+}
+
+div.resource-brief-record-alt {
+    background: #ccddff;
+}
+
+div.resource-brief-field-name {
+    font-size: 120%;
+    font-weight: bold;
+    font-family: 'Trebuchet MS',Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    margin: 3px 1px;
+}
+
+div.resource-brief-details {
+    display: none;
+    position: absolute;
+    background: #ffc;
+    border: 1px solid #c93;
+    padding: 7px 10px;
+    width: 35em;
+    left: 5.2em;
+    margin-top: -60px;
+    font-family: Helvetica,Verdana,Arial,sans-serif;
+}
+
+div.resource-brief-record a.trigger {
+    line-height: 135%;
+}
+
+span.resource-brief-label {
+    width: 8.2em;
+    float: left;
+    font-weight: bold;
+}
+
+span.resource-brief-data {
+    float: left;
+    width: 25.5em;
+}
+
+div.resource-brief-field {
+    padding: 4px 0px;
+    float: left;
+    clear: both;
+    width: 34.8em;
+}
+
+div.ajax_loading {
+    background: #faa;
+}
+
+div#resources-brief-facets {
+    border: 1px solid blue;
+    margin-top: 40px;
+}
+
+div#resources-brief-facets h2 {
+    font-family: 'Trebuchet MS',Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    margin: 5px 0px;
+}
+
+div#resources-current-facets {
+}
+
+div.resources-current-facets-row {
+    background: #cdf;
+    font-family: 'Trebuchet MS',Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    padding: 5px 3px;
+    font-size: 120%;
+}
+
+
+div#resources-brief-records {
+    clear: both;
+    padding-top: 10px;
+}
+
+div.resources-facet-choice-container {
+    padding: 0px 5px;
+    width: 30%;
+    height: 22.5em;
+    float: left;
+}
+
+div.resources-facet-choice-list {
+    width: 99%;
+    height: 19.5em;
+    overflow: auto;
+}
+
+ul#chosen-facets {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    height: 15em;
+}
