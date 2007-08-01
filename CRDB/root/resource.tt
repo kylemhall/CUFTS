@@ -1,0 +1,59 @@
+<div id="resource">
+ <div id="resource-name">[% erm.name | html %]</div>
+ <div id="resource-vendor">[% erm.vendor | html %]</div>
+
+ <div id="resource-description_full">
+  <span class="resource-field-label">Description</span>
+  <span class="resource-field-data">[% erm.description_full %]</span>
+ </div>
+
+ [% IF erm.publisher.length %]
+  <div id="resource-publisher">
+   <span class="resource-field-label">Publisher</span>
+   <span class="resource-field-data">[% erm.publisher | html %]</span>
+  </div>
+ [% END %]
+
+ <div id="resource-resource_type">
+  <span class="resource-field-label">Resource Type</span>
+  <span class="resource-field-data">[% erm.resource_type.resource_type | html %]</span>
+ </div>
+
+ <div id="resource-resource_medium">
+  <span class="resource-field-label">Resource Medium</span>
+  <span class="resource-field-data">[% erm.resource_medium.resource_medium | html %]</span>
+ </div>
+
+
+ <div id="resource-content_types">
+  <span class="resource-field-label">Content Types</span>
+  <span class="resource-field-data">[% erm.content_types.sort('content_type').map_join('content_type', ', ') | html %]</span>
+ </div>
+
+ <div id="resource-subjects">
+  <span class="resource-field-label">Subjects</span>
+  <span class="resource-field-data">[% erm.subjects.sort('subject').map_join('subject', ', ') | html %]</span>
+ </div>
+ 
+ [% IF erm.update_frequency.length %]
+  <div id="resource-update_frequency">
+   <span class="resource-field-label">Update Frequency</span>
+   <span class="resource-field-data">[% erm.update_frequency | html %]</span>
+  </div>
+ [% END %]
+
+ [% IF erm.coverage.length %]
+  <div id="resource-coverage">
+   <span class="resource-field-label">Coverage</span>
+   <span class="resource-field-data">[% erm.coverage | html %]</span>
+  </div>
+ [% END %]
+
+ [% IF erm.embargo_period.length %]
+  <div id="resource-embargo_period">
+   <span class="resource-field-label">Embargo</span>
+   <span class="resource-field-data">[% erm.embargo_period | html %]</span>
+  </div>
+ [% END %]
+ 
+</div>

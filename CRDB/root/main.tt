@@ -1,0 +1,4 @@
+[% USE url %]
+
+[%# PROCESS current_facets.tt %]
+[% PROCESS facet_menu.tt %]
