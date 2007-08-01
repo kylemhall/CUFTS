@@ -1,0 +1,75 @@
+<script type="text/javascript">
+
+ var facet_array;
+
+ var facet_display = new Object();
+ facet_display["subject"]       = [% subjects_json %];
+ facet_display["resource_type"] = [% resource_types_json %];
+ facet_display["content_type"]  = [% content_types_json %];
+
+ facet_display["keyword"] = new Object();
+ facet_display["name"] = {"[^a-z]":"0-9"}; // Special case for 0-9 (actually a not A-Z search)
+  
+ function init_facets() {
+     facet_array = new Object();
+
+     [% FOREACH facet IN facets.keys %]
+      facet_array["[% facet %]"] = "[% facets.$facet %]";
+     [% END %]
+     
+     update_chosen_facets();
+ }
+
+ function update_chosen_facets() {
+  var ul = $("ul#chosen-facets");
+  ul.empty();
+  $.each( facet_array, function(facet_type, data) {
+   var display_string = facet_display[facet_type][data];
+   if ( display_string == undefined ) {
+        display_string = data;
+   }
+   var display_name = facet_labels[facet_type];
+   if ( display_name != undefined ) {
+       display_name = display_name + ': ';
+   } 
+   ul.append( "<li><a href=\"/remove_facet/" + facet_type + "/\" onClick=\"remove_facet('" + facet_type + "'); return false;\">X</a> " + display_name + display_string + "</li>" );
+  } );
+
+  var URL = "[% c.uri_for_site( c.controller('Browse').action_for('count_facets') ) %]/";
+
+  $.each( facet_array, function(facet_type, data)  {
+      URL = URL + facet_type + '/' + data + '/';
+  } );
+
+  $.getJSON( URL, function(data) {
+      $('#facet-count').empty().append(data.count); 
+  });
+
+ }
+ 
+ function add_facet( facet_type, data ) {
+     facet_array[facet_type] = data;
+     update_chosen_facets();   
+ }
+
+ function remove_facet( facet_type ) {
+     delete facet_array[facet_type];
+     update_chosen_facets();
+ }
+
+ function submit_facet_changes() {
+
+  var URL = "[% c.uri_for_site( c.controller('Browse').action_for('facets') ) %]/";
+
+  $.each( facet_array, function(facet_type, data)  {
+      URL = URL + facet_type + '/' + data + '/';
+  } );
+
+  window.location.href = URL;
+ }
+ 
+$( function() {
+     init_facets();
+} );
+
+</script>

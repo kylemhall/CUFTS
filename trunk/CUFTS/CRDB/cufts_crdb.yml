@@ -1,0 +1,39 @@
+---
+name: CUFTS::CRDB
+
+connect_info:
+    - 'dbi:Pg:dbname=CUFTS2'
+    - 'tholbroo'
+    - ''
+    - AutoCommit: 1
+
+cache:
+    backend:
+        store: FastMmap
+        share_file: '/tmp/CUFTS_CRDB_cache'
+        cache_size: 2m
+        expire_time: 10m
+
+session:
+    expires: 36000
+    rewrite: 0
+    storage: '/tmp/CUFTS_CJDB_sessions'
+
+View::TT:
+    WRAPPER: layout.tt
+    TEMPLATE_EXTENSION: .tt
+    COMPILE_DIR: '/tmp/CUFTS_CRDB_template_cache'
+
+authentication:
+    default_realm: internal
+    realms:
+        internal:
+            credential:
+                class: Password
+                password_field: password
+                password_type: crypted
+            store:
+                class: 'DBIx::Class'
+                user_class: 'CJDB::Accounts'
+                role_relation: roles
+                role_field: role
