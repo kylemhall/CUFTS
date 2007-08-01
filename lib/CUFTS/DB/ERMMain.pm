@@ -218,11 +218,11 @@ sub facet_search {
 
         my $handler = "_facet_search_$field";
         if ( $class->can($handler) ) {
-            $class->$handler( $field, $fields->{$field}->{data}, $config, \$sql );
+            $class->$handler( $field, $fields->{$field}, $config, \$sql );
         }
         else {
             # default
-            $config->{search}->{$field} = $fields->{$field}->{data};
+            $config->{search}->{$field} = $fields->{$field};
         }
 
     }
@@ -272,7 +272,7 @@ sub facet_search {
 
 sub facet_count {
     my ( $class, $site, $fields ) = @_;
-
+    
     my $config = {
         joins  => {},
         order  => [ 'sort_name' ],    # Default order by resource name
@@ -302,11 +302,11 @@ sub facet_count {
 
         my $handler = "_facet_search_$field";
         if ( $class->can($handler) ) {
-            $class->$handler( $field, $fields->{$field}->{data}, $config, \$sql );
+            $class->$handler( $field, $fields->{$field}, $config, \$sql );
         }
         else {
             # default
-            $config->{search}->{$field} = $fields->{$field}->{data};
+            $config->{search}->{$field} = $fields->{$field};
         }
 
     }
