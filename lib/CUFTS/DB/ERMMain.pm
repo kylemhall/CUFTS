@@ -24,7 +24,6 @@ use strict;
 use base 'CUFTS::DB::DBI';
 
 use Data::Dumper;
-use Benchmark::Timer;
 
 __PACKAGE__->table('erm_main');
 __PACKAGE__->columns(Primary => 'id');
