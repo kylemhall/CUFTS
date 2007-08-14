@@ -66,9 +66,11 @@ __PACKAGE__->columns(All => qw(
     subscription_notes
     subscription_ownership
     subscription_ownership_notes
+    misc_notes
 
     cost_base
     cost_base_notes
+    cost
     gst
     pst
     payment_status
@@ -80,12 +82,14 @@ __PACKAGE__->columns(All => qw(
     notification_email
     notice_to_cancel
     requires_review
+    review_by
     review_notes
     local_bib
     local_vendor
     local_acquisitions
+    local_fund
     consortia
-    consortia_note
+    consortia_notes
     date_cost_notes
     pricing_model
     subscription
@@ -136,6 +140,13 @@ __PACKAGE__->has_many('names',    ['CUFTS::DB::ERMNames' => 'name'],           '
 
 __PACKAGE__->sequence('erm_main_id_seq');
 
+
+my @fast_columns = qw(
+    id
+    vendor
+    description_brief
+);
+
 sub main_name {
     my ( $self, $new_name ) = @_;
     
@@ -166,6 +177,34 @@ sub main_name {
     return defined($name_record) ? $name_record->name : undef;
 }
 
+sub retrieve_all_for_site {
+    my ( $class, $site_id, $no_objects ) = @_;
+
+    my $columns = join ', ', map { 'erm_main.' . $_ } ( $no_objects ? @fast_columns : __PACKAGE__->columns );
+    my $sql = qq{
+        SELECT *
+        FROM (
+            SELECT DISTINCT ON (erm_names.erm_main) $columns,
+                erm_names.search_name AS sort_name,
+                erm_names.name AS result_name
+            FROM erm_main
+            JOIN erm_names ON (erm_names.erm_main = erm_main.id)
+            WHERE erm_main.site = ?
+            ORDER BY erm_names.erm_main, erm_names.main DESC
+        ) AS erm_results
+        ORDER BY sort_name
+    };
+
+    my $sth = $class->db_Main()->prepare( $sql, {pg_server_prepare => 1} );
+    if ( $no_objects ) {
+        my $rv = $sth->execute( $site_id );
+        return $sth->fetchall_arrayref({});
+    }
+
+    my @results = $class->sth_to_objects( $sth, [ $site_id ] );
+    return \@results;
+}
+
 sub name {
     my ( $self ) = @_;
     
@@ -178,13 +217,7 @@ sub name {
 
 
 sub facet_search {
-    my ( $class, $site, $fields, $fast, $offset, $limit ) = @_;
-
-    my @fast_columns = qw(
-        id
-        vendor
-        description_brief
-    );
+    my ( $class, $site, $fields, $no_objects, $offset, $limit ) = @_;
 
     my $config = {
         joins  => {},
@@ -236,7 +269,7 @@ sub facet_search {
     # Build column list
     
     my @columns;
-    foreach my $column ( $fast ? @fast_columns : __PACKAGE__->columns ) {
+    foreach my $column ( $no_objects ? @fast_columns : __PACKAGE__->columns ) {
         if ( exists($config->{replace_columns}->{$column} ) ) {
             push @columns, $config->{replace_columns}->{$column};
         }
@@ -256,7 +289,7 @@ sub facet_search {
     $sql =~ s/%COLUMNS%/join( ', ', @columns )/e;
 
     my $sth = $class->db_Main()->prepare( $sql, {pg_server_prepare => 1} );
-    if ( $fast ) {
+    if ( $no_objects ) {
         my $rv = $sth->execute( @bind );
         return $sth->fetchall_arrayref({});
     }
