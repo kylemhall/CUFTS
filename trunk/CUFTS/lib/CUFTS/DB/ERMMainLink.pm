@@ -23,6 +23,9 @@ package CUFTS::DB::ERMMainLink;
 use strict;
 use base 'CUFTS::DB::DBI';
 
+# link_type
+# r - local_resource
+# j - local_journal
 
 __PACKAGE__->table('erm_main_link');
 __PACKAGE__->columns(Primary => 'id');
@@ -31,9 +34,51 @@ __PACKAGE__->columns(All => qw(
     erm_main
     link_type
     link_id
-));                                                                                                        
+));
+
+__PACKAGE__->columns( TEMP => qw( _linked_name ) );
+                                                                      
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 
 __PACKAGE__->sequence('erm_main_link_id_seq');
+
+sub linked_name {
+    my ( $self ) = @_;
+    
+    if ( !defined($self->_linked_name) ) {
+
+        if ( $self->link_type eq 'r' ) {
+
+            my $local_resource = CUFTS::DB::LocalResources->retrieve( $self->link_id );
+            if ( $local_resource->name ) {
+                $self->_linked_name( $local_resource->name );
+            }
+            else {
+                $self->_linked_name( $local_resource->resource->name );
+            }
+
+        }
+        elsif ( $self->link_type eq 'j' ) {
+
+            my $local_journal = CUFTS::DB::LocalJournals->retrieve( $self->link_id );
+            if ( $local_journal->title ) {
+                $self->_linked_name( $local_journal->title );
+            }
+            else {
+                $self->_linked_name( $local_journal->journal->title );
+            }
+
+        }
+        else {
+
+            warn("Unrecognized link_type in ERMMainLink->linked_name(): " . $self->link_type);
+            return '';
+
+        }
+    
+    }
+
+    return $self->_linked_name;
+}
 
 1;

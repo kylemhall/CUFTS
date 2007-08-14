@@ -30,40 +30,46 @@ __PACKAGE__->columns(All => qw(
     id
     key
     site
-
-    full_on_campus_access
-    full_on_campus_notes
-    allows_remote_access
-    allows_proxy_access
+    
+    additional_requirements
+    allowable_downtime
+    allows_archiving
     allows_commercial_use
-    allows_walkins
-    allows_ill
-    ill_notes
-    allows_ereserves
     allows_coursepacks
     allows_distance_ed
     allows_downloads
-    allows_prints
     allows_emails
-    emails_notes
-    allows_archiving
-    own_data
+    allows_ereserves
+    ereserves_notes
+    allows_ill
+    allows_prints
+    allows_proxy_access
+    allows_remote_access
+    allows_walkins
+    archiving_notes
     citation_requirements
+    contact_address
+    contact_email
+    contact_fax
+    contact_name
+    contact_notes
+    contact_phone
+    contact_role
+    coursepack_notes
+    emails_notes
+    full_on_campus_access
+    full_on_campus_notes
+    ill_notes
+    online_terms
+    own_data
+    perpetual_access
+    perpetual_access_notes
     requires_print
     requires_print_plus
-    additional_requirements
-    allowable_downtime
-    online_terms
-    user_restrictions
+    termination_requirements
     terms_notes
-    
-    contact_name
-    contact_role
-    contact_address
-    contact_phone
-    contact_fax
-    contact_email
-    contact_notes
+    user_restrictions
+
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 
