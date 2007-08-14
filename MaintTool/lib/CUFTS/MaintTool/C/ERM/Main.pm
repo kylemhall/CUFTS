@@ -202,7 +202,7 @@ sub find : Local {
 sub ajax_details : Local {
     my ( $self, $c, $id ) = @_;
 
-    my $erm_obj = CUFTS::DB::ERMMain->search( { id => $id, site => $c->stash->{current_site}->id } );
+    my $erm_obj = CUFTS::DB::ERMMain->search( { id => $id, site => $c->stash->{current_site}->id } )->first;
     my $erm_hash = {
         subjects => [],
         content_types => [],
