@@ -21,14 +21,13 @@ CREATE TABLE erm_main (
     public_list         BOOLEAN,
     public              BOOLEAN,
     public_message      TEXT,
-    subscription_status CHAR,
     active_alert        VARCHAR(1024),
 
     pick_and_choose     BOOLEAN,
     marc_available      BOOLEAN,
     marc_history        TEXT,
     marc_alert          VARCHAR(1024),
-    
+
     requirements        TEXT,
     maintenance         TEXT,
     title_list_url      VARCHAR(1024),
@@ -40,12 +39,16 @@ CREATE TABLE erm_main (
     user_documentation  TEXT,
     
     subscription_type            VARCHAR(1024),
+    subscription_status          VARCHAR(1024),
     subscription_notes           TEXT,
     subscription_ownership       VARCHAR(1024),
     subscription_ownership_notes TEXT,
     
+    misc_notes          TEXT,
+    
 -- Dates and Costs
 
+    cost                    VARCHAR(1024),
     cost_base               INTEGER,        -- linked table (erm_cost_bases)
     cost_base_notes         TEXT,
     gst                     BOOLEAN,
@@ -59,12 +62,14 @@ CREATE TABLE erm_main (
     notification_email      VARCHAR(1024),
     notice_to_cancel        INTEGER,
     requires_review         BOOLEAN,
+    review_by               VARCHAR(1024),
     review_notes            TEXT,
     local_bib               VARCHAR(1024),
     local_vendor            VARCHAR(1024),
     local_acquisitions      VARCHAR(1024),
+    local_fund              VARCHAR(1024),
     consortia               INTEGER,        -- linked table (erm_consortia)
-    consortia_note          TEXT,
+    consortia_notes         TEXT,
     date_cost_notes         TEXT,
     pricing_model           VARCHAR(1024),
     subscription            VARCHAR(1024),

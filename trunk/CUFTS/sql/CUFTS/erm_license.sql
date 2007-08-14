@@ -14,13 +14,16 @@ CREATE TABLE erm_license (
         allows_ill              BOOLEAN,
         ill_notes               TEXT,
         allows_ereserves        BOOLEAN,
+        ereserves_notes         TEXT,
         allows_coursepacks      BOOLEAN,
+        coursepack_notes        TEXT,
         allows_distance_ed      BOOLEAN,
         allows_downloads        BOOLEAN,
         allows_prints           BOOLEAN,
         allows_emails           BOOLEAN,
         emails_notes            TEXT,
         allows_archiving        BOOLEAN,
+        archiving_notes         TEXT,
         own_data                BOOLEAN,
         citation_requirements   VARCHAR(2048),
         requires_print          BOOLEAN,
@@ -30,6 +33,10 @@ CREATE TABLE erm_license (
         online_terms            VARCHAR(2048),
         user_restrictions       TEXT,
         terms_notes             TEXT,
+        termination_requirements TEXT,
+        perpetual_access        BOOLEAN,
+        perpetual_access_notes  TEXT,
+        
 
     -- Contacts
 
@@ -42,3 +49,5 @@ CREATE TABLE erm_license (
         contact_notes           TEXT
 
 );
+
+CREATE INDEX erm_license_site_idx ON erm_license ( site );
