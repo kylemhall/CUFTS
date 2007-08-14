@@ -219,6 +219,20 @@ sub edit : Local {
 		}
 	}
 
+    # Get ERM Main record if one is linked
+    
+    my $erm_main_link = CUFTS::DB::ERMMainLink->search( { link_type => 'r', link_id => $local_resource->id } )->first;
+    if ( defined($erm_main_link) ) {
+        $c->stash->{erm_main} = CUFTS::DB::ERMMain->retrieve( $erm_main_link->erm_main );
+    }
+        
+    # Get all the ERM mains for a select box - switch this to use the search system later
+    
+    my $erm_mains = CUFTS::DB::ERMMain->retrieve_all_for_site( $c->stash->{current_site}->id, 1 );    # 1 - fast, no objects
+    $c->stash->{erm_mains} = $erm_mains;
+
+    # Fill out the rest of the stash
+
 	$c->stash->{section} = 'general';
 	$c->stash->{module_list} = [CUFTS::ResourcesLoader->list_modules()];
 	

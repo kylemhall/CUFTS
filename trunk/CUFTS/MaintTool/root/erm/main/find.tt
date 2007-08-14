@@ -26,6 +26,10 @@ function ajax_erm_resource_details( record_id ) {
 
 </script>
 
+<div style="margin-top: 5px; margin-bottom: 5px;">
+ <a href="[% url("$url_base/erm/main/create") %]">Create a new ERM record</a>
+</div>
+
 [% PROCESS erm/main/facet_menu.tt %]
 
 <div id="resources-brief-records">

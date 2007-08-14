@@ -6,7 +6,12 @@ $( function() {
 } );
 </script>
 
-<div id="erm-edit-key">[% erm.key | html %]</div>
+<div id="erm-edit-key">[% erm.key | html %]
+ <form method="post" action="[% url("$url_base/erm/license/delete/") %]">
+  <input style="margin-left: 10px;" type="submit" name="delete" value="delete" />
+  <input type="hidden" name="erm_license_id" value="[% erm.id %]" />
+ </form> 
+</div>
 
 <form method="post" name="license-form" id="license-form">
 
@@ -158,6 +163,17 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-ereserves_notes">ILL notes</label>
+  <textarea id="erm-edit-input-ereserves_notes" name="ereserves_notes">[% erm.ereserves_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Notes and exceptions regarding ILL usage.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-allows_coursepacks">allows coursepacks</label>
   <select id="erm-edit-input-allows_coursepacks" name="allows_coursepacks" style="width: 8em;">
    <option value=""></option>
@@ -167,6 +183,16 @@ $( function() {
  </div>
  <div class="help">
   Indicates whether the license allows the library to utilize content in coursepacks.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-coursepack_notes">coursepack notes</label>
+  <textarea id="erm-edit-input-coursepack_notes" name="coursepack_notes">[% erm.coursepack_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Notes and exceptions regarding coursepack usage.
  </div>
 </div>
 
@@ -228,7 +254,7 @@ $( function() {
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-emails_notes">emails notes</label>
+  <label for="erm-edit-input-emails_notes">allows emails notes</label>
   <textarea id="erm-edit-input-emails_notes" name="emails_notes">[% erm.emails_notes | html %]</textarea>
  </div>
  <div class="help">
@@ -249,6 +275,17 @@ $( function() {
   Indicates whether the license allows the library to archive the content of the resource.
  </div>
 </div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-archiving_notes">archiving notes</label>
+  <textarea id="erm-edit-input-archiving_notes" name="archiving_notes">[% erm.archiving_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Notes and exceptions regarding archiving.
+ </div>
+</div>
+
 
 <div class="field">
  <div class="data">
@@ -344,6 +381,17 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-termination_requirements">termination requirements</label>
+  <textarea id="erm-edit-input-termination_requirements" name="termination_requirements">[% erm.termination_requirements | html %]</textarea>
+ </div>
+ <div class="help">
+  Requirements for termination.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-terms_notes">terms notes</label>
   <textarea id="erm-edit-input-terms_notes" name="terms_notes">[% erm.terms_notes | html %]</textarea>
  </div>
@@ -351,6 +399,31 @@ $( function() {
   Any additional notes.
  </div>
 </div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-perpetual_access">perpetual access</label>
+  <select id="erm-edit-input-perpetual_access" name="perpetual_access" style="width: 8em;">
+   <option value=""></option>
+   <option value="1"     [% 'selected="selected"' IF erm.perpetual_access == 1     %]>yes</option>
+   <option value="0"      [% 'selected="selected"' IF erm.perpetual_access == 0      %]>no</option>
+  </select>
+ </div>
+ <div class="help">
+  Indicates whether the license provides for perpetual access.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-perpetual_access_notes">perpetual access notes</label>
+  <textarea id="erm-edit-input-perpetual_access_notes" name="perpetual_access_notes">[% erm.perpetual_access_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Notes and exceptions regarding perpetual access.
+ </div>
+</div>
+
 
 </fieldset>
 

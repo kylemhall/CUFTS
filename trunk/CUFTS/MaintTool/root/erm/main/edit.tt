@@ -59,7 +59,7 @@ $( function() {
     }
 </style>
 
-<div id="erm-edit-key">[% erm.key | html %]</div>
+<div id="erm-edit-key">[% erm.key | html %] <a style="margin-left: 15px;" href="[% url("$url_base/erm/main/delete/?erm_main_id=$erm.id") %]">delete</a></div>
 
 <form method="post" name="main-form" id="main-form">
 
@@ -71,7 +71,8 @@ $( function() {
  <li><a href="#page-stats"><span>Statistics</span></a></li>
  <li><a href="#page-admin"><span>Admin</span></a></li>
  <li><a href="#page-subjects"><span>Subjects</span></a></li>
- <li><a href="#page-content-types"><span>Content Types</span></a></li>
+ <li><a href="#page-alternate-names"><span>Names</span></a></li>
+ <li><a href="#page-links"><span>Links</span></a></li>
 </ul>
 
 
@@ -129,7 +130,7 @@ $( function() {
 <div class="field">
  <div class="data">
   <label for="erm-edit-input-resource_type">resource type</label>
-  <select id="erm-edit-input-resource_type" name="resource_type" style="width: 15em">
+  <select id="erm-edit-input-resource_type" name="resource_type" style="width: 19em">
    [% IF resource_type_options.defined %]
     <option value=""></option>
     [% FOREACH resource_type_option IN resource_type_options %]
@@ -141,14 +142,14 @@ $( function() {
   </select>
  </div>
  <div class="help">
-  Select the best description for how this resource was purchased.
+  Type of resource.
  </div>
 </div>
 
 <div class="field">
  <div class="data">
   <label for="erm-edit-input-resource_medium">resource medium</label>
-  <select id="erm-edit-input-resource_medium" name="resource_medium" style="width: 15em">
+  <select id="erm-edit-input-resource_medium" name="resource_medium" style="width: 19em">
    [% IF resource_medium_options.defined %]
     <option value=""></option>
     [% FOREACH resource_medium_option IN resource_medium_options %]
@@ -160,10 +161,29 @@ $( function() {
   </select>
  </div>
  <div class="help">
-  Description of method of access for this resource.
+  Type of medium for this resource.
  </div>
 </div>
 
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-content_types">content types</label>
+  <select id="erm-edit-input-content_types" name="erm-edit-input-content_types" style="width: 19em" multiple="multiple">
+   [% IF content_type_options.defined %]
+    [% FOREACH content_type_option IN content_type_options %]
+     [% SET content_type_id = content_type_option.id %]
+     <option value="[% content_type_id %]" [% 'selected="selected"' IF active_content_types.$content_type_id %]>[% content_type_option.content_type | html %]</option>
+    [% END %]
+   [% ELSE %]
+    <option value="">None available</option>
+   [% END %]
+  </select>
+ </div>
+ <div class="help">
+  Type of content found in this resource.
+ </div>
+</div>
 
 <div class="field">
  <div class="data">
@@ -299,6 +319,67 @@ $( function() {
 </div>
 
 </fieldset>
+
+
+<fieldset>
+
+<legend>Subscription</legend>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-subscription_type">subscription type</label>
+  <input id="erm-edit-input-subscription_type" name="subscription_type" value="[% erm.subscription_type | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Subscription type.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-subscription_status">subscription status</label>
+  <input id="erm-edit-input-subscription_status" name="subscription_status" value="[% erm.subscription_status | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Subscription status.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-subscription_notes">subscription notes</label>
+  <textarea id="erm-edit-input-subscription_notes" name="subscription_notes">[% erm.subscription_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Local information regarding the subscription.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-subscription_ownership">subscription ownership</label>
+  <input id="erm-edit-input-subscription_ownership" name="subscription_ownership" value="[% erm.subscription_ownership | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Subscription ownership.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-subscription_ownership_notes">subscription notes</label>
+  <textarea id="erm-edit-input-subscription_ownership_notes" name="subscription_ownership_notes">[% erm.subscription_ownership_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Local information regarding the subscription ownership.
+ </div>
+</div>
+
+
+</fieldset>
+
 
 <fieldset>
 
@@ -440,15 +521,6 @@ $( function() {
  </div>
 </div>
 
-<div class="field">
- <div class="data">
-  <label for="erm-edit-input-subscription_notes">subscription notes</label>
-  <textarea id="erm-edit-input-subscription_notes" name="subscription_notes">[% erm.subscription_notes | html %]</textarea>
- </div>
- <div class="help">
-  Local information regarding the subscription.
- </div>
-</div>
 
 </fieldset>
 
@@ -467,6 +539,17 @@ $( function() {
 <fieldset>
     
 <legend>Costs</legend>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-cost">cost</label>
+  <input id="erm-edit-input-cost" name="cost" value="[% erm.cost | html %]" style="width: 10em;" />
+ </div>
+ <div class="help">
+  Cost
+ </div>
+</div>
+
 
 <div class="field">
  <div class="data">
@@ -499,6 +582,31 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-pricing_model">pricing model</label>
+  <input id="erm-edit-input-pricing_model" name="pricing_model" value="[% erm.pricing_model | html %]" style="width: 10em;" />
+ </div>
+ <div class="help">
+  Pricing model
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-price_cap">price cap</label>
+   <select id="erm-edit-input-price_cap" name="price_cap" style="width: 4em;">
+    <option value=""></option>
+    <option value="1" [% 'selected="selected"' IF erm.price_cap == 1 %]>Yes</option>
+    <option value="0" [% 'selected="selected"' IF erm.price_cap == 0 %]>No</option>
+   </select>
+ </div>
+ <div class="help">
+  Is there a price cap for this product?
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-gst">GST</label>
    <select id="erm-edit-input-gst" name="gst" style="width: 4em;">
     <option value=""></option>
@@ -524,6 +632,7 @@ $( function() {
   Is PST charged for this product?
  </div>
 </div>
+
 
 <div class="field">
  <div class="data">
@@ -577,6 +686,17 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-license_start_date">license start date</label>
+  <input id="erm-edit-input-license_start_date" name="license_start_date" value="[% erm.license_start_date | html %]" style="width: 10em;" />
+ </div>
+ <div class="help">
+  Beginning date for new license.<br /><br />Format: YYYY-MM-DD
+ </div>
+</div>
+
+
 </fieldset>
 
 <fieldset>
@@ -613,6 +733,15 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-local_fund">local fund number</label>
+  <input id="erm-edit-input-local_fund" name="local_fund" value="[% erm.local_fund | html %]" />
+ </div>
+ <div class="help">
+  Local fund number used for this subscription.
+ </div>
+</div>
 
 
 </fieldset>
@@ -683,6 +812,16 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-review_by">review by</label>
+  <input id="erm-edit-input-review_by" name="review_by" value="[% erm.review_by | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Who should the review be done by.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-review_notes">review notes</label>
   <textarea id="erm-edit-input-review_notes" name="review_notes">[% erm.review_notes | html %]</textarea>
  </div>
@@ -719,8 +858,8 @@ $( function() {
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-consortia_note">consortia notes</label>
-  <textarea id="erm-edit-input-consortia_note" name="consortia_note">[% erm.consortia_note | html %]</textarea>
+  <label for="erm-edit-input-consortia_notes">consortia notes</label>
+  <textarea id="erm-edit-input-consortia_notes" name="consortia_notes">[% erm.consortia_notes | html %]</textarea>
  </div>
  <div class="help">
   Notes on consortial purchase.
@@ -743,6 +882,17 @@ $( function() {
   Other information regarding the payment or date information about the subscription.
  </div>
 </div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-misc_notes">consortia notes</label>
+  <textarea id="erm-edit-input-misc_notes" name="misc_notes">[% erm.misc_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Any other notes not covered by other fields.
+ </div>
+</div>
+
 
 </fieldset>
 
@@ -1161,7 +1311,7 @@ $( function() {
     
 </div>
 
-<div id="page-content-types">
+<div id="page-alternate-names">
 
     <div style="padding: 1em 0px;">
      <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
@@ -1169,22 +1319,9 @@ $( function() {
 
     <fieldset>
 
-    <legend>Current Content Types</legend>
+    <legend>Alternate Names</legend>
 
-     <div class="field" style="padding: 5px 0px;">
-      <div class="data">
-       <select name="erm-edit-input-content-types" id="erm-edit-input-content-types" multiple="multiple">
-        [% FOREACH content_type IN content_type_options %]
-         [% SET content_type_id = content_type.id %]
-        <option value="[% content_type_id %]" [% 'selected="selected"' IF active_content_types.$content_type_id %]>[% content_type.content_type | html %]</option>
-        [% END %]
-       </select>
-       </div>
-      </div>
-      <div class="help">
-       Content types, blah blah blah.
-      </div>
-     </div>
+TODO
 
     </fieldset>
 
@@ -1193,6 +1330,46 @@ $( function() {
     </div>
     
 </div>
+
+<div id="page-links">
+
+    <div style="padding: 1em 0px;">
+     <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
+    </div>
+
+    <fieldset>
+
+    <legend>License Link</legend>
+
+        <select name="license">
+         <option value="">No linked license...</option>
+         [% FOREACH erm_license IN erm_licenses %]
+          <option value="[% erm_license.id %]" [% 'selected="selected"' IF erm.license == erm_license.id %]>[% erm_license.key | html %]</option>
+         [% END %]
+        </select>
+
+    </fieldset>
+
+    <fieldset>
+    <legend>Linked Resources</legend>
+
+    TODO
+
+    </fieldset>
+
+    <fieldset>
+    <legend>Linked Journals</legend>
+
+    TODO
+    
+    </fieldset>
+
+    <div style="padding: 1em 0px;">
+     <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
+    </div>
+    
+</div>
+
 
 </div> <!-- tab-container -->
 
