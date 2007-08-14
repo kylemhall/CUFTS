@@ -490,9 +490,16 @@ div.data {
     padding: 3px;
     width: 35em;
 }
+
     
 div.data label {
     width: 10em;
+    float: left;
+    text-align: left;
+    padding-top: 3px;
+}
+
+span.data {
     float: left;
     text-align: left;
     padding-top: 3px;

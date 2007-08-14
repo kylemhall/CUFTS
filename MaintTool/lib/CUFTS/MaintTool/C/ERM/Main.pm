@@ -21,6 +21,7 @@ my $form_validate = {
             submit
             cancel
 
+            license
             vendor
             publisher
             resource_type
@@ -54,7 +55,9 @@ my $form_validate = {
             subscription_notes
             subscription_ownership
             subscription_ownership_notes
+            misc_notes
 
+            cost
             cost_base
             cost_base_notes
             gst
@@ -68,12 +71,14 @@ my $form_validate = {
             notification_email
             notice_to_cancel
             requires_review
+            review_by
             review_notes
             local_bib
             local_vendor
             local_acquisitions
+            local_fund
             consortia
-            consortia_note
+            consortia_notes
             date_cost_notes
             pricing_model
             subscription
@@ -110,7 +115,7 @@ my $form_validate = {
             access_notes
             breaches7
             
-            erm-edit-input-content-types
+            erm-edit-input-content_types
         )
     ],
     optional_regexp => qr/^erm-edit-input-subject/,
@@ -197,7 +202,7 @@ sub find : Local {
 sub ajax_details : Local {
     my ( $self, $c, $id ) = @_;
 
-    my $erm_obj = CUFTS::DB::ERMMain->retrieve( $id );
+    my $erm_obj = CUFTS::DB::ERMMain->search( { id => $id, site => $c->stash->{current_site}->id } );
     my $erm_hash = {
         subjects => [],
         content_types => [],
@@ -285,7 +290,8 @@ sub edit : Local {
     $c->req->params->{cancel}
         and return $c->redirect('/erm/main/');
 
-    
+    # Get the ERM Main record for editing
+
     my $erm = CUFTS::DB::ERMMain->search({
         id   => $erm_id,
         site => $c->stash->{current_site}->id,
@@ -295,6 +301,13 @@ sub edit : Local {
         die("Unable to find ERMMain record: $erm_id for site " . $c->stash->{current_site}->id);
     }
     my %active_content_types = ( map { $_->id, 1 } $erm->content_types() );
+    
+    # Get ERM License records for linking
+    
+    my @erm_licenses = CUFTS::DB::ERMLicense->search({
+        site => $c->stash->{current_site}->id,
+    });
+    $c->stash->{erm_licenses} = \@erm_licenses;
     
     if ( $c->req->params->{submit} ) {
 
@@ -308,7 +321,7 @@ sub edit : Local {
 
                 # Handle content type changes
                 
-                my $content_types_values = $c->form->{valid}->{'erm-edit-input-content-types'};
+                my $content_types_values = $c->form->{valid}->{'erm-edit-input-content_types'};
                 if ( defined($content_types_values) ) {
                     if ( !ref($content_types_values) ) {
                         $content_types_values = [ $content_types_values ];
@@ -384,6 +397,169 @@ sub edit : Local {
 
     $c->stash->{javascript_validate} = [ $c->convert_form_validate( "main-form", $form_validate, 'erm-edit-input-' ) ];
     push( @{ $c->stash->{load_css} }, "tabs.css" );
+
+    return 1;
+}
+
+sub delete : Local {
+    my ( $self, $c ) = @_;
+    
+    $c->form({
+        required => [ qw( erm_main_id ) ],
+        optional => [ qw( confirm cancel delete ) ],
+    });
+    
+    unless ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
+    
+        if ( $c->form->{valid}->{cancel} ) {
+            return $c->forward('/erm/main/edit/' . $c->form->{valid}->{erm_main_id} );
+        }
+    
+        my $erm_main = CUFTS::DB::ERMMain->search({
+            site => $c->stash->{current_site}->id,
+            id => $c->form->{valid}->{erm_main_id},
+        })->first;
+        
+        my @erm_links = CUFTS::DB::ERMMainLink->search({
+            erm_main => $erm_main->id
+        });
+
+        my ( @erm_links_resources, @erm_links_journals );
+        
+        foreach my $link ( @erm_links ) {
+            if ( $link->link_type eq 'r' ) {
+                push @erm_links_resources, $link;
+            }
+            elsif ( $link->link_type eq 'j' ) {
+                push @erm_links_journals, $link;
+            }
+        }
+
+        $c->stash->{erm_main} = $erm_main;
+        $c->stash->{erm_links} = \@erm_links;
+        $c->stash->{erm_links_journals} = \@erm_links_journals;
+        $c->stash->{erm_links_resources} = \@erm_links_resources;
+
+        if ( defined($erm_main) ) {
+
+            if ( $c->form->{valid}->{confirm} ) {
+
+                eval {
+                    foreach my $erm_link ( @erm_links ) {
+                        $erm_link->delete();
+                    }
+                    $erm_main->delete();
+                };
+
+                if ($@) {
+                    my $err = $@;
+                    CUFTS::DB::DBI->dbi_rollback;
+                    die($err);
+                }
+            
+                CUFTS::DB::ERMMain->dbi_commit();
+                $c->stash->{result} = "ERM Main record deleted.";
+            }
+        }
+        else {
+            $c->stash->{error} = "Unable to locate ERM record: " . $c->form->{valid}->{erm_main_id};
+        }
+
+    }
+
+    $c->stash->{template} = 'erm/main/delete.tt';
+}
+
+
+
+sub unlink_json : Local {
+    my ( $self, $c ) = @_;
+    
+    $c->form({
+        required => [ qw( link_id link_type ) ],
+    });
+
+    if ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
+        $c->stash->{'json'}->{error} = 'Failed to validate request parameters';
+        return $c->forward('V::JSON');
+    }
+
+    my $link_type = $c->form->{valid}->{link_type};
+    my $link_id = $c->form->{valid}->{link_id};
+
+    if ( $self->_verify_linking( $c, $link_type, $link_id ) ) {
+
+        # Remove any existing links
+
+        CUFTS::DB::ERMMainLink->search( { link_id => $link_id, link_type => $link_type } )->delete_all;
+        CUFTS::DB::ERMMainLink->dbi_commit;
+        
+        $c->stash->{json} = { result => 'unlinked' };
+
+    }
+    
+    $c->forward('V::JSON');
+}
+
+sub link_json : Local {
+    my ( $self, $c ) = @_;
+    $c->form({
+        required => [ qw( erm_main link_id link_type ) ],
+    });
+
+    if ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
+        $c->stash->{'json'}->{error} = 'Failed to validate request parameters';
+        return $c->forward('V::JSON');
+    }
+
+    my $erm_main_id = $c->form->{valid}->{erm_main};
+    my $link_type = $c->form->{valid}->{link_type};
+    my $link_id = $c->form->{valid}->{link_id};
+
+    if ( $self->_verify_linking( $c, $link_type, $link_id, $erm_main_id ) ) {
+
+        # Remove any existing links
+
+        CUFTS::DB::ERMMainLink->search( { link_id => $link_id, link_type => $link_type } )->delete_all;
+        my $new_link = CUFTS::DB::ERMMainLink->create( { link_id => $link_id, link_type => $link_type, erm_main => $erm_main_id } );
+        CUFTS::DB::ERMMainLink->dbi_commit;
+        
+        $c->stash->{json} = { result => 'linked', erm_main => $new_link->erm_main, link_type => $new_link->link_type, link_id => $new_link->link_id };
+
+    }
+    
+    $c->forward('V::JSON');
+
+}
+
+
+sub _verify_linking {
+    my ( $self, $c, $link_type, $link_id, $erm_main_id ) = @_;
+
+    # Check to make sure it's for our current site
+
+    if ( defined( $erm_main_id ) ) {
+        my $erm_main = CUFTS::DB::ERMMain->search( { site => $c->stash->{current_site}->id, id => $erm_main_id } )->first;
+        if ( !defined($erm_main) ) {
+            $c->stash->{json}->{error} = { error => "No matching ERM Main record for current site" };
+            return 0;
+        }
+    }
+
+    if ( $link_type eq 'r' ) {
+        my $journal = CUFTS::DB::LocalResources->search( { site => $c->stash->{current_site}->id, id => $link_id } )->first;
+        if ( !defined($journal) ) {
+            $c->stash->{json}->{error} = { error => "No matching journal record for current site" };
+            return 0;
+        }
+    }
+    elsif ( $link_type eq 'j' ) {
+        my $resource = CUFTS::DB::LocalJournals->search( { site => $c->stash->{current_site}->id, id => $link_id } )->first;
+        if ( !defined($resource) ) {
+            $c->stash->{json}->{error} = { error => "No matching resource record for current site" };
+            return 0;
+        }
+    }
 
     return 1;
 }

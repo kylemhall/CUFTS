@@ -25,13 +25,16 @@ my $form_validate = {
             allows_ill
             ill_notes
             allows_ereserves
+            ereserves_notes
             allows_coursepacks
+            coursepack_notes
             allows_distance_ed
             allows_downloads
             allows_prints
             allows_emails
             emails_notes
             allows_archiving
+            archiving_notes
             own_data
             citation_requirements
             requires_print
@@ -41,6 +44,9 @@ my $form_validate = {
             online_terms
             user_restrictions
             terms_notes
+            termination_requirements
+            perpetual_access
+            perpetual_access_notes
        
             contact_name
             contact_role
@@ -169,5 +175,63 @@ sub edit : Local {
 
     $c->stash->{javascript_validate} = [ $c->convert_form_validate( 'license-form', $form_validate, 'erm-edit-input-' ) ];
 }
+
+sub delete : Local {
+    my ( $self, $c ) = @_;
+    
+    $c->form({
+        required => [ qw( erm_license_id ) ],
+        optional => [ qw( confirm cancel delete ) ],
+    });
+
+    unless ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
+
+        if ( $c->form->{valid}->{cancel} ) {
+            return $c->forward('/erm/license/edit/' . $c->form->{valid}->{erm_license_id} );
+        }
+    
+        my $erm_license = CUFTS::DB::ERMLicense->search({
+            site => $c->stash->{current_site}->id,
+            id => $c->form->{valid}->{erm_license_id},
+        })->first;
+
+        my @erm_mains = CUFTS::DB::ERMMain->search( { license => $erm_license->id, site => $c->stash->{current_site}->id });
+
+        $c->stash->{erm_mains} = \@erm_mains;
+        $c->stash->{erm_license} = $erm_license;
+
+        if ( defined($erm_license) ) {
+
+            if ( $c->form->{valid}->{confirm} ) {
+
+                eval {
+                
+                    foreach my $erm_main ( @erm_mains ) {
+                        $erm_main->license( undef );
+                        $erm_main->update();
+                    }
+                    
+                    $erm_license->delete();
+                };
+
+                if ($@) {
+                    my $err = $@;
+                    CUFTS::DB::DBI->dbi_rollback;
+                    die($err);
+                }
+            
+                CUFTS::DB::ERMMain->dbi_commit();
+                $c->stash->{result} = "ERM License record deleted.";
+            }
+        }
+        else {
+            $c->stash->{error} = "Unable to locate ERM record: " . $c->form->{valid}->{erm_license_id};
+        }
+
+    }
+
+    $c->stash->{template} = 'erm/license/delete.tt';
+}
+
 
 1;
