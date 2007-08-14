@@ -487,6 +487,8 @@ sub load_link {
     my $link     = $self->get_link($record);
     my $rank     = $self->get_rank();
 
+    $__CJDB_LOADER_DEBUG and print "links: $coverage : $link : $rank\n";
+
     defined($coverage) && defined($link)
         or return 0;
 
