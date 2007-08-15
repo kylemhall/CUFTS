@@ -3,7 +3,7 @@
  <legend>Linked ERM Summary</legend>
  
 <div class="field" style="margin: .8em 3px;">
- <a href="[% url("/erm/main/edit/$erm_main.id") %]">Edit ERM record</a>
+ <a href="[% url("$url_base/erm/main/edit/$erm_main.id") %]">Edit ERM record</a>
 </div>
 
 <div class="field">
