@@ -55,6 +55,7 @@ my @modules = qw(
     Getopt::Long
     HTML::Entities
     HTML::FillInForm
+    JSON::XS
     LWP::UserAgent
     MARC::Record
     MIME::Lite
