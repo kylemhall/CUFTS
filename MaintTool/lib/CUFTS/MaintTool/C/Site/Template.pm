@@ -151,8 +151,7 @@ sub menu : Local {
     my @crdb_sandbox_css = grep !/^\./, readdir SANDBOX;
     closedir SANDBOX;
 
-
-    # TODO: Get URL for CJDB for link to sandbox/active?
+    $c->stash->{cjdb_url} = $CUFTS::Config::CJDB_URL;
 
     $c->stash->{cjdb_active_templates}   = \@cjdb_active_templates;
     $c->stash->{cjdb_sandbox_templates}  = \@cjdb_sandbox_templates;
