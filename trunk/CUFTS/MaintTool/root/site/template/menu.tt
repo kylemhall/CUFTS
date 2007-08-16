@@ -20,8 +20,8 @@ $( function() {
 
 <tr><td><table class="outlined" style="width: 100%;">
 <tr><td class="heading-bar">test links</td></tr>
-<tr><td class="field0"><a href="" target="_blank">sandbox</a></td></tr>
-<tr><td class="field1"><a href="" target="_blank">active</a></td></tr>
+<tr><td class="field0"><a href="[% cjdb_url %]/[% current_site.key %]/sandbox/" target="_blank">sandbox</a></td></tr>
+<tr><td class="field1"><a href="[% cjdb_url %]/[% current_site.key %]/active/" target="_blank">active</a></td></tr>
 </table></td></tr>
 
 <tr><td><br /></td></tr>
