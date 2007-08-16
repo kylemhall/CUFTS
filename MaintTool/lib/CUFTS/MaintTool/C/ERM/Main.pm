@@ -113,7 +113,7 @@ my $form_validate = {
             referrer_url
             openurl_compliant
             access_notes
-            breaches7
+            breaches
             
             erm-edit-input-content_types
         )
