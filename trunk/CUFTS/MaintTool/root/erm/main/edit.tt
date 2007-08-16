@@ -1233,6 +1233,15 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-access_notes">access notes</label>
+  <textarea id="erm-edit-input-access_notes" name="access_notes">[% erm.access_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Other access information.
+ </div>
+</div>
 
 <div class="field">
  <div class="data">
