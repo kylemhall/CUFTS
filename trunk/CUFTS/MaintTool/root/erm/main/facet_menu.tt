@@ -33,7 +33,7 @@
    if ( display_name != undefined ) {
     display_name = display_name + ': ';
    } 
-   ul.append( "<li><a href=\"/remove_facet/" + facet_type + "/\" onClick=\"remove_facet('" + facet_type + "'); return false;\">X</a> " + display_string + "</li>" );
+   ul.append( "<li><a href=\"/remove_facet/" + facet_type + "/\" onClick=\"remove_facet('" + facet_type + "'); return false;\">X</a> " + display_name +  display_string + "</li>" );
   } );
 
   var URL = "[% url("$url_base/erm/main/count_facets/") %]";
