@@ -289,6 +289,9 @@ sub facet_search {
     $sql =~ s/%ORDER%/join( ', ', @{ $config->{order} } )/e;
     $sql =~ s/%COLUMNS%/join( ', ', @columns )/e;
 
+#    warn($sql);
+#    warn(Dumper(\@bind));
+
     my $sth = $class->db_Main()->prepare( $sql, {pg_server_prepare => 1} );
     if ( $no_objects ) {
         my $rv = $sth->execute( @bind );
