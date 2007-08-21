@@ -136,7 +136,8 @@ __PACKAGE__->has_a('resource_type', 'CUFTS::DB::ERMResourceTypes');
 __PACKAGE__->has_many('subjects', ['CUFTS::DB::ERMSubjectsMain' => 'subject'], 'erm_main');
 __PACKAGE__->has_many('subjectsmain' => 'CUFTS::DB::ERMSubjectsMain');
 __PACKAGE__->has_many('content_types', ['CUFTS::DB::ERMContentTypesMain' => 'content_type'], 'erm_main');
-__PACKAGE__->has_many('names',    ['CUFTS::DB::ERMNames' => 'name'],           'erm_main');
+__PACKAGE__->has_many( 'names' => 'CUFTS::DB::ERMNames'  );
+__PACKAGE__->has_a( 'license', 'CUFTS::DB::ERMLicense' );
 
 __PACKAGE__->sequence('erm_main_id_seq');
 

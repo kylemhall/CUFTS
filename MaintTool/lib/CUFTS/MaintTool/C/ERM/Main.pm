@@ -5,6 +5,8 @@ use base 'Catalyst::Base';
 
 use JSON::XS qw( to_json );
 
+use CUFTS::Util::Simple;
+
 use CUFTS::DB::ERMMain;
 use CUFTS::DB::ERMMainLink;
 use CUFTS::DB::ERMSubjectsMain;
@@ -118,7 +120,7 @@ my $form_validate = {
             erm-edit-input-content_types
         )
     ],
-    optional_regexp => qr/^erm-edit-input-subject/,
+    optional_regexp => qr/^erm-edit-input-/,
     constraints            => {
         contract_end       => qr/^\d{4}-\d{1,2}-\d{1,2}/,
         contract_start     => qr/^\d{4}-\d{1,2}-\d{1,2}/,
@@ -176,7 +178,6 @@ sub auto : Private {
 sub default : Private {
     my ( $self, $c ) = @_;
 
-    warn('HERE!');
     $c->stash->{template} = "erm/main/find.tt";
     push( @{ $c->stash->{load_css} }, "erm_find.css" );
 
@@ -342,6 +343,7 @@ sub edit : Local {
                 # Handle subject changes
                 
                 foreach my $param ( keys %{ $c->form->{valid} } ) {
+
                     if ( $param =~ /^erm-edit-input-subject-(\d+)-subject$/ ) {
                         my $erm_main_subject_id    = $1;
                         my $erm_main_subject_value = $c->form->{valid}->{$param};
@@ -364,16 +366,63 @@ sub edit : Local {
                             $erm_subjects_main->description( $c->form->{valid}->{"erm-edit-input-subject-${erm_main_subject_id}-description"} );
                             $erm_subjects_main->update;
                         }
+
                     }
                     elsif ( $param =~ /^erm-edit-input-subject-add-subject-(\d+)$/ ) {
-                        warn("Creating new subject");
+
+
                         my $erm_add_id = $1;
-                        CUFTS::DB::ERMSubjectsMain->create({
-                            erm_main    => $erm_id,
-                            subject     => $c->form->{valid}->{"erm-edit-input-subject-add-subject-${erm_add_id}"},
-                            rank        => $c->form->{valid}->{"erm-edit-input-subject-add-rank-${erm_add_id}"},
-                            description => $c->form->{valid}->{"erm-edit-input-subject-add-description-${erm_add_id}"},
-                        });
+                        my $subject_value = $c->form->{valid}->{$param};
+
+                        if ( $subject_value ne 'delete' ) {
+
+                            warn("Creating new subject");
+                            CUFTS::DB::ERMSubjectsMain->create({
+                                erm_main    => $erm_id,
+                                subject     => $subject_value,
+                                rank        => $c->form->{valid}->{"erm-edit-input-subject-add-rank-${erm_add_id}"},
+                                description => $c->form->{valid}->{"erm-edit-input-subject-add-description-${erm_add_id}"},
+                            });
+
+                        }
+
+                    }
+                    elsif ( $param =~ /^erm-edit-input-names-(\d+)$/ ) {
+
+                        # Modify or delete an alternate name
+
+                        my $erm_names_id    = $1;
+                        my $erm_names_value = $c->form->{valid}->{$param};
+                        
+                        my $erm_name = CUFTS::DB::ERMNames->search({
+                            erm_main => $erm_id,
+                            id       => $erm_names_id,
+                        })->first();
+                        
+                        if ( not_empty_string( $erm_names_value ) ) {
+                            $erm_name->name( $erm_names_value );
+                            $erm_name->update();
+                        }
+                        else {
+                            $erm_name->delete();
+                        }
+                        
+                    }
+                    elsif ( $param =~ /^erm-edit-input-names-add-name-\d+$/ ) {
+                        
+                        my $name_value = $c->form->{valid}->{$param};
+
+                        # Add a new alternate name
+
+                        if ( not_empty_string($name_value) ) {
+
+                            CUFTS::DB::ERMNames->create({
+                                name     => $name_value,
+                                erm_main => $erm_id,
+                            });
+
+                        }
+                        
                     }
                 
                 }

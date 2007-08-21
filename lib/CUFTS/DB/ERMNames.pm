@@ -38,6 +38,15 @@ __PACKAGE__->sequence('erm_names_id_seq');
 
 __PACKAGE__->has_a('erm_main', 'CUFTS::DB::ERMMain');
 
+sub normalize_column_values {
+    my ( $self, $values ) = @_;
+
+    $values->{search_name} = $self->strip_name( $values->{name} );
+
+    return 1;
+}
+
+
 sub strip_name {
     my ( $class, $name ) = @_;
     

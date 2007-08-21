@@ -7,13 +7,15 @@ $( function() {
 } );
 
 var new_subjects_count = 0;
+var new_names_count    = 0;
+
 $( function() {
 
     /* Create new subject entries on demand */
 
     $('#erm-edit-input-subject-addbutton').bind( 'click', function(event) {
         event.preventDefault();
-        var new_subject = $('#subject-add-factory').clone();
+        var new_subject = $('#subject-add-subject-factory').clone();
 
         new_subject.attr( 'id', "subject-add-" + new_subjects_count );
 
@@ -23,7 +25,6 @@ $( function() {
         
         new_subjects_count = new_subjects_count + 1;
 
-        
         $('#erm-edit-input-subject-addbutton').parent().parent().before( new_subject );
         new_subject.find('select.subject').bind( 'change', function(event) {
             if ( $(this).val() == 'delete' ) {
@@ -35,12 +36,12 @@ $( function() {
         });
         new_subject.show();
         new_subject.parent('fieldset:not(.nostripe)').find('div.field').removeClass('alt').filter(':odd').addClass('alt');
-
+        apply_help( new_subject.find(':input') );
     });
     
 /* Visibly disable a subject if it is going to be deleted */
 
-    $('select.subject').bind( 'change', function(event) {
+    $('#page-subjects select.subject').bind( 'change', function(event) {
         if ( $(this).val() == 'delete' ) {
             $(this).parent().parent().addClass('to_delete').find('input, textarea').attr('disabled', 'disabled');
         }
@@ -50,6 +51,52 @@ $( function() {
     });
 
 });
+
+$( function() {
+
+    /* Create new name entries on demand */
+
+    $('#erm-edit-input-names-addbutton').bind( 'click', function(event) {
+        event.preventDefault();
+
+        var new_name = $('#names-add-name-factory').clone();
+
+        new_name.attr( 'id', "names-add-" + new_names_count );
+
+        new_name.find('input[@name=erm-edit-input-names-add-name-]').attr( 'name', 'erm-edit-input-names-add-name-' + new_names_count ).bind( 'change', function(event) {
+            if ( $(this).val() == '' ) {
+                $(this).parent().parent().addClass('to_delete');
+            }
+            else {
+                $(this).parent().parent().removeClass('to_delete');
+            }
+        });
+        
+        new_names_count = new_names_count + 1;
+        
+        $('#erm-edit-input-names-addbutton').parent().parent().before( new_name );
+        new_name.show();
+        
+        new_name.parent('fieldset:not(.nostripe)').find('div.field').removeClass('alt').filter(':odd').addClass('alt');
+
+        apply_help( new_name.find(':input') );
+
+    });
+    
+/* Visibly disable a name if it is going to be deleted */
+
+    $('#page-alternate-names input.name').bind( 'change', function(event) {
+        if ( $(this).val() == '' ) {
+            $(this).parent().parent().addClass('to_delete');
+        }
+        else {
+            $(this).parent().parent().removeClass('to_delete');
+        }
+    });
+
+});
+
+
 
 </script>
 
@@ -1296,7 +1343,7 @@ $( function() {
      </div>
     </div>
     
-    <div id="subject-add-factory" class="field" style="padding: 5px 0px; display: none">
+    <div id="subject-add-subject-factory" class="field" style="padding: 5px 0px; display: none">
      <div class="data">
        <select name="erm-edit-input-subject-add-subject-" class="subject" />
         <option value="delete">Delete this subject entry</option>
@@ -1329,9 +1376,33 @@ $( function() {
     <fieldset>
 
     <legend>Alternate Names</legend>
+    
+    [% FOREACH name IN erm.names %]
+      [% NEXT IF name.main == 1 %]
+      <div class="field" style="padding: 5px 0px;">
+       <div class="data">
+         <input type="text" class="name" name="erm-edit-input-names-[% name.id %]" value="[% name.name | html %]"/>
+       </div>
+       <div class="help">
+        Alternate name for the resource.
+       </div>
+      </div>
+     [% END %]
 
-TODO
+     <div class="field">
+      <div class="data">
+       <a id="erm-edit-input-names-addbutton" href="[% url("$url_base/erm/edit/add_name/1979") %]">Add</a>
+      </div>
+     </div>
 
+     <div id="names-add-name-factory" class="field" style="padding: 5px 0px; display: none">
+      <div class="data">
+        <input type="text" name="erm-edit-input-names-add-name-" value="" />
+      </div>
+      <div class="help">
+       New alternate name for the resource.
+      </div>
+     </div>
     </fieldset>
 
     <div style="padding: 1em 0px;">
