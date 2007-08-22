@@ -433,7 +433,7 @@ sub account : Local {
                             # Add a role
 
                             CJDB::DB::AccountsRoles->find_or_create( {
-                                role => $roles_map{$role},
+                                role => $role_id,
                                 account => $account_id 
                             } );
 
@@ -443,7 +443,7 @@ sub account : Local {
                             # Remove a role
 
                             CJDB::DB::AccountsRoles->search( {
-                                role => $roles_map{$role},
+                                role => $role_id,
                                 account => $account_id 
                             } )->delete_all;
     
