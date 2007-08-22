@@ -46,22 +46,6 @@ sub title_list_fields {
     ];
 }
 
-## title_list_field_map - Hash ref mapping fields from the raw title lists to
-## internal field names
-##
-
-sub title_list_field_map {
-    return {
-        'title'         => 'title',
-        'issn'          => 'issn',
-        'ft_start_date' => 'ft_start_date',
-        'ft_end_date'   => 'ft_end_date',
-        'vol_ft_start'  => 'vol_ft_start',
-        'vol_ft_end'    => 'vol_ft_end',
-        'iss_ft_start'  => 'iss_ft_start',
-        'iss_ft_end'    => 'iss_ft_end'
-    };
-}
 
 ## -------------------------------------------------------------------------------------------
 sub build_linkJournal {
