@@ -1,4 +1,5 @@
 CREATE TABLE cjdb_accounts_roles (
+    id      SERIAL PRIMARY KEY,
     account INTEGER,
     role    INTEGER
 );
