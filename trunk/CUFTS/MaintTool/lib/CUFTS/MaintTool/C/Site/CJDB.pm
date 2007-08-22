@@ -3,6 +3,8 @@ package CUFTS::MaintTool::C::Site::CJDB;
 use strict;
 use base 'Catalyst::Base';
 
+use CUFTS::Util::Simple;
+
 my @valid_states = ( 'active', 'sandbox' );
 my @valid_types  = ( 'css',    'cjdb_template' );
 
@@ -73,7 +75,7 @@ my $form_data_validate = {
     constraints => {
         delete  => qr/^[^&\|:;'"\\\/]+$/,
         test    => qr/^[^&\|:;'"\\\/]+$/,
-        rebuild => qr/^[^&\|:;'"\\\/]+$/,
+        rebuild => qr/^[^&\|:;'"\\\/]+$/,       #"
     },
     filters => ['trim'],
 };
@@ -89,6 +91,11 @@ my $form_accounts_validate = {
     filters => ['trim'],
 };
 
+
+my @handled_roles = ( qw(
+    edit_erm_records
+) );
+
 my $form_account_validate = {
     required => [
         qw(
@@ -100,10 +107,12 @@ my $form_account_validate = {
     ],
     optional => [
         qw(
+            new_password
             level
             active
             submit
-        )
+        ),
+        map { 'role-' . $_ } @handled_roles,
     ],
     defaults => {
         active => 'false',
@@ -390,7 +399,54 @@ sub account : Local {
             }
 
             if ( !scalar( $c->stash->{errors} ) ) {
-                eval { $account->update_from_form( $c->form ); };
+                
+                if ( not_empty_string( $c->form->{valid}->{new_password} ) ) {
+                    $c->form->{valid}->{password} = crypt( $c->form->{valid}->{new_password}, $c->form->{valid}->{key} );
+                }
+                
+                eval {
+                    $account->update_from_form( $c->form );
+                    
+                    ##
+                    ## Handle role updates
+                    ##
+
+                    
+                    # Build role id lookup table
+                    
+                    my @role_objects = CJDB::DB::Roles->retrieve_all;
+                    my %roles_map;
+                    foreach my $role_object ( @role_objects ) {
+                        $roles_map{$role_object->role} = $role_object->id;
+                    }
+                    
+                    
+                    foreach my $role ( @handled_roles ) {
+
+                        if ( $c->form->{valid}->{"role-${role}"} ) {
+
+                            # Add a role
+
+                            CJDB::DB::AccountsRoles->find_or_create( {
+                                role => $roles_map{$role},
+                                account => $account_id 
+                            } );
+
+                        }
+                        else {
+
+                            # Remove a role
+
+                            CJDB::DB::AccountsRoles->search( {
+                                role => $roles_map{$role},
+                                account => $account_id 
+                            } )->delete_all;
+    
+                        }
+                    }
+                    
+                    
+                };
                 if ($@) {
                     my $err = $@;
                     CUFTS::DB::DBI->dbi_rollback;

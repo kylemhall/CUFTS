@@ -1,4 +1,4 @@
-## CJDB::DB::Accounts
+## CJDB::DB::AccountsRoles
 ##
 ## Copyright Todd Holbrook, Simon Fraser University (2003)
 ##
@@ -18,33 +18,24 @@
 ## with CJDB; if not, write to the Free Software Foundation, Inc., 59
 ## Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package CJDB::DB::Accounts;
+package CJDB::DB::AccountsRoles;
 
 use strict;
 use base 'CJDB::DB::DBI';
 
 
-__PACKAGE__->table('cjdb_accounts');
+__PACKAGE__->table('cjdb_accounts_roles');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
-	id
+    id
 
-	name
-	key
-	password
-	email
-	level
-
-	site
-
-	active
-
-	created
-	modified
+    account
+    role
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('cjdb_accounts_id_seq');
+__PACKAGE__->sequence('cjdb_accounts_roles_id_seq');
 
-__PACKAGE__->has_many( 'roles' => [ 'CJDB::DB::AccountsRoles' => 'role' ] );
+__PACKAGE__->has_a( account => 'CJDB::DB::Accounts' );
+__PACKAGE__->has_a( role => 'CJDB::DB::Roles' );
 
 1;
