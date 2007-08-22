@@ -423,6 +423,11 @@ sub account : Local {
                     
                     foreach my $role ( @handled_roles ) {
 
+                        my $role_id = $roles_map{$role};
+                        if ( !defined($role_id) ) {
+                            die("Attempting to process a role which does not exist in the database: $role");
+                        }
+
                         if ( $c->form->{valid}->{"role-${role}"} ) {
 
                             # Add a role
