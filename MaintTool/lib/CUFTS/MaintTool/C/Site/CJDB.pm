@@ -144,8 +144,8 @@ sub settings : Local {
         }
     }
 
-    $c->stash->{section}  = 'cjdb_settings';
-    $c->stash->{template} = 'site/cjdb/settings.tt';
+    $c->stash->{header_section} = 'Site Settings : CJDB Settings';
+    $c->stash->{template}       = 'site/cjdb/settings.tt';
 }
 
 sub data : Local {
@@ -338,8 +338,8 @@ sub data : Local {
         . $c->stash->{current_site}->id
         . '/static/';
 
-    $c->stash->{section}  = 'cjdb_data';
-    $c->stash->{template} = 'site/cjdb/data.tt';
+    $c->stash->{header_section} = 'Site Settings : CJDB Data';
+    $c->stash->{template}       = 'site/cjdb/data.tt';
 }
 
 sub accounts : Local {
@@ -368,8 +368,8 @@ sub accounts : Local {
     $c->stash->{search_field} = $c->req->params->{search_field};
     $c->stash->{search_value} = $c->req->params->{search_value};
 
-    $c->stash->{section}  = 'cjdb_accounts';
-    $c->stash->{template} = 'site/cjdb/accounts.tt';
+    $c->stash->{header_section} = 'Site Settings : C*DB Accounts';
+    $c->stash->{template}       = 'site/cjdb/accounts.tt';
 }
 
 sub account : Local {
@@ -463,10 +463,10 @@ sub account : Local {
         }
     }
 
-    $c->stash->{account}  = $account;
-    $c->stash->{tags}     = CJDB::DB::Tags->get_mytags_list($account_id);
-    $c->stash->{section}  = 'cjdb_accounts';
-    $c->stash->{template} = 'site/cjdb/account.tt';
+    $c->stash->{account}        = $account;
+    $c->stash->{tags}           = CJDB::DB::Tags->get_mytags_list($account_id);
+    $c->stash->{header_section} = 'Site Settings : C*DB Accounts';
+    $c->stash->{template}       = 'site/cjdb/account.tt';
 }
 
 =head1 NAME
