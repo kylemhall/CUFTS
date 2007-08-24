@@ -35,6 +35,7 @@ __PACKAGE__->columns(All => qw(
 
     vendor
     publisher
+    url
     resource_type
     resource_medium
     file_type
@@ -144,6 +145,7 @@ __PACKAGE__->sequence('erm_main_id_seq');
 
 my @fast_columns = qw(
     id
+    url
     vendor
     description_brief
 );

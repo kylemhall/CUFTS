@@ -8,6 +8,7 @@ CREATE TABLE erm_main (
 
     vendor              VARCHAR(1024),
     publisher           VARCHAR(1024),
+    url                 VARCHAR(1024),
     resource_type       INTEGER,        -- linked table (erm_resource_types)
     resource_medium     INTEGER,        -- linked table (erm_resource_mediums)
     file_type           VARCHAR(255),
