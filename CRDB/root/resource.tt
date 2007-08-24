@@ -16,12 +16,16 @@
   <dd id="resource-definition-publisher">[% erm.publisher | html %]</dd>
  [% END %]
 
- <dt id="resource-term-resource_type">Resource Type</dt>
- <dd id="resource-definition-resource_type">[% erm.resource_type.resource_type | html %]</dd>
-
- <dt id="resource-term-resource_medium">Resource Medium</dt>
- <dd id="resource-definition-resource_medium">[% erm.resource_medium.resource_medium | html %]</dd>
-
+ [% IF erm.resource_type.defined %]
+  <dt id="resource-term-resource_type">Resource Type</dt>
+  <dd id="resource-definition-resource_type">[% erm.resource_type.resource_type | html %]</dd>
+ [% END %]
+ 
+ [% IF erm.resource_medium.defined %]
+  <dt id="resource-term-resource_medium">Resource Medium</dt>
+  <dd id="resource-definition-resource_medium">[% erm.resource_medium.resource_medium | html %]</dd>
+ [% END %]
+ 
  [% IF erm.content_types.force_list.size %]
  <dt id="resource-term-content_types">Content Types</dt>
  <dd id="resource-definition-content_types">[% erm.content_types.force_list.sort('content_type').map_join('content_type', ', ') | html %]</dd>
