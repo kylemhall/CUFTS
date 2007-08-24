@@ -154,6 +154,17 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-url">URL</label>
+  <input id="erm-edit-input-url" name="url" value="[% erm.url | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  The URL to access the resource.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-resource_type">resource type</label>
   <select id="erm-edit-input-resource_type" name="resource_type" style="width: 19em">
    [% IF resource_type_options.defined %]

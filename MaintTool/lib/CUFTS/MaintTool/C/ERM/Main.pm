@@ -26,6 +26,7 @@ my $form_validate = {
             license
             vendor
             publisher
+            url
             resource_type
             resource_medium
             file_type
