@@ -339,6 +339,14 @@ div#resources-brief-records {
     padding-top: 10px;
 }
 
+.resources-sort-helper {
+    border-top: dashed 2px black;
+    border-bottom: dashed 2px black;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: auto !important;
+}
+
 div.resources-facet-choice-container {
     padding: 0px 5px;
     width: 30%;

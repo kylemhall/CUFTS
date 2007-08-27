@@ -43,23 +43,38 @@ AJAX action for reranking a set of resources using drag and drop sortables.
 sub rerank : Chained('edit_erm_records') PathPart('rerank') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->form({ required => [ qw( subject resource_order ) ] });
+    $c->form({
+        required => [ qw( subject  ) ], 
+        optional => [ qw( resource_order resource_other ) ] 
+    });
+    
     unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
         my $subject = $c->form->{valid}->{subject};
         my %records = map { $_->erm_main => $_ } $c->model('CUFTS::ERMSubjectsMain')->search( { subject => $subject } )->all;
 
-        my $rank = 0;
+        my $rank = 1;
         my $schema =  $c->model('CUFTS')->schema;
+        
         my $update_transaction = sub {
-            foreach my $resource_id ( reverse @{ $c->form->{valid}->{resource_order} } ) {
+            foreach my $resource_id ( @{ $c->form->{valid}->{resource_order} } ) {
                 my $record = $records{$resource_id};
                 if ( !defined($record) ) {
                     die("Unable to find matching ERM record ($resource_id) in subject ($subject)" );
                 }
-                $record->rank($rank);
+                $record->rank( $rank );
                 $record->update;
                 $rank++;
              }
+
+             foreach my $resource_id ( @{ $c->form->{valid}->{resource_other} } ) {
+                 my $record = $records{$resource_id};
+                 if ( !defined($record) ) {
+                     die("Unable to find matching ERM record ($resource_id) in subject ($subject)" );
+                 }
+                 $record->rank( 0 );
+                 $record->update;
+              }
+
              return 1;
         };
 

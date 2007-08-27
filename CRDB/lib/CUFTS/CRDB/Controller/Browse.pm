@@ -64,8 +64,13 @@ sub browse_index : Chained('options') PathPart('') Args(0) {
     my ( $self, $c ) = @_;
 
     if ( scalar( keys( %{$c->session->{resources_browse_facets}} ) ) ) {
-        $c->stash->{records} = CUFTS::DB::ERMMain->facet_search( $c->site->id, $c->session->{resources_browse_facets} );
+
+        my $search = { %{$c->session->{resources_browse_facets}} };
+        $search->{public_list} = 't';
+
+        $c->stash->{records} = CUFTS::DB::ERMMain->facet_search( $c->site->id, $search );
         $c->stash->{facets}  = $c->session->{resources_browse_facets};
+
     }
 
     $c->stash->{template} = 'browse.tt';
@@ -83,8 +88,11 @@ sub facets : Chained('options') PathPart('facets') Args {
     while ( my ( $type, $data ) = splice( @facets, 0, 2 ) ) {
         $facets->{$type} = $data;
     }
+    
+    my $search = { %{$facets} };
+    $search->{public_list} = 't';
 
-    $c->stash->{records}  = CUFTS::DB::ERMMain->facet_search( $c->site->id, $facets, 1 );  # Trailing 1 means no object creation, short records only - for speed
+    $c->stash->{records}  = CUFTS::DB::ERMMain->facet_search( $c->site->id, $search, 1 );  # Trailing 1 means no object creation, short records only - for speed
     $c->stash->{facets}   = $facets;
     $c->stash->{template} = 'browse.tt';
 }
@@ -103,7 +111,10 @@ sub ajax_facets : Chained('base') PathPart('ajax_facets') Args {
         $facets->{$type} = $data;
     }
 
-    $c->res->body( to_json( CUFTS::DB::ERMMain->facet_search( $c->site->id, $facets, 1 ) ) ); # Trailing 1 means no object creation, short records only - for speed
+    my $search = { %{$facets} };
+    $search->{public_list} = 't';
+
+    $c->res->body( to_json( CUFTS::DB::ERMMain->facet_search( $c->site->id, $search, 1 ) ) ); # Trailing 1 means no object creation, short records only - for speed
 }
 
 =head2 count_facets
@@ -129,7 +140,11 @@ sub count_facets : Chained('base') PathPart('count_facets') Args {
     # Add caching in server session?
     my $count = $c->cache->get( $cache_key ); 
     if ( !defined($count) ) {
-        $count = CUFTS::DB::ERMMain->facet_count( $c->site->id, \%facets );
+
+        my $search = { %facets };
+        $search->{public_list} = 't';
+
+        $count = CUFTS::DB::ERMMain->facet_count( $c->site->id, $search );
         $c->cache->set( $cache_key, $count );
     }
 
