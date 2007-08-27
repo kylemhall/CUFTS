@@ -1,32 +1,55 @@
 <script type="text/javascript">
 $( function() {
-
- $('div.resource-brief-record:odd').addClass('resource-brief-record-alt');
+ if ( $('#resources-brief-records-top') ) {
+    $('#resources-brief-records-top div.resource-brief-record:odd').addClass('resource-brief-record-alt');
+    $('#resources-brief-records-other div.resource-brief-record:odd').addClass('resource-brief-record-alt');
+ }
+ else {
+     $('div.resource-brief-record:odd').addClass('resource-brief-record-alt');
+ }
 
 });
 
 [% IF c.check_user_roles('edit_erm_records') AND facets.subject AND facets.size == 1 %]
-$( function() {
- $('#resources-brief-records').Sortable(
+
+function do_rerank() {
+    $.post(
+        '[% c.uri_for_site( c.controller('Resources').action_for('rerank') ) %]',
+        {
+            subject: [% facets.subject %],
+            resource_order: $.SortSerialize('resources-brief-records-top')["o"]["resources-brief-records-top"],
+            resource_other: $.SortSerialize('resources-brief-records-other')["o"]["resources-brief-records-other"],
+        },
+        function( data ) {
+            $('#resources-brief-records-top   div.resource-brief-record').removeClass('resource-brief-record-alt').filter(':odd').addClass('resource-brief-record-alt');
+            $('#resources-brief-records-other div.resource-brief-record').removeClass('resource-brief-record-alt').filter(':odd').addClass('resource-brief-record-alt');
+        }
+    );
+}
+
+$( 
+function() {
+ $('#resources-brief-records-top').Sortable(
      {
          accept: 'resource-brief-record',
          handle: 'div.handle',
          axis: 'vertically',
-         onChange: function(ser) {
-             $.post(
-                 '[% c.uri_for_site( c.controller('Resources').action_for('rerank') ) %]',
-                 {
-                     subject: [% facets.subject %],
-                     resource_order: ser[0]["o"]["resources-brief-records"],
-                 }
-             ),
-             $('div.resource-brief-record').removeClass('resource-brief-record-alt').filter(':odd').addClass('resource-brief-record-alt');
-         },
-         onStop: function() {
-         },
+         helperclass: 'resources-sort-helper',
+         onChange: do_rerank,
      }
  );
+
  
+ $('#resources-brief-records-other').Sortable(
+     {
+         accept: 'resource-brief-record',
+         handle: 'div.handle',
+         axis: 'vertically',
+         helperclass: 'resources-sort-helper',
+         
+         onChange: do_rerank,
+     }
+ );
 
 });
 [% END %]

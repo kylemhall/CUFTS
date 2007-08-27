@@ -54,23 +54,23 @@ sub login : Chained('/site') PathPart('login') Args(0) {
         my $site_id  = $c->site->id;
         my $account;
 
-#        if ( not_empty_string($site->cjdb_authentication_module) ) {
-#            # Get our internal record, then check external system for password
-#
-#            $account = CJDB::DB::Accounts->search( site => $site->id, key => $key)->first;
-#            if ( defined($account) ) {
-#                my $module = 'CUFTS::CJDB::Authentication::' . $site->cjdb_authentication_module;
-#                eval {
-#                    $module->authenticate($site, $key, $password);
-#                };
-#                if ($@) {
-#                    # External validation error.
-#                    warn($@);
-#                    $account = undef;
-#                }
-#            }
-#        }
-#        else {
+        if ( not_empty_string($c->site->cjdb_authentication_module) ) {
+            # Get our internal record, then check external system for password
+
+            $account = CJDB::DB::Accounts->search( site => $site_id, key => $key)->first;
+            if ( defined($account) ) {
+                my $module = 'CUFTS::CJDB::Authentication::' . $c->site->cjdb_authentication_module;
+                eval {
+                    $module->authenticate($c->site, $key, $password);
+                };
+                if ($@) {
+                    # External validation error.
+                    warn($@);
+                    $account = undef;
+                }
+            }
+        }
+        else {
 
             # Use internal authentication
 
@@ -78,7 +78,7 @@ sub login : Chained('/site') PathPart('login') Args(0) {
                 $c->stash->{error} = ['The password or account was not recognized. Please check that you have entered the correct login name and password. If you are still having problems, please contact your administrator.'];
             }
 
-#        }
+        }
         
         if ( defined($c->user) ) {
             if ( $c->user->active ) {
@@ -111,7 +111,7 @@ sub create : Local {
                   optional => ['email', 'password2'],
                   filters => ['trim']});
 
-        my $site = $c->stash->{current_site};
+        my $site = $c->site;
         unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
 
             my $key       = $c->form->{valid}->{key};

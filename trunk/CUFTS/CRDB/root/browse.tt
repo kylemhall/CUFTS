@@ -5,11 +5,48 @@
 [% PROCESS facet_menu.tt %]
 
 <div id="resources-brief-records">
+    
+[% IF facets.subject AND facets.size == 1 %]
+ [% SET other_index = 0 %]
 
-[% FOREACH record IN records %]
+ <h2>Top Resources</h2>
+
+ <div id="resources-brief-records-top">
+
+  [% FOREACH record IN records %]
+   [% NEXT IF record.rank == 0 %]
+   [% PROCESS display_record %]
+  [% END %]
+
+ </div>
+
+ <h2>Other Resources</h2>
+
+ <div id="resources-brief-records-other">
+
+  [% FOREACH record IN records %]
+   [% LAST IF record.rank > 0 %]
+   [% PROCESS display_record %]
+  [% END %]
+
+ </div>
+
+
+[% ELSE %]
+
+ [% FOREACH record IN records %]
+  [% PROCESS display_record %]
+ [% END %]
+
+[% END %]
+
+</div>
+
+
+[% BLOCK display_record %]
  [% SET record_id = record.id %]
 <div class="resource-brief-record" id="[% record_id %]">
- [% IF c.check_user_roles('edit_erm_records') AND facets.subject AND facets.size == 1 AND records.size > 1 %]
+ [% IF c.check_user_roles('edit_erm_records') AND facets.subject AND facets.size == 1 %]
   <div style="float:right; cursor: move" class="handle">[ rank ]</div>
  [% END %]
  <div class="resource-brief-field-name">[% record.result_name %] - [% record.vendor %]</div>
@@ -24,5 +61,3 @@
  </div>
 </div>
 [% END %]
-
-</div>
