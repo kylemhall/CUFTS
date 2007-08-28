@@ -67,7 +67,18 @@ sub login : Chained('/site') PathPart('login') Args(0) {
                     # External validation error.
                     warn($@);
                     $account = undef;
+                    $c->stash->{error} = ['The password or account was not recognized. Please check that you have entered the correct login name and password. If you are still having problems, please contact your administrator.'];
                 }
+                else {
+                
+                    # Preauthenticated realm does not need a password
+                
+                    if ( !$c->authenticate({ key => $key, site => $site_id }, 'preauthenticated') ) {
+                        $c->stash->{error} = ['The password or account was not recognized. Please check that you have entered the correct login name and password. If you are still having problems, please contact your administrator.'];
+                    }
+                }
+                
+                
             }
         }
         else {
