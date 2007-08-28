@@ -37,3 +37,12 @@ authentication:
                 user_class: 'CJDB::Accounts'
                 role_relation: roles
                 role_field: role
+        preauthenticated:
+            credential:
+                class: Password
+                password_type: none
+            store:
+                class: 'DBIx::Class'
+                user_class: 'CJDB::Accounts'
+                role_relation: roles
+                role_field: role
