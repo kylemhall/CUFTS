@@ -40,56 +40,28 @@ sub title_list_fields {
             e_issn
 
             ft_start_date
-            ft_end_date
             vol_ft_start
-            vol_ft_end
             iss_ft_start
+            ft_end_date
+            vol_ft_end
             iss_ft_end
             journal_url
         )
     ];
 }
 
-sub title_list_get_field_headings {
-    return [
-        qw(
-            title
-            issn
-            e_issn
-            journal_url
-            ___volume
-            ___issues
-            ___year
-            ___rate
-            ___ft_format
-            ___early_view
-            ___mobile
-            ___ava
-            ___inc_freq
-            ___inc_pages
-            ___title_change
-            ___merged_title
-            ___split_title
-            ___new_journal
-            ___new_acq
-            ___new_online
-            ___dec_freq
-            ___dec_pages
-            ___other
-            ___status
-            ___new_to_wiley
-            ___end
-            ___start
-            ___first_year
-            ___acquired_from
-            ___backfile
-            ___backfile_collection
-            ___comment
-        )
-    ];
-}
 
-sub title_list_skip_lines_count { return 1; }
+sub title_list_field_map {
+    return {
+        'TITLE'       => 'title',
+        'TITLE '      => 'title',
+        'PRINT ISSN'  => 'issn',
+        'ONLINE ISSN' => 'e_issn',
+        'URL ON WIS'  => 'journal_url',
+        'CEASED JOURNALS -- LAST VOL/ISS/YEAR PUBLISHED' => '___end',
+        'PDF ON WIS STARTS WITH VOL/ISS/YEAR'            => '___start',
+    };
+}
 
 sub skip_record {
     my ( $class, $record ) = @_;
