@@ -4,9 +4,6 @@ use strict;
 use warnings;
 use base 'Catalyst::Controller';
 
-use JSON::XS qw(to_json);
-
-
 =head1 NAME
 
 CUFTS::CRDB::Controller::Resource - Catalyst Controller for working with an individual ERM resource
@@ -74,7 +71,9 @@ sub json : Chained('resource') PathPart('json') Args(0) {
     my @content_types = $erm_obj->content_types;
     @{ $erm_hash->{content_types} } = map { $_->content_type } sort { $a->content_type cmp $b->content_type } @content_types;
 
-    $c->res->body( to_json( $erm_hash ) );
+    $c->stash->{json} = $erm_hash;
+    
+    $c->stash->{current_view} = 'JSON';
 }
 
 =head1 AUTHOR

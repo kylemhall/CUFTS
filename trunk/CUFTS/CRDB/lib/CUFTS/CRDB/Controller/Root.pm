@@ -58,6 +58,11 @@ sub default : Private {
     $c->response->body( 'Not found' );
 }
 
+
+sub test : Global {
+    my ( $self, $c ) = @_;
+    $c->stash->{template} = 'test.tt';
+}
 =head2 default
 
 Displays a page with details for a single resource.

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use base 'Catalyst::Controller';
 
-use JSON::XS qw(to_json);
+use CUFTS::Util::Simple;
 
 =head1 NAME
 
@@ -50,13 +50,21 @@ sub rerank : Chained('edit_erm_records') PathPart('rerank') Args(0) {
     
     unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
         my $subject = $c->form->{valid}->{subject};
+        
+        # Add security join which only brings back subjects for the current site
+        
         my %records = map { $_->erm_main => $_ } $c->model('CUFTS::ERMSubjectsMain')->search( { subject => $subject } )->all;
 
+        my $resource_order = $c->form->{valid}->{resource_order} || [];
+        $resource_order = [ $resource_order ] if !ref($resource_order);
+
+        my $resource_other = $c->form->{valid}->{resource_other} || [];
+        $resource_other = [ $resource_other ] if !ref($resource_other);
+
         my $rank = 1;
-        my $schema =  $c->model('CUFTS')->schema;
-        
+
         my $update_transaction = sub {
-            foreach my $resource_id ( @{ $c->form->{valid}->{resource_order} } ) {
+            foreach my $resource_id ( @{ $resource_order} ) {
                 my $record = $records{$resource_id};
                 if ( !defined($record) ) {
                     die("Unable to find matching ERM record ($resource_id) in subject ($subject)" );
@@ -64,24 +72,71 @@ sub rerank : Chained('edit_erm_records') PathPart('rerank') Args(0) {
                 $record->rank( $rank );
                 $record->update;
                 $rank++;
-             }
+            }
 
-             foreach my $resource_id ( @{ $c->form->{valid}->{resource_other} } ) {
-                 my $record = $records{$resource_id};
-                 if ( !defined($record) ) {
-                     die("Unable to find matching ERM record ($resource_id) in subject ($subject)" );
-                 }
-                 $record->rank( 0 );
-                 $record->update;
-              }
+            foreach my $resource_id ( @{ $resource_other } ) {
+                my $record = $records{$resource_id};
+                if ( !defined($record) ) {
+                    die("Unable to find matching ERM record ($resource_id) in subject ($subject)" );
+                }
+                $record->rank( 0 );
+                $record->update;
+            }
 
-             return 1;
+            $c->stash->{json}->{update} = 'success';
+
+            return 1;
         };
 
         $c->model('CUFTS')->schema->txn_do( $update_transaction );
     }
 
-    $c->response->body( to_json( { update => 'success' } ) );
+    
+    $c->stash->{current_view} = 'JSON';
+}
+
+
+sub subject_description : Chained('edit_erm_records') PathPart('subject_description') Args(0) {
+    my ( $self, $c ) = @_;
+
+    $c->form({
+        required => [ qw( subject_id erm_main_id  ) ], 
+        optional => [ qw( change description ) ] 
+    });
+    
+    unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
+
+        my $erm_main_id = $c->form->{valid}->{erm_main_id};
+        my $subject_id  = $c->form->{valid}->{subject_id };
+
+        my $subject  = $c->model('CUFTS::ERMSubjectsMain')->search( { subject => $subject_id, erm_main => $erm_main_id } )->first()
+            or die("Unable to find subject record.");
+
+        my $erm_main = $c->model('CUFTS::ERMMain')->search( id => $erm_main_id, site => $c->site->id )->first()
+            or die("Unable to find erm_main record");
+
+        if ( $c->form->{valid}->{change} ) {
+
+            # Try to change the description
+            
+            my $description = $c->form->{valid}->{description};
+            $description = trim_string( $description );
+            $description = undef if is_empty_string( $description );
+
+            $c->model('CUFTS')->schema->txn_do( sub {
+                $subject->description( $description );
+                $subject->update();
+            } );
+
+        }
+
+        $c->stash->{json}->{description}         = $erm_main->description_brief;
+        $c->stash->{json}->{subject_description} = $subject->description;
+
+    }
+
+    
+    $c->stash->{current_view} = 'JSON';
 }
 
 =head1 AUTHOR
