@@ -379,7 +379,7 @@ sub _facet_search_subject {
 
     $config->{joins}->{subject} = ' JOIN erm_subjects_main ON ( erm_subjects_main.erm_main = erm_main.id )';
     
-    unshift( @{ $config->{order} }, 'rank DESC' );
+    unshift( @{ $config->{order} }, 'rank' );
     $config->{extra_columns}->{rank} = 'erm_subjects_main.rank';
     $config->{replace_columns}->{description_brief} = 'COALESCE( erm_subjects_main.description, erm_main.description_brief ) AS description_brief';
     $config->{search}->{'erm_subjects_main.subject'} = $data;
