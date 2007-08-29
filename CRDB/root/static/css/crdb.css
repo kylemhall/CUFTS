@@ -275,6 +275,39 @@ div.resource-brief-field-name {
     margin: 3px 1px;
 }
 
+div.resource-brief-field-description {
+    margin: 4px 2px;
+}
+
+div.resource-brief-default-description {
+    background: #eee;
+    margin: 5px 2px;
+    padding: 3px;
+}
+
+div.resource-brief-default-description h3 {
+    font-family: 'Trebuchet MS',Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size: 100%;
+    padding: 2px 0px;
+    margin: 0px;
+}
+
+textarea.resource-brief-change-description {
+    width: 50em;
+    height: 5em;
+    border: 1px solid #333;
+    margin-left: 4px;
+    margin-bottom: 3px;
+}
+
+input.resource-brief-change-submit {
+    margin-left: 5px;
+}
+
+input.resource-brief-change-cancel {
+}
+
+
 div.resource-brief-details {
     display: none;
     position: absolute;

@@ -1,5 +1,6 @@
 ---
 name: CUFTS::CRDB
+default_view: View::TT
 
 connect_info:
     - 'dbi:Pg:dbname=CUFTS2'
@@ -18,6 +19,9 @@ session:
     expires: 36000
     rewrite: 0
     storage: '/tmp/CUFTS_CJDB_sessions'
+
+View::JSON:
+    expose_stash: json
 
 View::TT:
     WRAPPER: layout.tt

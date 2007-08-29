@@ -6,7 +6,6 @@ use base 'Catalyst::Controller';
 
 use JSON::XS qw(to_json);
 
-
 =head1 NAME
 
 CUFTS::CRDB::Controller::Browse - Catalyst Controller for browsing ERM resources
@@ -103,7 +102,7 @@ Returns the results of a facet search in JSON.  Facets are specified as part of 
 
 =cut
 
-sub ajax_facets : Chained('base') PathPart('ajax_facets') Args {
+sub json_facets : Chained('base') PathPart('json_facets') Args {
     my ( $self, $c, @facets ) = @_;
 
     my $facets = {};
@@ -113,8 +112,10 @@ sub ajax_facets : Chained('base') PathPart('ajax_facets') Args {
 
     my $search = { %{$facets} };
     $search->{public_list} = 't';
+    
+    $c->stash->{json}->{records} = CUFTS::DB::ERMMain->facet_search( $c->site->id, $search, 1 );  # Trailing 1 means no object creation, short records only - for speed
 
-    $c->res->body( to_json( CUFTS::DB::ERMMain->facet_search( $c->site->id, $search, 1 ) ) ); # Trailing 1 means no object creation, short records only - for speed
+    $c->stash->{current_view}  = 'JSON';
 }
 
 =head2 count_facets
@@ -148,7 +149,9 @@ sub count_facets : Chained('base') PathPart('count_facets') Args {
         $c->cache->set( $cache_key, $count );
     }
 
-    $c->res->body( to_json( { count => $count } ) );
+    $c->stash->{json}->{count} = $count;
+
+    $c->stash->{current_view}  = 'JSON';
 }
 
 
