@@ -47,10 +47,10 @@ CREATE TABLE local_resources (
 
     erm_statistics_notes                TEXT,
 
-    erm_admin_notes
+    erm_admin_notes			TEXT,
 
     erm_terms_simultaneous_users        VARCHAR(256),
-    erm_terms_allows_ill                VARCHAR(256),,
+    erm_terms_allows_ill                VARCHAR(256),
     erm_terms_ill_notes                 TEXT,
     erm_terms_allows_ereserves          VARCHAR(256),
     erm_terms_ereserves_notes           TEXT,
