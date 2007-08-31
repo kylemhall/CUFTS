@@ -21,7 +21,7 @@
 
       <h2>Keyword</h2>
       <div id="resources-brief-browse-keyword" class="resources-facet-choice-list" style="width: 99%; height: 100%">
-       <form onSubmit="return false;"><input style="border: 1px solid black; width: 16em" name="keyword" type="text" onChange="var keywordvalue = $(this).val(); add_facet( 'keyword', keywordvalue ); return false;" value="[% facets.keyword | html %]" /></form>
+       <form onSubmit="return false;"><input style="border: 1px solid black; width: 16em" name="keyword" type="text" onKeyPress="if (event.keyCode == 13) {  var keywordvalue = $(this).val(); add_facet( 'keyword', keywordvalue ); return false; } return true;" value="[% facets.keyword | html %]" /></form>
       </div>
 
      </div>
