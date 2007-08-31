@@ -69,6 +69,7 @@ BEGIN {
         Karger
         Kluwer
         Lexis_Nexis_AC
+        LexisNexisAcademic
         MetaPress
         Micromedia_CNS
         Micromedia
