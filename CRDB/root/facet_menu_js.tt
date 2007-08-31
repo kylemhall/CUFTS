@@ -42,13 +42,18 @@
   } );
 
   $.getJSON( URL, function(data) {
-      $('#facet-count').empty().append(data.count); 
+      $('#facet-count').empty().append( data.count.toString() ); 
   });
 
  }
  
  function add_facet( facet_type, data ) {
-     facet_array[facet_type] = data;
+     if ( data.length == 0 ) {
+         delete facet_array[facet_type]
+     }
+     else {
+         facet_array[facet_type] = data;
+     }
      update_chosen_facets();   
  }
 
