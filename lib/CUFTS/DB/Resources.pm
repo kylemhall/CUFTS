@@ -27,6 +27,8 @@ use CUFTS::DB::Resources_Services;
 use CUFTS::DB::ResourceTypes;
 use CUFTS::DB::LocalResources;
 
+use CUFTS::Util::Simple;
+
 __PACKAGE__->table('resources');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
