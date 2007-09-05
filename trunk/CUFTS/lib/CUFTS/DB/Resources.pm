@@ -92,7 +92,14 @@ sub record_count {
 sub do_module {
 	my ($self, $method, @args) = @_;
 	
-	my $module = $CUFTS::Config::CUFTS_MODULE_PREFIX . $self->module;
+	my $module = $self->module;
+	if ( is_empty_string( $module ) ) {
+	    warn( "Empty module being used, defaulting to blank" );
+	    $module = 'blank';
+	}		
+	
+	$module = $CUFTS::Config::CUFTS_MODULE_PREFIX . $module;
+
 	return $module->$method(@args);
 }
 

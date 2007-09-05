@@ -26,6 +26,8 @@ use CUFTS::DB::LocalResources_Services;
 use CUFTS::DB::Resources;
 use CUFTS::DB::ResourceTypes;
 
+use CUFTS::Util::Simple;
+
 use strict;
 use base 'CUFTS::DB::DBI';
 
@@ -181,6 +183,11 @@ sub do_module {
 	defined($module) or 
 		defined($self->resource) and
 			$module = $self->resource->module;
+			
+	if ( is_empty_string( $module ) ) {
+	    warn( "Empty module being used, defaulting to blank" );
+	    $module = 'blank';
+	}		
 			
 	$module = $CUFTS::Config::CUFTS_MODULE_PREFIX . $module;
 	
