@@ -1,4 +1,4 @@
-## CUFTS::DB::ERMMain
+## CUFTS::Schema::ERMMain
 ##
 ## Copyright Todd Holbrook, Simon Fraser University (2003)
 ##
@@ -127,7 +127,11 @@ __PACKAGE__->add_columns( qw(
     breaches)
 );                                                                                                        
 
+__PACKAGE__->mk_group_accessors('column' => qw/ result_name sort_name / );
+
 __PACKAGE__->set_primary_key( 'id' );
+
+__PACKAGE__->has_many( 'names' => 'CUFTS::Schema::ERMNames', 'erm_main' );
 
 1;
 

@@ -36,7 +36,7 @@ __PACKAGE__->add_columns( qw(
 
 __PACKAGE__->set_primary_key( 'id' );
 
-#__PACKAGE__->has_a('erm_main', 'CUFTS::Schema::ERMMain');
+__PACKAGE__->belongs_to('erm_main', 'CUFTS::Schema::ERMMain');
 
 sub strip_name {
     my ( $class, $name ) = @_;
