@@ -12,7 +12,7 @@ CUFTS::CRDB::Controller::Resources - Catalyst Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller for actions against sets of resources.
+Catalyst Controller for actions against sets of resources.  These generally tend to be AJAX.
 
 =head1 METHODS
 
@@ -94,6 +94,12 @@ sub rerank : Chained('edit_erm_records') PathPart('rerank') Args(0) {
     
     $c->stash->{current_view} = 'JSON';
 }
+
+=head2 rerank 
+
+AJAX action for changing the subject specific description for a resource from the browse display
+
+=cut
 
 
 sub subject_description : Chained('edit_erm_records') PathPart('subject_description') Args(0) {

@@ -23,6 +23,8 @@ package CUFTS::Schema::ERMNames;
 use strict;
 use base qw/DBIx::Class/;
 
+use CUFTS::Util::Simple;
+
 __PACKAGE__->load_components(qw/PK::Auto Core/);
 
 __PACKAGE__->table('erm_names');

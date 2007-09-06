@@ -1,9 +1,17 @@
-[% USE dumper %]
+[%# USE dumper %]
+[% BLOCK show_field %]
+ [% UNLESS show_flag %]
+  class="no_data"
+ [% END %]
+[% END %]
+
+<style>
+.no_data { display: none; }
+</style>
 
 <div id="resource">
     
  <div id="resource-name">[% erm.name | html %]</div>
- <div id="resource-vendor">[% erm.vendor | html %]</div>
 
  <div id="resource-description_full">
   [% erm.description_full %]
@@ -11,47 +19,45 @@
  
  <dl class="resource-fields"> 
     
- [% IF erm.publisher.length %]
-  <dt id="resource-term-publisher">Publisher</dt>
-  <dd id="resource-definition-publisher">[% erm.publisher | html %]</dd>
- [% END %]
+  [% SET show_flag = erm.publisher.length %]
+  <dt [% PROCESS show_field %] id="resource-term-vendor">Vendor</dt>
+  <dd [% PROCESS show_field %] id="resource-definition-vendor">[% erm.vendor | html %]</dd>
 
- [% IF erm.resource_type.defined %]
-  <dt id="resource-term-resource_type">Resource Type</dt>
-  <dd id="resource-definition-resource_type">[% erm.resource_type.resource_type | html %]</dd>
- [% END %]
- 
- [% IF erm.resource_medium.defined %]
-  <dt id="resource-term-resource_medium">Resource Medium</dt>
-  <dd id="resource-definition-resource_medium">[% erm.resource_medium.resource_medium | html %]</dd>
- [% END %]
- 
- [% IF erm.content_types.force_list.size %]
- <dt id="resource-term-content_types">Content Types</dt>
- <dd id="resource-definition-content_types">[% erm.content_types.force_list.sort('content_type').map_join('content_type', ', ') | html %]</dd>
- [% END %]
+  [% SET show_flag = erm.publisher.length %]
+  <dt [% PROCESS show_field %] id="resource-term-publisher">Publisher</dt>
+  <dd [% PROCESS show_field %] id="resource-definition-publisher">[% erm.publisher | html %]</dd>
 
- [% IF erm.subjects.force_list.size %]
- <dt id="resource-term-subjects">Subjects</dt>
- <dd id="resource-definition-subjects">[% erm.subjects.force_list.sort('subject').map_join('subject', ', ') | html %]</dd>
- [% END %]
+  [% SET show_flag = erm.resource_type.defined %]
+  <dt [% PROCESS show_field %] id="resource-term-resource_type">Resource Type</dt>
+  <dd [% PROCESS show_field %] id="resource-definition-resource_type">[% erm.resource_type.resource_type | html %]</dd>
  
- [% IF erm.update_frequency.length %]
- <dt id="resource-term-update_frequency">Update Frequency</dt>
- <dd id="resource-definition-update_frequency">[% erm.update_frequency | html %]</dd>
- [% END %]
+  [% SET show_flag = erm.resource_medium.defined %]
+  <dt [% PROCESS show_field %] id="resource-term-resource_medium">Resource Medium</dt>
+  <dd [% PROCESS show_field %] id="resource-definition-resource_medium">[% erm.resource_medium.resource_medium | html %]</dd>
  
- [% IF erm.coverage.length %]
-  <dt id="resource-term-coverage">Coverage</dt>
-  <dd id="resource-definition-coverage">[% erm.coverage | html %]</dd>
- [% END %]
+  [% SET show_flag = erm.content_types.force_list.size %]
+  <dt [% PROCESS show_field %] id="resource-term-content_types">Content Types</dt>
+  <dd [% PROCESS show_field %] id="resource-definition-content_types">[% erm.content_types.force_list.sort('content_type').map_join('content_type', ', ') | html %]</dd>
 
- [% IF erm.embargo_period.length %]
-  <dt id="resource-term-embargo">Embargo</dt>
-  <dd id="resource-definition-embargo">[% erm.embargo_period | html %]</dd>
- [% END %]
+  [% SET show_flag = erm.subjects.force_list.size %]
+  <dt [% PROCESS show_field %] id="resource-term-subjects">Subjects</dt>
+  <dd [% PROCESS show_field %] id="resource-definition-subjects">[% erm.subjects.force_list.sort('subject').map_join('subject', ', ') | html %]</dd>
+ 
+  [% SET show_flag = erm.update_frequency.length %]
+  <dt [% PROCESS show_field %] id="resource-term-update_frequency">Update Frequency</dt>
+  <dd [% PROCESS show_field %] id="resource-definition-update_frequency">[% erm.update_frequency | html %]</dd>
+ 
+  [% SET show_flag = erm.coverage.length %]
+  <dt [% PROCESS show_field %] id="resource-term-coverage">Coverage</dt>
+  <dd [% PROCESS show_field %] id="resource-definition-coverage">[% erm.coverage | html %]</dd>
+
+  [% SET show_flag = erm.embargo.length %]
+  <dt [% PROCESS show_field %] id="resource-term-embargo">Embargo</dt>
+  <dd [% PROCESS show_field %] id="resource-definition-embargo">[% erm.embargo_period | html %]</dd>
 
 </dl>
  
  
 </div>
+
+

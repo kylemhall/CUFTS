@@ -36,8 +36,8 @@ __PACKAGE__->add_columns( qw(
 
 __PACKAGE__->set_primary_key( 'id' );
 
-#__PACKAGE__->has_a('erm_main', 'CUFTS::DB::ERMMain');
-#__PACKAGE__->has_a('subject', 'CUFTS::DB::ERMSubjects');
+__PACKAGE__->belongs_to( 'erm_main' => 'CUFTS::Schema::ERMMain' );
+__PACKAGE__->belongs_to( 'subject'  => 'CUFTS::Schema::ERMSubjects' );
 
 
 1;

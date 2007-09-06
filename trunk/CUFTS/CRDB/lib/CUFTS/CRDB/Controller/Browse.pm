@@ -20,7 +20,9 @@ Catalyst Controller
 
 use CUFTS::DB::ERMMain;
 
-sub base : Chained('/site') PathPart('browse') CaptureArgs(0) { }
+sub base : Chained('/site') PathPart('browse') CaptureArgs(0) {
+    my ( $self, $c ) = @_;
+}
 
 sub options : Chained('base') PathPart('') CaptureArgs(0) {
     my ( $self, $c ) = @_;
@@ -62,15 +64,7 @@ sub options : Chained('base') PathPart('') CaptureArgs(0) {
 sub browse_index : Chained('options') PathPart('') Args(0) {
     my ( $self, $c ) = @_;
 
-    if ( scalar( keys( %{$c->session->{resources_browse_facets}} ) ) ) {
-
-        my $search = { %{$c->session->{resources_browse_facets}} };
-        $search->{public_list} = 't';
-
-        $c->stash->{records} = CUFTS::DB::ERMMain->facet_search( $c->site->id, $search );
-        $c->stash->{facets}  = $c->session->{resources_browse_facets};
-
-    }
+    $c->save_current_action();
 
     $c->stash->{template} = 'browse.tt';
 }
@@ -83,6 +77,8 @@ sub browse_index : Chained('options') PathPart('') Args(0) {
 sub facets : Chained('options') PathPart('facets') Args {
     my ( $self, $c, @facets ) = @_;
 
+    $c->save_current_action();
+
     my $facets = {};
     while ( my ( $type, $data ) = splice( @facets, 0, 2 ) ) {
         $facets->{$type} = $data;
@@ -91,7 +87,17 @@ sub facets : Chained('options') PathPart('facets') Args {
     my $search = { %{$facets} };
     $search->{public_list} = 't';
 
-    $c->stash->{records}  = CUFTS::DB::ERMMain->facet_search( $c->site->id, $search, 1 );  # Trailing 1 means no object creation, short records only - for speed
+    my @records = $c->model('ERMMain')->facet_search( $c->site->id, $search )->all();
+    if ( exists( $facets->{subject} ) ) {
+        # Rank sort for subjects
+        @records = sort { $a->rank cmp $b->rank or $a->sort_name cmp $b->sort_name } @records;
+    }
+    else {
+        # Default to title sort
+        @records = sort { $a->sort_name cmp $b->sort_name } @records;
+    }
+
+    $c->stash->{records}  = \@records;
     $c->stash->{facets}   = $facets;
     $c->stash->{template} = 'browse.tt';
 }
@@ -112,8 +118,18 @@ sub json_facets : Chained('base') PathPart('json_facets') Args {
 
     my $search = { %{$facets} };
     $search->{public_list} = 't';
+
+    my @records = $c->model('ERMMain')->facet_search( $c->site->id, $search )->all();
+    if ( exists( $facets->{subject} ) ) {
+        # Rank sort for subjects
+#        @records = sort { $a->rank cmp $b->rank or $a->sort_name cmp $b->sort_name } @records;
+    }
+    else {
+        # Default to title sort
+#        @records = sort { $a->sort_name cmp $b->sort_name } @records;
+    }
     
-    $c->stash->{json}->{records} = CUFTS::DB::ERMMain->facet_search( $c->site->id, $search, 1 );  # Trailing 1 means no object creation, short records only - for speed
+    $c->stash->{json}->{records} = \@records;
 
     $c->stash->{current_view}  = 'JSON';
 }
@@ -145,7 +161,7 @@ sub count_facets : Chained('base') PathPart('count_facets') Args {
         my $search = { %facets };
         $search->{public_list} = 't';
 
-        $count = CUFTS::DB::ERMMain->facet_count( $c->site->id, $search );
+        $count = $c->model('ERMMain')->facet_search( $c->site->id, $search )->count();
         $c->cache->set( $cache_key, $count );
     }
 
@@ -153,57 +169,6 @@ sub count_facets : Chained('base') PathPart('count_facets') Args {
 
     $c->stash->{current_view}  = 'JSON';
 }
-
-
-=head2 add_facet
-
-Add a facet to the current search when session based facet browsing is being used.  This normally happens when Javascript is off.
-
-=cut
-
-
-sub add_facet : Chained('base') PathPart('add_facet') Args(3) {
-    my ( $self, $c, $type, $display, $data ) = @_;
-
-    $c->session->{resources_browse_facets}->{$type}->{display} = $display;
-    $c->session->{resources_browse_facets}->{$type}->{data}    = $data;
-
-    $c->res->redirect( $c->uri_for_site( $c->controller->action_for('/') ) );
-}
-
-=head2 add_facet
-
-Sets the current facet search when session based facet browsing is being used.  This normally happens when Javascript is off.
-
-=cut
-
-sub set_facets : Chained('base') PathPart('set_facet') Args {
-    my ( $self, $c, @facets ) = @_;
-    
-    $c->session->{resources_browse_facets} = {};
-    while ( my ( $type, $display, $data ) = splice( @facets, 0, 3 ) ) {
-        $c->session->{resources_browse_facets}->{$type}->{display} = $display;
-        $c->session->{resources_browse_facets}->{$type}->{data}    = $data;
-    }
-    
-    $c->res->redirect( $c->uri_for_site( $c->controller->action_for('/') ) );
-}
-
-=head2 remove_facet
-
-Removes a facet from the current search when session based facet browsing is being used.  This normally happens when Javascript is off.
-
-=cut
-
-sub remove_facet : Chained('base') PathPart('remove_facet') Args(1) {
-    my ( $self, $c, $type ) = @_;
-
-    delete $c->session->{resources_browse_facets}->{$type};
-
-    $c->res->redirect( $c->uri_for_site( $c->controller->action_for('/') ) );
-}
-
-
 
 
 

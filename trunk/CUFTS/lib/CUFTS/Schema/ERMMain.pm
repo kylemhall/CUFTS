@@ -131,7 +131,26 @@ __PACKAGE__->mk_group_accessors('column' => qw/ result_name sort_name / );
 
 __PACKAGE__->set_primary_key( 'id' );
 
-__PACKAGE__->has_many( 'names' => 'CUFTS::Schema::ERMNames', 'erm_main' );
+# Check the ResultSet for more predefined complex searches
+
+__PACKAGE__->resultset_class('CUFTS::ResultSet::ERMMain');
+
+__PACKAGE__->belongs_to( 'license' => 'CUFTS::Schema::ERMLicense', undef, { join_type => 'left outer' } );
+
+__PACKAGE__->has_many( 'names'         => 'CUFTS::Schema::ERMNames',        'erm_main' );
+
+__PACKAGE__->has_many( 'subjects_main'      => 'CUFTS::Schema::ERMSubjectsMain',     'erm_main' );
+__PACKAGE__->has_many( 'content_types_main' => 'CUFTS::Schema::ERMContentTypesMain', 'erm_main' );
+
+__PACKAGE__->many_to_many( 'content_types' => 'content_types_main', 'content_type' );
+__PACKAGE__->many_to_many( 'subjects'      => 'subjects_main',      'subject'      );
+
+__PACKAGE__->might_have( 'consortia'       => 'CUFTS::Schema::ERMConsortia'       );
+__PACKAGE__->might_have( 'cost_base'       => 'CUFTS::Schema::ERMCostBases'       );
+__PACKAGE__->might_have( 'resource_medium' => 'CUFTS::Schema::ERMResourceMediums' );
+__PACKAGE__->might_have( 'resource_type'   => 'CUFTS::Schema::ERMResourceTypes'   );
+
+
 
 1;
 

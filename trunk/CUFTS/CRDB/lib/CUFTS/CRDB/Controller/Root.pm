@@ -55,7 +55,8 @@ sub app_root : Chained('site') PathPart('') Args(0) {
 sub default : Private {
     my ( $self, $c ) = @_;
     $c->response->status(404);
-    $c->response->body( 'Not found' );
+    $c->detach();
+#    $c->response->body( 'Not found' );
 }
 
 
@@ -63,17 +64,12 @@ sub test : Global {
     my ( $self, $c ) = @_;
     $c->stash->{template} = 'test.tt';
 }
-=head2 default
 
-Displays a page with details for a single resource.
 
-=cut
-
-sub resource : Chained('site') PathPart('resource') Args(1) {
-    my ( $self, $c, $id ) = @_;
-
-    $c->stash->{erm} = CUFTS::DB::ERMMain->retrieve($id);
-    $c->stash->{template} = 'resource.tt';
+sub exit : Global {
+    my ( $self, $c ) = @_;
+    
+    exit();
 }
 
 =head2 end

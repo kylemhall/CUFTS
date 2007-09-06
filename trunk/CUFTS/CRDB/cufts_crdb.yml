@@ -3,7 +3,7 @@ name: CUFTS::CRDB
 default_view: View::TT
 
 connect_info:
-    - 'dbi:Pg:dbname=CUFTS2'
+    - 'dbi:Pg:dbname=CUFTS3'
     - 'tholbroo'
     - ''
     - AutoCommit: 1
