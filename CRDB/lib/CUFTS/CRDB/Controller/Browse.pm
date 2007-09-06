@@ -18,8 +18,6 @@ Catalyst Controller
 
 =cut
 
-use CUFTS::DB::ERMMain;
-
 sub base : Chained('/site') PathPart('browse') CaptureArgs(0) {
     my ( $self, $c ) = @_;
 }

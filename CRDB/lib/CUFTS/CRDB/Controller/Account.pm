@@ -48,7 +48,7 @@ sub login : Chained('/site') PathPart('login') Args(0) {
         if ( not_empty_string($c->site->cjdb_authentication_module) ) {
             # Get our internal record, then check external system for password
 
-            $account = CJDB::DB::Accounts->search( site => $site_id, key => $key)->first;
+            $account = $c->model('CJDB::Accounts')->search( { site => $site_id, key => $key } )->first();
             if ( defined($account) ) {
                 my $module = 'CUFTS::CJDB::Authentication::' . $c->site->cjdb_authentication_module;
                 eval {
