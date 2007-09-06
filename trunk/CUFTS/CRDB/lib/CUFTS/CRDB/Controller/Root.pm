@@ -31,7 +31,7 @@ Uses chained paths to get the site key from the URL.
 sub site : Chained('/') PathPart('') CaptureArgs(1) {
     my ($self, $c, $site_key) = @_;
     
-    my $site = $c->model('CUFTS::Sites')->search( { key => $site_key })->first;
+    my $site = $c->model('CUFTS::Sites')->search( { key => $site_key } )->first;
     if ( !defined($site) ) {
         die("Unrecognized site key: $site_key");
     }
