@@ -89,30 +89,31 @@ Example call:
 sub uri_for_site {
     my ( $c, $url, $caps, @rest ) = @_;
 
+    my $captures_copy = [];
+
 #    use Data::Dumper;
 #    warn( "\nurl: " . Dumper($url) );
 #    warn( "\ncaps: " . Dumper($caps) );
 #    warn( "\nrest: " . Dumper(\@rest) . "\n" );
-    
-    if ( defined( $c->site ) ) {
 
-        if ( defined($caps) ) {
+    die("Attempting to create URI for site when site is not defined.") if !defined( $c->site );
 
-            if ( ref($caps) ne 'ARRAY') {
-                unshift @rest, $caps;
-                $caps = [];
-            }
-        }
-        else {
-            $caps = []
+    if ( defined($caps) ) {
+        if ( ref($caps) eq 'ARRAY' ) {
+            $captures_copy = [ @$caps ];
+        } else {
+            unshift @rest, $caps;
         }
     }
-    else {
-        die("Attempting to create URI for site when site is not defined.")
-    }
-    unshift @$caps, $c->site->key;
-    
-    return $c->uri_for( $url, $caps, @rest );
+
+    unshift @$captures_copy, $c->site->key;
+
+#    warn( "\nurl: " . Dumper($url) );
+#    warn( "\ncaps: " . Dumper($captures_copy) );
+#    warn( "\nrest: " . Dumper(\@rest) . "\n" );
+#    warn( $c->uri_for( $url, $captures_copy, @rest ) );
+
+    return $c->uri_for( $url, $captures_copy, @rest );
 }
 
 sub uri_for_js {
@@ -128,6 +129,37 @@ sub uri_for_css {
 sub uri_for_image {
     my $c = shift;
     return $c->uri_for( '/static/images/', @_ );
+}
+
+
+sub redirect {
+    my ( $c, $uri ) = @_;
+    
+    $c->res->redirect( $uri );
+    $c->detach();
+}
+
+sub restore_saved_action {
+    my ( $c ) = @_;
+
+    if ( $c->session->{prev_action} ) {
+        $c->redirect( $c->session->{prev_action} );
+    }
+    else {
+        $c->redirect( $c->uri_for_site('/') );
+    }
+}
+
+sub save_current_action {
+    my ( $c ) = @_;
+
+    my $uri      = $c->action;
+    my $captures = $c->req->captures;
+    my $args     = $c->req->arguments || [];
+
+    my $saved_action = $c->uri_for( $uri, $captures, @$args );
+
+    $c->session->{prev_action} = $saved_action;
 }
 
 =head1 NAME

@@ -28,18 +28,9 @@ Catalyst Controller for account management, login, logout, etc..
 sub logout : Chained('/site') PathPart('logout') Args(0) {
     my ($self, $c) = @_;
 
-    $c->logout;
-    
-    $c->req->params($c->session->{prev_params});
-    
-#    my $forward_to = '/' . $c->session->{prev_action};
-#    if ( $forward_to eq '/') {
-#        $forward_to = '/browse';
-#    }
-    
-#    return $c->forward($forward_to, $c->session->{prev_arguments});
-
-    return $c->response->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse_index') ) );
+    $c->logout();
+    return $c->restore_saved_action();
+#    return $c->response->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse_index') ) );
 }
 
 
@@ -93,9 +84,8 @@ sub login : Chained('/site') PathPart('login') Args(0) {
         
         if ( defined($c->user) ) {
             if ( $c->user->active ) {
-#                $c->req->params($c->session->{prev_params});
-#                return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
-                return $c->response->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse_index') ) );
+                return $c->restore_saved_action();
+#                return $c->response->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse_index') ) );
             }
             else {
                 $c->stash->{error} = ['This account has been disabled by library administrators.'];

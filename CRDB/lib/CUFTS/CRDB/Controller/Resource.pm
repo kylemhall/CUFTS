@@ -20,10 +20,10 @@ use CUFTS::DB::ERMMain;
 
 sub base : Chained('/site') PathPart('resource') CaptureArgs(0) { }
 
-sub resource : Chained('base') PathPart('') CaptureArgs(1) {
+sub load_resource : Chained('base') PathPart('') CaptureArgs(1) {
     my ( $self, $c, $resource_id ) = @_;
     
-    $c->stash->{erm_record} = CUFTS::DB::ERMMain->retrieve( $resource_id );
+    $c->stash->{erm} = CUFTS::DB::ERMMain->retrieve( $resource_id );
 }
 
 
@@ -34,8 +34,11 @@ Default is to view the resource.
 
 =cut
 
-sub default_view : Chained('resource') PathPart('') Args(0) {
+sub default_view : Chained('load_resource') PathPart('') Args(0) {
     my ( $self, $c ) = @_;
+
+    $c->save_current_action();
+    
     $c->stash->{template} = 'resource.tt';
 }
 
@@ -47,10 +50,10 @@ used for things like the pop-up resource details.
 =cut
 
 
-sub json : Chained('resource') PathPart('json') Args(0) {
+sub json : Chained('load_resource') PathPart('json') Args(0) {
     my ( $self, $c ) = @_;
 
-    my $erm_obj = $c->stash->{erm_record};
+    my $erm_obj = $c->stash->{erm};
     my $erm_hash = {
         subjects => [],
         content_types => [],
@@ -71,8 +74,15 @@ sub json : Chained('resource') PathPart('json') Args(0) {
     my @content_types = $erm_obj->content_types;
     @{ $erm_hash->{content_types} } = map { $_->content_type } sort { $a->content_type cmp $b->content_type } @content_types;
 
+    if ( my $license = $erm_hash->{license} ) {
+        $erm_hash->{license} = {};
+        foreach my $column ( $license->columns() ) {
+            $erm_hash->{license}->{$column} = $license->$column();
+        }
+    }
+
     $c->stash->{json} = $erm_hash;
-    
+
     $c->stash->{current_view} = 'JSON';
 }
 
