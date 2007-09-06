@@ -127,7 +127,7 @@ __PACKAGE__->add_columns( qw(
     breaches)
 );                                                                                                        
 
-__PACKAGE__->mk_group_accessors('column' => qw/ result_name sort_name / );
+__PACKAGE__->mk_group_accessors('column' => qw/ result_name sort_name rank / );
 
 __PACKAGE__->set_primary_key( 'id' );
 
