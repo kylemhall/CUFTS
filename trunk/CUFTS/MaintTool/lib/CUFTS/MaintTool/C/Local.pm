@@ -171,9 +171,13 @@ sub edit : Local {
         if ( defined($global_resource) ) {
             $new_record->{resource} = $global_resource->id;
         }
+        else {
+            $new_record->{module} = 'blank';
+        }
 
         eval {
             $local_resource = CUFTS::DB::LocalResources->create($new_record);
+            $c->stash->{local_resource} = $local_resource;
         };
             
         if ($@) {
