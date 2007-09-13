@@ -94,6 +94,7 @@ sub title_list_field_map {
         'FULLTEXT_START' => 'ft_start_date',
         'FULLTEXT_END'   => 'ft_end_date',
         'DB_IDENTIFIER'  => 'db_identifier',
+        'URLBASE'        => 'journal_url',
     };
 }
 
@@ -101,33 +102,24 @@ sub clean_data {
     my ( $class, $record ) = @_;
     my @errors;
 
-    if ( defined( $record->{'___EMBARGO'} ) ) {
-        if ( $record->{'___EMBARGO'} =~ /(\d+)\s+(\w+)/ ) {
-            if ( $2 =~ /^month/ ) {
-                $record->{embargo_months} = $1;
+    if ( defined( $record->{'___EMBARGO'} ) && $record->{'___EMBARGO'} =~ /(\d+)\s+(\w+)/ ) {
+
+            my ( $amount, $period ) = ( $1, $2 );
+            if ( $period =~ /^month/ ) {
+                $record->{embargo_months} = $amount;
             }
-            elsif ( $2 =~ /^day/ ) {
-                $record->{embargo_days} = $1;
+            elsif ( $period =~ /^day/ ) {
+                $record->{embargo_days} = $amount;
             }
 
-        }
     }
 
     # Clear embargo months/days if there's no fulltext start/end dates
 
-    
     if ( is_empty_string($record->{ft_start_date}) && is_empty_string($record->{ft_end_date}) ) {
-
-        if ( not_empty_string($record->{embargo_months}) ) {
             delete $record->{embargo_months};
-        }
-
-        if ( not_empty_string($record->{embargo_days}) ) {
             delete $record->{embargo_days};
-        }
-
     }
-    
 
     my $errors = $class->SUPER::clean_data($record);
     push @errors, @$errors if defined($errors);
