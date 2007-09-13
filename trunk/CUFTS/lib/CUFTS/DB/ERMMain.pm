@@ -163,14 +163,12 @@ sub main_name {
         if ( defined($name_record) ) {
             if ( $name_record->name ne $new_name ) {
                 $name_record->name( $new_name );
-                $name_record->search_name( CUFTS::DB::ERMNames->strip_name( $new_name ) );
                 $name_record->update;
             }
         }
         else {
             $name_record = CUFTS::DB::ERMNames->create({
                 name        => $new_name,
-                search_name => CUFTS::DB::ERMNames->strip_name($new_name),
                 erm_main    => $self->id,
                 main        => 1,
             });
