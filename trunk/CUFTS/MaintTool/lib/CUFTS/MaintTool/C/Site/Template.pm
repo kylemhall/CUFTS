@@ -37,7 +37,6 @@ sub menu : Local {
         browse_journals_unified_data.tt
         browse_search_description.tt
         browse_subjects.tt
-        cjdb_layout.tt
         errors.tt
         journal.tt
         journal_associations.tt
@@ -56,7 +55,7 @@ sub menu : Local {
         loggedin.tt
         login.tt
         manage_tags_info.tt
-        cjdb_menu.tt
+        menu.tt
         mytags.tt
         nav_line.tt
         page_footer.tt
