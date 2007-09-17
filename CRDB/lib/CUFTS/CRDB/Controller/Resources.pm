@@ -53,7 +53,7 @@ sub rerank : Chained('edit_erm_records') PathPart('rerank') Args(0) {
         
         # Add security join which only brings back subjects for the current site
         
-        my %records = map { $_->erm_main => $_ } $c->model('CUFTS::ERMSubjectsMain')->search( { subject => $subject } )->all;
+        my %records = map { $_->get_column('erm_main') => $_ } $c->model('CUFTS::ERMSubjectsMain')->search( { subject => $subject } )->all;
 
         my $resource_order = $c->form->{valid}->{resource_order} || [];
         $resource_order = [ $resource_order ] if !ref($resource_order);
