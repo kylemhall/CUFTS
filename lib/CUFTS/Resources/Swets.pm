@@ -114,13 +114,10 @@ sub clean_data {
 
     # Clear vol/iss ends unless the journal is really ending (has a ft end date)
 
-    if ( !defined($record->{ft_end_date}) ) {
-        if ( defined($record->{vol_ft_end}) ) {
+    if ( is_empty_string( $record->{ft_end_date} ) ) {
+            delete $record->{ft_end_date};
             delete $record->{vol_ft_end};
-        }
-        if ( defined($record->{iss_ft_end}) ) {
             delete $record->{iss_ft_end};
-        }
     }
 
     # Remove the electronic ISSN field if it is a duplicate of the ISSN
