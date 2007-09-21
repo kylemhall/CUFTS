@@ -36,7 +36,7 @@
 
 <div class="field">
  <div class="data">    
-  <label>Contract end</label>
+  <label>contract end</label>
   <span class="data">[% erm_main.contract_end | html %]</span>
  </div>
 </div>
