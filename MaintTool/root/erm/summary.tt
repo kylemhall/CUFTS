@@ -44,7 +44,7 @@
 
 <div class="field">
  <div class="data">    
-  <label>resource type</label>
+  <label>consortia</label>
   <span class="data">[% erm_main.consortia.consortia | html %]</span>
  </div>
 </div>
