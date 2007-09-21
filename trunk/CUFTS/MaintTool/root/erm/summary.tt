@@ -29,6 +29,28 @@
 
 <div class="field">
  <div class="data">    
+  <label>URL</label>
+  <span class="data">[% erm_main.url | html %]</span>
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">    
+  <label>Contract end</label>
+  <span class="data">[% erm_main.contract_end | html %]</span>
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">    
+  <label>resource type</label>
+  <span class="data">[% erm_main.consortia.consortia | html %]</span>
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">    
   <label>resource type</label>
   <span class="data">[% erm_main.resource_type.resource_type | html %]</span>
  </div>
