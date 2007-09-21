@@ -23,6 +23,7 @@ sub base : Chained('/site') PathPart('browse') CaptureArgs(0) {
 }
 
 sub options : Chained('base') PathPart('') CaptureArgs(0) {
+
     my ( $self, $c ) = @_;
     
     my @load_options = (
@@ -44,15 +45,16 @@ sub options : Chained('base') PathPart('') CaptureArgs(0) {
 
             $c->stash->{$type}           = { map { $_->id => $_->$field } @records };
             $c->stash->{"${type}_order"} = [ map { $_->id } @records ];
-            
-            
+
             $c->cache->set( $c->site->id . " $type" , $c->stash->{$type} );
             $c->cache->set( $c->site->id . " ${type}_order" , $c->stash->{"${type}_order"} );
+
         }
 
-        $c->stash->{"${type}_json"}  = to_json( $c->stash->{$type} );
+        $c->stash->{"${type}_json"}    = to_json( $c->stash->{$type} );
         $c->stash->{"${field}_lookup"} = $c->stash->{$type};  # Alias for looking up when we have the "field" name rather than the type name.
     }
+
 }
 
 =head2 browse_index 
@@ -67,26 +69,70 @@ sub browse_index : Chained('options') PathPart('') Args(0) {
     $c->stash->{template} = 'browse.tt';
 }
 
-=head2 facets 
+=head2 facet_form
+
+Translate form parameters into a facet search path
 
 =cut
 
 
-sub facets : Chained('options') PathPart('facets') Args {
-    my ( $self, $c, @facets ) = @_;
+sub facet_form : Chained('base') PathPart('facet_form') Args(0) {
+    my ( $self, $c ) = @_;
+    
+    my @search_facets;
+    foreach my $param ( keys %{ $c->req->params } ) {
+        my $values = $c->req->params->{$param};
+        if ( ref($values) ne 'ARRAY' ) {
+            $values = [ $values ];
+        }
+        foreach my $value ( @$values ) {
+            push @search_facets, $param, $value;
+        }
+    }
+
+    return $c->redirect( $c->uri_for_site( $c->action_for('html_facets'), @search_facets ) );
+}
+
+=head2 _facet_search
+
+Builds the facet search from a list of facets and returns a result set.
+
+=cut
+
+
+sub _facet_search  {
+    my ( $self, $c, $facet_list ) = @_;
 
     $c->save_current_action();
 
     my $facets = {};
-    while ( my ( $type, $data ) = splice( @facets, 0, 2 ) ) {
+    while ( my ( $type, $data ) = splice( @$facet_list, 0, 2 ) ) {
         $facets->{$type} = $data;
     }
     
     my $search = { %{$facets} };
     $search->{public_list} = 't';
 
-    my @records = $c->model('ERMMain')->facet_search( $c->site->id, $search )->all();
-    if ( exists( $facets->{subject} ) ) {
+    $c->stash->{facets} = $facets;
+
+    return $c->model('ERMMain')->facet_search( $c->site->id, $search );
+}
+
+
+
+=head2 json_facets
+
+Returns the results of a facet search in JSON.  Facets are specified as part of the URL.
+
+=cut
+
+sub html_facets : Chained('options') PathPart('facets') Args {
+    my ( $self, $c, @facets ) = @_;
+
+    my $rs = $self->_facet_search( $c, \@facets );
+    my @records = $rs->all();
+
+    if ( exists( $c->stash->{facets}->{subject} ) ) {
         # Rank sort for subjects
         @records = sort { $a->rank cmp $b->rank or $a->sort_name cmp $b->sort_name } @records;
     }
@@ -95,40 +141,35 @@ sub facets : Chained('options') PathPart('facets') Args {
         @records = sort { $a->sort_name cmp $b->sort_name } @records;
     }
 
-    $c->stash->{records}  = \@records;
-    $c->stash->{facets}   = $facets;
     $c->stash->{template} = 'browse.tt';
+    $c->stash->{records}  = \@records;
 }
 
-=head2 results
+
+=head2 json_facets
 
 Returns the results of a facet search in JSON.  Facets are specified as part of the URL.
 
 =cut
 
-sub json_facets : Chained('base') PathPart('json_facets') Args {
+sub json_facets : Chained('options') PathPart('facets/json') Args {
     my ( $self, $c, @facets ) = @_;
 
-    my $facets = {};
-    while ( my ( $type, $data ) = splice( @facets, 0, 2 ) ) {
-        $facets->{$type} = $data;
-    }
+    my $rs = $self->_facet_search( $c, \@facets );
 
-    my $search = { %{$facets} };
-    $search->{public_list} = 't';
+    $rs->result_class('DBIx::Class::ResultClass::HashRefInflator');  # Get a hash so the JSON view can convert
+    my @records = $rs->all();
 
-    my @records = $c->model('ERMMain')->facet_search( $c->site->id, $search )->all();
-    if ( exists( $facets->{subject} ) ) {
+    if ( exists( $c->stash->{facets}->{subject} ) ) {
         # Rank sort for subjects
-#        @records = sort { $a->rank cmp $b->rank or $a->sort_name cmp $b->sort_name } @records;
+        @records = sort { $a->{rank} cmp $b->{rank} or $a->{sort_name} cmp $b->{sort_name} } @records;
     }
     else {
         # Default to title sort
-#        @records = sort { $a->sort_name cmp $b->sort_name } @records;
+        @records = sort { $a->{sort_name} cmp $b->{sort_name} } @records;
     }
-    
-    $c->stash->{json}->{records} = \@records;
 
+    $c->stash->{json}->{records} = \@records;
     $c->stash->{current_view}  = 'JSON';
 }
 
@@ -145,26 +186,19 @@ site_id [facet_type facet_data]...
 sub count_facets : Chained('base') PathPart('count_facets') Args {
     my ( $self, $c, @facets ) = @_;
 
-    my %facets;
-    while ( my ( $type, $data ) = splice( @facets, 0, 2 ) ) {
-        $facets{$type} = $data;
-    }
-
-    my $cache_key = $c->site->id . ' ' . join( ' ', map { $_ . ' ' . $facets{$_} } sort keys %facets );
+    my $rs = $self->_facet_search( $c, \@facets );
+ 
+    # Flatten the facets hash to produce a cache key
+    my $cache_key = $c->site->id . ' ' . join( ' ', map { $_ . ' ' . $c->stash->{facets}->{$_} } sort keys %{$c->stash->{facets}} );
 
     # Add caching in server session?
     my $count = $c->cache->get( $cache_key ); 
     if ( !defined($count) ) {
-
-        my $search = { %facets };
-        $search->{public_list} = 't';
-
-        $count = $c->model('ERMMain')->facet_search( $c->site->id, $search )->count();
+        $count = $rs->count();
         $c->cache->set( $cache_key, $count );
     }
 
     $c->stash->{json}->{count} = $count;
-
     $c->stash->{current_view}  = 'JSON';
 }
 

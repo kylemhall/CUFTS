@@ -21,7 +21,7 @@
 
       <h2>Keyword</h2>
       <div id="resources-brief-browse-keyword" class="resources-facet-choice-list" style="width: 99%; height: 100%">
-       <form onSubmit="return false;"><input style="border: 1px solid black; width: 16em" name="keyword" type="text" onKeyPress="if (event.keyCode == 13) {  var keywordvalue = $(this).val(); add_facet( 'keyword', keywordvalue ); return false; } return true;" value="[% facets.keyword | html %]" /></form>
+       <form method="POST" action="[% c.uri_for_site( c.controller('Browse').action_for('facet_form') ) %]" onSubmit="return false;"><input style="border: 1px solid black; width: 16em" name="keyword" type="text" onKeyPress="if (event.keyCode == 13) {  var keywordvalue = $(this).val(); add_facet( 'keyword', keywordvalue ); return false; } return true;" value="[% facets.keyword | html %]" /></form>
       </div>
 
      </div>
@@ -31,9 +31,9 @@
       <h2>Titles</h2>
       <div id="resources-brief-browse-title" style="width: 99%; height: 100%; white-space: nowrap;">
        [% FOREACH letter IN [ 'A' .. 'Z' ] %]
-        <a href="[% url("$url_base/resources/browse/add_facet/name/$letter") %]" onClick="add_facet( 'name', '[% letter %]'); return false;">[% letter %]</a>
+        <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'name', letter ) %]" onClick="add_facet( 'name', '[% letter %]' ); return false;">[% letter %]</a>
        [% END %]
-       <a href="[% url("$url_base/resources/browse/add_facet/name/[^a-z]") %]"  onClick="add_facet( 'name', '[^a-z]'); return false;">0-9</a>
+       <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'name', '[^a-z]' ) %]"  onClick="add_facet( 'name', '[^a-z]'); return false;">0-9</a>
       </div>
   
      </div>
@@ -48,7 +48,7 @@
     [% FOREACH subject_id IN subjects_order %]
      [% SET subject = subjects.$subject_id %]
      <div class="resources-main-browse-subject-record" id="resources-main-browse-facet-subject-[% subject_id %]">
-      <a href="[% url("$url_base/resources/browse/add_facet/subject/$subject_id") %]" onClick="add_facet( 'subject', '[% subject_id %]' ); return false;">[% subject %]</a>
+      <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'subject', subject_id ) %]" onClick="add_facet( 'subject', '[% subject_id %]' ); return false;">[% subject %]</a>
      </div>
     [% END %]
    </div>
@@ -59,7 +59,7 @@
    <div id="resources-brief-browse-resource-type" class="resources-facet-choice-list">
    [% FOREACH resource_type_id IN resource_types_order %]
     [% SET resource_type = resource_types.$resource_type_id %]
-    <a href="[% url("$url_base/resources/browse/add_facet/resource_type/$resource_type_id") %]" onClick="add_facet( 'resource_type', '[% resource_type_id %]'); return false;">[% resource_type %]</a> <br />
+    <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'resource_type', resource_type_id ) %]" onClick="add_facet( 'resource_type', '[% resource_type_id %]'); return false;">[% resource_type %]</a> <br />
    [% END %]
    </div>
   </div>
@@ -69,7 +69,7 @@
    <div id="resources-brief-browse-content-type" class="resources-facet-choice-list">
    [% FOREACH content_type_id IN content_types_order %]
     [% SET content_type = content_types.$content_type_id %]
-    <a href="[% url("$url_base/resources/browse/add_facet/content_type/$content_type_id") %]" onClick="add_facet( 'content_type', '[% content_type_id %]'); return false;">[% content_type %]</a><br />
+    <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'content_type' content_type_id ) %]" onClick="add_facet( 'content_type', '[% content_type_id %]'); return false;">[% content_type %]</a><br />
    [% END %]
    </div>
   </div>
