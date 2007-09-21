@@ -79,9 +79,18 @@ Translate form parameters into a facet search path
 sub facet_form : Chained('base') PathPart('facet_form') Args(0) {
     my ( $self, $c ) = @_;
     
+    my $action = 'html_facets';
+    
     my @search_facets;
     foreach my $param ( keys %{ $c->req->params } ) {
         my $values = $c->req->params->{$param};
+
+        # Special case to allow specifying JSON format as a parameter
+        if ( $param eq 'format' && $values eq 'json' ) {
+            $action = 'json_facets';
+            next;
+        }
+
         if ( ref($values) ne 'ARRAY' ) {
             $values = [ $values ];
         }
@@ -90,7 +99,7 @@ sub facet_form : Chained('base') PathPart('facet_form') Args(0) {
         }
     }
 
-    return $c->redirect( $c->uri_for_site( $c->action_for('html_facets'), @search_facets ) );
+    return $c->redirect( $c->uri_for_site( $c->action_for('html_facets'), @search_facets, {} ) );
 }
 
 =head2 _facet_search
@@ -168,7 +177,7 @@ sub json_facets : Chained('options') PathPart('facets/json') Args {
         # Default to title sort
         @records = sort { $a->{sort_name} cmp $b->{sort_name} } @records;
     }
-
+    
     $c->stash->{json}->{records} = \@records;
     $c->stash->{current_view}  = 'JSON';
 }
