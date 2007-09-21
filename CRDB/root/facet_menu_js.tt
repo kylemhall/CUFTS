@@ -64,7 +64,7 @@
 
  function submit_facet_changes() {
 
-  var URL = "[% c.uri_for_site( c.controller('Browse').action_for('facets') ) %]/";
+  var URL = "[% c.uri_for_site( c.controller('Browse').action_for('html_facets') ) %]/";
 
   $.each( facet_array, function(facet_type, data)  {
       URL = URL + facet_type + '/' + data + '/';
