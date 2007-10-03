@@ -934,6 +934,7 @@ CJDB_RECORD:
             foreach my $field_num ( '245', '246' ) {
                 my @title_fields = $MARC_record->field( $field_num );
                 foreach my $title_field ( @title_fields ) {
+                    $title_field->delete_subfield( code => 'h' );
                     $title_field->add_subfields( 'h', latin1_to_marc8($site->marc_dump_medium_text) );
                 }
             }
