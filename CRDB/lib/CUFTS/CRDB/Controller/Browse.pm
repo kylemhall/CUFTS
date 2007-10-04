@@ -112,8 +112,6 @@ Builds the facet search from a list of facets and returns a result set.
 sub _facet_search  {
     my ( $self, $c, $facet_list ) = @_;
 
-    $c->save_current_action();
-
     my $facets = {};
     while ( my ( $type, $data ) = splice( @$facet_list, 0, 2 ) ) {
         $facets->{$type} = $data;
@@ -149,6 +147,8 @@ sub html_facets : Chained('options') PathPart('facets') Args {
         # Default to title sort
         @records = sort { $a->sort_name cmp $b->sort_name } @records;
     }
+
+    $c->save_current_action();
 
     $c->stash->{template} = 'browse.tt';
     $c->stash->{records}  = \@records;
