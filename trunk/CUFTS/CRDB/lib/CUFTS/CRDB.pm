@@ -159,6 +159,8 @@ sub save_current_action {
 
     my $saved_action = $c->uri_for( $uri, $captures, @$args );
 
+    warn( "Saving action: $saved_action" );
+
     $c->session->{prev_action} = $saved_action;
 }
 
