@@ -61,7 +61,7 @@ sub title_list_field_map {
 sub overridable_resource_details {
         my ($class) = @_;
 
-        my $details = $class->SUPER:overridable_resource_details();
+        my $details = $class->SUPER::overridable_resource_details();
         push @$details, 'url_base';
 
         return $details;
