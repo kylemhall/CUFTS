@@ -224,9 +224,9 @@ sub build_linkDatabase {
 
     foreach my $record (@$records) {
 
-        my $url = $resource->database_url;
+        my $url = $resource->url_base;
         if ( is_empty_string($url) ) { 
-            $url = $resource->url_base;
+            $url = $resource->database_url;
         }
         if ( is_empty_string($url) ) {
             return [];
