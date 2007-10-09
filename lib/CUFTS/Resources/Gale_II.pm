@@ -259,19 +259,30 @@ sub build_linkJournal {
             return [];
         }
 
-        if ( $resource->auth_name ) {
-            $url .= $resource->auth_name;
+        # Try first style of linking:
+        # http://infotrac.galegroup.com.darius/itw/infomark/1/1/1/purl=rc18%5fSP09%5F0%5F%5Fjn+%22Computers+in+Libraries%22
+        
+        
+        if ( $url =~ /purl=rc1/ ) {
+            $url .= '%22' . uri_escape($record->title) . '%22';
         }
+        else {
 
-        if ( $resource->resource_identifier ) {
-            if ( $url =~ /IOURL/ ) {
-                $url .= '?prod=' . $resource->resource_identifier;
-            } else {
-                $url .= '?db=' . $resource->resource_identifier;
+            if ( $resource->auth_name ) {
+                $url .= $resource->auth_name;
             }
-        }
 
-        $url .= '&title=' . uri_escape($record->title);
+            if ( $resource->resource_identifier ) {
+                if ( $url =~ /IOURL/ ) {
+                    $url .= '?prod=' . $resource->resource_identifier;
+                } else {
+                    $url .= '?db=' . $resource->resource_identifier;
+                }
+            }
+
+            $url .= '&title=' . uri_escape($record->title);
+        }
+        
         $url .= __add_proxy_suffix($url, $resource->proxy_suffix);
 
         my $result = new CUFTS::Result($url);
