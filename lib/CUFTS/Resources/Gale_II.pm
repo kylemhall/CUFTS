@@ -191,6 +191,7 @@ sub local_resource_details {
     return [
         @{ $class->SUPER::local_resource_details },
         qw(
+            url_base
             auth_name
             proxy_suffix
         )
