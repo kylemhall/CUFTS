@@ -3,6 +3,7 @@ package CUFTS::ResultSet::ERMMain;
 use strict;
 use base 'DBIx::Class::ResultSet';
 
+use Set::Object;
 
 use Data::Dumper;
 
@@ -149,6 +150,38 @@ sub _facet_search_keyword {
             'names.search_name'    => { '~'  => CUFTS::Schema::ERMNames->strip_name( $data ) },
     ];
         
+}
+
+
+##
+## Restricted column information
+##
+
+sub restricted_columns {
+    my ( $class, $site, $account ) = @_;
+    
+    my $account_type = $class->get_account_type( $account );
+    
+    if ( $account_type eq 'patron' ) {
+        return grep { grep { $_ eq 'patron' } @{ $class->result_source->column_info($_)->{default_can_view} } } $class->result_source->columns;
+    }
+    elsif ( $account_type eq 'staff' ) {
+        return grep { grep { $_ eq 'staff' } @{ $class->result_source->column_info($_)->{default_can_view} } } $class->result_source->columns;
+    }
+    else {
+        die("Unrecognized account type: ${account_type}");
+    }
+    
+}
+
+sub get_account_type {
+    my ( $class, $account ) = @_;   # CJDB::Schema::Account
+    
+    # Lowest level access if there is not account
+
+    return 'patron' if !defined($account);
+
+    return $account->get_account_type();
 }
 
 1;
