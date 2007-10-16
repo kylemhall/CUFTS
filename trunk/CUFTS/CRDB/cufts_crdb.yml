@@ -1,6 +1,6 @@
 ---
 name: CUFTS::CRDB
-default_view: View::TT
+default_view: TT
 
 connect_info:
     - 'dbi:Pg:dbname=CUFTS3'

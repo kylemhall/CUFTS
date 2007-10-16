@@ -7,7 +7,7 @@ use CUFTS::Util::Simple;
 
 my $edit_form_validate = {
     optional => [ qw( submit cancel ) ],
-    optional_regexp => qr/^(consortia|content_types|cost_bases|resource_types|resource_mediums|subjects)/,
+    optional_regexp => qr/^(consortia|content_types|pricing_models|resource_types|resource_mediums|subjects)/,
     filters => ['trim'],
 };
 
@@ -20,12 +20,12 @@ sub auto : Private {
 sub edit : Local {
     my ( $self, $c ) = @_;
     
-    my @tables = qw( consortia content_types cost_bases resource_mediums resource_types subjects );
+    my @tables = qw( consortia content_types pricing_models resource_mediums resource_types subjects );
 
     my %db_classes = (
         consortia        => 'CUFTS::DB::ERMConsortia',
         content_types    => 'CUFTS::DB::ERMContentTypes',
-        cost_bases       => 'CUFTS::DB::ERMCostBases',
+        pricing_models   => 'CUFTS::DB::ERMPricingModels',
         resource_mediums => 'CUFTS::DB::ERMResourceMediums',
         resource_types   => 'CUFTS::DB::ERMResourceTypes',
         subjects         => 'CUFTS::DB::ERMSubjects',
@@ -34,7 +34,7 @@ sub edit : Local {
     my %value_field = (
         consortia        => 'consortia',
         content_types    => 'content_type',
-        cost_bases       => 'cost_base',
+        pricing_models   => 'pricing_model',
         resource_types   => 'resource_type',
         resource_mediums => 'resource_medium',
         subjects         => 'subject',
@@ -43,7 +43,7 @@ sub edit : Local {
     my %count_table = (
         consortia        => 'CUFTS::DB::ERMMain',
         content_types    => 'CUFTS::DB::ERMContentTypesMain',
-        cost_bases       => 'CUFTS::DB::ERMMain',
+        pricing_models   => 'CUFTS::DB::ERMMain',
         resource_mediums => 'CUFTS::DB::ERMMain',
         resource_types   => 'CUFTS::DB::ERMMain',
         subjects         => 'CUFTS::DB::ERMSubjectsMain',
@@ -72,7 +72,7 @@ sub edit : Local {
         # Deletes
 
         foreach my $param ( keys %{ $c->req->params } ) {
-            if ( $param =~ /^(cost_bases|consortia|content_types|resource_types|resource_mediums|subjects)_delete$/ ) {
+            if ( $param =~ /^(pricing_models|consortia|content_types|resource_types|resource_mediums|subjects)_delete$/ ) {
                 my $table = $1;
                 my $method = $value_field{$table};
                 my @ids = $c->form->valid->{$param};
@@ -95,7 +95,7 @@ sub edit : Local {
         # Updates
 
         foreach my $param ( keys %{ $c->req->params } ) {
-            if ( $param =~ /^(cost_bases|consortia|content_types|resource_types|resource_mediums|subjects)_(\d+)$/ ) {
+            if ( $param =~ /^(pricing_models|consortia|content_types|resource_types|resource_mediums|subjects)_(\d+)$/ ) {
                 my $method = $value_field{$1};
                 my $record = $records->{$1}->{$2};
                 next if !defined($record);    # Record was deleted
@@ -117,7 +117,7 @@ sub edit : Local {
         # New entries
 
         foreach my $param ( keys %{ $c->req->params } ) {
-            if ( $param =~ /^(cost_bases|consortia|content_types|resource_types|resource_mediums|subjects)_new$/ ) {
+            if ( $param =~ /^(pricing_models|consortia|content_types|resource_types|resource_mediums|subjects)_new$/ ) {
                 my $table = $1;
                 my $value = $c->form->valid->{$param};
                 next if is_empty_string( $value );

@@ -195,7 +195,7 @@
 
 
 <fieldset>
- <legend>ERM Cost Bases</legend>
+ <legend>ERM Pricing Models</legend>
 
 <div class="form-heading">
  <label class="delete">delete</label>
@@ -203,17 +203,17 @@
 </div>
 
  [% SET count = 0 %]
- [% FOREACH cost_base IN cost_bases %]
+ [% FOREACH pricing_model IN pricing_models %]
   <div class="field">
    <div class="data">
     <div class="delete">
-     <input class="delete" [% 'disabled="disabled"' IF cost_base_count.$count %] type="checkbox" name="cost_bases_delete" value="[% cost_base.id %]"  />
+     <input class="delete" [% 'disabled="disabled"' IF pricing_model_count.$count %] type="checkbox" name="pricing_models_delete" value="[% pricing_model.id %]"  />
     </div>
-    <input maxlength="1024" size="50" type="text" name="cost_bases_[% cost_base.id %]" value="[% cost_base.cost_base | html %]" />
+    <input maxlength="1024" size="50" type="text" name="pricing_models_[% pricing_model.id %]" value="[% pricing_model.pricing_model | html %]" />
    </div>
    <div class="help">
-    [% IF cost_bases_count.$count > 0 %]
-     This cost base is used in <span class="no-highlight">[% cost_bases_count.$count %]</span> ERM record(s) and <span class="no-highlight">cannot</span> be deleted until those are changed.
+    [% IF pricing_models_count.$count > 0 %]
+     This cost base is used in <span class="no-highlight">[% pricing_models_count.$count %]</span> ERM record(s) and <span class="no-highlight">cannot</span> be deleted until those are changed.
     [% ELSE %]
      This cost base is not used in any ERM and <span class="yes-highlight">can</span> be deleted.
     [% END %]
@@ -224,8 +224,8 @@
 
  <div class="field">
   <div class="data">
-   <label for="cost_base_new" class="new">new</label>
-   <input type="text" maxlength="1024" size="50" name="cost_bases_new" id="cost_base_new" value="" />
+   <label for="pricing_model_new" class="new">new</label>
+   <input type="text" maxlength="1024" size="50" name="pricing_models_new" id="pricing_model_new" value="" />
   </div>
   <div class="help">Add a new ERM cost base record.</div>
  </div>

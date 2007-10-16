@@ -49,6 +49,7 @@ __PACKAGE__->columns(All => qw(
     public_list
     public_message
     subscription_status
+    print_included
     active_alert
     pick_and_choose
     marc_available
@@ -68,12 +69,18 @@ __PACKAGE__->columns(All => qw(
     subscription_ownership
     subscription_ownership_notes
     misc_notes
+    issn
+    isbn
 
-    cost_base
-    cost_base_notes
+    pricing_model
+    pricing_model_notes
     cost
+    invoice_amount
+    currency
     gst
     pst
+    gst_amount
+    pst_amount
     payment_status
     contract_start
     contract_end
@@ -89,10 +96,10 @@ __PACKAGE__->columns(All => qw(
     local_vendor
     local_acquisitions
     local_fund
+    journal_auth
     consortia
     consortia_notes
     date_cost_notes
-    pricing_model
     subscription
     price_cap
     license_start_date
@@ -131,7 +138,7 @@ __PACKAGE__->columns(All => qw(
 __PACKAGE__->columns( Essential => __PACKAGE__->columns );
 __PACKAGE__->columns( TEMP => qw( result_name rank ) );
 __PACKAGE__->has_a('consortia', 'CUFTS::DB::ERMConsortia');
-__PACKAGE__->has_a('cost_base', 'CUFTS::DB::ERMCostBases');
+__PACKAGE__->has_a('pricing_model', 'CUFTS::DB::ERMPricingModels');
 __PACKAGE__->has_a('resource_medium', 'CUFTS::DB::ERMResourceMediums');
 __PACKAGE__->has_a('resource_type', 'CUFTS::DB::ERMResourceTypes');
 __PACKAGE__->has_many('subjects', ['CUFTS::DB::ERMSubjectsMain' => 'subject'], 'erm_main');

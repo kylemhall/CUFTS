@@ -139,17 +139,6 @@ sub redirect {
     $c->detach();
 }
 
-sub restore_saved_action {
-    my ( $c ) = @_;
-
-    if ( $c->session->{prev_action} ) {
-        $c->redirect( $c->session->{prev_action} );
-    }
-    else {
-        $c->redirect( $c->uri_for_site('/') );
-    }
-}
-
 sub save_current_action {
     my ( $c ) = @_;
 
@@ -158,10 +147,12 @@ sub save_current_action {
     my $args     = $c->req->arguments || [];
 
     my $saved_action = $c->uri_for( $uri, $captures, @$args );
+    
+    $c->stash->{ return_to } = $saved_action || $c->uri_for_site('/');
 
     warn( "Saving action: $saved_action" );
 
-    $c->session->{prev_action} = $saved_action;
+#    $c->session->{prev_action} = $saved_action;
 }
 
 =head1 NAME

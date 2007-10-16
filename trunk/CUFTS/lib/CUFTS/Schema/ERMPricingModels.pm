@@ -1,4 +1,4 @@
-## CUFTS::DB::ERMCostBases
+## CUFTS::DB::ERMPricingModels
 ##
 ## Copyright Todd Holbrook, Simon Fraser University (2003)
 ##
@@ -18,20 +18,21 @@
 ## with CUFTS; if not, write to the Free Software Foundation, Inc., 59
 ## Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package CUFTS::DB::ERMCostBases;
+package CUFTS::Schema::ERMPricingModels;
 
 use strict;
-use base 'CUFTS::DB::DBI';
+use base qw/DBIx::Class/;
 
-__PACKAGE__->table('erm_cost_bases');
-__PACKAGE__->columns(Primary => 'id');
-__PACKAGE__->columns(All => qw(
+__PACKAGE__->load_components(qw/PK::Auto Core/);
+
+__PACKAGE__->table('erm_pricing_models');
+__PACKAGE__->add_columns( qw(
     id
     site
-    cost_base
+    pricing_model
 ));                                                                                                        
-__PACKAGE__->columns(Essential => __PACKAGE__->columns);
-__PACKAGE__->sequence('erm_cost_bases_id_seq');
+
+__PACKAGE__->set_primary_key( 'id' );
 
 1;
 

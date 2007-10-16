@@ -59,6 +59,8 @@ sub json : Chained('load_resource') PathPart('json') Args(0) {
         content_types => [],
     };
     
+    # TODO: Get valid staff and patron columns and filter
+    
     foreach my $column ( $erm_obj->columns() ) {
         $erm_hash->{$column} = $erm_obj->$column();
     }
