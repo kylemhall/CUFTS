@@ -293,6 +293,27 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-issn">ISSN</label>
+  <input id="erm-edit-input-issn" name="issn" value="[% erm.issn | html %]" style="width: 10em;" />
+ </div>
+ <div class="help">
+  ISSN.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-isbn">ISBN</label>
+  <input id="erm-edit-input-isbn" name="isbn" value="[% erm.isbn | html %]" style="width: 10em;" />
+ </div>
+ <div class="help">
+  ISBN.
+ </div>
+</div>
+
+
 <!--- ADD EXPIRY FIELD -->
 
 <div class="field">
@@ -368,7 +389,7 @@ $( function() {
   <input id="erm-edit-input-subscription_type" name="subscription_type" value="[% erm.subscription_type | html %]" style="width: 30em;" />
  </div>
  <div class="help">
-  Subscription type.
+  For journals. Describes type of subscription – either Direct Subscription or Part of a Package.
  </div>
 </div>
 
@@ -378,7 +399,21 @@ $( function() {
   <input id="erm-edit-input-subscription_status" name="subscription_status" value="[% erm.subscription_status | html %]" style="width: 30em;" />
  </div>
  <div class="help">
-  Subscription status.
+  Status of the subscription – Active, trial, cancelled etc.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-print_required">print required?</label>
+  <select id="erm-edit-input-print_required" name="print_required" style="width: 4em;">
+   <option value=""></option>
+   <option value="1" [% 'selected="selected"' IF erm.print_required == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.print_required == 0 %]>No</option>
+  </select>
+ </div>
+ <div class="help">
+  Print subscription is required for online access?
  </div>
 </div>
 
@@ -389,7 +424,7 @@ $( function() {
   <textarea id="erm-edit-input-subscription_notes" name="subscription_notes">[% erm.subscription_notes | html %]</textarea>
  </div>
  <div class="help">
-  Local information regarding the subscription.
+  Enter further information about the subscription here..
  </div>
 </div>
 
@@ -399,17 +434,17 @@ $( function() {
   <input id="erm-edit-input-subscription_ownership" name="subscription_ownership" value="[% erm.subscription_ownership | html %]" style="width: 30em;" />
  </div>
  <div class="help">
-  Subscription ownership.
+  Only for journals. Describes whether or not the resource is owned by the library and has three options – Subscription, Part of Core Package, Formerly Part of Core Package.
  </div>
 </div>
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-subscription_ownership_notes">subscription notes</label>
+  <label for="erm-edit-input-subscription_ownership_notes">subscription ownership notes</label>
   <textarea id="erm-edit-input-subscription_ownership_notes" name="subscription_ownership_notes">[% erm.subscription_ownership_notes | html %]</textarea>
  </div>
  <div class="help">
-  Local information regarding the subscription ownership.
+  Enter further information about the subscription ownership here.
  </div>
 </div>
 
@@ -586,15 +621,41 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-invoice_amount">invoice amount</label>
+  <input id="erm-edit-input-invoice_amount" name="invoice_amount" value="[% erm.invoice_amount | html %]" style="width: 10em;" />
+ </div>
+ <div class="help">
+  Amount invoiced
+ </div>
+</div>
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-cost_base">cost base</label>
-  <select id="erm-edit-input-cost_base" name="cost_base" style="width: 15em">
-   [% IF cost_base_options.defined %]
+  <label for="erm-edit-input-currency">currency</label>
+  <select id="erm-edit-input-currency" name="currency" style="width: 4em;">
+   <option value=""></option>
+   <option value="CAD" [% 'selected="selected"' IF erm.currency == 'CAD' %]>CAD</option>
+   <option value="USD" [% 'selected="selected"' IF erm.currency == 'USD' %]>USD</option>
+   <option value="GBP" [% 'selected="selected"' IF erm.currency == 'GBP' %]>GBP</option>
+   <option value="EUR" [% 'selected="selected"' IF erm.currency == 'EUR' %]>EUR</option>
+  </select>
+ </div>
+ <div class="help">
+  Currency code for invoice 
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-pricing_model">pricing model</label>
+  <select id="erm-edit-input-pricing_model" name="pricing_model" style="width: 15em">
+   [% IF pricing_model_options.defined %]
     <option value=""></option>
-    [% FOREACH cost_base_option IN cost_base_options %]
-     <option value="[% cost_base_option.id %]" [% 'selected="selected"' IF erm.cost_base.id == cost_base_option.id %]>[% cost_base_option.cost_base | html %]</option>
+    [% FOREACH pricing_model_option IN pricing_model_options %]
+     <option value="[% pricing_model_option.id %]" [% 'selected="selected"' IF erm.pricing_model.id == pricing_model_option.id %]>[% pricing_model_option.pricing_model | html %]</option>
     [% END %]
    [% ELSE %]
     <option value="">None available</option>
@@ -608,21 +669,11 @@ $( function() {
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-cost_base_notes">cost base notes</label>
-  <textarea id="erm-edit-input-cost_base_notes" name="cost_base_notes">[% erm.cost_base_notes | html %]</textarea>
+  <label for="erm-edit-input-pricing_model_notes">pricing model notes</label>
+  <textarea id="erm-edit-input-pricing_model_notes" name="pricing_model_notes">[% erm.pricing_model_notes | html %]</textarea>
  </div>
  <div class="help">
-  Extra information about the product's cost base.
- </div>
-</div>
-
-<div class="field">
- <div class="data">
-  <label for="erm-edit-input-pricing_model">pricing model</label>
-  <input id="erm-edit-input-pricing_model" name="pricing_model" value="[% erm.pricing_model | html %]" style="width: 10em;" />
- </div>
- <div class="help">
-  Pricing model
+  Extra information about the product's pricing model.
  </div>
 </div>
 
@@ -657,6 +708,16 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-gst_amount">gst amount</label>
+  <input id="erm-edit-input-gst_amount" name="gst_amount" value="[% erm.gst_amount | html %]" style="width: 10em;" />
+ </div>
+ <div class="help">
+  Amount of GST
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-pst">PST</label>
   <select id="erm-edit-input-pst" name="pst" style="width: 4em;">
    <option value=""></option>
@@ -669,6 +730,15 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-pst_amount">pst amount</label>
+  <input id="erm-edit-input-pst_amount" name="pst_amount" value="[% erm.pst_amount | html %]" style="width: 10em;" />
+ </div>
+ <div class="help">
+  Amount of PST
+ </div>
+</div>
 
 <div class="field">
  <div class="data">
@@ -745,7 +815,7 @@ $( function() {
   <input id="erm-edit-input-local_bib" name="local_bib" value="[% erm.local_bib | html %]" />
  </div>
  <div class="help">
-  Local bibliographic record ID number for the journal or resource.
+  The record number that is assigned by a local library management system to the bibliographic record for the resource.
  </div>
 </div>
 
@@ -765,7 +835,7 @@ $( function() {
   <input id="erm-edit-input-local_acquisitions" name="local_acquisitions" value="[% erm.local_acquisitions | html %]" />
  </div>
  <div class="help">
-  Local acquisitions number used for this subscription.
+  The record number that is assigned by a local library management system to the order/acquisitions record for the resource.
  </div>
 </div>
 
@@ -778,6 +848,17 @@ $( function() {
   Local fund number used for this subscription.
  </div>
 </div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-journal_auth">journal auth number</label>
+  <input id="erm-edit-input-journal_auth" name="journal_auth" value="[% erm.journal_auth | html %]" />
+ </div>
+ <div class="help">
+  CJDB journal auth number.  A more advanced linking system may be added in the future.
+ </div>
+</div>
+
 
 
 </fieldset>
@@ -1045,7 +1126,7 @@ $( function() {
   <textarea id="erm-edit-input-stats_notes" name="stats_notes">[% erm.stats_notes | html %]</textarea>
  </div>
  <div class="help">
-  Local information regarding the subscription.
+  Enter further information about statistics for the resource here.
  </div>
 </div>
 
@@ -1079,7 +1160,7 @@ $( function() {
   </select>
  </div>
  <div class="help">
-  Indicates whether the resource is open access, either in full or partially.
+  Indicates the degree to which the resource is Open Access.
  </div>
 </div>
 
@@ -1089,7 +1170,7 @@ $( function() {
   <input id="erm-edit-admin_subscription_no" name="admin_subscription_no" value="[% erm.admin_subscription_no | html %]" style="width: 30em;" />
  </div>
  <div class="help">
-  Vendor assigned number to identify subscription or to register for online access.
+  Publisher/Vendor assigned customer number to identify the subscription.
  </div>
 </div>
 
@@ -1203,7 +1284,7 @@ $( function() {
   <input id="erm-edit-marc_url" name="marc_url" value="[% erm.marc_url | html %]" style="width: 30em;" />
  </div>
  <div class="help">
-  URL for MARC records if they are available.
+  URL for downloading MARC records for resource.
  </div>
 </div>
 
@@ -1265,7 +1346,7 @@ $( function() {
   <textarea id="erm-edit-input-breaches" name="admin_notes">[% erm.breaches | html %]</textarea>
  </div>
  <div class="help">
-  Notes on any security or access breaches that may have occurred.
+  Record here the details on any security or access breaches that may have occurred.
  </div>
 </div>
 
@@ -1373,7 +1454,7 @@ $( function() {
          <input type="text" class="name" name="erm-edit-input-names-[% name.id %]" value="[% name.name | html %]"/>
        </div>
        <div class="help">
-        Alternate name for the resource.
+        Change an alternate name (alternate title) for the resource here.
        </div>
       </div>
      [% END %]
@@ -1389,7 +1470,7 @@ $( function() {
         <input type="text" class="name" name="erm-edit-input-names-add-name-" value="" />
       </div>
       <div class="help">
-       New alternate name for the resource.
+       Add any alternate names (alternate titles) for the resource here.
       </div>
      </div>
     </fieldset>
