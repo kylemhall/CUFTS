@@ -29,15 +29,19 @@ sub logout : Chained('/site') PathPart('logout') Args(0) {
     my ($self, $c) = @_;
 
     $c->logout();
-    return $c->restore_saved_action();
-#    return $c->response->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse_index') ) );
+
+    return $c->response->redirect( $c->req->params->{return_to} || $c->uri_for_site('/') );
 }
 
 
 sub login : Chained('/site') PathPart('login') Args(0) {
     my ($self, $c) = @_;
 
-    $c->form({'required' => ['key', 'password', 'login'], 'filters' => ['trim']});
+    $c->form( {
+        required => ['key', 'password', 'login'],
+        optional => [ 'return_to' ],
+        filters  => ['trim'],
+    } );
 
     if (defined($c->form->{valid}->{key})) {
         my $key      = $c->form->{valid}->{key};
@@ -84,6 +88,7 @@ sub login : Chained('/site') PathPart('login') Args(0) {
         
         if ( defined($c->user) ) {
             if ( $c->user->active ) {
+                return $c->response->redirect( $c->req->params->{return_to} || $c->uri_for_site('/') );
                 return $c->restore_saved_action();
 #                return $c->response->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse_index') ) );
             }

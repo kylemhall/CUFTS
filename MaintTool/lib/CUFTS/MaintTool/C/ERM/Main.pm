@@ -55,16 +55,23 @@ my $form_validate = {
             user_documentation
             simultaneous_users
             subscription_type
+            print_required
             subscription_notes
             subscription_ownership
             subscription_ownership_notes
             misc_notes
+            issn
+            isbn
 
             cost
-            cost_base
-            cost_base_notes
+            invoice_amount
+            currency
+            pricing_model
+            pricing_model_notes
             gst
             pst
+            gst_amount
+            pst_amount
             payment_status
             contract_start
             contract_end
@@ -80,10 +87,10 @@ my $form_validate = {
             local_vendor
             local_acquisitions
             local_fund
+            journal_auth
             consortia
             consortia_notes
             date_cost_notes
-            pricing_model
             subscription
             price_cap
             license_start_date
@@ -153,7 +160,7 @@ sub auto : Private {
         [ 'subjects',         'subject',         'CUFTS::DB::ERMSubjects' ],
         [ 'content_types',    'content_type',    'CUFTS::DB::ERMContentTypes' ],
         [ 'consortias',       'consortia',       'CUFTS::DB::ERMConsortia' ],
-        [ 'cost_bases',       'cost_base',       'CUFTS::DB::ERMCostBases' ],
+        [ 'pricing_models',   'pricing_model',   'CUFTS::DB::ERMPricingModels' ],
     );
     
     foreach my $load_option ( @load_options ) {
@@ -213,7 +220,7 @@ sub ajax_details : Local {
     foreach my $column ( $erm_obj->columns() ) {
         $erm_hash->{$column} = $erm_obj->$column();
     }
-    foreach my $column ( qw( consortia cost_base resource_medium resource_type ) ) {
+    foreach my $column ( qw( consortia pricing_model resource_medium resource_type ) ) {
         if ( defined( $erm_hash->{$column} ) ) {
             $erm_hash->{$column} = $erm_obj->$column()->$column();
         }
@@ -423,7 +430,6 @@ sub edit : Local {
                             });
 
                         }
-                        
                     }
                 
                 }

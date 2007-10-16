@@ -52,18 +52,23 @@ $( function() {
 
         var new_name = $('#names-add-name-factory').clone();
         new_name.attr( 'id', "names-add-" + new_names_count );
+        var input    = new_name.find('input');
+        var input_id = input.attr( 'name' ) + new_names_count;
+        
+        input.attr( 'id', input_id ).attr( 'name', input_id );
+        new_name.find('label').attr( 'for', input_id );
 
         new_names_count = new_names_count + 1;
         
-        $('#erm-edit-input-names-addbutton').parent().parent().before( new_name );
-        new_name.show();
+        $('#erm-edit-input-names-addbutton').parent().parent().after( new_name );
+        new_name.addClass('field').show();
         
         new_name.parent('fieldset:not(.nostripe)').find('div.field').removeClass('alt').filter(':odd').addClass('alt');
     });
     
 /* Visibly disable a name if it is going to be deleted */
 
-    $('#page-alternate-names input.name').livequery( 'blur', function(event) {
+    $('#page-general input.altname').livequery( 'blur', function(event) {
         if ( $(this).val() == '' ) {
             $(this).parent().parent().addClass('to_delete');
         }
@@ -96,7 +101,6 @@ $( function() {
  <li><a href="#page-stats"><span>Statistics</span></a></li>
  <li><a href="#page-admin"><span>Admin</span></a></li>
  <li><a href="#page-subjects"><span>Subjects</span></a></li>
- <li><a href="#page-alternate-names"><span>Names</span></a></li>
  <li><a href="#page-links"><span>Links</span></a></li>
 </ul>
 
@@ -126,9 +130,33 @@ $( function() {
  <div class="data">
   <label for="erm-edit-input-main_name">main name</label>
   <input id="erm-edit-input-main_name" name="main_name" value="[% erm.main_name | html %]" style="width: 30em;" />
+  <a id="erm-edit-input-names-addbutton" href="[% url("$url_base/erm/edit/add_name/1979") %]"><img src="[% image_dir %]/icons/plus.png" style="width: 20px; height: 20px;" alt="add new alternate name" /></a>
  </div>
  <div class="help">
   The main name displayed for this resource.
+ </div>
+</div>
+
+[% FOREACH name IN erm.names %]
+ [% NEXT IF name.main == 1 %]
+ <div class="field" style="padding: 5px 0px;">
+  <div class="data">
+   <label for="erm-edit-alt_name_[% loop.count %]">alternate name</label>
+   <input id= "erm-edit-alt_name_[% loop.count %]" type="text" class="altname" name="erm-edit-input-names-[% name.id %]" value="[% name.name | html %]"/>
+  </div>
+  <div class="help">
+   Change an alternate name (alternate title) for the resource here.
+  </div>
+ </div>
+[% END %]
+
+<div id="names-add-name-factory" style="padding: 5px 0px; display: none">
+ <div class="data">
+  <label>alternate name</label>
+  <input type="text" class="altname" name="erm-edit-input-names-add-name-" value="" />
+ </div>
+ <div class="help">
+  Add any alternate names (alternate titles) for the resource here.
  </div>
 </div>
 
@@ -405,15 +433,15 @@ $( function() {
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-print_required">print required?</label>
-  <select id="erm-edit-input-print_required" name="print_required" style="width: 4em;">
+  <label for="erm-edit-input-print_included">print included?</label>
+  <select id="erm-edit-input-print_included" name="print_included" style="width: 4em;">
    <option value=""></option>
-   <option value="1" [% 'selected="selected"' IF erm.print_required == 1 %]>Yes</option>
-   <option value="0" [% 'selected="selected"' IF erm.print_required == 0 %]>No</option>
+   <option value="1" [% 'selected="selected"' IF erm.print_included == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.print_included == 0 %]>No</option>
   </select>
  </div>
  <div class="help">
-  Print subscription is required for online access?
+  Print subscription is included with online access?
  </div>
 </div>
 
@@ -1432,50 +1460,6 @@ $( function() {
     </fieldset>
 
     <div class="padding: 1em 0px;">
-     <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
-    </div>
-    
-</div>
-
-<div id="page-alternate-names">
-
-    <div style="padding: 1em 0px;">
-     <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
-    </div>
-
-    <fieldset>
-
-    <legend>Alternate Names</legend>
-    
-    [% FOREACH name IN erm.names %]
-      [% NEXT IF name.main == 1 %]
-      <div class="field" style="padding: 5px 0px;">
-       <div class="data">
-         <input type="text" class="name" name="erm-edit-input-names-[% name.id %]" value="[% name.name | html %]"/>
-       </div>
-       <div class="help">
-        Change an alternate name (alternate title) for the resource here.
-       </div>
-      </div>
-     [% END %]
-
-     <div class="field">
-      <div class="data">
-       <a id="erm-edit-input-names-addbutton" href="[% url("$url_base/erm/edit/add_name/1979") %]">Add</a>
-      </div>
-     </div>
-
-     <div id="names-add-name-factory" class="field" style="padding: 5px 0px; display: none">
-      <div class="data">
-        <input type="text" class="name" name="erm-edit-input-names-add-name-" value="" />
-      </div>
-      <div class="help">
-       Add any alternate names (alternate titles) for the resource here.
-      </div>
-     </div>
-    </fieldset>
-
-    <div style="padding: 1em 0px;">
      <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
     </div>
     

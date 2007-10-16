@@ -16,7 +16,7 @@
  %]
  
  [% IF !field_name.length %]
-  <!-- Bad call to display_field TT block.  field_name is empty. -->
+  <!-- Bad call to display_field TT block: field_name is empty. -->
   [% RETURN %]
  [% END %]
 

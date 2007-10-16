@@ -108,7 +108,6 @@ Builds the facet search from a list of facets and returns a result set.
 
 =cut
 
-
 sub _facet_search  {
     my ( $self, $c, $facet_list ) = @_;
 

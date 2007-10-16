@@ -448,7 +448,7 @@ fieldset {
 /*    float: left;
     clear: both; */
     display: block;
-    width: 30em;
+    width: 40em;
     padding: 0px;
     margin: 3px 10px 11px 0px;
     border: 1px solid #004997;
@@ -488,7 +488,7 @@ div.field {
 div.data {
     float: left;
     padding: 3px;
-    width: 35em;
+    width: 40em;
 }
 
     
@@ -519,7 +519,7 @@ div.help {
     position: absolute;
     float: left;
     margin: -5px 1px 1px 1px;
-    left: 36.2em;
+    left: 41.2em;
     width: 18em;
     border: 1px solid #c93;
     padding: 10px 12px;
