@@ -355,14 +355,14 @@ __PACKAGE__->add_columns(
       'size' => 0
     },
     'pst_amount' => {
-        'data_type' => 'real',
-        'size'      => 10,
+        'data_type' => 'varchar',
+        'size'      => 1024,
         'default_value' => undef,
         'is_nullable' => 1,
     },
     'gst_amount' => {
-        'data_type' => 'real',
-        'size'      => 10,
+        'data_type' => 'varchar',
+        'size'      => 1024,
         'default_value' => undef,
         'is_nullable' => 1,
     },
