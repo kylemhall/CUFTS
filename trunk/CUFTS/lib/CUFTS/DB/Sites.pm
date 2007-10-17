@@ -44,6 +44,9 @@ __PACKAGE__->columns(
 
         active
 
+        erm_staff_fields
+        erm_patron_fields
+
         cjdb_results_per_page
         cjdb_unified_journal_list
         cjdb_show_citations
