@@ -21,3 +21,6 @@ ALTER TABLE erm_main ADD COLUMN isbn VARCHAR(1024);
 ALTER TABLE erm_main ADD COLUMN invoice_amount VARCHAR(1024);
 ALTER TABLE erm_main ADD COLUMN currency VARCHAR(3);
 ALTER TABLE erm_main ADD COLUMN print_included BOOLEAN;
+
+ALTER TABLE sites ADD COLUMN erm_patron_fields VARCHAR(8192);
+ALTER TABLE sites ADD COLUMN erm_staff_fields VARCHAR(8192);
