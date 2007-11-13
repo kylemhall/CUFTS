@@ -32,9 +32,9 @@ while ( my $journal = $journals->next ) {
         
         next if $url !~ s{^http://proxy\.lib\.sfu\.ca/login\?url=}{};
 
-	if ($url !~ /^https?:/) {
-	    $url = "http://${url}";
-	}
+        if ($url !~ /^https?:/) {
+            $url = "http://${url}";
+        }
         
         my $uri  = URI->new($url);
         my $host = $uri->host;
@@ -47,8 +47,13 @@ while ( my $journal = $journals->next ) {
 foreach my $host ( keys %hosts ) {
     print "T ${host}\n";
     print "U http://${host}/\n";
+    print "U https://${host}/\n";
     print "HJ ${host}\n";
     
-    $host =~ s/^.+?\.//;
-    print "DJ ${host}\n\n";
+    if ( $host =~ / ( [^\.]+ \. [^\.]+ ) $/xsm ) {
+        print "DJ $1\n\n";
+    } else {
+        warn( "Could not determine domain for host: $host" );
+    }
+
 }
