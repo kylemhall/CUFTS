@@ -417,7 +417,7 @@ $( function() {
   <input id="erm-edit-input-subscription_type" name="subscription_type" value="[% erm.subscription_type | html %]" style="width: 30em;" />
  </div>
  <div class="help">
-  For journals. Describes type of subscription – either Direct Subscription or Part of a Package.
+  For journals. Describes type of subscription - either Direct Subscription or Part of a Package.
  </div>
 </div>
 
@@ -427,7 +427,7 @@ $( function() {
   <input id="erm-edit-input-subscription_status" name="subscription_status" value="[% erm.subscription_status | html %]" style="width: 30em;" />
  </div>
  <div class="help">
-  Status of the subscription – Active, trial, cancelled etc.
+  Status of the subscription - Active, trial, cancelled etc.
  </div>
 </div>
 
