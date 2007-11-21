@@ -42,7 +42,7 @@ sub marc_dump : Local {
     
     my @erm_records = CUFTS::DB::ERMMain->search( { site => $c->stash->{current_site}->id } );
     foreach my $erm_record ( @erm_records ) {
-        if ( $c->req->params('text') eq '1' ) {
+        if ( $c->req->params->{'text'} eq '1' ) {
             $MARC_dump .= $erm_record->as_marc()->as_formatted();
         }
         else {
@@ -50,7 +50,7 @@ sub marc_dump : Local {
         }
     }
 
-    if ( $c->req->params('text') eq '1' ) {
+    if ( $c->req->params->{'text'} eq '1' ) {
         $c->res->content_type( 'text/plain' );
     }
     else {
