@@ -37,14 +37,26 @@ sub summary : Local {
 sub marc_dump : Local {
     my ( $self, $c ) = @_;
     
+    
     my $MARC_dump;
     
     my @erm_records = CUFTS::DB::ERMMain->search( { site => $c->stash->{current_site}->id } );
     foreach my $erm_record ( @erm_records ) {
-        $MARC_dump .= $erm_record->as_marc()->as_usmarc();
+        if ( $c->req->params('text') eq '1' ) {
+            $MARC_dump .= $erm_record->as_marc()->as_formatted();
+        }
+        else {
+            $MARC_dump .= $erm_record->as_marc()->as_usmarc();
+        }
     }
 
-    $c->res->content_type( 'application/marc' );
+    if ( $c->req->params('text') eq '1' ) {
+        $c->res->content_type( 'text/plain' );
+    }
+    else {
+        $c->res->content_type( 'application/marc' );
+    }
+    
     $c->res->body( $MARC_dump );
 }
 
