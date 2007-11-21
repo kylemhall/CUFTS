@@ -44,6 +44,7 @@ sub marc_dump : Local {
     foreach my $erm_record ( @erm_records ) {
         if ( $c->req->params->{'text'} eq '1' ) {
             $MARC_dump .= $erm_record->as_marc()->as_formatted();
+            $MARC_dump .= "\n----------------------------------------------\n";
         }
         else {
             $MARC_dump .= $erm_record->as_marc()->as_usmarc();
