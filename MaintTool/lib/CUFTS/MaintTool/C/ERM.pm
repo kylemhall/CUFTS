@@ -44,6 +44,7 @@ sub marc_dump : Local {
         $MARC_dump .= $erm_record->as_marc()->as_usmarc();
     }
 
+    $c->res->content_type( 'application/marc' );
     $c->res->body( $MARC_dump );
 }
 
