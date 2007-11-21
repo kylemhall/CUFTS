@@ -24,6 +24,7 @@ use strict;
 use base 'CUFTS::DB::DBI';
 
 use Data::Dumper;
+use CUFTS::Util::Simple;
 
 __PACKAGE__->table('erm_main');
 __PACKAGE__->columns(Primary => 'id');
@@ -420,6 +421,62 @@ my ( $class, $field, $data, $config, $sql ) = @_;
        'erm_main.publisher'         => { '~*' => $data },
        'erm_names.search_name'      => { '~'  => lc($data) },
     ];
+}
+
+
+sub as_marc {
+    my ( $self ) = @_;
+    
+    my $MARC = MARC::Record->new();
+
+    if ( not_empty_string( $self->isbn ) ) {
+        $MARC->append_fields( MARC::Field->new( '020', '', '', 'a' => $self->isbn ) );
+    }
+
+    if ( not_empty_string( $self->issn ) ) {
+        $MARC->append_fields( MARC::Field->new( '022', '', '', 'a' => $self->issn ) );
+    }
+
+    if ( not_empty_string( $self->journal_auth ) ) {
+        $MARC->append_fields( MARC::Field->new( '035', '', '', 'a' => $self->journal_auth ) );
+    }
+
+    $MARC->append_fields( MARC::Field->new( '245', '', '', 'a' => $self->main_name ) );
+    $MARC->append_fields( MARC::Field->new( '930', '', '', 'a' => $self->id ) );
+
+    my @subfields;
+
+    if ( not_empty_string( $self->local_fund ) ) {
+        push @subfields, 'u', $self->local_fund;
+    }
+
+    if ( not_empty_string( $self->vendor ) ) {
+        push @subfields, 'v', $self->vendor;
+    }
+    
+    if ( scalar(@subfields) ) {
+        $MARC->append_fields( MARC::Field->new( '960', '', '', @subfields ) );
+    }
+
+    @subfields = ();
+
+    if ( not_empty_string( $self->currency ) ) {
+        push @subfields, 'z', $self->currency;
+    }
+
+    if ( not_empty_string( $self->currency ) ) {
+        push @subfields, 'c', $self->currency;
+    }
+
+    if ( not_empty_string( $self->local_vendor ) ) {
+        push @subfields, 'i', $self->local_vendor;
+    }
+
+    if ( scalar(@subfields) ) {
+        $MARC->append_fields( MARC::Field->new( '961', '', '', @subfields ) );
+    }   
+    
+    return $MARC;
 }
 
 1;
