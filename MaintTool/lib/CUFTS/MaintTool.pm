@@ -72,19 +72,19 @@ sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( scalar @{ $c->error } ) {
+
         warn("Rolling back database changes due to error flag.");
+
         CUFTS::DB::DBI->dbi_rollback();
         
         $c->stash(
             template      => 'fatal_error.tt',
             fatal_errors  => $c->error,
         );
+        warn( join("\n",  @{ $c->error }) );
+        $c->{error} = [];
         $c->forward('CUFTS::MaintTool::V::TT');
 
-        warn( join("\n",  @{ $c->error }) );
-
-        $c->{error} = [];
-        
     }
 
     return 1 if $c->response->status =~ /^3\d\d$/;
