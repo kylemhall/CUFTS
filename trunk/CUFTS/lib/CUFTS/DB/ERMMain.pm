@@ -405,7 +405,7 @@ my ( $class, $field, $data, $config, $sql ) = @_;
     if ( !exists( $config->{joins}->{subject} ) ) {
         $config->{joins}->{subject} = ' LEFT JOIN erm_subjects_main ON ( erm_subjects_main.erm_main = erm_main.id )';
     }
-    $config->{joins}->{subject_name} = ' JOIN erm_subjects ON ( erm_subjects_main.subject = erm_subjects.id )';
+    $config->{joins}->{subject_name} = ' LEFT JOIN erm_subjects ON ( erm_subjects_main.subject = erm_subjects.id )';
 
     if ( !exists( $config->{joins}->{consortia} ) ) {
         $config->{joins}->{consortia} = ' LEFT JOIN erm_consortia ON ( erm_main.consortia = erm_consortia.id )';
