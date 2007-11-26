@@ -11,6 +11,8 @@ use CUFTS::DB::ERMMain;
 use CUFTS::DB::ERMMainLink;
 use CUFTS::DB::ERMSubjectsMain;
 
+use MARC::Record;
+
 my $form_validate = {
     required => [
         qw(

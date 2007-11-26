@@ -61,4 +61,16 @@ sub marc_dump : Local {
     $c->res->body( $MARC_dump );
 }
 
+sub marc : Local {
+    my ( $self, $c, $erm_main_id ) = @_;
+    
+    my $erm_main = CUFTS::DB::ERMMain->search( { site => $c->stash->{current_site}->id, id => $erm_main_id } )->first;
+    if ( !defined($erm_main) ) {
+        die("No matching ERM Main record for current site");
+    }
+    
+    $c->res->body( $erm_main->as_marc()->as_usmarc() );
+    $c->res->content_type( 'application/marc' );
+}
+
 1;
