@@ -42,6 +42,7 @@ my $form_validate = {
             public_list
             public_message
             subscription_status
+            print_included
             active_alert
             marc_available
             marc_history
