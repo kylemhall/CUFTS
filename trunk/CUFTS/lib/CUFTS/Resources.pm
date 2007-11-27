@@ -685,6 +685,29 @@ sub overlay_title_list {
     my $error_count = 0;
     my $processed_count = 0;
     my $new_count = 0;
+    
+    # Pregrab all records - look into this again later, perhaps using a recursive "match_on" generator to create the map
+    
+    # my @records = $global_module->search( 'resource' => $global_resource->id );
+    # my %map;
+    # foreach my $rec ( @records ) {
+    #     $class->add_to_match_map( \%map, $rec, $match_on)
+    #     push @{ $map{$rec->issn} }, $rec;
+    #     if ( not_empty_string( $rec->e_issn ) ) {
+    #         push @{ $map{$rec->e_issn} }, $rec;
+    #     }
+    # }
+
+    # Create a map of all the local records instead of searching them
+    
+    my @local_records = $local_module->search( { resource => $local_resource->id } );
+    my %lmap;
+    my $map_field = $class->local_to_global_field;
+    foreach my $rec ( @local_records ) {
+        $lmap{$rec->$map_field} = $rec;
+    }
+    
+    
     while (my $row = CUFTS::Resources->title_list_parse_row(*IN)) {
         $count++;
         my $record = CUFTS::Resources->title_list_build_record($field_headings, $row);          
@@ -694,8 +717,11 @@ sub overlay_title_list {
         $processed_count++;
 
         if (defined($global_resource) && defined($global_module)) {
-            my $global_records = $class->_match_on($global_resource->id, $global_module, \@match_on, $record);
 
+            # my $global_records = [ @{ $map{$record->{issn}} }, @{ $map{$record->{e_issn}} } ];  # See "pregrab" note above
+             
+            my $global_records = $class->_match_on($global_resource->id, $global_module, \@match_on, $record);
+            
             my $global_record;
             if (scalar(@$global_records) == 0) {
                 my $err = "record $count: Could not match global record on:";
@@ -715,15 +741,21 @@ sub overlay_title_list {
                 next;
             }
             
-            my $local_record = $local_module->find_or_create('resource' => $local_resource->id, $class->local_to_global_field => $global_record->id);
+            # Find an existing cached local title, or create a new one
+            
+            my $local_record = $lmap{$global_record->id};
+            if ( !defined($local_record) ) {
+                $local_record = $local_module->create({'resource' => $local_resource->id, $class->local_to_global_field => $global_record->id});
+            }
+
             $local_record->active('true');
             $local_record->scanned($timestamp);
             foreach my $column (keys %$record) {
-                next if grep {$_ eq $column} (@match_on);
                 next if $column =~ /^___/;
                 next unless defined($record->{$column});
+                next if grep {$_ eq $column} (@match_on);
                 
-                $local_record->$column($record->{$column});
+               $local_record->$column($record->{$column});
             }
             
             $local_record->update;
@@ -746,6 +778,7 @@ sub overlay_title_list {
 
     return $results;
 }
+
 
 sub _match_on {
     my ($class, $resource_id, $module, $fields, $data) = @_;
