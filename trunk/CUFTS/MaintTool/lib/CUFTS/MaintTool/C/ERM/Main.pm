@@ -113,6 +113,7 @@ my $form_validate = {
             admin_user
             admin_password
             admin_url
+            admin_notes
             support_url
             access_url
             public_account_needed
@@ -221,6 +222,7 @@ sub ajax_details : Local {
     };
 
     foreach my $column ( $erm_obj->columns() ) {
+        next if grep { $_ eq $column } qw( license );
         $erm_hash->{$column} = $erm_obj->$column();
     }
     foreach my $column ( qw( consortia pricing_model resource_medium resource_type ) ) {
@@ -235,7 +237,8 @@ sub ajax_details : Local {
     my @content_types = $erm_obj->content_types;
     @{ $erm_hash->{content_types} } = map { $_->content_type } sort { $a->content_type cmp $b->content_type } @content_types;
 
-    $c->res->body( to_json( $erm_hash ) );
+    $c->stash->{json} = $erm_hash;
+    $c->forward('V::JSON');
 }
 
 
@@ -588,7 +591,6 @@ sub link_json : Local {
     }
     
     $c->forward('V::JSON');
-
 }
 
 

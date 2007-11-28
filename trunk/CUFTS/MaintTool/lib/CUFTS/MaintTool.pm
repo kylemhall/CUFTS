@@ -184,7 +184,7 @@ sub main : Global {
 ## default - Redirect to the login screen
 ##
 
-sub default : Private {
+sub index : Private {
     my ( $self, $c ) = @_;
     $c->redirect('/login');
 }
