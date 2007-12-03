@@ -8,9 +8,7 @@ use CUFTS::Util::Simple;
 my $form_validate_local = {
     required => ['name', 'provider', 'module', 'resource_type'],
     optional => [
-        # Standard fields
         'provider', 'proxy', 'dedupe', 'rank', 'active', 'resource_services', 'submit', 'cancel',
-        # Resource details...
         'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'notes_for_local', 'cjdb_note', 'proxy_suffix'
     ],
     defaults => {
@@ -26,9 +24,7 @@ my $form_validate_local = {
 
 my $form_validate_global = {
     optional => [
-        # Standard fields
         'proxy', 'dedupe', 'auto_activate', 'rank', 'active', 'resource_services', 'submit', 'cancel',
-        # Resource details...
         'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'cjdb_note', 'proxy_suffix'
     ],
     defaults => {
@@ -85,7 +81,9 @@ sub menu : Local {
     $c->form->valid->{show} and
         $c->session->{local_menu_show} = $c->form->valid->{show};
 
-    my $active = defined($c->session->{local_menu_show}) && $c->session->{local_menu_show} eq 'show active' ? 1 : 0;
+    # Default to "show active"
+
+    my $active = !defined($c->session->{local_menu_show}) || $c->session->{local_menu_show} eq 'show active' ? 1 : 0;
 
     $c->form->valid->{apply_filter} and
         $c->session->{local_menu_filter} = $c->form->valid->{filter};
@@ -95,6 +93,9 @@ sub menu : Local {
 
     my %search;
     if ($c->session->{local_menu_filter}) {
+
+        # Get filter and escape SQL LIKE special characters
+
         my $filter = $c->session->{local_menu_filter};
         $filter =~ s/([%_])/\\$1/g;
         $filter =~ s#\\#\\\\\\\\#;
@@ -115,7 +116,7 @@ sub menu : Local {
                           ? CUFTS::DB::LocalResources->search_where({ -nest => [\%search, {resource => { '!=' => undef }}], site => $c->{stash}->{current_site}->id })
                           : CUFTS::DB::LocalResources->search_where({ %search, site => $c->{stash}->{current_site}->id });
 
-    # Merge resources into "magic" resource that we can treat like a real CDBI resource except for DB interaction
+    # Merge resources into a resource that we can treat like a real CDBI resource except for DB interaction.
 
     my $resources = CUFTS::MaintTool::M::MergeResources->merge(\@local_resources, \@global_resources, $active);
                                                      
@@ -138,10 +139,11 @@ sub menu : Local {
         
     $c->stash->{filter} = $c->session->{local_menu_filter};
     $c->stash->{sort} = $sort;
-    $c->stash->{show} = $c->session->{local_menu_show} || 'show all';
+    $c->stash->{show} = $c->session->{local_menu_show} || 'show active';
     $c->stash->{resources} = $resources;
     $c->stash->{template} = 'local/menu.tt';
 }
+
 
 sub view : Local {
     my ($self, $c, $resource_id) = @_;
@@ -220,6 +222,7 @@ sub edit : Local {
             }
             
             CUFTS::DB::DBI->dbi_commit;
+            
             return $c->redirect('/local/menu');
         }
     }
@@ -230,7 +233,7 @@ sub edit : Local {
     if ( defined($erm_main_link) ) {
         $c->stash->{erm_main} = CUFTS::DB::ERMMain->retrieve( $erm_main_link->erm_main );
     }
-        
+
     # Get all the ERM mains for a select box - switch this to use the search system later
     
     my $erm_mains = CUFTS::DB::ERMMain->retrieve_all_for_site( $c->stash->{current_site}->id, 1 );    # 1 - fast, no objects
@@ -240,7 +243,7 @@ sub edit : Local {
 
     $c->stash->{section} = 'general';
     $c->stash->{module_list} = [CUFTS::ResourcesLoader->list_modules()];
-    
+
     if (defined($global_resource)) {
         $c->stash->{services} = [$global_resource->services];
         $c->stash->{template} = 'local/edit_global.tt';
