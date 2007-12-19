@@ -43,6 +43,7 @@ use strict;
 
 $| = 1;
 my $PROGRESS = 1;
+my $DEBUG_UPDATE_CJDB = 0;
 
 my %options;
 GetOptions( \%options, 'site_key=s', 'site_id=i', 'append' );
@@ -391,6 +392,7 @@ sub load_cufts {
                     !$site->cjdb_show_citations || is_empty_string( $new_link->{'citation_coverage'} )
                 ) )
             {
+                if ( $DEBUG_UPDATE_CJDB ) { print STDERR "Skipping journal '", $local_journal->title, "' due to no fulltext coverage information.\n" }
                 next JOURNAL;
             }
 
@@ -431,6 +433,8 @@ sub load_cufts {
                 }
 
             }
+
+            if ( $DEBUG_UPDATE_CJDB ) { print STDERR "Links: ", scalar(@links), "\n"; }
 
             if ( scalar(@links) > 0 ) {
 
