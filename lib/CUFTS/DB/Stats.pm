@@ -52,7 +52,7 @@ sub normalize_column_values {
 	# Check ISSNs for dashes and strip them out
 
 	if ( exists($values->{title}) && defined($values->{title}) ) {
-	    $values->{title} = substr( 0, 512, $values->{title} );
+	    $values->{title} = substr( $values->{title}, 0, 512 );
 	}
 	
 	return 1;   # ???
