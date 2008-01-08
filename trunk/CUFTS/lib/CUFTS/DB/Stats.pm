@@ -72,6 +72,7 @@ __PACKAGE__->set_sql('top50journals' => qq{
     WHERE request_date > (current_date - interval '%s')
     AND site = ?
     AND results = ?
+    AND ( ( title IS NOT NULL AND title != '' ) OR ( issn IS NOT NULL AND issn != '' ) )
     GROUP BY issn, title 
     ORDER BY COUNT(*) DESC
     LIMIT 50
