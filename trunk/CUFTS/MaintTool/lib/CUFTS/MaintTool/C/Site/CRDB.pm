@@ -6,8 +6,6 @@ use base 'Catalyst::Base';
 use CUFTS::DB::ERMDisplayFields;
 
 use CUFTS::Util::Simple;
-use List::Compare;
-
 
 my $form_settings_validate = {
     optional_regexp => qr/^(show_field|staff_)/,
