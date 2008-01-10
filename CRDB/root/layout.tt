@@ -1,4 +1,4 @@
-<html>
+[%- IF no_wrap; content; RETURN; END -%]<html>
 <head>
 <meta name="ROBOTS" content="NOINDEX,NOFOLLOW" />
 <base href="[% url_base %]" />

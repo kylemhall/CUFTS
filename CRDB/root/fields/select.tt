@@ -1,0 +1,6 @@
+<form><select class="edit-in-place" name="[% field %]">
+<option value="" [% !value.defined ? 'selected="selected"' : '' %]"></option>
+[% FOREACH option IN options %]
+ <option value="[% option.id %]" [% value == option.id ? 'selected="selected"' : '' %]">[% option.$display_field %]</option>
+[% END %]
+</select></form>

@@ -3,7 +3,7 @@ package CUFTS::MaintTool::C::ERM::Main;
 use strict;
 use base 'Catalyst::Base';
 
-use JSON::XS qw( to_json );
+use JSON::XS qw( encode_json );
 
 use CUFTS::Util::Simple;
 
@@ -177,7 +177,7 @@ sub auto : Private {
         $c->stash->{$type}           = { map { $_->id => $_->$field } @records };
         $c->stash->{"${type}_order"} = [ map { $_->id } @records ];
 
-        $c->stash->{"${type}_json"}  = to_json( $c->stash->{$type} );
+        $c->stash->{"${type}_json"}  = encode_json( $c->stash->{$type} );
         $c->stash->{"${field}_lookup"} = $c->stash->{$type};  # Alias for looking up when we have the "field" name rather than the type name.
 
     }

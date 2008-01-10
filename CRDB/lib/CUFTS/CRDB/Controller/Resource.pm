@@ -23,7 +23,7 @@ sub base : Chained('/site') PathPart('resource') CaptureArgs(0) { }
 sub load_resource : Chained('base') PathPart('') CaptureArgs(1) {
     my ( $self, $c, $resource_id ) = @_;
     
-    $c->stash->{erm} = CUFTS::DB::ERMMain->retrieve( $resource_id );
+    $c->stash->{erm} = $c->model('CUFTS::ERMMain')->find( $resource_id );
 }
 
 
@@ -38,6 +38,8 @@ sub default_view : Chained('load_resource') PathPart('') Args(0) {
     my ( $self, $c ) = @_;
 
     $c->save_current_action();
+    
+    $c->stash->{display_fields} = [ $c->model('CUFTS::ERMDisplayFields')->search( { site => $c->site->id }, { order_by => 'display_order' } )->all ];
     
     $c->stash->{template} = 'resource.tt';
 }

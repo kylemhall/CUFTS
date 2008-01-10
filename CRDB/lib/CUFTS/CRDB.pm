@@ -91,10 +91,10 @@ sub uri_for_site {
 
     my $captures_copy = [];
 
-#    use Data::Dumper;
-#    warn( "\nurl: " . Dumper($url) );
-#    warn( "\ncaps: " . Dumper($caps) );
-#    warn( "\nrest: " . Dumper(\@rest) . "\n" );
+    # use Data::Dumper;
+    # warn( "\nurl: " . Dumper($url) );
+    # warn( "\ncaps: " . Dumper($caps) );
+    # warn( "\nrest: " . Dumper(\@rest) . "\n" );
 
     die("Attempting to create URI for site when site is not defined.") if !defined( $c->site );
 
@@ -108,10 +108,10 @@ sub uri_for_site {
 
     unshift @$captures_copy, $c->site->key;
 
-#    warn( "\nurl: " . Dumper($url) );
-#    warn( "\ncaps: " . Dumper($captures_copy) );
-#    warn( "\nrest: " . Dumper(\@rest) . "\n" );
-#    warn( $c->uri_for( $url, $captures_copy, @rest ) );
+    # warn( "\nurl: " . Dumper($url) );
+    # warn( "\ncaps: " . Dumper($captures_copy) );
+    # warn( "\nrest: " . Dumper(\@rest) . "\n" );
+    # warn( $c->uri_for( $url, $captures_copy, @rest ) );
 
     return $c->uri_for( $url, $captures_copy, @rest );
 }

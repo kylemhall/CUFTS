@@ -56,6 +56,7 @@ my @modules = qw(
     HTML::Entities
     HTML::FillInForm
     JSON::XS
+    List::Compare
     LWP::UserAgent
     MARC::Record
     MIME::Lite

@@ -21,11 +21,12 @@
         
         menu.push([
             [
-                [ '/site/edit', 'General' ],
-                [ '/site/template/menu', 'Templates' ],
-                [ '/site/cjdb/settings', 'CJDB Settings' ],
-                [ '/site/cjdb/data', 'CJDB Data' ],
-                [ '/site/cjdb/accounts', 'C*DB Accounts' ],
+                [ '/site/edit',               'General' ],
+                [ '/site/template/menu',      'Templates' ],
+                [ '/site/cjdb/settings',      'CJDB Settings' ],
+                [ '/site/cjdb/data',          'CJDB Data' ],
+                [ '/site/crdb/settings',      'CRDB Settings' ],
+                [ '/site/cjdb/accounts',      'C*DB Accounts' ],
                 [ '/site/googlescholar/edit', 'Google Scholar' ],
             ],
             'Site Settings'
