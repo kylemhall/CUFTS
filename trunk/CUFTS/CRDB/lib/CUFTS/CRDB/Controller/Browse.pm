@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use base 'Catalyst::Controller';
 
-use JSON::XS qw(to_json);
+use JSON::XS qw(encode_json);
 
 =head1 NAME
 
@@ -51,7 +51,7 @@ sub options : Chained('base') PathPart('') CaptureArgs(0) {
 
         }
 
-        $c->stash->{"${type}_json"}    = to_json( $c->stash->{$type} );
+        $c->stash->{"${type}_json"}    = encode_json( $c->stash->{$type} );
         $c->stash->{"${field}_lookup"} = $c->stash->{$type};  # Alias for looking up when we have the "field" name rather than the type name.
     }
 
@@ -69,12 +69,12 @@ sub browse_index : Chained('options') PathPart('') Args(0) {
     $c->stash->{template} = 'browse.tt';
 }
 
+
 =head2 facet_form
 
-Translate form parameters into a facet search path
+Translate form parameters into a facet search path and redirect so the standard search handler runs.
 
 =cut
-
 
 sub facet_form : Chained('base') PathPart('facet_form') Args(0) {
     my ( $self, $c ) = @_;

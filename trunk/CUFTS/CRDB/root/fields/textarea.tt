@@ -1,0 +1,1 @@
+<form><textarea class="edit-in-place" name="[% field %]">[% value | html %]</textarea></form>

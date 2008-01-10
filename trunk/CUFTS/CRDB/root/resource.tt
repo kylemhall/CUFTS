@@ -1,87 +1,87 @@
-[%# USE dumper %]
-[% USE HTML %]
-[% BLOCK show_field %]
- [% UNLESS show_flag %]
-  class="no_data"
- [% END %]
-[% END %]
+<script>
+var CRDB_show_nodata_fields = 0;
 
-[% BLOCK display_field %]
- [%# Takes: field_name [ field_label ] [ field_data ] [ show_flag ] [ access_roles ] 
-     
-     If you do not want your field data HTML escaped, you must provide the data through the field_data parameter.
- 
-     Field label will be set to ucfirst with _ translated to space unless supplied.
- 
- %]
- 
- [% IF !field_name.length %]
-  <!-- Bad call to display_field TT block: field_name is empty. -->
-  [% RETURN %]
- [% END %]
 
- [% IF access_roles.defined %]
-  [% FOREACH access_role IN access_roles %]
-   [% RETURN UNLESS c.check_user_roles(access_role) %]
-  [% END %]
- [% END %]
+function toggle_nodata_fields( ) {
+    CRDB_show_nodata_fields = !CRDB_show_nodata_fields;
+    nodata_fields();
+}
 
- [% IF !field_label.defined %]
-  [% USE field_label = String field_name %]
-  [% CALL field_label.lower.capital.replace('_', ' ') %]
- [% END %]
+function nodata_fields( ) {
+    $('.no_data').each( function(i) {
+        this.style.display = CRDB_show_nodata_fields ? '' : 'none';
+    });
+}
 
- [% IF !field_data.defined %]
-  [% SET field_data = erm.$field_name | html %]
- [% END %]
+$( function ( ) {
+    nodata_fields();
+} );
 
- [% IF !has_data.defined %]
-  [% SET has_data = field_data.length %]
- [% END %]
 
-<dt id="resource-term-[% field_name %]" [% UNLESS has_data %]class="no_data"[% END %]>[% field_label | html %]</dt>
-<dd id="resource-definition-[% field_name %]" [% UNLESS has_data %]class="no_data"[% END %]>[% field_data %]</dd>
+function ajax_get_edit( field, url ) {
+    $.ajax({
+        type: 'GET',
+        url: url,
+        success: function( html ) {
+            $('#resource-definition-' + field).find('.field-data').hide();
 
-[% END %]
+            $('#resource-definition-' + field).append(
+                '<div class="field-editing">' + html + '</div>'
+            );
+
+            $('#resource-' + field).find('.resource-edit-control-savecancel').show();
+            $('#resource-' + field).find('.resource-edit-control-edit').hide();
+
+       }
+    });
+}
+
+function ajax_cancel_edit( field ) {
+    $('#resource-definition-' + field).find('.field-editing').remove();
+    $('#resource-definition-' + field).find('.field-data').show();
+    
+    $('#resource-' + field).find('.resource-edit-control-savecancel').hide();
+    $('#resource-' + field).find('.resource-edit-control-edit').show();
+    
+}
+
+function ajax_save_edit( field, url ) {
+    $.ajax({
+       type: 'POST',
+       url: url,
+       data: $('#resource-definition-' + field).find('.field-editing form').serialize(),
+       success: function( html ) {
+           $('#resource-' + field).replaceWith( html );
+           
+           $('#resource-' + field).find('.resource-edit-control-savecancel').hide();
+           $('#resource-' + field).find('.resource-edit-control-edit').show();           
+
+           nodata_fields();
+       }
+    });
+}
+
+</script>
+
+
  
 
 
 <style>
-.no_data { display: none; }
+.edit-in-place { border: 1px solid #888;}
 </style>
 
 <div id="resource">
     
- <div id="resource-name">[% erm.name | html %]</div>
+ <div id="resource-name">[% erm.main_name | html %]</div>
 
- <div id="resource-description_full">
-  [% erm.description_full %]
- </div>
+ [% IF c.check_user_roles('edit_erm_records') %]<a href="#toggle" onClick="toggle_nodata_fields(); return false;">toggle empty fields</a>[% END %]
  
- <dl class="resource-fields"> 
-
-[% INCLUDE display_field field_name="vendor" | trim %]
-[% INCLUDE display_field field_name="publisher" | trim %]
-[% INCLUDE display_field field_name="resource_type", field_data=HTML.escape( erm.resource_type.resource_type ) | trim %]
-[% INCLUDE display_field field_name="subjects", field_data=HTML.escape( erm.subjects.force_list.sort('subject').map_join('subject', ', ') ) | trim %]
-[% INCLUDE display_field field_name="resource_medium", field_data=HTML.escape( erm.resource_medium.resource_medium ) | trim %]
-[% INCLUDE display_field field_name="consortia", field_data=HTML.escape( erm.consortia.consortia ) | trim %]
-[% INCLUDE display_field field_name="content_types", field_data=HTML.escape( erm.content_types.force_list.sort('content_type').map_join('content_type', ', ') ) | trim %]
-[% INCLUDE display_field field_name="coverage" | trim %]
-[% INCLUDE display_field field_name="embargo" | trim %]
-[% INCLUDE display_field field_name="open_access" | trim %]
-[% INCLUDE display_field field_name="update_frequency" | trim %]
-[% INCLUDE display_field field_name="subscription_status" | trim %]
-[% INCLUDE display_field field_name="resolver_enabled", field_data=erm.resolver_enabled ? 'yes' : 'no' | trim %]
-[% INCLUDE display_field field_name="refworks_compatible", field_data=erm.resolver_enabled ? 'yes' : 'no' | trim %]
-[% INCLUDE display_field field_name="refworks_info_url" | trim %]
-[% INCLUDE display_field field_name="title_list_url" | trim %]
-[% INCLUDE display_field field_name="help_url" | trim %]
-[% INCLUDE display_field field_name="user_documentation" | trim %]
-[% INCLUDE display_field field_name="public_user" | trim %]
-[% INCLUDE display_field field_name="public_password" | trim %]
-
-</dl>
+ <table class="resource-fields"> 
+  [% FOREACH display_field IN display_fields %]
+   [% PROCESS display_field.tt | trim %]
+  [% END %]
+ </table>
  
  
 </div>

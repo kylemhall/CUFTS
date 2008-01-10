@@ -87,7 +87,9 @@ while (<>) {
         'doi'     => $request{doi},
         'results' => ( scalar(@fields) > 0 ? 't' : 'f' ),
     };
-    print Dumper($db_log), "\n";
+    print '.';
+    
+    # print Dumper($db_log), "\n";
     CUFTS::DB::Stats->create( $db_log );
 }
 

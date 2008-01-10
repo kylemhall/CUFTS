@@ -10,6 +10,10 @@ body {
     margin: 0;
 }
 
+td {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 80%;
+}
 /* Prevent forms from forcing a line break */
 
 form {
@@ -21,6 +25,11 @@ form {
 .highlight {
     font-weight: bold;
 }
+
+img.icon {
+    border: none;
+}
+
 
 /* Page header background, useful for a repeating image/solid background colour */
 
@@ -447,13 +456,43 @@ dl.resource-fields {
 dt {
     padding-top: 3px;
     float: left;
-    width: 9.9em;
+    width: 11.9em;
     clear: left;
 }
 
 
 dd {
     padding-top: 3px;
-    margin-left: 10em;
+    margin-left: 12em;
 }
 
+textarea.edit-in-place {
+    width: 40em;
+    height: 7em;
+}
+
+input.edit-in-place {
+    width: 40em;
+}
+
+
+#resource-definition-description_full {
+    margin: 5px 0px;
+    padding: 4px 2px;
+    background: #eee;
+}
+
+
+td {
+    vertical-align: top;
+}
+
+td.resource-field-label {
+    width: 8.5em;
+}
+
+td.resource-edit-control {
+    text-align: center;
+    width: 50px;
+    white-space: nowrap;
+}
