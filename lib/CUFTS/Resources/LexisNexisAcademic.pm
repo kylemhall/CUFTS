@@ -50,8 +50,11 @@ sub title_list_field_map {
         'ISSN'             => 'issn',
         'Begin yyyymmdd'   => 'ft_start_date',
         'End yyyymmdd'     => 'ft_end_date',
+        'begin_yyyymmdd'   => 'ft_start_date',
+        'end_yyyymmdd'     => 'ft_end_date',
         'Article Link CSI' => 'db_identifier',
         'Title Search URL' => 'journal_url',
+        'Title Level URL'  => 'journal_url',
     };
 }
 
