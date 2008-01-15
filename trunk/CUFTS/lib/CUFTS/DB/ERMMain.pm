@@ -442,7 +442,7 @@ sub as_marc {
     }
 
     $MARC->append_fields( MARC::Field->new( '245', '', '', 'a' => $self->main_name ) );
-    $MARC->append_fields( MARC::Field->new( '930', '', '', 'a' => $self->id ) );
+    $MARC->append_fields( MARC::Field->new( '930', '', '', 'a' => 'e' . $self->id ) );
 
     my @subfields;
 
