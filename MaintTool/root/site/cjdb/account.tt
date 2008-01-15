@@ -98,6 +98,16 @@
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="cjdb-account-edit-role-staff">staff</label>
+  <input id="cjdb-account-edit-role-staff" type="checkbox" name="role-staff" value="1" [% 'checked="checked"' IF account.roles.in( 'staff', 'role' ) %] />
+ </div>
+ <div class="help">
+  Users with this role can see extended ERM data in the CRDB.
+ </div>
+</div>
+
 </fieldset>
 
 <div style="padding: 1em 0px;">
