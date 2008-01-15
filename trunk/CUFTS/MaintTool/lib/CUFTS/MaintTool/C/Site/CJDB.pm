@@ -94,6 +94,7 @@ my $form_accounts_validate = {
 
 my @handled_roles = ( qw(
     edit_erm_records
+    staff
 ) );
 
 my $form_account_validate = {
