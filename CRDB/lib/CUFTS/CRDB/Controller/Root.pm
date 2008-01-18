@@ -37,6 +37,7 @@ sub site : Chained('/') PathPart('') CaptureArgs(1) {
     }
     
     $c->stash->{additional_template_paths} = [ $c->config->{root} . '/sites/' . $site->id . '/active' ];    
+    $c->stash->{extra_js} = [];
     $c->site( $site );
     
     return 1;

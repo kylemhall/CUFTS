@@ -2,4 +2,4 @@
 <option value="" [% !value.defined ? 'selected="selected"' : '' %]"></option>
 <option value="1" [% value ? 'selected="selected"' : '' %]">yes</option>
 <option value="0" [% value.defined && !value ? 'selected="selected"' : '' %]">no</option>
-</select></form>
+</select><input type="hidden" name="update_value" value="1" /></form>

@@ -5,6 +5,7 @@ use warnings;
 use base 'Catalyst::Controller';
 
 use CUFTS::Util::Simple;
+use JSON::XS qw(encode_json);
 
 =head1 NAME
 
@@ -83,10 +84,72 @@ sub get_handler {
     return $handler;
 }
 
+sub edit_field_subjects : Private {
+    my ( $self, $c, $field ) = @_;
+
+    if ( defined( $c->req->params->{add_subjects} ) || defined( $c->req->params->{delete_subjects} ) ) {
+    
+        my @add_subjects    = split /,/, $c->req->params->{add_subjects};
+        my @delete_subjects = split /,/, $c->req->params->{delete_subjects};
+
+        $c->model('CUFTS')->schema->txn_do( sub {
+
+            foreach my $add_subject ( @add_subjects ) {
+
+                my $count = $c->model('CUFTS::ERMSubjects')->search( site => $c->site->id, id => $add_subject )->count();
+                if ( $count < 1 ) {
+                    die("Attempt to add subject not belonging to this site.");
+                }
+
+                $c->model('CUFTS::ERMSubjectsMain')->find_or_create( erm_main => $c->stash->{erm}->id, subject => $add_subject );
+            
+            }
+
+            foreach my $delete_subject ( @delete_subjects ) {
+
+                my $count = $c->model('CUFTS::ERMSubjects')->search( site => $c->site->id, id => $delete_subject )->count();
+                if ( $count < 1 ) {
+                    die("Attempt to delete subject not belonging to this site.");
+                }
+
+                $c->model('CUFTS::ERMSubjectsMain')->search( erm_main => $c->stash->{erm}->id, subject => $delete_subject )->delete_all();
+            
+            }
+
+        } );
+        
+        $c->stash->{display_field_name} = $field;
+        $c->stash->{template} = 'display_field.tt'
+    }
+    else {
+        my @all_subjects = $c->model('CUFTS::ERMSubjects')->search( { site => $c->site->id }, { order_by => 'subject' } )->all;
+        my @current_subjects = $c->stash->{erm}->subjects( {}, {order_by => 'subject'} );
+
+        $c->stash->{field} = $field;
+
+        $c->stash->{current_subjects} = \@current_subjects;
+        $c->stash->{all_subjects}     = \@all_subjects;
+
+        my %current_subjects_ids = map { $_->id => 1 } @current_subjects;
+        my @other_subjects       = grep { !$current_subjects_ids{$_->id} } @all_subjects;
+
+        $c->stash->{other_subjects}       = \@other_subjects; 
+        $c->stash->{current_subjects_ids} = \%current_subjects_ids; 
+
+        $c->stash->{current_json} = encode_json( [ map { [ $_->id, $_->subject ] } @current_subjects ] );
+        $c->stash->{all_json}     = encode_json( { map { $_->id => $_->subject } @all_subjects } );
+
+        $c->stash->{display_field} = 'subjects';
+        $c->stash->{template} = 'fields/subjects.tt'
+    }
+}
+
+
+
 sub edit_field_consortia : Private {
     my ( $self, $c, $field ) = @_;
 
-    if ( defined( $c->req->params->{$field} ) ) {
+    if ( $c->req->params->{$field} ) {
 
         # Add in validation here
         
@@ -118,15 +181,53 @@ sub edit_field_consortia : Private {
     }
 }
 
+sub edit_field_content_types : Private {
+    my ( $self, $c, $field ) = @_;
+
+    if ( $c->req->params->{update_value} ) {
+
+        my $value = $c->req->params->{$field};
+        if ( !ref($value) ) {
+            $value = [ $value ];
+        }
+        
+        $c->model('CUFTS')->schema->txn_do( sub {
+            $c->stash->{erm}->content_types_main->delete_all();
+
+            foreach my $content_type_id ( @$value ) {
+                my $count = $c->model('CUFTS::ERMContentTypes')->search( site => $c->site->id, id => $content_type_id )->count();
+                if ( $count < 1 ) {
+                    die("Attempt to update content_type to a value not appropriate for this site: $content_type_id");
+                }
+                $c->stash->{erm}->add_to_content_types_main({
+                    content_type => $content_type_id
+                });
+            }
+            
+        } );
+        
+        $c->stash->{display_field_name} = $field;
+        $c->stash->{template} = 'display_field.tt'
+    }
+    else {
+        $c->stash->{field} = $field;
+        $c->stash->{value} = [ map { $_->id } $c->stash->{erm}->content_types ];
+        $c->stash->{options} = [ $c->model('CUFTS::ERMContentTypes')->search( site => $c->site->id )->all ];
+        $c->stash->{display_field} = 'content_type';
+        $c->stash->{template} = 'fields/multiselect.tt'
+    }
+}
+
+
 sub edit_field_resource_medium : Private {
     my ( $self, $c, $field ) = @_;
 
-    if ( defined( $c->req->params->{$field} ) ) {
+    if ( $c->req->params->{update_value} ) {
 
         # Add in validation here
         
         my $value = $c->req->params->{$field};
-        if ( not_empty_string( $value) ) {
+        if ( not_empty_string( $value ) ) {
             my $count = $c->model('CUFTS::ERMResourceMediums')->search( site => $c->site->id, id => $value )->count();
             if ( $count < 1 ) {
                 die("Attempt to update resource_medium to a value not appropriate for this site: $value");
@@ -137,7 +238,7 @@ sub edit_field_resource_medium : Private {
         }
 
         $c->model('CUFTS')->schema->txn_do( sub {
-            $c->stash->{erm}->set_column('resource_medium', $value );
+            $c->stash->{erm}->resource_medium( $value );
             $c->stash->{erm}->update();
         } );
         
@@ -156,7 +257,7 @@ sub edit_field_resource_medium : Private {
 sub edit_field_resource_type : Private {
     my ( $self, $c, $field ) = @_;
 
-    if ( defined( $c->req->params->{$field} ) ) {
+    if ( $c->req->params->{update_value} ) {
 
         # Add in validation here
         
@@ -172,7 +273,7 @@ sub edit_field_resource_type : Private {
         }
 
         $c->model('CUFTS')->schema->txn_do( sub {
-            $c->stash->{erm}->set_column('resource_type', $value );
+            $c->stash->{erm}->resource_type( $value );
             $c->stash->{erm}->update();
         } );
         
@@ -192,7 +293,7 @@ sub edit_field_resource_type : Private {
 sub edit_field_text : Private {
     my ( $self, $c, $field ) = @_;
 
-    if ( defined( $c->req->params->{$field} ) ) {
+    if ( $c->req->params->{update_value} ) {
 
         # Add in validation here
 
@@ -214,7 +315,7 @@ sub edit_field_text : Private {
 sub edit_field_textarea : Private {
     my ( $self, $c, $field ) = @_;
 
-    if ( defined( $c->req->params->{$field} ) ) {
+    if ( $c->req->params->{update_value} ) {
 
         # Add in validation here
 
@@ -237,7 +338,7 @@ sub edit_field_textarea : Private {
 sub edit_field_boolean : Private {
     my ( $self, $c, $field ) = @_;
 
-    if ( defined( $c->req->params->{$field} ) ) {
+    if ( $c->req->params->{update_value} ) {
 
         # Add in validation here
         
