@@ -1,3 +1,4 @@
+[% extra_js.push( c.uri_for_js('jquery.selectboxes.js') ) %]
 <script>
 var CRDB_show_nodata_fields = 0;
 
@@ -22,6 +23,7 @@ function ajax_get_edit( field, url ) {
     $.ajax({
         type: 'GET',
         url: url,
+        dataType: 'html',
         success: function( html ) {
             $('#resource-definition-' + field).find('.field-data').hide();
 
@@ -59,6 +61,51 @@ function ajax_save_edit( field, url ) {
            nodata_fields();
        }
     });
+}
+
+function delete_subject( subject_id ) {
+    CRDB_to_delete[ subject_id ] = 1;
+    CRDB_to_add[ subject_id ] = 0;
+    
+    $('#edit-subjects-add').addOption( subject_id, CRDB_all_subjects[subject_id], false ).sortOptions();
+    $('div#edit-all-subjects-' + subject_id).hide();
+    
+    update_subject_fields();
+    
+    return false;
+}
+
+function add_subject() {
+    var subject_id = $('#edit-subjects-add').find("option:selected")[0].value;
+
+    CRDB_to_delete[ subject_id ] = 0;
+    CRDB_to_add[ subject_id ] = 1;
+
+    $('#edit-subjects-add').removeOption( subject_id, false );
+    $('div#edit-all-subjects-' + subject_id).show();
+    
+    update_subject_fields();
+    
+    return false;
+}
+
+function update_subject_fields() {
+    var key;
+    var array = new Array();
+    for (key in CRDB_to_add) {
+        if ( CRDB_to_add[key] ) {
+            array.push(key)
+        }
+    }
+    $('#edit-subjects-add-field').val( array.join(',') );
+
+    array = new Array();
+    for (key in CRDB_to_delete) {
+        if ( CRDB_to_delete[key] ) {
+            array.push(key)
+        }
+    }
+    $('#edit-subjects-delete-field').val( array.join(',') );
 }
 
 </script>
