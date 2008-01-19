@@ -4,8 +4,9 @@ use strict;
 use warnings;
 use base 'Catalyst::Controller';
 
-#use CUFTS::CJDB::Authentication::LDAP;
+use CUFTS::CJDB::Authentication::LDAP;
 use CUFTS::Util::Simple;
+use Data::FormValidator;
 
 =head1 NAME
 
@@ -30,7 +31,7 @@ sub logout : Chained('/site') PathPart('logout') Args(0) {
 
     $c->logout();
 
-    return $c->response->redirect( $c->req->params->{return_to} || $c->uri_for_site('/') );
+    return $c->response->redirect( $c->flash->{return_to} || $c->uri_for_site('/') );
 }
 
 
@@ -69,7 +70,7 @@ sub login : Chained('/site') PathPart('login') Args(0) {
                     # Preauthenticated realm does not need a password
                 
                     if ( !$c->authenticate({ key => $key, site => $site_id }, 'preauthenticated') ) {
-                        $c->stash->{error} = ['The password or account was not recognized. Please check that you have entered the correct login name and password. If you are still having problems, please contact your administrator.'];
+                        $c->stash->{error} = ['There was an error in the pre-authentication user lookup.'];
                     }
                 }
                 
@@ -88,9 +89,7 @@ sub login : Chained('/site') PathPart('login') Args(0) {
         
         if ( defined($c->user) ) {
             if ( $c->user->active ) {
-                return $c->response->redirect( $c->req->params->{return_to} || $c->uri_for_site('/') );
-                return $c->restore_saved_action();
-#                return $c->response->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse_index') ) );
+                return $c->response->redirect( $c->flash->{return_to} || $c->uri_for_site('/') );
             }
             else {
                 $c->stash->{error} = ['This account has been disabled by library administrators.'];
@@ -101,13 +100,8 @@ sub login : Chained('/site') PathPart('login') Args(0) {
     $c->stash->{template} = 'login.tt';
 }
 
-sub create : Local {
+sub create : Chained('/site') PathPart('create') Args(0) {
     my ($self, $c) = @_;
-
-    if (defined($c->req->params->{cancel})) {
-        $c->req->params($c->session->{prev_params});
-        return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
-    }
 
     $c->stash->{template} = 'account_create.tt';
 
@@ -115,7 +109,7 @@ sub create : Local {
 
         $c->form({required => ['key', 'name', 'password', 'create'],
                   optional => ['email', 'password2'],
-                  filters => ['trim']});
+                  filters  => ['trim']});
 
         my $site = $c->site;
         unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
@@ -126,7 +120,7 @@ sub create : Local {
             my $crypted_pass;
             my $level;
 
-            my @accounts = CJDB::DB::Accounts->search('site' => $site->id, 'key' => $key);
+            my @accounts = $c->model('CJDB::Accounts')->search('site' => $site->id, 'key' => $key);
             if (scalar(@accounts)) {
                 push @{$c->stash->{error}}, "The user id '$key' already exists.";
                 return;
@@ -156,7 +150,7 @@ sub create : Local {
 
             }
             
-            my $account = CJDB::DB::Accounts->create({
+            my $account = $c->model('CJDB::Accounts')->create({
                 site      => $site->id,
                 name      => $c->form->{valid}->{name},
                 email     => $c->form->{valid}->{email},
@@ -173,60 +167,51 @@ sub create : Local {
                 return;
             }
 
-            $c->session->{ $c->stash->{current_site}->id }->{current_account_id} = $account->id;
-            $c->stash->{current_account} = $account;
+            if ( !$c->authenticate({ key => $key, site => $site->id }, 'preauthenticated') ) {
+                die('There was an error in the pre-authentication user lookup.');
+            }
             
-            CJDB::DB::DBI->dbi_commit();
-
-            $c->req->params($c->session->{prev_params});
-            return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
+            return $c->response->redirect( $c->flash->{return_to} || $c->uri_for_site( $c->controller('Root')->action_for('app_root') ) );
         }
     } 
 }
 
 
-sub manage : Local {
+sub manage : Chained('/site') PathPart('manage') Args(0) {
     my ($self, $c) = @_;
 
     # If the user logged out on this page, go back to /browse
 
-    defined($c->stash->{current_account}) or
-        return $c->redirect('/browse');
+    defined($c->user) or
+        return $c->redirect( $c->uri_for_site( $c->controller('Root')->action_for('app_root') ) );
 
-    if (defined($c->req->params->{cancel})) {
-        $c->req->params($c->session->{prev_params});
-        return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
-    }
-
+    $c->stash->{return_to} = $c->req->params->{return_to};
     $c->stash->{template} = 'account_manage.tt';
 
     if (defined($c->req->params->{save})) {
 
         $c->form({required => ['name', 'email', 'save'],
-                  optional => ['password', 'password2'],
-                  filters => ['trim']});
+                  optional => ['change_password', 'change_password2'],
+                  filters  => ['trim']});
 
         unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
 
-            my ($password, $password2) = ($c->form->{valid}->{password}, $c->form->{valid}->{password2});
+            my ($password, $password2) = ($c->form->{valid}->{change_password}, $c->form->{valid}->{change_password2});
 
             if (defined($password) || defined($password2)) {
                 if ($password eq $password2) {
-                    $c->stash->{current_account}->password(crypt($password, $c->stash->{current_account}->key));
+                    $c->user->password(crypt($password, $c->user->key));
                 } else {
                     push @{$c->stash->{error}}, "Passwords do not match.";
                     return;
                 }
             }
 
-            $c->stash->{current_account}->name($c->form->{valid}->{name});
-            $c->stash->{current_account}->email($c->form->{valid}->{email});
-            $c->stash->{current_account}->update;           
-            
-            CJDB::DB::DBI->dbi_commit();
+            $c->user->name($c->form->{valid}->{name});
+            $c->user->email($c->form->{valid}->{email});
+            $c->user->update;           
 
-            $c->req->params($c->session->{prev_params});
-            return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
+            return $c->response->redirect( $c->flash->{return_to} || $c->uri_for_site( $c->controller('Root')->action_for('app_root') ) );
         }
     } 
 }
@@ -236,7 +221,7 @@ sub tags : Local {
     my ($self, $c) = @_;
 
     
-    $c->stash->{tags} = CJDB::DB::Tags->get_mytags_list($c->stash->{current_account});
+    $c->stash->{tags} = CJDB::DB::Tags->get_mytags_list($c->user);
     $c->stash->{template} = 'mytags.tt';
 }
 
