@@ -4,5 +4,4 @@
 <tr><td>Password</td><td><input name="password" type="password" size="20" maxlength="128" /></td></tr>
 <tr><td colspan="2"><input type="submit" name="login" value="login" /></td></tr>
 </table>
-<input type="hidden" name="return_to" value="[% return_to %]" />
 </form>
