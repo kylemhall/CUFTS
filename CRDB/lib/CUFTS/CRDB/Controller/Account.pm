@@ -31,7 +31,7 @@ sub logout : Chained('/site') PathPart('logout') Args(0) {
 
     $c->logout();
 
-    return $c->response->redirect( $c->flash->{return_to} || $c->uri_for_site('/') );
+    return $c->response->redirect( $c->flash->{return_to} || $c->uri_for_site( $c->controller('Root')->action_for('app_root') ) );
 }
 
 
@@ -89,7 +89,7 @@ sub login : Chained('/site') PathPart('login') Args(0) {
         
         if ( defined($c->user) ) {
             if ( $c->user->active ) {
-                return $c->response->redirect( $c->flash->{return_to} || $c->uri_for_site('/') );
+                return $c->response->redirect( $c->flash->{return_to} || $c->uri_for_site( $c->controller('Root')->action_for('app_root') ) );
             }
             else {
                 $c->stash->{error} = ['This account has been disabled by library administrators.'];
