@@ -78,10 +78,10 @@
 
 </div>
 
-<div id="resources-facet-change-list" style="width: 18%; padding: 5px; height: 27.5em; background: white; float: right;">
+<div id="resources-facet-change-list">
  <h2>Show:</h2>
  <ul id="chosen-facets"></ul>
- <div id="facet-count-container">Estimated result count: <span id="facet-count"></span></div>
+ <div id="facet-count-container">Resources: <span id="facet-count"></span></div>
  <form name="browse">
   <input type="submit" name="show" value="show"   onClick="submit_facet_changes(); return false;" />
   <input type="submit" name="reset" value="reset" onClick="init_facets(); return false;" />
