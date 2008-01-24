@@ -1,4 +1,4 @@
 [% USE url %]
 <div id="menu">
-<a href="[% c.uri_for_site( c.controller('Browse').action_for('browse_index') ) %]">Browse</a>
+<a href="[% c.uri_for_site( c.controller('Root').action_for('site_index') ) %]">Home</a>
 </div>
