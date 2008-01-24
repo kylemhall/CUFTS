@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use base 'Catalyst::Controller';
 
+use JSON::XS qw(encode_json);
+
 #
 # Sets the actions in this controller to be registered with no prefix
 # so they function identically to actions created in MyApp.pm
@@ -43,10 +45,47 @@ sub site : Chained('/') PathPart('') CaptureArgs(1) {
     return 1;
 }
 
+sub facet_options : Chained('site') PathPart('') CaptureArgs(0) {
+
+    my ( $self, $c ) = @_;
+    
+    my @load_options = (
+        [ 'resource_types',   'resource_type',   'CUFTS::ERMResourceTypes' ],
+        [ 'resource_mediums', 'resource_medium', 'CUFTS::ERMResourceMediums' ],
+        [ 'subjects',         'subject',         'CUFTS::ERMSubjects' ],
+        [ 'content_types',    'content_type',    'CUFTS::ERMContentTypes' ],
+    );
+    
+    foreach my $load_option ( @load_options ) {
+        my ( $type, $field, $model ) = @$load_option;
+
+        $c->stash->{$type} = $c->cache->get( $c->site->id . " $type" );
+        $c->stash->{"${type}_order"} = $c->cache->get( $c->site->id . " ${type}_order" );
+        
+        unless ( $c->stash->{$type} && $c->stash->{"${type}_order"} ) {
+
+            my @records = $c->model($model)->search( site => $c->site->id, { order_by => $field } )->all;
+
+            $c->stash->{$type}           = { map { $_->id => $_->$field } @records };
+            $c->stash->{"${type}_order"} = [ map { $_->id } @records ];
+
+            $c->cache->set( $c->site->id . " $type" , $c->stash->{$type} );
+            $c->cache->set( $c->site->id . " ${type}_order" , $c->stash->{"${type}_order"} );
+
+        }
+
+        $c->stash->{"${type}_json"}    = encode_json( $c->stash->{$type} );
+        $c->stash->{"${field}_lookup"} = $c->stash->{$type};  # Alias for looking up when we have the "field" name rather than the type name.
+    }
+
+}
+
+
+
 =head2 default
 
 =cut
-sub app_root : Chained('site') PathPart('') Args(0) {
+sub app_root : Chained('facet_options') PathPart('') Args(0) {
     my ( $self, $c ) = @_;
 
     $c->stash->{template} = 'main.tt';
@@ -72,6 +111,7 @@ sub exit : Global {
     
     exit();
 }
+
 
 =head2 end
 
