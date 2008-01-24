@@ -18,50 +18,15 @@ Catalyst Controller
 
 =cut
 
-sub base : Chained('/site') PathPart('browse') CaptureArgs(0) {
-    my ( $self, $c ) = @_;
-}
+sub base : Chained('/site') PathPart('browse') CaptureArgs(0) {}
 
-sub options : Chained('base') PathPart('') CaptureArgs(0) {
-
-    my ( $self, $c ) = @_;
-    
-    my @load_options = (
-        [ 'resource_types',   'resource_type',   'CUFTS::ERMResourceTypes' ],
-        [ 'resource_mediums', 'resource_medium', 'CUFTS::ERMResourceMediums' ],
-        [ 'subjects',         'subject',         'CUFTS::ERMSubjects' ],
-        [ 'content_types',    'content_type',    'CUFTS::ERMContentTypes' ],
-    );
-    
-    foreach my $load_option ( @load_options ) {
-        my ( $type, $field, $model ) = @$load_option;
-
-        $c->stash->{$type} = $c->cache->get( $c->site->id . " $type" );
-        $c->stash->{"${type}_order"} = $c->cache->get( $c->site->id . " ${type}_order" );
-        
-        unless ( $c->stash->{$type} && $c->stash->{"${type}_order"} ) {
-
-            my @records = $c->model($model)->search( site => $c->site->id, { order_by => $field } )->all;
-
-            $c->stash->{$type}           = { map { $_->id => $_->$field } @records };
-            $c->stash->{"${type}_order"} = [ map { $_->id } @records ];
-
-            $c->cache->set( $c->site->id . " $type" , $c->stash->{$type} );
-            $c->cache->set( $c->site->id . " ${type}_order" , $c->stash->{"${type}_order"} );
-
-        }
-
-        $c->stash->{"${type}_json"}    = encode_json( $c->stash->{$type} );
-        $c->stash->{"${field}_lookup"} = $c->stash->{$type};  # Alias for looking up when we have the "field" name rather than the type name.
-    }
-
-}
+sub facet_options : Chained('/facet_options') PathPart('browse') CaptureArgs(0) {}
 
 =head2 browse_index 
 
 =cut
 
-sub browse_index : Chained('options') PathPart('') Args(0) {
+sub browse_index : Chained('facet_options') PathPart('') Args(0) {
     my ( $self, $c ) = @_;
 
     $c->save_current_action();
@@ -132,7 +97,7 @@ Returns the results of a facet search in JSON.  Facets are specified as part of 
 
 =cut
 
-sub html_facets : Chained('options') PathPart('facets') Args {
+sub html_facets : Chained('facet_options') PathPart('facets') Args {
     my ( $self, $c, @facets ) = @_;
 
     my $rs = $self->_facet_search( $c, \@facets );
@@ -160,7 +125,7 @@ Returns the results of a facet search in JSON.  Facets are specified as part of 
 
 =cut
 
-sub json_facets : Chained('options') PathPart('facets/json') Args {
+sub json_facets : Chained('facet_options') PathPart('facets/json') Args {
     my ( $self, $c, @facets ) = @_;
 
     my $rs = $self->_facet_search( $c, \@facets );

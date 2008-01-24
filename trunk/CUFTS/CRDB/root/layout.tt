@@ -27,6 +27,7 @@
 [% PROCESS page_header.tt %]
 [% PROCESS nav_line.tt %]
 <div id="content">
+[% PROCESS page_title.tt %]
 [%- PROCESS errors.tt -%]
 [%- content -%]
 </div>
