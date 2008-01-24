@@ -402,6 +402,23 @@ div.resources-facet-choice-list {
     overflow: auto;
 }
 
+div#resources-facet-change-list {
+    width: 18%; 
+    padding: 5px;
+    height: 27.5em;
+    background: white;
+    float: right;
+}
+
+div#resources-facet-change-list ul {
+}
+
+div#facet-count-container {
+    padding-left: 7px;
+    margin-bottom: 7px;
+    font-size: 110%;
+}
+
 ul#chosen-facets {
     list-style-type: none;
     margin: 0px;
