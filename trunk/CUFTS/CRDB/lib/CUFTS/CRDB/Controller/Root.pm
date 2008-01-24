@@ -38,6 +38,14 @@ sub site : Chained('/') PathPart('') CaptureArgs(1) {
         die("Unrecognized site key: $site_key");
     }
     
+    # Set up site specific CSS file if it exists
+    
+    my $site_css =   '/sites/' . $site->id . '/static/css/active/crdb.css';
+                  
+    if ( -e ($c->config->{root} . $site_css) ) {
+        $c->stash->{site_css_file} = $c->uri_for( $site_css );
+    }
+    
     $c->stash->{additional_template_paths} = [ $c->config->{root} . '/sites/' . $site->id . '/active' ];    
     $c->stash->{extra_js} = [];
     $c->site( $site );
