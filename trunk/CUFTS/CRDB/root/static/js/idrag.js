@@ -136,7 +136,10 @@ jQuery.iDrag =	{
 		}
 
 		jQuery.iDrag.helper.empty();
-		var clonedEl = elm.cloneNode(true);
+		// Todd Holbrook - Fix for Interface 1.2 on jQuery 1.2+.  Sortables stop responding on IE
+
+        // var clonedEl = elm.cloneNode(true);
+        var clonedEl = $(elm).clone(true).get(0);
 		
 		jQuery(clonedEl).css(
 			{

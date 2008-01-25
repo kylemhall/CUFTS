@@ -46,14 +46,15 @@
 [% BLOCK display_record %]
  [% SET record_id = record.id %]
 <div class="resource-brief-record" id="[% record_id %]">
- [% IF c.check_user_roles('edit_erm_records') AND facets.subject AND facets.size == 1 %]
-  <div style="float: right; cursor: move" class="handle">[ rank ]</div>
- [% END %]
  <div class="resource-brief-field-name">
   <a href="[% record.url %]">[% record.result_name %][% IF record.vendor.length %] - [% record.vendor %][% END %]</a>
  </div>
  <div class="resource-brief-field-description">[% record.description_brief %]</div>
  <a class="trigger" id="resource-brief-details-trigger-[% record_id %]" href="[% c.uri_for_site( c.controller('Resource').action_for('default_view'), [ record_id ] ) %]"  onMouseOver="javascript: ajax_erm_resource_details([% record_id %])" onMouseOut="javascript: $('#resource-brief-details-[% record_id %]').hide()">[ details ]</a>
+ [% IF c.check_user_roles('edit_erm_records') AND facets.subject AND facets.size == 1 %]
+  <span style="cursor: move" class="handle">[ rank ]</span>
+ [% END %]
+ 
 
  <div class="resource-brief-details" id="resource-brief-details-[% record_id %]">
   <div class="resource-brief-field"><span class="resource-brief-label">Resource Type:</span><span id="field-resource_type" class="resource-brief-data"></span></div>

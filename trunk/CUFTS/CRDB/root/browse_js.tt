@@ -32,7 +32,7 @@ function CRDB_enable_sorting() {
     $('#resources-brief-records-top, #resources-brief-records-other').Sortable(
         {
             accept: 'resource-brief-record',
-            handle: 'div.handle',
+            handle: '.handle',
             axis: 'vertically',
             helperclass: 'resources-sort-helper',
             opacity: 0.8,
