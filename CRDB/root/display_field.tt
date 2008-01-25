@@ -18,7 +18,7 @@
  [% CASE 'url' %]
   [% SET url_field_data = erm.url %]
   [% IF url_field_data.search('^http') %]
-   [% SET url_field_data = '<a href="' _ url_field_data _ '">Connect</a>' %]
+   [% SET url_field_data = '<a href="' _ erm.proxied_url(c.site) _ '">Connect</a>' %]
   [% END %]
   [% INCLUDE render_field field_name="url", field_data=url_field_data %]
  [% CASE %]
@@ -69,17 +69,21 @@
    [% IF !hide_label OR c.check_user_roles('edit_erm_records') %]
     <td id="resource-term-[% field_name %]" class="resource-field-label">[% field_label | html %]</td>
    [% END %]
-   [% IF display_field.staff_edit AND c.check_user_roles('edit_erm_records') %]
+   [% IF c.check_user_roles('edit_erm_records') %]
+    [% IF display_field.staff_edit %]
     <td class="resource-edit-control">
-     [% SET ajax_edit_URL = c.uri_for_site( c.controller('Resource::Field').action_for('edit'), [ erm.id ], field_name ) %]
-     <span class="resource-edit-control-savecancel" style="display: none">
-      <a href="#" onClick="ajax_save_edit( '[% field_name %]', '[% ajax_edit_URL %]'); return false;" ><img class="icon" src="[% c.uri_for_image('tick.png') %]" alt="save" /></a> 
-      <a href="#" onClick="ajax_cancel_edit( '[% field_name %]' ); return false;" ><img class="icon" src="[% c.uri_for_image('cross.png') %]" alt="cancel" /></a>
-     </span>
-     <span class="resource-edit-control-edit">
-      <a href="#" onClick="ajax_get_edit( '[% field_name %]', '[% ajax_edit_URL %]' ); return false;" ><img class="icon" src="[% c.uri_for_image('pencil.png') %]" alt="edit" /></a>
-     </span>
-    </td>
+      [% SET ajax_edit_URL = c.uri_for_site( c.controller('Resource::Field').action_for('edit'), [ erm.id ], field_name ) %]
+      <span class="resource-edit-control-savecancel" style="display: none">
+       <a href="#" onClick="ajax_save_edit( '[% field_name %]', '[% ajax_edit_URL %]'); return false;" ><img class="icon" src="[% c.uri_for_image('tick.png') %]" alt="save" /></a> 
+       <a href="#" onClick="ajax_cancel_edit( '[% field_name %]' ); return false;" ><img class="icon" src="[% c.uri_for_image('cross.png') %]" alt="cancel" /></a>
+      </span>
+      <span class="resource-edit-control-edit">
+       <a href="#" onClick="ajax_get_edit( '[% field_name %]', '[% ajax_edit_URL %]' ); return false;" ><img class="icon" src="[% c.uri_for_image('pencil.png') %]" alt="edit" /></a>
+      </span>
+     </td>
+    [% ELSE %]
+     <td></td>
+    [% END %]
    [% END %]
    <td id="resource-definition-[% field_name %]" class="resource-field-data" [% IF hide_label AND !c.check_user_roles('edit_erm_records') %]colspan="3"[% END %]>
     <div class="field-data">
