@@ -1,11 +1,3 @@
-[% IF c.check_user_roles('edit_erm_records') AND facets.subject AND facets.size == 1 %]
- [% SET sorting_enabled = 1 %]
-[% END %]
-[% IF c.check_user_roles('edit_erm_records') AND facets.subject %]
- [% SET editing_enabled = 1 %]
-[% END %]
-
-
 <script type="text/javascript">
 
 /* Zebra stripe the results */
