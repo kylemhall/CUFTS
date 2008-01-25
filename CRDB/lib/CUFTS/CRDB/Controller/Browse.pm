@@ -105,7 +105,8 @@ sub html_facets : Chained('facet_options') PathPart('facets') Args {
 
     if ( exists( $c->stash->{facets}->{subject} ) ) {
         # Rank sort for subjects
-        @records = sort { $a->rank cmp $b->rank or $a->sort_name cmp $b->sort_name } @records;
+        warn('!!');
+        @records = sort { int($a->rank) <=> int($b->rank) or $a->sort_name cmp $b->sort_name } @records;
     }
     else {
         # Default to title sort
