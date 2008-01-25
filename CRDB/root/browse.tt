@@ -1,5 +1,13 @@
 [% USE url %]
 
+[% IF c.check_user_roles('edit_erm_records') AND facets.subject AND facets.size == 1 %]
+ [% SET sorting_enabled = 1 %]
+[% END %]
+[% IF c.check_user_roles('edit_erm_records') AND facets.subject %]
+ [% SET editing_enabled = 1 %]
+[% END %]
+
+
 [% PROCESS browse_js.tt %]
 
 [% PROCESS facet_menu.tt %]
@@ -7,29 +15,37 @@
 <div id="resources-brief-records">
     
 [% IF facets.subject AND facets.size == 1 %]
- [% SET other_index = 0 %]
 
  <h2>Top Resources</h2>
 
  <div id="resources-brief-records-top">
 
+  [% SET have_unranked = 0 %]
   [% FOREACH record IN records %]
-   [% NEXT IF record.rank == 0 %]
+   [% IF record.rank == 0 %]
+    [% SET have_unranked = 1 %]
+    [% NEXT %]
+   [% END %]
+
    [% PROCESS display_record %]
+
   [% END %]
 
  </div>
 
- <h2>Other Resources</h2>
+ [% IF have_unranked OR sorting_enabled %]
 
- <div id="resources-brief-records-other">
+  <h2>Other Resources</h2>
 
-  [% FOREACH record IN records %]
-   [% LAST IF record.rank > 0 %]
-   [% PROCESS display_record %]
-  [% END %]
+  <div id="resources-brief-records-other">
 
- </div>
+   [% FOREACH record IN records %]
+    [% LAST IF record.rank > 0 %]
+    [% PROCESS display_record %]
+   [% END %]
+
+  </div>
+ [% END %]
 
 
 [% ELSE %]
