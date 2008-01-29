@@ -37,6 +37,13 @@ sub base : Chained('/resource/load_resource') PathPart('field') CaptureArgs(0) {
     my ( $self, $c ) = @_;
     
     $c->assert_user_roles('edit_erm_records');
+    
+    # Avoid IE caching of AJAX calls
+    
+    $c->res->header( 'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0' );
+    $c->res->header( 'Pragma' => 'no-cache' );
+    $c->res->header( 'Expires' => 'Thu, 01 Jan 1970 00:00:00 GMT' );
+    
 }
 
 sub edit : Chained('base') PathPart('edit') Args(1) {
