@@ -39,6 +39,7 @@ sub title_list_fields {
             issn
             e_issn
             ft_start_date
+            ft_end_date
             journal_url
             db_identifier
             publisher
@@ -60,6 +61,7 @@ sub title_list_field_map {
         'Who is the publisher?'                      => 'publisher',
         'db_identifier'                              => 'db_identifier',
         'ft_start_date'                              => 'ft_start_date',
+        'ft_end_date'                                => 'ft_end_date',
         'embargo_months'                             => 'embargo_months',
     };
 }
