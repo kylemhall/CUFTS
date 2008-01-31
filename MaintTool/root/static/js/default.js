@@ -39,6 +39,9 @@ function MM_swapImage() { //v3.0
 }
 
 function confirmDelete(message) {
+    if ( message == null ) {
+        message = '';
+    }
 	var agree = confirm("Delete record(s)? " + message);
 	if (agree) 
 		return true;

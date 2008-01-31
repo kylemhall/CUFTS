@@ -10,7 +10,7 @@ use MARC::Record;
 sub auto : Private {
     my ( $self, $c ) = @_;
     
-    $c->stash->{header_section} = 'Global Resources';
+    $c->stash->{header_section} = 'ERM';
     
     return 1;
 }

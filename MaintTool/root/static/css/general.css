@@ -101,7 +101,7 @@ td.heading {
     background: #004997;
     font-weight: bold;
     color: white;
-    padding: 2px 5px;
+    padding: 4px 5px 2px 5px;
     white-space: nowrap;
 }
 
@@ -680,4 +680,27 @@ div#site-settings-crdb-active-fields-drop {
     width: 25em;
     height: 400px;
     overflow: auto;
+}
+
+
+/* ERM Costs */
+
+table.erm-costs input {
+    font-size: 90%;
+}
+
+table.erm-costs td.action {
+    text-align: center;
+}
+
+table.erm-costs td.currency {
+    text-align: right;
+}
+
+table.erm-costs-edit input {
+    font-size: 90%;
+}
+
+tr.highlight td {
+    background: #ee8 !important;
 }
