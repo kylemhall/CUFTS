@@ -18,6 +18,9 @@
    <td class="[% class %]">[% cost.period_end %]</td>
   </tr>
  [% END %]
+ [% IF !costs.scalar %]
+  <tr><td colspan="8" class="field0">No costs records found.</td></tr>
+ [% END %]
  <tr><form method="post" action="[% url("$url_base/erm/costs/add/$erm.id") %]"]"><td class="heading">Add Cost</td><td class="heading">date</td><td class="heading currency">invoice</td><td class="heading">currency</td><td class="heading currency">paid</td><td class="heading">currency</td><td class="heading">period start</td><td class="heading">period end</td></tr> 
  <tr>
   <td class="field0"><input type="submit" name="add" value="add" /></td>
