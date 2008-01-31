@@ -1,6 +1,7 @@
 CREATE TABLE erm_costs (
     id                 SERIAL PRIMARY KEY,
     erm_main           INTEGER NOT NULL,
+    date               DATE,
     invoice            NUMERIC(10,2),
     invoice_currency   VARCHAR(3),
     paid               NUMERIC(10,2),
