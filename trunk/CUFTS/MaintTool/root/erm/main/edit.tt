@@ -644,6 +644,7 @@ $( function() {
  <div class="data">
   <label for="erm-edit-input-cost">cost</label>
   <input id="erm-edit-input-cost" name="cost" value="[% erm.cost | html %]" style="width: 10em;" />
+   <a style="padding-top: 3px; float: left; padding-left: 5px;" href="[% url("$url_base/erm/costs/view/$erm.id") %]">advanced costs</a>
  </div>
  <div class="help">
   Cost

@@ -20,6 +20,9 @@
 
 package CUFTS::Schema::ERMMain;
 
+use CUFTS::Resources;  # For prepend_proxy()
+use CUFTS::Util::Simple;
+
 use strict;
 use base qw/DBIx::Class/;
 
@@ -732,6 +735,19 @@ sub name {
     return $self->main_name;
 }
 
+sub proxied_url {
+    my ( $self, $site ) = @_;
+    
+    if ( not_empty_string($site->proxy_prefix) ) {
+        return $site->proxy_prefix . $self->url;
+    } elsif ( not_empty_string($site->proxy_WAM) ) {
+        my $url = $self->url;
+        my $wam = $site->proxy_WAM;
+        $url =~ s{ http:// ([^/]+) /? }{http://0-$1.$wam/}xsm;
+        return $url;
+    }
+    
+}
 
 
 1;

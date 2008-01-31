@@ -38,6 +38,8 @@ sub site : Chained('/') PathPart('') CaptureArgs(1) {
         die("Unrecognized site key: $site_key");
     }
     
+    # TODO: Add support for sandbox
+    
     # Set up site specific CSS file if it exists
     
     my $site_css =   '/sites/' . $site->id . '/static/css/active/crdb.css';
