@@ -11,7 +11,7 @@ sub auto : Private {
     my ( $self, $c ) = @_;
     
     $c->stash->{header_section} = 'ERM';
-    $c->stash->{currency_list} = qw(
+    $c->stash->{currency_list} = [ qw(
         AUD
         CAD
         CHF
@@ -29,7 +29,7 @@ sub auto : Private {
         SGD
         USD
         ZAR
-    );
+    ) ];
     
     
     return 1;
