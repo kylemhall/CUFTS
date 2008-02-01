@@ -11,6 +11,26 @@ sub auto : Private {
     my ( $self, $c ) = @_;
     
     $c->stash->{header_section} = 'ERM';
+    $c->stash->{currency_list} = qw(
+        AUD
+        CAD
+        CHF
+        DKK
+        EUR
+        GBP
+        HKD
+        INR
+        JPY
+        MXN
+        NOK
+        NZD
+        PKR
+        SEK
+        SGD
+        USD
+        ZAR
+    );
+    
     
     return 1;
 }
