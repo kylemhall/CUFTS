@@ -10,10 +10,9 @@
    <td class="field1">
     $ <input type="text" name="invoice" size="8" maxlength="12" value="[% cost.invoice %]" />
     <select name="invoice_currency" style="width: 4em;">
-      <option value="CAD" [% 'selected="selected"' IF cost.invoice_currency == 'CAD' %]>CAD</option>
-      <option value="USD" [% 'selected="selected"' IF cost.invoice_currency == 'USD' %]>USD</option>
-      <option value="GBP" [% 'selected="selected"' IF cost.invoice_currency == 'GBP' %]>GBP</option>
-      <option value="EUR" [% 'selected="selected"' IF cost.invoice_currency == 'EUR' %]>EUR</option>
+    [% FOREACH currency IN currency_list %]
+     <option value="[% currency %]" [% 'selected="selected"' IF cost.invoice_currency == currency %]>[% currency %]</option>
+    [% END %]
      </select>
      [% PROCESS form_results.tt frf='invoice' %]
     </td>
@@ -23,10 +22,9 @@
    <td class="field0">
     $ <input type="text" name="paid" size="8" maxlength="12" value="[% cost.paid %]" />
     <select name="paid_currency" style="width: 4em;">
-       <option value="CAD" [% 'selected="selected"' IF cost.paid_currency == 'CAD' %]>CAD</option>
-       <option value="USD" [% 'selected="selected"' IF cost.paid_currency == 'USD' %]>USD</option>
-       <option value="GBP" [% 'selected="selected"' IF cost.paid_currency == 'GBP' %]>GBP</option>
-       <option value="EUR" [% 'selected="selected"' IF cost.paid_currency == 'EUR' %]>EUR</option>
+     [% FOREACH currency IN currency_list %]
+      <option value="[% currency %]" [% 'selected="selected"' IF cost.paid_currency == currency %]>[% currency %]</option>
+     [% END %]
        </select>
     [% PROCESS form_results.tt frf='paid' %]
    </td>

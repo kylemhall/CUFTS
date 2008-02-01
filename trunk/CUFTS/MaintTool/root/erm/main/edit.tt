@@ -666,10 +666,9 @@ $( function() {
   <label for="erm-edit-input-currency">currency</label>
   <select id="erm-edit-input-currency" name="currency" style="width: 4em;">
    <option value=""></option>
-   <option value="CAD" [% 'selected="selected"' IF erm.currency == 'CAD' %]>CAD</option>
-   <option value="USD" [% 'selected="selected"' IF erm.currency == 'USD' %]>USD</option>
-   <option value="GBP" [% 'selected="selected"' IF erm.currency == 'GBP' %]>GBP</option>
-   <option value="EUR" [% 'selected="selected"' IF erm.currency == 'EUR' %]>EUR</option>
+   [% FOREACH currency IN currency_list %]
+    <option value="[% currency %]" [% 'selected="selected"' IF currency == erm.currency %]>[% currency %]</option>
+   [% END %]
   </select>
  </div>
  <div class="help">
