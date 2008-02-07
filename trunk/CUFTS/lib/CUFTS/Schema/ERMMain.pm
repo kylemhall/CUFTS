@@ -79,6 +79,13 @@ __PACKAGE__->add_columns(
       size => 1024,
       'default_can_view' => [ 'patron', 'staff' ],
     },
+    'access' => {
+      data_type => 'varchar',
+      default_value => undef,
+      is_nullable => 1,
+      size => 1024,
+      'default_can_view' => [ 'patron', 'staff' ],
+    },
     'resource_type' => {
       data_type => 'integer',
       default_value => undef,
@@ -160,6 +167,12 @@ __PACKAGE__->add_columns(
       default_value => undef,
       is_nullable => 1,
       size => 64000
+    },
+    'group_records' => {
+      data_type => 'varchar',
+      default_value => undef,
+      is_nullable => 1,
+      size => 1024,
     },
     'active_alert' => {
       data_type => 'varchar',
@@ -738,6 +751,8 @@ sub name {
 sub proxied_url {
     my ( $self, $site ) = @_;
     
+    return undef if is_empty_string( $self->url );
+    
     if ( not_empty_string($site->proxy_prefix) ) {
         return $site->proxy_prefix . $self->url;
     } elsif ( not_empty_string($site->proxy_WAM) ) {
@@ -746,9 +761,22 @@ sub proxied_url {
         $url =~ s{ http:// ([^/]+) /? }{http://0-$1.$wam/}xsm;
         return $url;
     }
-    
 }
 
+sub get_group_records {
+    my $self = shift;
+    return [] if is_empty_string( $self->group_records );
+
+    my @record_ids = split( /[,\s]+/, $self->group_records );
+    my $recordset = $self->result_source->resultset->search( {
+        site => $self->site,
+        id => { '-in' => \@record_ids }
+    } );
+
+    my @records = $recordset->all();
+    
+    return \@records;
+}
 
 1;
 

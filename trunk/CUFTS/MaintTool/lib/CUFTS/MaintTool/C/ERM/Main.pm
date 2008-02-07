@@ -29,6 +29,7 @@ my $form_validate = {
             vendor
             publisher
             url
+            access
             resource_type
             resource_medium
             file_type
@@ -41,6 +42,7 @@ my $form_validate = {
             public
             public_list
             public_message
+            group_records
             subscription_status
             print_included
             active_alert
