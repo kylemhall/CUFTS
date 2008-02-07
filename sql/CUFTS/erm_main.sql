@@ -9,6 +9,7 @@ CREATE TABLE erm_main (
     vendor              VARCHAR(1024),
     publisher           VARCHAR(1024),
     url                 VARCHAR(1024),
+    access              VARCHAR(1024),
     resource_type       INTEGER,        -- linked table (erm_resource_types)
     resource_medium     INTEGER,        -- linked table (erm_resource_mediums)
     file_type           VARCHAR(255),
@@ -22,6 +23,7 @@ CREATE TABLE erm_main (
     public_list         BOOLEAN,
     public              BOOLEAN,
     public_message      TEXT,
+    group_records       VARCHAR(1024),
     active_alert        VARCHAR(1024),
 
     pick_and_choose     BOOLEAN,
@@ -41,27 +43,27 @@ CREATE TABLE erm_main (
     
     subscription_type            VARCHAR(1024),
     subscription_status          VARCHAR(1024),
-    print_included		 BOOLEAN,
+    print_included               BOOLEAN,
     subscription_notes           TEXT,
     subscription_ownership       VARCHAR(1024),
     subscription_ownership_notes TEXT,
     
-    issn		VARCHAR(1024),
-    isbn		VARCHAR(1024),
+    issn        VARCHAR(1024),
+    isbn        VARCHAR(1024),
     
     misc_notes          TEXT,
     
 -- Dates and Costs
 
     cost                    VARCHAR(1024),
-    invoice_amount	    VARCHAR(1024),
-    currency		    VARCHAR(3),
+    invoice_amount          VARCHAR(1024),
+    currency                VARCHAR(3),
     pricing_model           INTEGER,        -- linked table (erm_pricing_model)
     pricing_model_notes     TEXT,
     gst                     BOOLEAN,
     pst                     BOOLEAN,
-    gst_amount		    VARCHAR(1024),
-    pst_amount		    VARCHAR(1024),
+    gst_amount              VARCHAR(1024),
+    pst_amount              VARCHAR(1024),
     payment_status          VARCHAR(1024),
     contract_start          DATE,
     contract_end            DATE,

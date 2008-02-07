@@ -13,6 +13,7 @@ my @fast_search_columns = qw(
     vendor
     description_brief
     url
+    access
     license.id
 );
 

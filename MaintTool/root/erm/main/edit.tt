@@ -191,6 +191,15 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-access">Access</label>
+  <input id="erm-edit-input-access" name="access" value="[% erm.access | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  How to access the resource if not through the URL above.  This can be something simple like "Standalone CDROMs, 3rd floor."
+ </div>
+</div>
 
 <div class="field">
  <div class="data">
@@ -260,6 +269,15 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-group_records">group records</label>
+  <input id="erm-edit-input-group_records" name="group_records" value="[% erm.group_records | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  If this is a special group record, enter the resource ids for the grouped records here.
+ </div>
+</div>
 
 <div class="field">
  <div class="data">

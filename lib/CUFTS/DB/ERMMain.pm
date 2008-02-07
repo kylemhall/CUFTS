@@ -37,6 +37,7 @@ __PACKAGE__->columns(All => qw(
     vendor
     publisher
     url
+    access
     resource_type
     resource_medium
     file_type
@@ -49,6 +50,7 @@ __PACKAGE__->columns(All => qw(
     public
     public_list
     public_message
+    group_records
     subscription_status
     print_included
     active_alert
