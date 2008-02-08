@@ -754,6 +754,7 @@ sub overlay_title_list {
                 next if $column =~ /^___/;
                 next unless defined($record->{$column});
                 next if grep {$_ eq $column} (@match_on);
+                next unless $local_record->can( $column );
                 
                $local_record->$column($record->{$column});
             }
