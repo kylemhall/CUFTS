@@ -73,8 +73,14 @@
    <input style="width: 1.1em;" type="text" name="[% field_index %]-[% field_type %]-1" value="[% field.indicator(1) | html %]" size="1" maxlength="1" />
    <input style="width: 1.1em;" type="text" name="[% field_index %]-[% field_type %]-2" value="[% field.indicator(2) | html %]" size="1" maxlength="1" />
    [% FOREACH subfield IN marc_fields.$field_type.subfields %]
+    [% SET subfield_key   = subfield %]
+    [% SET subfield_index = 0 %]
+    [% IF ( matches = subfield.match('^(.)(\d)$') ) %]
+     [% SET subfield_key   = matches.0 %]
+     [% SET subfield_index = matches.1 %]
+    [% END %]
     [% SET loop_index = loop.index %]
-    [% subfield %] <input type="text" name="[% field_index %]-[% field_type %][% subfield %]" value="[% field.subfield(subfield) | marc8 | html %]" size="[% marc_fields.$field_type.size.$loop_index %]" />
+    [% subfield_key %] <input type="text" name="[% field_index %]-[% field_type %][% subfield %]" value="[% field.subfield(subfield_key).list.$subfield_index | marc8 | html %]" size="[% marc_fields.$field_type.size.$loop_index %]" />
    [% END %]
    <input type="hidden" name="[% field_index %]-[% field_type %]-exists" value="1" />
    <input style="background: #D0DEED; margin-left: 10px;" type="submit" name="clear" value="clear" onClick="return clear_field('[% field_index %]', '[% field_type %]', 'journal_auth');" />
@@ -84,14 +90,20 @@
  [% IF marc_fields.$field_type.repeats %]
 
   [% SET start = max_field + 1  %]
-  [% SET end   = max_field + 26 %]
+  [% SET end   = max_field + 10 %]
   [% FOREACH x IN [ start .. end ] %]
    <div class="row[% x % 2 %]" [% IF !max_seen_field.defined || x > max_seen_field.$field_type %]style="display: none"[% END %] id="[% x %]-[% field_type %]">
     <input style="width: 1.1em;" type="text" name="[% x %]-[% field_type %]-1" value="" size="1" maxlength="1" />
     <input style="width: 1.1em;" type="text" name="[% x %]-[% field_type %]-2" value="" size="1" maxlength="1" />
     [% FOREACH subfield IN marc_fields.$field_type.subfields %]
+    [% SET subfield_key   = subfield %]
+    [% SET subfield_index = 0 %]
+    [% IF ( matches = subfield.match('^(.)(\d)$') ) %]
+     [% SET subfield_key   = matches.0 %]
+     [% SET subfield_index = matches.1 %]
+    [% END %]
      [% SET loop_index = loop.index %]
-     [% subfield %] <input type="text" name="[% x %]-[% field_type %][% subfield %]" value="" size="[% marc_fields.$field_type.size.$loop_index %]" />
+     [% subfield_key %] <input type="text" name="[% x %]-[% field_type %][% subfield %]" value="" size="[% marc_fields.$field_type.size.$loop_index %]" />
     [% END %]
     <input type="hidden" name="[% x %]-[% field_type %]-exists" value="1" />
     <input style="background: #D0DEED; margin-left: 10px;" type="submit" name="clear" value="clear" onClick="return clear_field('[% x %]', '[% field_type %]', 'journal_auth');" />

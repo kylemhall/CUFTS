@@ -8,83 +8,83 @@ use CUFTS::JournalsAuth;
 use CUFTS::CJDB::Util;
 
 my $marc_fields = {
-	'022' => { 
-	           subfields => [ qw(a) ],
-	           size      => [ 10 ],
-	           repeats   => 1,
-	         },
-	'050' => { 
-	           subfields => [ qw(a) ],
-	           size      => [ 10 ],
-	           repeats   => 1,
-	         },
-	'110' => {
-	           subfields => [ qw(a b c) ],
-	           size      => [ 40, 40 , 10 ],
-	           repeats   => 0,
-	         },
-	'210' => {
-	           subfields => [ qw(a) ],
-	           size      => [ 40 ],
-	           repeats   => 1,
-	         },
-	'222' => {
-	           subfields => [ qw(a b) ],
-	           size      => [ 40, 40 ],
-	           repeats   => 1,
-	         },
-	'245' => {
-	           indicators => [ 2 ],
-	           subfields  => [ qw(a b c n p) ],
-	           size       => [ 40, 40, 10, 10, 10 ],
-	           repeats    => 0,
-	         },
-	'246' => {
-	           subfields => [ qw(a b n p) ],
-	           size      => [ 40, 40, 10, 10 ],
-	           repeats   => 1,
-	         },
-	'260' => {
-	           subfields => [ qw(a b) ],
-	           size      => [ 40, 40 ],
-	           repeats   => 1,
-	         },
-	'650' => {
-	           subfields => [ qw(a b z y x x v) ],
-	           size      => [ 40, 40, 10, 10, 10, 10, 10 ],
-	           repeats   => 1,
-	         },
-	'710' => {
-	           subfields => [ qw(a b c) ],
-	           size      => [ 40, 40, 10 ],
-	           repeats   => 1,
-	         },
-	'780' => {
-	           subfields => [ qw(a s t x) ],
-	           size      => [ 40, 10, 40, 10 ],
-	           repeats   => 1,
-	         },
-	'785' => {
-	           subfields => [ qw(a s t x) ],
-	           size      => [ 40, 10, 40, 10 ],
-	           repeats   => 1,
-	         },
+    '022' => { 
+               subfields => [ qw(a) ],
+               size      => [ 10 ],
+               repeats   => 1,
+             },
+    '050' => { 
+               subfields => [ qw(a) ],
+               size      => [ 10 ],
+               repeats   => 1,
+             },
+    '110' => {
+               subfields => [ qw(a b c) ],
+               size      => [ 40, 40 , 10 ],
+               repeats   => 0,
+             },
+    '210' => {
+               subfields => [ qw(a) ],
+               size      => [ 40 ],
+               repeats   => 1,
+             },
+    '222' => {
+               subfields => [ qw(a b) ],
+               size      => [ 40, 40 ],
+               repeats   => 1,
+             },
+    '245' => {
+               indicators => [ 2 ],
+               subfields  => [ qw(a b c n p) ],
+               size       => [ 40, 40, 10, 10, 10 ],
+               repeats    => 0,
+             },
+    '246' => {
+               subfields => [ qw(a b n p) ],
+               size      => [ 40, 40, 10, 10 ],
+               repeats   => 1,
+             },
+    '260' => {
+               subfields => [ qw(a b) ],
+               size      => [ 40, 40 ],
+               repeats   => 1,
+             },
+    '650' => {
+               subfields => [ qw(a b z y x0 x1 v) ],
+               size      => [ 30, 30, 10, 10, 10, 10, 10 ],
+               repeats   => 1,
+             },
+    '710' => {
+               subfields => [ qw(a b c) ],
+               size      => [ 40, 40, 10 ],
+               repeats   => 1,
+             },
+    '780' => {
+               subfields => [ qw(a s t x) ],
+               size      => [ 40, 10, 40, 10 ],
+               repeats   => 1,
+             },
+    '785' => {
+               subfields => [ qw(a s t x) ],
+               size      => [ 40, 10, 40, 10 ],
+               repeats   => 1,
+             },
 };
 
 my $form_validate_search = {
-	optional => [
-		'string', 'field', 'search', 'cancel',
-	],
-	filters => ['trim'],
-	missing_optional_valid => 1,
+    optional => [
+        'string', 'field', 'search', 'cancel',
+    ],
+    filters => ['trim'],
+    missing_optional_valid => 1,
 };
 
 my $form_validate_marc = {
-	optional => [
-		'save', 'cancel',
-	],
-	optional_regexp => qr/^\d+-\d{3}/,
-	filters => ['trim'],
+    optional => [
+        'save', 'cancel',
+    ],
+    optional_regexp => qr/^\d+-\d{3}/,
+    filters => ['trim'],
 };
 
 my $form_validate_merge = {
@@ -93,70 +93,70 @@ my $form_validate_merge = {
 
 
 sub auto : Private {
-	my ($self, $c, $resource_id) = @_;
+    my ($self, $c, $resource_id) = @_;
 
-	$c->stash->{current_account}->{edit_global} || $c->stash->{current_account}->{administrator} or
-		die('User not authorized for journal auth maintenance');
+    $c->stash->{current_account}->{edit_global} || $c->stash->{current_account}->{administrator} or
+        die('User not authorized for journal auth maintenance');
 
     $c->stash->{header_section} = 'Journal Auth';
     push( @{ $c->stash->{load_css} }, 'journal_auth.css' );
 
-	return 1;
+    return 1;
 }
 
 sub search : Local {
-	my ($self, $c) = @_;
+    my ($self, $c) = @_;
 
-	if ($c->req->params->{search}) {
-		$c->form($form_validate_search);
+    if ($c->req->params->{search}) {
+        $c->form($form_validate_search);
 
-		if ($c->form->valid->{string}) {
-			my @records;
-			if ($c->form->valid->{field} eq 'title') {
-				@records = CUFTS::DB::JournalsAuth->search_by_title($c->form->valid->{string} . '%');
-			} elsif ($c->form->valid->{field} eq 'official_title') {
-				@records = CUFTS::DB::JournalsAuth->search_like('title' => $c->form->valid->{string});
-			} elsif ($c->form->valid->{field} eq 'issn') {
-				@records = CUFTS::DB::JournalsAuth->search_by_issns($c->form->valid->{string});
-			} elsif ($c->form->valid->{field} eq 'ids') {
-			    my @ids = split /\s+/,  $c->form->valid->{string};
-				@records = CUFTS::DB::JournalsAuth->search( { 'id' => {'in' => \@ids} } );
-			}
-			$c->stash->{journal_auths} = \@records;
+        if ($c->form->valid->{string}) {
+            my @records;
+            if ($c->form->valid->{field} eq 'title') {
+                @records = CUFTS::DB::JournalsAuth->search_by_title($c->form->valid->{string} . '%');
+            } elsif ($c->form->valid->{field} eq 'official_title') {
+                @records = CUFTS::DB::JournalsAuth->search_like('title' => $c->form->valid->{string});
+            } elsif ($c->form->valid->{field} eq 'issn') {
+                @records = CUFTS::DB::JournalsAuth->search_by_issns($c->form->valid->{string});
+            } elsif ($c->form->valid->{field} eq 'ids') {
+                my @ids = split /\s+/,  $c->form->valid->{string};
+                @records = CUFTS::DB::JournalsAuth->search( { 'id' => {'in' => \@ids} } );
+            }
+            $c->stash->{journal_auths} = \@records;
 
-			# Stash search field/string for display on search box and into the session for 
+            # Stash search field/string for display on search box and into the session for 
 
-			$c->session->{journal_auth_search_field} = $c->stash->{field} = $c->form->valid->{field};
-			$c->session->{journal_auth_search_string} = $c->stash->{string} = $c->form->valid->{string};
-		}
-	} elsif ($c->req->params->{cancel}) {
-		$c->redirect('/main');
-	}
+            $c->session->{journal_auth_search_field} = $c->stash->{field} = $c->form->valid->{field};
+            $c->session->{journal_auth_search_string} = $c->stash->{string} = $c->form->valid->{string};
+        }
+    } elsif ($c->req->params->{cancel}) {
+        $c->redirect('/main');
+    }
 
-	$c->stash->{template} = 'journalauth/search.tt';
+    $c->stash->{template} = 'journalauth/search.tt';
 }
 
 sub edit : Local {
     my ($self, $c, $journal_auth_id) = @_;
     
     my $form_validate_edit = {
-    	optional => [
-    		'save', 'cancel', 'title', 'rss'
-    	],
-    	optional_regexp => qr/_(issn|info|title|count)$/,
-    	filters => ['trim'],
+        optional => [
+            'save', 'cancel', 'title', 'rss'
+        ],
+        optional_regexp => qr/_(issn|info|title|count)$/,
+        filters => ['trim'],
     };
     
     my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($journal_auth_id);
 
-	$c->form($form_validate_edit);
+    $c->form($form_validate_edit);
 
-	if ( $c->form->valid->{cancel} ) {
-		return $c->forward('/journalauth/done_edits');
-	}
+    if ( $c->form->valid->{cancel} ) {
+        return $c->forward('/journalauth/done_edits');
+    }
     if ( $c->form->valid->{save} ) {
-        unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {		
-  		eval {
+        unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {      
+        eval {
                 $journal_auth->title($c->form->valid->{'title'});
                 $journal_auth->rss($c->form->valid->{'rss'});
                 $journal_auth->update();
@@ -216,122 +216,123 @@ sub edit : Local {
                     }
                 }
                 
-    		} else {
-    		    CUFTS::DB::DBI->dbi_commit;
-    		    return $c->forward('/journalauth/done_edits');
-    		}
+            } else {
+                CUFTS::DB::DBI->dbi_commit;
+                return $c->forward('/journalauth/done_edits');
+            }
         }
     }
 
     $c->stash->{max_title_field} ||= 0;
     $c->stash->{max_issn_field}  ||= 0;
     
-	$c->stash->{load_javascript} = 'journal_auth.js';
+    $c->stash->{load_javascript} = 'journal_auth.js';
     $c->stash->{journal_auth}    = $journal_auth;
     $c->stash->{template}        = 'journalauth/edit.tt';
 }
 
 
 sub edit_marc : Local {
-	my ($self, $c, $journal_auth_id) = @_;
+    my ($self, $c, $journal_auth_id) = @_;
 
-	my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($journal_auth_id);
+    my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($journal_auth_id);
 
-	if ($c->req->params->{cancel}) {
-		return $c->forward('/journalauth/done_edits');
-	}
-	if ($c->req->params->{save}) {
+    if ($c->req->params->{cancel}) {
+        return $c->forward('/journalauth/done_edits');
+    }
+    if ($c->req->params->{save}) {
 
-		$c->form($form_validate_marc);
-		unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {		
-			
-			my @fields;
-			foreach my $field_type (sort keys %$marc_fields) {
-				my $row = 0;
+        $c->form($form_validate_marc);
+        unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {      
+            
+            my @fields;
+            foreach my $field_type (sort keys %$marc_fields) {
+                my $row = 0;
                 $c->stash->{max_seen_fields}->{$field_type} = -1;
 
-				while ($c->form->valid->{"${row}-${field_type}-exists"}) {
-					my @subfields;
-					my $indicators = [];
-					
-					foreach my $subfield (@{$marc_fields->{$field_type}->{subfields}}) {
-						my $value = $c->form->valid->{"${row}-${field_type}${subfield}"};
-						next unless defined($value) && $value ne '';
-						$value = CUFTS::CJDB::Util::latin1_to_marc8($value);
-						push @subfields, ($subfield, $value);
-					}
-					$indicators->[0] = $c->form->valid->{"${row}-${field_type}-1"};
-					$indicators->[1] = $c->form->valid->{"${row}-${field_type}-2"};
-					$row++;
-					
-					next unless scalar(@subfields);  # Don't save blank fields, they're to be "deleted"
+                while ($c->form->valid->{"${row}-${field_type}-exists"}) {
+                    my @subfields;
+                    my $indicators = [];
+                    
+                    foreach my $subfield (@{$marc_fields->{$field_type}->{subfields}}) {
+                        my $value = $c->form->valid->{"${row}-${field_type}${subfield}"};
+                        next unless defined($value) && $value ne '';
+                        $value = CUFTS::CJDB::Util::latin1_to_marc8($value);
+                        my $subfield_indicator = substr( $subfield, 0, 1);  # Grab the real subfield indicator for the MARC record
+                        push @subfields, ($subfield_indicator, $value);
+                    }
+                    $indicators->[0] = $c->form->valid->{"${row}-${field_type}-1"};
+                    $indicators->[1] = $c->form->valid->{"${row}-${field_type}-2"};
+                    $row++;
+                    
+                    next unless scalar(@subfields);  # Don't save blank fields, they're to be "deleted"
 
                     $c->stash->{max_seen_fields}->{$field_type} = $row;
 
-					my $field;
-					eval { $field = MARC::Field->new($field_type, @$indicators, @subfields); };
-					if ($@) {
-						warn($@);
-						push @{$c->stash->{errors}}, $@;
-					} else {
-						push @fields, $field;
-					}
-				}
-			}
+                    my $field;
+                    eval { $field = MARC::Field->new($field_type, @$indicators, @subfields); };
+                    if ($@) {
+                        warn($@);
+                        push @{$c->stash->{errors}}, $@;
+                    } else {
+                        push @fields, $field;
+                    }
+                }
+            }
 
-			if (!defined($c->stash->{errors})) {
-				my $record;
-				eval {
-					$record = new MARC::Record();
-					$record->append_fields(@fields);
-				};
-				if ($@) {
-				    CUFTS::DB::DBI->dbi_rollback();
-					push @{$c->stash->{errors}}, "Error creating MARC record: $@";
-				} else {
-					$journal_auth->marc($record->as_usmarc());
-					$journal_auth->update();
-					CUFTS::DB::JournalsAuth->dbi_commit();
-					return $c->forward('/journalauth/done_edits');
-				}
-			}
-		}
-	}
-	
-	$c->stash->{marc_fields} = $marc_fields;
-	$c->stash->{load_javascript} = 'journal_auth.js';
-	$c->stash->{journal_auth} = $journal_auth;
-	$c->stash->{template} = 'journalauth/edit_marc.tt';
-}	
+            if (!defined($c->stash->{errors})) {
+                my $record;
+                eval {
+                    $record = new MARC::Record();
+                    $record->append_fields(@fields);
+                };
+                if ($@) {
+                    CUFTS::DB::DBI->dbi_rollback();
+                    push @{$c->stash->{errors}}, "Error creating MARC record: $@";
+                } else {
+                    $journal_auth->marc($record->as_usmarc());
+                    $journal_auth->update();
+                    CUFTS::DB::JournalsAuth->dbi_commit();
+                    return $c->forward('/journalauth/done_edits');
+                }
+            }
+        }
+    }
+    
+    $c->stash->{marc_fields} = $marc_fields;
+    $c->stash->{load_javascript} = 'journal_auth.js';
+    $c->stash->{journal_auth} = $journal_auth;
+    $c->stash->{template} = 'journalauth/edit_marc.tt';
+}   
 
 sub done_edits : Local {
     my ($self, $c) = @_;
 
-	$c->req->params({
-		'field'  => $c->session->{journal_auth_search_field},
-		'string' => $c->session->{journal_auth_search_string},
-		'search' => 'search',
-	});
-	return $c->forward('/journalauth/search');
+    $c->req->params({
+        'field'  => $c->session->{journal_auth_search_field},
+        'string' => $c->session->{journal_auth_search_string},
+        'search' => 'search',
+    });
+    return $c->forward('/journalauth/search');
 }
 
 
 sub merge : Local {
     my ($self, $c) = @_;
     $c->form($form_validate_merge);
-	
-	if ( !($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) ) {		
-	    my $ids = $c->form->valid->{merge};
-	    my $merged_ja;
-	    eval {
-	        $merged_ja = CUFTS::JournalsAuth->merge(@$ids);
+    
+    if ( !($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) ) {     
+        my $ids = $c->form->valid->{merge};
+        my $merged_ja;
+        eval {
+            $merged_ja = CUFTS::JournalsAuth->merge(@$ids);
         };
         if ($@) {
             CUFTS::DB::DBI->dbi_rollback();
             push @{$c->stash->{errors}}, "Error merging records: $@";
-		} else {
-		    CUFTS::DB::DBI->dbi_commit();
-		}
+        } else {
+            CUFTS::DB::DBI->dbi_commit();
+        }
 
         return $c->redirect("/journalauth/search?search=search&field=ids&string=" . $merged_ja->id);
     }
