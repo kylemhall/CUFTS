@@ -139,7 +139,7 @@ sub json_facets : Chained('facet_options') PathPart('facets/json') Args {
         # Put zeros at the end
         my $unranked = 0;
         foreach my $record ( @records ) {
-            last if $record->rank != 0;
+            last if $record->{rank} != 0;
             $unranked++;
         }
         push @records, splice @records, 0, $unranked
