@@ -106,6 +106,14 @@ sub html_facets : Chained('facet_options') PathPart('facets') Args {
     if ( exists( $c->stash->{facets}->{subject} ) ) {
         # Rank sort for subjects
         @records = sort { int($a->rank) <=> int($b->rank) or $a->sort_name cmp $b->sort_name } @records;
+        # Put zeros at the end
+        my $unranked = 0;
+        foreach my $record ( @records ) {
+            last if $record->rank != 0;
+            $unranked++;
+        }
+        push @records, splice @records, 0, $unranked
+        
     }
     else {
         # Default to title sort
@@ -135,14 +143,7 @@ sub json_facets : Chained('facet_options') PathPart('facets/json') Args {
 
     if ( exists( $c->stash->{facets}->{subject} ) ) {
         # Rank sort for subjects
-        @records = sort { $a->{rank} <=> $b->{rank} or $a->{sort_name} cmp $b->{sort_name} } @records;
-        # Put zeros at the end
-        my $unranked = 0;
-        foreach my $record ( @records ) {
-            last if $record->{rank} != 0;
-            $unranked++;
-        }
-        push @records, splice @records, 0, $unranked
+        @records = sort { int($a->{rank}) <=> int($b->{rank}) or $a->{sort_name} cmp $b->{sort_name} } @records;
     }
     else {
         # Default to title sort
