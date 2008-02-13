@@ -20,29 +20,26 @@
 
  <div id="resources-brief-records-top">
 
-  [% SET have_unranked = 0 %]
+  [% SET record_index = 0 %]
   [% FOREACH record IN records %]
-   [% IF record.rank == 0 %]
-    [% SET have_unranked = 1 %]
-    [% NEXT %]
-   [% END %]
-
+   [% LAST IF record.rank == 0 %]
+   [% SET record_index = record_index + 1 %]
    [% PROCESS display_record %]
 
   [% END %]
 
  </div>
-
- [% IF have_unranked OR sorting_enabled %]
-
+ 
+ [% IF record_index < records.size OR sorting_enabled %]
   <h2>Other Resources</h2>
 
   <div id="resources-brief-records-other">
 
-   [% FOREACH record IN records %]
-    [% LAST IF record.rank > 0 %]
-    [% PROCESS display_record %]
-   [% END %]
+  [% WHILE record_index < records.size %]
+   [% SET record = records.$record_index %]
+   [% PROCESS display_record %]
+   [% SET record_index = record_index + 1 %]
+  [% END %]
 
   </div>
  [% END %]
