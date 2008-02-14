@@ -13,6 +13,7 @@ my @fast_search_columns = qw(
     vendor
     description_brief
     url
+    proxy
     access
     license.id
 );
