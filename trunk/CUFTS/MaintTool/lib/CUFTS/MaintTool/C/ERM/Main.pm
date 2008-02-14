@@ -42,6 +42,7 @@ my $form_validate = {
             public
             public_list
             public_message
+            proxy
             group_records
             subscription_status
             print_included

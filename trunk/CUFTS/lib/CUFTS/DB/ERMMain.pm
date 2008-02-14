@@ -50,6 +50,7 @@ __PACKAGE__->columns(All => qw(
     public
     public_list
     public_message
+    proxy
     group_records
     subscription_status
     print_included

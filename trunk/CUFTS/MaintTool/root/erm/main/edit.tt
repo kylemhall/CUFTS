@@ -319,6 +319,20 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-proxy">proxy?</label>
+  <select id="erm-edit-input-proxy" name="proxy" style="width: 4em;">
+   <option value=""></option>
+   <option value="1" [% 'selected="selected"' IF erm.proxy == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.proxy == 0 %]>No</option>
+  </select>
+ </div>
+ <div class="help">
+  Prepend the site proxy to the URL for this record?
+ </div>
+</div>
+
 
 <div class="field">
  <div class="data">

@@ -20,6 +20,7 @@ CREATE TABLE erm_main (
     coverage            VARCHAR(1024),
     embargo_period      VARCHAR(1024),
     simultaneous_users  VARCHAR(1024),
+    proxy               BOOLEAN,
     public_list         BOOLEAN,
     public              BOOLEAN,
     public_message      TEXT,
