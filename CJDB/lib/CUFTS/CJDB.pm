@@ -197,11 +197,11 @@ sub end : Private {
         $c->response->content_type('text/html; charset=iso-8859-1');
     }
 
-    # $c->response->headers->header( 'Cache-Control' => 'no-cache' );
-    # $c->response->headers->header( 'Pragma' => 'no-cache' );
-    # $c->response->headers->expires( time  );
+    $c->response->headers->header( 'Cache-Control' => 'no-cache' );
+    $c->response->headers->header( 'Pragma' => 'no-cache' );
+    $c->response->headers->expires( time  );
 
-    $c->response->headers->header( 'Cache-Control' => 'private, max-age=5000, pre-check=5000' );
+    # $c->response->headers->header( 'Cache-Control' => 'private, max-age=5000, pre-check=5000' );
     # $c->response->headers->header( 'Pragma' => 'no-cache' );
     # $c->response->headers->expires( time  );
 
