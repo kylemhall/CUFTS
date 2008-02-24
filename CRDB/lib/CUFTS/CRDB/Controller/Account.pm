@@ -217,13 +217,13 @@ sub manage : Chained('/site') PathPart('manage') Args(0) {
 }
 
 
-sub tags : Local {
-    my ($self, $c) = @_;
-
-    
-    $c->stash->{tags} = CJDB::DB::Tags->get_mytags_list($c->user);
-    $c->stash->{template} = 'mytags.tt';
-}
+# sub tags : Local {
+#     my ($self, $c) = @_;
+# 
+#     
+#     $c->stash->{tags} = CJDB::DB::Tags->get_mytags_list($c->user);
+#     $c->stash->{template} = 'mytags.tt';
+# }
 
 
 sub index : Private {

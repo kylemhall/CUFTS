@@ -151,6 +151,7 @@ __PACKAGE__->has_many('content_types', ['CUFTS::DB::ERMContentTypesMain' => 'con
 __PACKAGE__->has_many( 'names' => 'CUFTS::DB::ERMNames'  );
 __PACKAGE__->has_a( 'license', 'CUFTS::DB::ERMLicense' );
 __PACKAGE__->has_many( 'costs' => 'CUFTS::DB::ERMCosts' );
+__PACKAGE__->has_many( 'uses' => 'CUFTS::DB::ERMUses' );
 
 __PACKAGE__->sequence('erm_main_id_seq');
 
