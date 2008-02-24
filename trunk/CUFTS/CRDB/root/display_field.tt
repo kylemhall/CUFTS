@@ -21,7 +21,7 @@
   [% INCLUDE render_field field_name="content_types", field_data=HTML.escape( erm.content_types.force_list.sort('content_type').map_join('content_type', ', ') ) %]
  [% CASE 'url' %]
   [% IF erm.url.length %]
-   [% SET url_field_data = '<a href="' _ erm.proxied_url(c.site) _ '">Connect</a>' %]
+   [% SET url_field_data = '<a href="' _ c.uri_for_site( c.controller('Resource').action_for('goto'), [ erm.id ] ) _ '">Connect</a>' %]
   [% END %]
   [% INCLUDE render_field field_name="url", field_data=url_field_data %]
  [% CASE %]

@@ -16,8 +16,6 @@ Catalyst Controller
 
 =cut
 
-use CUFTS::DB::ERMMain;
-
 sub base : Chained('/site') PathPart('resource') CaptureArgs(0) { }
 
 sub load_resource : Chained('base') PathPart('') CaptureArgs(1) {
@@ -26,6 +24,18 @@ sub load_resource : Chained('base') PathPart('') CaptureArgs(1) {
     $c->stash->{erm} = $c->model('CUFTS::ERMMain')->search( id => $resource_id, site => $c->site->id )->first();
 }
 
+sub goto : Chained('load_resource') PathPart('goto') Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $erm = $c->stash->{erm};
+
+    # count click
+
+    $c->model('CUFTS::ERMUses')->create({ erm_main => $erm->id });
+
+    $c->response->redirect( $erm->proxied_url( $c->site ) );
+    $c->detach();
+}
 
 
 =head2 default_view
