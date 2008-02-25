@@ -39,7 +39,14 @@ sub get_title {
     } 
     
     my $title = join ' ', @data;
-    $title = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_title( $title ) );
+    eval {
+        $title = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_title( $title ) );
+    };
+    if ( $@ ) {
+        warn($@);
+        warn("Skipping title \"$title\" due to MARC8->latin1 translation error.");
+        return undef;
+    }
     
     return $title;
 }
@@ -64,7 +71,15 @@ sub get_sort_title {
     } else {
         $title = $self->get_title( $record );
     }
-    $title = CUFTS::CJDB::Util::marc8_to_latin1($title);
+    eval {
+        $title = CUFTS::CJDB::Util::marc8_to_latin1($title);
+    };
+    if ( $@ ) {
+        warn($@);
+        warn("Skipping title \"$title\" due to MARC8->latin1 translation error.");
+        return undef;
+    }
+    
     $title = $self->clean_title($title);
 
     return $title;
@@ -132,7 +147,14 @@ ALT_TITLE:
 
         # Fix up diacritics
 
-        $title = CUFTS::CJDB::Util::marc8_to_latin1($title);
+        eval {
+            $title = CUFTS::CJDB::Util::marc8_to_latin1($title);
+        };
+        if ( $@ ) {
+            warn($@);
+            warn("Skipping alt title \"$title\" due to MARC8->latin1 translation error.");
+            next ALT_TITLE;
+        }
 
         my $stripped_title = $self->strip_title($title);
 
@@ -194,7 +216,14 @@ sub get_MARC_subjects {
         } 
 
         my $subject = join ' ', @data;
-        $subject = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_subject( $subject ) );
+        eval {
+            $subject = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_subject( $subject ) );
+        };
+        if ( $@ ) {
+            warn($@);
+            warn("Skipping subject \"$subject\" due to MARC8->latin1 translation error.");
+            next;
+        }
 
         push @subjects, $subject;
     }
@@ -258,7 +287,16 @@ sub get_associations {
     push @marc_associations, $record->field('710');
 
     foreach my $association (@marc_associations) {
-        push @associations, CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_association( $association->as_string ) );
+        eval {
+            my $association_string = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_association( $association->as_string ) );
+            push @associations, $association_string;
+        };
+        if ( $@ ) {
+            warn($@);
+            warn("Skipping association \"" . $association->as_string . "\" due to MARC8->latin1 translation error.");
+            next;
+        }
+
     }
 
     return @associations;
