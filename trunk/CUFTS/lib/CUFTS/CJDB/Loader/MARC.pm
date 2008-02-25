@@ -331,16 +331,37 @@ sub _get_relation {
 
     my $relation = { relation => $relation_type };
 
-    my $title = $self->clean_title( CUFTS::CJDB::Util::marc8_to_latin1( $field->subfield('t') ) );
+    my $title = $field->subfield('t');
+
+    eval {
+        $title = CUFTS::CJDB::Util::marc8_to_latin1( $title );
+    };
+    if ( $@ ) {
+        warn($@);
+        warn("Skipping relation \"$title\" due to MARC8->latin1 translation error.");
+        return undef;
+    }
+    
+    $title = $self->clean_title( $title );
     my $stripped_sort_title = $self->strip_title($title);
 
-    if ( grep { $_ eq $stripped_sort_title } @CUFTS::CJDB::Util::generic_titles ) {
-        $title .= ' / '
-               . $self->clean_title( CUFTS::CJDB::Util::marc8_to_latin1( $field->subfield('a') ) );
-    }
 
-    $relation->{title} = $title 
-                         || $self->clean_title( CUFTS::CJDB::Util::marc8_to_latin1( $field->subfield('a') ) );
+    eval {
+
+        if ( grep { $_ eq $stripped_sort_title } @CUFTS::CJDB::Util::generic_titles ) {
+            $title .= ' / '
+                   . $self->clean_title( CUFTS::CJDB::Util::marc8_to_latin1( $field->subfield('a') ) );
+        }
+
+        $relation->{title} = $title 
+                             || $self->clean_title( CUFTS::CJDB::Util::marc8_to_latin1( $field->subfield('a') ) );
+    };
+    if ( $@ ) {
+        warn($@);
+        warn("Skipping relation \"" . $field->subfield('a') . "\" due to MARC8->latin1 translation error.");
+        return undef;
+    }
+    
 
     if ( not_empty_string( $field->subfield('b') ) ) {
         $relation->{title} .= ' ' . $field->subfield('b');
