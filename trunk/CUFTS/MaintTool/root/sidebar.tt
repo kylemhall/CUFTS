@@ -22,7 +22,8 @@
         menu.push([
             [
                 [ '/site/edit',               'General' ],
-                [ '/site/template/menu',      'Templates' ],
+                [ '/site/template/menu_cjdb', 'CJDB Templates' ],
+                [ '/site/template/menu_crdb', 'CRDB Templates' ],
                 [ '/site/cjdb/settings',      'CJDB Settings' ],
                 [ '/site/cjdb/data',          'CJDB Data' ],
                 [ '/site/crdb/settings',      'CRDB Settings' ],

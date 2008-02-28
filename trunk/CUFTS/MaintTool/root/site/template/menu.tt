@@ -1,21 +1,4 @@
 [% USE url %]
-[% load_css.push('tabs.css') %]
-
-<script type="text/javascript">
-$( function() {
-    $('#pages-container').tabs();
-} );
-</script>
-
-<div id="pages-container" class="tabs-nav" style="width: 100%;">
-
-<ul>
- <li><a href="#page-cjdb"><span>CJDB</span></a></li>
- <li><a href="#page-crdb"><span>CRDB</span></a></li>
-</ul>
-
-<div id="page-cjdb">
-
 <table>
 
 <tr><td><table class="outlined" style="width: 100%;">
@@ -28,29 +11,29 @@ $( function() {
 
 <tr><td>
 <table class="outlined" style="width: 100%;">
-<tr><td class="heading-bar" colspan="4">CJDB templates</td></tr>
+<tr><td class="heading-bar" colspan="4">Templates</td></tr>
 <tr><td class="heading-bar2-left" style="text-align: left;">template</td>
     <td class="heading-bar2" style="text-align: center;">active</td>
     <td class="heading-bar2" style="text-align: center;">transfer</td>
     <td class="heading-bar2-right" style="text-align: center;">sandbox</td></tr>
 
-[% FOREACH cjdb_template IN cjdb_templates %]
- [% SET active = cjdb_active_templates.in(cjdb_template) %]
- [% SET sandbox = cjdb_sandbox_templates.in(cjdb_template) %]
+[% FOREACH template IN templates %]
+ [% SET active = active_templates.in(template) %]
+ [% SET sandbox = sandbox_templates.in(template) %]
  [% SET class = 'field' _ (loop.count % 2) %]
 
  <tr>
-  <td class="[% class %]" style="text-align: left;">[% cjdb_template %]</td>
+  <td class="[% class %]" style="text-align: left;">[% template %]</td>
   
   <td class="[% class %]" style="text-align: center;">
     [% IF active %]
-     <a href="[% url("$url_base/site/template/view/cjdb_template/$cjdb_template/active") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/view/${type}_template/$template/active") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
     [% END %]
 
     [% IF active %]
-     <a href="[% url("$url_base/site/template/delete/cjdb_template/$cjdb_template/active") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/delete/${type}_template/$template/active") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
     [% END %]
@@ -58,7 +41,7 @@ $( function() {
    <td class="[% class %]" style="text-align: center;">
 
     [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/transfer/cjdb_template/$cjdb_template") %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/transfer/${type}_template/$template") %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]transfer-button-inactive.gif" alt="transfer (inactive)" title="transfer (inactive)" width="12" height="12" border="0">
     [% END %]
@@ -67,15 +50,15 @@ $( function() {
     <td class="[% class %]" style="text-align: center;">
 
     [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/view/cjdb_template/$cjdb_template/sandbox") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/view/${type}_template/$template/sandbox") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
     [% ELSE %]         
      <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
     [% END %]
 
-    <a href="[% url("$url_base/site/template/edit/cjdb_template/$cjdb_template") %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
+    <a href="[% url("$url_base/site/template/edit/${type}_template/$template") %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
 
     [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/delete/cjdb_template/$cjdb_template/sandbox") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/delete/${type}_template/$template/sandbox") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
     [% END %]
@@ -88,14 +71,14 @@ $( function() {
 
 <tr><td>
 <table class="outlined" style="width: 100%;">
-<tr><td class="heading-bar" colspan="4">CJDB CSS</td></tr>
+<tr><td class="heading-bar" colspan="4">CSS</td></tr>
 <tr><td class="heading-bar2-left" style="text-align: left;">template</td>
     <td class="heading-bar2" style="text-align: center;">active</td>
     <td class="heading-bar2" style="text-align: center;">transfer</td>
     <td class="heading-bar2-right" style="text-align: center;">sandbox</td></tr>
-[% FOREACH css IN cjdb_csses %]
- [% SET active = cjdb_active_csses.in(css) %]
- [% SET sandbox = cjdb_sandbox_csses.in(css) %]
+[% FOREACH css IN csses %]
+ [% SET active = active_csses.in(css) %]
+ [% SET sandbox = sandbox_csses.in(css) %]
  [% SET class = 'field' _ (loop.count % 2) %]
 
  <tr>
@@ -103,13 +86,13 @@ $( function() {
   
   <td class="[% class %]" style="text-align: center;">
     [% IF active %]
-     <a href="[% url("$url_base/site/template/view/cjdb_css/$css/active") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/view/${type}_css/$css/active") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
     [% END %]
 
     [% IF active %]
-     <a href="[% url("$url_base/site/template/delete/cjdb_css/$css/active") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/delete/${type}_css/$css/active") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
     [% END %]
@@ -117,7 +100,7 @@ $( function() {
    <td class="[% class %]" style="text-align: center;">
 
     [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/transfer/cjdb_css/$css") %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/transfer/${type}_css/$css") %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]transfer-button-inactive.gif" alt="transfer (inactive)" title="transfer (inactive)" width="12" height="12" border="0">
     [% END %]
@@ -126,89 +109,15 @@ $( function() {
     <td class="[% class %]" style="text-align: center;">
 
     [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/view/cjdb_css/$css/sandbox") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/view/${type}_css/$css/sandbox") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
     [% ELSE %]         
      <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
     [% END %]
 
-    <a href="[% url("$url_base/site/template/edit/cjdb_css/$css") %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
+    <a href="[% url("$url_base/site/template/edit/${type}_css/$css") %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
 
     [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/delete/cjdb_css/$css/sandbox") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
-    [% ELSE %]
-     <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
-    [% END %]
-
-   </td></tr>
-[% END %]
-</table>
-
-</table>
-</div>
-
-<div id="page-crdb">
-
-
-<table>
-
-<tr><td><table class="outlined" style="width: 100%;">
-<tr><td class="heading-bar">test links</td></tr>
-<tr><td class="field0"><a href="" target="_blank">sandbox</a></td></tr>
-<tr><td class="field1"><a href="" target="_blank">active</a></td></tr>
-</table></td></tr>
-
-<tr><td><br /></td></tr>
-
-<tr><td>
-<table class="outlined" style="width: 100%;">
-<tr><td class="heading-bar" colspan="4">CRDB templates</td></tr>
-<tr><td class="heading-bar2-left" style="text-align: left;">template</td>
-    <td class="heading-bar2" style="text-align: center;">active</td>
-    <td class="heading-bar2" style="text-align: center;">transfer</td>
-    <td class="heading-bar2-right" style="text-align: center;">sandbox</td></tr>
-
-[% FOREACH crdb_template IN crdb_templates %]
- [% SET active = crdb_active_templates.in(crdb_template) %]
- [% SET sandbox = crdb_sandbox_templates.in(crdb_template) %]
- [% SET class = 'field' _ (loop.count % 2) %]
-
- <tr>
-  <td class="[% class %]" style="text-align: left;">[% crdb_template %]</td>
-  
-  <td class="[% class %]" style="text-align: center;">
-    [% IF active %]
-     <a href="[% url("$url_base/site/template/view/crdb_template/$crdb_template/active") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
-    [% ELSE %]
-     <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
-    [% END %]
-
-    [% IF active %]
-     <a href="[% url("$url_base/site/template/delete/crdb_template/$crdb_template/active") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
-    [% ELSE %]
-     <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
-    [% END %]
-   </td>
-   <td class="[% class %]" style="text-align: center;">
-
-    [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/transfer/crdb_template/$crdb_template") %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
-    [% ELSE %]
-     <img src="[% image_dir %]transfer-button-inactive.gif" alt="transfer (inactive)" title="transfer (inactive)" width="12" height="12" border="0">
-    [% END %]
-
-    </td>
-    <td class="[% class %]" style="text-align: center;">
-
-    [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/view/crdb_template/$crdb_template/sandbox") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
-    [% ELSE %]         
-     <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
-    [% END %]
-
-    <a href="[% url("$url_base/site/template/edit/crdb_template/$crdb_template") %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
-
-    [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/delete/crdb_template/$crdb_template/sandbox") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
+     <a href="[% url("$url_base/site/template/delete/${type}_css/$css/sandbox") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
     [% ELSE %]
      <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
     [% END %]
@@ -217,67 +126,4 @@ $( function() {
 [% END %]
 </table>
 </td></tr>
-
-<tr><td><br /></td></tr>
-
-<tr><td>
-<table class="outlined" style="width: 100%;">
-<tr><td class="heading-bar" colspan="4">CRDB CSS</td></tr>
-<tr><td class="heading-bar2-left" style="text-align: left;">template</td>
-    <td class="heading-bar2" style="text-align: center;">active</td>
-    <td class="heading-bar2" style="text-align: center;">transfer</td>
-    <td class="heading-bar2-right" style="text-align: center;">sandbox</td></tr>
-[% FOREACH css IN crdb_csses %]
- [% SET active = crdb_active_csses.in(css) %]
- [% SET sandbox = crdb_sandbox_csses.in(css) %]
- [% SET class = 'field' _ (loop.count % 2) %]
-
- <tr>
-  <td class="[% class %]" style="text-align: left;">[% css %]</td>
-  
-  <td class="[% class %]" style="text-align: center;">
-    [% IF active %]
-     <a href="[% url("$url_base/site/template/view/crdb_css/$css/active") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
-    [% ELSE %]
-     <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
-    [% END %]
-
-    [% IF active %]
-     <a href="[% url("$url_base/site/template/delete/crdb_css/$css/active") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
-    [% ELSE %]
-     <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
-    [% END %]
-   </td>
-   <td class="[% class %]" style="text-align: center;">
-
-    [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/transfer/crdb_css/$css") %]"><img src="[% image_dir %]transfer-button.gif" alt="transfer" title="transfer" width="12" height="12" border="0"></a>
-    [% ELSE %]
-     <img src="[% image_dir %]transfer-button-inactive.gif" alt="transfer (inactive)" title="transfer (inactive)" width="12" height="12" border="0">
-    [% END %]
-
-    </td>
-    <td class="[% class %]" style="text-align: center;">
-
-    [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/view/crdb_css/$css/sandbox") %]"><img src="[% image_dir %]view-button.gif" alt="view" title="view" width="15" height="12" border="0"></a>
-    [% ELSE %]         
-     <img src="[% image_dir %]view-button-inactive.gif" alt="view (inactive)" title="view (inactive)" width="15" height="12" border="0">
-    [% END %]
-
-    <a href="[% url("$url_base/site/template/edit/crdb_css/$css") %]"><img src="[% image_dir %]edit-button.gif" alt="edit" title="edit" width="15" height="12" border="0"></a>
-
-    [% IF sandbox %]
-     <a href="[% url("$url_base/site/template/delete/crdb_css/$css/sandbox") %]"><img src="[% image_dir %]delete-button.gif" alt="delete" title="delete" width="11" height="12" border="0"></a>
-    [% ELSE %]
-     <img src="[% image_dir %]delete-button-inactive.gif" alt="delete (inactive)" title="delete (inactive)" width="11" height="12" border="0">
-    [% END %]
-
-   </td></tr>
-[% END %]
 </table>
-
-</td></tr>
-</table>
-
-</div>
