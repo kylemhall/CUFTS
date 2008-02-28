@@ -53,9 +53,9 @@ sub view : Local {
 
     # Get costs
     
-    my @costs = $erm->costs( {}, {order_by => 'date DESC'} );
+    my @costs = $erm->costs();
 
-    $c->stash->{costs} = \@costs;
+    $c->stash->{costs} = [ sort { $b->date cmp $a->date } @costs ];
     $c->stash->{erm} = $erm;
     $c->stash->{template} = 'erm/costs/view.tt';
 }

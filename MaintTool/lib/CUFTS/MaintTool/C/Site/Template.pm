@@ -16,13 +16,13 @@ sub auto : Private {
     $c->stash->{section} = 'templates';
 }
 
-sub menu : Local {
+sub menu_cjdb : Local {
     my ( $self, $c ) = @_;
 
     my $site = $c->stash->{current_site};
 
     ##
-    ## Get CJDB and CRDB template files, active, and sandbox lists
+    ## Get CJDB template files, active, and sandbox lists
     ##
 
     my @cjdb_template_list = qw(
@@ -69,29 +69,6 @@ sub menu : Local {
         tag_viewing_string.tt
     );
     
-    my @crdb_template_list = qw(
-        account_create.tt
-        account_manage.tt
-        browse.tt
-        browse_js.tt
-        current_facets.tt
-        errors.tt
-        facet_labels.tt
-        facet_menu.tt
-        facet_menu_js.tt
-        fatal_error.tt
-        layout.tt
-        loggedin.tt
-        login.tt
-        main.tt
-        menu.tt
-        nav_line.tt
-        page_footer.tt
-        page_header.tt
-        page_title.tt
-        resource.tt
-    );
-
     my $cjdb_active_dir  = get_site_base_dir('cjdb_template', $site, '/active');
     my $cjdb_sandbox_dir = get_site_base_dir('cjdb_template', $site, '/sandbox');
 
@@ -103,19 +80,6 @@ sub menu : Local {
     opendir SANDBOX, $cjdb_sandbox_dir
         or die('Unable to open CJDB site sandbox template directory for reading');
     my @cjdb_sandbox_templates = grep !/^\./, readdir SANDBOX;
-    closedir SANDBOX;
-
-    my $crdb_active_dir  = get_site_base_dir('crdb_template', $site, '/active');
-    my $crdb_sandbox_dir = get_site_base_dir('crdb_template', $site, '/sandbox');
-
-    opendir ACTIVE, $crdb_active_dir
-        or die('Unable to open CRDB site active template directory for reading');
-    my @crdb_active_templates = grep !/^\./, readdir ACTIVE;
-    closedir ACTIVE;
-
-    opendir SANDBOX, $crdb_sandbox_dir
-        or die('Unable to open CRDB site sandbox template directory for reading');
-    my @crdb_sandbox_templates = grep !/^\./, readdir SANDBOX;
     closedir SANDBOX;
 
     ##
@@ -136,6 +100,73 @@ sub menu : Local {
     my @cjdb_sandbox_css = grep !/^\./, readdir SANDBOX;
     closedir SANDBOX;
 
+    $c->stash->{cjdb_url} = $CUFTS::Config::CJDB_URL;
+
+    $c->stash->{active_templates}   = \@cjdb_active_templates;
+    $c->stash->{sandbox_templates}  = \@cjdb_sandbox_templates;
+    $c->stash->{templates}          = \@cjdb_template_list;
+
+    $c->stash->{csses}         = \@cjdb_css_list;
+    $c->stash->{active_csses}  = \@cjdb_active_css;
+    $c->stash->{sandbox_csses} = \@cjdb_sandbox_css;
+
+    $c->stash->{header_section} = 'CJDB Templates';
+
+    $c->stash->{type} = 'cjdb';
+    $c->stash->{template} = 'site/template/menu.tt';
+}
+
+sub menu_crdb : Local {
+    my ( $self, $c ) = @_;
+
+    my $site = $c->stash->{current_site};
+
+    ##
+    ## Get CRDB template files, active, and sandbox lists
+    ##
+
+    my @crdb_template_list = qw(
+        account_create.tt
+        account_manage.tt
+        browse.tt
+        browse_js.tt
+        current_facets.tt
+        display_field.tt
+        errors.tt
+        facet_labels.tt
+        facet_menu.tt
+        facet_menu_js.tt
+        fatal_error.tt
+        group_record_field.tt
+        layout.tt
+        loggedin.tt
+        login.tt
+        main.tt
+        menu.tt
+        nav_line.tt
+        page_footer.tt
+        page_header.tt
+        page_title.tt
+        resource.tt
+    );
+
+    my $crdb_active_dir  = get_site_base_dir('crdb_template', $site, '/active');
+    my $crdb_sandbox_dir = get_site_base_dir('crdb_template', $site, '/sandbox');
+
+    opendir ACTIVE, $crdb_active_dir
+        or die('Unable to open CRDB site active template directory for reading');
+    my @crdb_active_templates = grep !/^\./, readdir ACTIVE;
+    closedir ACTIVE;
+
+    opendir SANDBOX, $crdb_sandbox_dir
+        or die('Unable to open CRDB site sandbox template directory for reading');
+    my @crdb_sandbox_templates = grep !/^\./, readdir SANDBOX;
+    closedir SANDBOX;
+
+    ##
+    ## Get CSS files, active and sandbox lists
+    ##
+
     my @crdb_css_list        = qw( crdb.css );
     my $crdb_active_css_dir  = get_site_base_dir( 'crdb_css', $site, 'active'  );
     my $crdb_sandbox_css_dir = get_site_base_dir( 'crdb_css', $site, 'sandbox' );
@@ -152,22 +183,17 @@ sub menu : Local {
 
     $c->stash->{cjdb_url} = $CUFTS::Config::CJDB_URL;
 
-    $c->stash->{cjdb_active_templates}   = \@cjdb_active_templates;
-    $c->stash->{cjdb_sandbox_templates}  = \@cjdb_sandbox_templates;
-    $c->stash->{cjdb_templates}          = \@cjdb_template_list;
+    $c->stash->{templates}          = \@crdb_template_list;
+    $c->stash->{active_templates}   = \@crdb_active_templates;
+    $c->stash->{sandbox_templates}  = \@crdb_sandbox_templates;
 
-    $c->stash->{crdb_templates}          = \@crdb_template_list;
-    $c->stash->{crdb_active_templates}   = \@crdb_active_templates;
-    $c->stash->{crdb_sandbox_templates}  = \@crdb_sandbox_templates;
+    $c->stash->{csses}         = \@crdb_css_list;
+    $c->stash->{active_csses}  = \@crdb_active_css;
+    $c->stash->{sandbox_csses} = \@crdb_sandbox_css;
 
-    $c->stash->{cjdb_csses}         = \@cjdb_css_list;
-    $c->stash->{cjdb_active_csses}  = \@cjdb_active_css;
-    $c->stash->{cjdb_sandbox_csses} = \@cjdb_sandbox_css;
+    $c->stash->{header_section} = 'CRDB Templates';
 
-    $c->stash->{crdb_csses}         = \@crdb_css_list;
-    $c->stash->{crdb_active_csses}  = \@crdb_active_css;
-    $c->stash->{crdb_sandbox_csses} = \@crdb_sandbox_css;
-
+    $c->stash->{type} = 'crdb';
     $c->stash->{template} = 'site/template/menu.tt';
 }
 
@@ -257,7 +283,9 @@ sub save : Local {
     close TEMPLATE;
 
     $c->stash->{results} = 'File saved.';
-    $c->forward('/site/template/menu');
+    
+    my $forward_type = substr($type,0,4);
+    $c->redirect("/site/template/menu_${forward_type}");
 }
 
 sub delete : Local {
@@ -278,7 +306,8 @@ sub delete : Local {
             and unlink "${site_dir}/${template_name}"
                 or die("Unable to unlink template file '${site_dir}/${template_name}': $!");
 
-    $c->redirect('/site/template/menu');
+    my $forward_type = substr($type,0,4);
+    $c->redirect("/site/template/menu_${forward_type}");
 }
 
 sub transfer : Local {
@@ -306,7 +335,8 @@ sub transfer : Local {
 
     `cp ${sandbox_dir}/${template_name} ${active_dir}/${template_name}`;
 
-    $c->redirect('/site/template/menu');
+    my $forward_type = substr($type,0,4);
+    $c->redirect("/site/template/menu_${forward_type}");
 }
 
 sub get_base_dir {
