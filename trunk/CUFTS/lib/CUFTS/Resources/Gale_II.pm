@@ -270,8 +270,6 @@ sub build_linkJournal {
             return [];
         }
 
-        warn($url);
-
         my $escaped_title = uri_escape($record->title);
         my $resource_identifier = $resource->resource_identifier;
         
