@@ -1,4 +1,4 @@
-## CUFTS::Resources::Wiley
+## CUFTS::Resources::WileyBackfile
 ##
 ## Copyright Todd Holbrook - Simon Fraser University (2005)
 ##
@@ -55,11 +55,13 @@ sub title_list_field_map {
     return {
         'TITLE'       => 'title',
         'TITLE '      => 'title',
-        'PRINT ISSN'  => 'issn',
-        'ONLINE ISSN' => 'e_issn',
+        'PRINT ISSN / ISBN'  => 'issn',
+        'Online_ISBN' => 'e_issn',
         'URL ON WIS'  => 'journal_url',
-        'CEASED JOURNALS -- LAST VOL/ISS/YEAR PUBLISHED' => '___end',
-        'PDF ON WIS STARTS WITH VOL/ISS/YEAR'            => '___start',
+        'Start Year'  => 'ft_start_date',
+        'End Year'    => 'ft_end_date',
+        'Voume / Issue (End)'    => '___end',
+        'Voume / Issue (Start)'  => '___start',
     };
 }
 
@@ -76,49 +78,56 @@ sub skip_record {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    # if ( $record->{'issn'} =~ /:99/ ) {
-    #     return ['Skipping due to non-fulltext backfile entry'];
-    # }
+    if ( $record->{issn} eq 'tbd' ) {
+        delete $record->{issn};
+        # return ['Skipping due to non-fulltext backfile entry'];
+    }
+    if ( $record->{e_issn} eq 'tbd' ) {
+        delete $record->{e_issn};
+        # return ['Skipping due to non-fulltext backfile entry'];
+    }
+
     # 
     # if ( !defined( $record->{'___start'} ) ) {
     #     return ['Skipping due to missing holdings data'];
     # }
 
     $record->{title} = trim_string( $record->{title}, '"' );
-
-    if ( $record->{e_issn} !~ / \d{4} - \d{3}[\dxX] /xsm ) {
-        delete $record->{e_issn};
-    }
-
-    my ( $start_vol, $start_iss, $start_year ) = split /\s*\/\s*/, $record->{'___start'};
-
-    if ( defined($start_vol) && $start_vol =~ / (\d+) \s* -? /xsm ) {
-        $record->{vol_ft_start} = $1;
-    }
-
-    if ( defined($start_iss) && $start_iss =~ / (\d+) \s* -? /xs, ) {
-        $record->{iss_ft_start} = $1;
-    }
-
-    if ( defined($start_year) && $start_year =~ / (\d{4}) /xsm ) {
-        $record->{ft_start_date} = $1;
-    }
-
-    if ( defined( $record->{'___end'} ) ) {
-        my ( $end_vol, $end_iss, $end_year ) = split /\s*\/\s*/, $record->{'___end'};
+    $record->{title} =~ s/\(.+\)$//;
         
-        if ( defined($end_vol) && $end_vol =~ / -? \s* (\d+) /xsm ) {
-            $record->{vol_ft_end} = $1;
-        }
-    
-        if ( defined($end_iss) && $end_iss =~ / -? \s* (\d+) /xsm ) {
-            $record->{iss_ft_end} = $1;
-        }
-    
-        if ( defined($end_year) && $end_year =~ / (\d{4}) /xsm ) {
-            $record->{ft_end_date} = $1;
-        }
-    }
+    # if ( $record->{e_issn} !~ / \d{4} - \d{3}[\dxX] /xsm ) {
+    #     delete $record->{e_issn};
+    # }
+    # 
+    # my ( $start_vol, $start_iss, $start_year ) = split /\s*\/\s*/, $record->{'___start'};
+    # 
+    # if ( defined($start_vol) && $start_vol =~ / (\d+) \s* -? /xsm ) {
+    #     $record->{vol_ft_start} = $1;
+    # }
+    # 
+    # if ( defined($start_iss) && $start_iss =~ / (\d+) \s* -? /xs, ) {
+    #     $record->{iss_ft_start} = $1;
+    # }
+    # 
+    # if ( defined($start_year) && $start_year =~ / (\d{4}) /xsm ) {
+    #     $record->{ft_start_date} = $1;
+    # }
+    # 
+    # if ( defined( $record->{'___end'} ) ) {
+    #     my ( $end_vol, $end_iss, $end_year ) = split /\s*\/\s*/, $record->{'___end'};
+    #     
+    #     if ( defined($end_vol) && $end_vol =~ / -? \s* (\d+) /xsm ) {
+    #         $record->{vol_ft_end} = $1;
+    #     }
+    # 
+    #     if ( defined($end_iss) && $end_iss =~ / -? \s* (\d+) /xsm ) {
+    #         $record->{iss_ft_end} = $1;
+    #     }
+    # 
+    #     if ( defined($end_year) && $end_year =~ / (\d{4}) /xsm ) {
+    #         $record->{ft_end_date} = $1;
+    #     }
+    # }
 
     return $class->SUPER::clean_data($record);
 }
