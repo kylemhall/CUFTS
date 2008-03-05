@@ -270,28 +270,43 @@ sub build_linkJournal {
             return [];
         }
 
+        warn($url);
+
+        my $escaped_title = uri_escape($record->title);
+        my $resource_identifier = $resource->resource_identifier;
+        
         # Try first style of linking:
         # http://infotrac.galegroup.com.darius/itw/infomark/1/1/1/purl=rc18%5fSP09%5F0%5F%5Fjn+%22Computers+in+Libraries%22
         
         
         if ( $url =~ /purl=rc1/ ) {
-            $url .= '%22' . uri_escape($record->title) . '%22';
+            $url .= "\%22${escaped_title}\%22";
         }
+        
+        # Second link style
+        # http://find.galegroup.com/itx/publicationSearch.do?dblist=&serQuery=Locale%28en%2C%2C%29%3AFQE%3D%28JX%2CNone%2C24%29%22{title}%22%24&inPS=true&type=getIssues&searchTerm=&prodId={resource_identifier}&currentPosition=0
+        # may need an authname: &userGroupName=leth89164
+        
+        elsif ( $url =~ /\{title\}/ ) {
+            $url =~ s/\{title\}/$escaped_title/e;
+            $url =~ s/\{resource_identifier\}/$resource_identifier/e;
+        }
+        
+        # Original, should have an example here.
         else {
-
-            if ( $resource->auth_name ) {
-                $url .= $resource->auth_name;
-            }
-
             if ( $resource->resource_identifier ) {
                 if ( $url =~ /IOURL/ ) {
-                    $url .= '?prod=' . $resource->resource_identifier;
+                    $url .= '?prod=' . $resource_identifier;
                 } else {
-                    $url .= '?db=' . $resource->resource_identifier;
+                    $url .= '?db=' . $resource_identifier;
                 }
             }
 
-            $url .= '&title=' . uri_escape($record->title);
+            $url .= "&title=${escaped_title}";
+        }
+        
+        if ( $resource->auth_name ) {
+            $url .= $resource->auth_name;
         }
         
         $url .= __add_proxy_suffix($url, $resource->proxy_suffix);
