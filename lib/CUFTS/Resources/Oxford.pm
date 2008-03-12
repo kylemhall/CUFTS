@@ -66,7 +66,7 @@ sub title_list_split_row {
 
 sub title_list_field_map {
     return {
-        'Journal title'        => 'title',
+        'Journal Title'        => 'title',
         'Print ISSN'           => 'issn',
         'Online ISSN'          => 'e_issn',
         'Short title'          => 'abbreviation',
@@ -90,9 +90,9 @@ sub clean_data {
         delete $record->{e_issn};
     }
     
-    if ( not_empty_string($record->{'___PDF start'}) ) {
+    if ( not_empty_string($record->{'___PDF Starts'}) ) {
         
-        if ( $record->{'___PDF start'} =~ / (\d+) : (\d*) /xsm ) {
+        if ( $record->{'___PDF Starts'} =~ / (\d+) : (\d*) /xsm ) {
 
             $record->{vol_ft_start} = $1;
             if ( not_empty_string($2) ) {
@@ -101,7 +101,7 @@ sub clean_data {
             
         }
     
-        if ( $record->{'___PDF start'} =~ / \( (\d{4}) \) /xsm ) {
+        if ( $record->{'___PDF Starts'} =~ / \( (\d{4}) \) /xsm ) {
             $record->{ft_start_date} = $1 . '-01-01';
         }
         
