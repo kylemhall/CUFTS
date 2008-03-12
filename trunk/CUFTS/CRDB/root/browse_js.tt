@@ -60,6 +60,9 @@ $( function() {
 [% IF editing_enabled %]
 
 $( function() {
+
+ // Edit in place for subject overrides for each resource
+
  $('div.resource-brief-field-description').bind( 'dblclick', function() {
 
      var description_field = $(this);
@@ -121,13 +124,73 @@ $( function() {
                  edit_field.hide().remove();
              });
 
+         }
+     });
 
-             
+ } );
+
+ // Edit in place for subject description at the top of a results list
+
+ $('div#resources-brief-subject_description').bind( 'dblclick', function() {
+
+     var description_field = $(this);
+
+     $.ajax({
+         type: 'POST',
+         url:  '[% c.uri_for_site( c.controller('Browse').action_for('subject_description') ) %]',
+         dataType: 'json',
+         data: {
+             subject_id:  [% facets.subject %]
+         },
+         success: function( data ) {
+
+             var subject_description     = data.subject_description ? data.subject_description.escape_html() : '';
+
+             var content_field = $('#resources-brief-subject_description-content');
+             var edit_field    = content_field.after('<div id="resources-brief-subject_description-edit"></div>').next();
+             content_field.hide();
+
+             edit_field.empty()
+                       .append( '<textarea id="resources-brief-subject_description-textarea" name="change_subject_description">' + subject_description + '</textarea><br />' )
+                       .append( '<input type="submit" name="submit" value="submit" id="resources-brief-subject_description-submit" /> ' )
+                       .append( '<input type="submit" name="cancel" value="cancel" id="resources-brief-subject_description-cancel" />' );
+
+             $( '#resources-brief-subject_description-textarea' )[0].focus();
+
+             $( '#resources-brief-subject_description-submit' ).bind( 'click', function(event) {
+                 event.preventDefault();
+                 $.ajax({
+                     type: 'POST',
+                     url:  '[% c.uri_for_site( c.controller('Browse').action_for('subject_description') ) %]',
+                     dataType: 'json',
+                     data: {
+                         subject_id: [% facets.subject %],
+                         subject_description: $( '#resources-brief-subject_description-textarea' ).val(),
+                         change: 1
+                     },
+                     success: function( new_data ) {
+                         content_field.empty().append( new_data.subject_description ? new_data.subject_description : 'No subject description.' ).show();
+                         edit_field.hide().remove();
+                     }
+                     
+                 });
+                 
+             });
+
+             /* Cancel button - empty the div tag and put back the regular description */
+
+             $( '#resources-brief-subject_description-cancel' ).bind( 'click', function(event) {
+                 event.preventDefault();
+                 content_field.empty().append( data.subject_description ? data.subject_description : 'No subject description.' ).show();
+                 edit_field.hide().remove();
+             });
 
          }
      });
 
  } );
+
+
 
 } );
 

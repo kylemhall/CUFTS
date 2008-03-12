@@ -12,6 +12,12 @@
 
 [% PROCESS facet_menu.tt %]
 
+[% IF subject_description.length OR editing_enabled %]
+<div id="resources-brief-subject_description"><div id="resources-brief-subject_description-content">
+[% subject_description || 'No subject description.'%]
+</div></div>
+[% END %]
+
 <div id="resources-brief-records">
     
 [% IF facets.subject AND facets.size == 1 %]

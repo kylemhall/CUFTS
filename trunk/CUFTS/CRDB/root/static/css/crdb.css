@@ -268,6 +268,38 @@ div#account td.data {
     Browse screen
 
 **************************************************/
+div#resources-brief-subject_description {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #eee;
+    float: left;
+    clear: both;
+    width: 99%;
+}
+
+div#resources-brief-subject_description-content {
+    padding: 4px;
+}
+
+div#resources-brief-subject_description-edit {
+    padding: 4px;
+}
+
+textarea#resources-brief-subject_description-textarea {
+    width: 50em;
+    height: 5em;
+    border: 1px solid #333;
+    margin-left: 4px;
+    margin-bottom: 3px;
+}
+
+input#resources-brief-subject_description-submit {
+    margin-left: 5px;
+}
+
+input#resources-brief-subject_description-cancel {
+}
+
 
 div.resource-brief-record {
     background: #ddeeff;
@@ -379,7 +411,6 @@ div.resources-current-facets-row {
 
 div#resources-brief-records {
     clear: both;
-    padding-top: 10px;
 }
 
 div.resource-brief-url {

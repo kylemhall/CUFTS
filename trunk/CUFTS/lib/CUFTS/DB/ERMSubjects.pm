@@ -29,6 +29,7 @@ __PACKAGE__->columns(All => qw(
     id
     site
     subject
+    description
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 __PACKAGE__->sequence('erm_subjects_id_seq');
