@@ -5,6 +5,7 @@ use warnings;
 use base 'Catalyst::Controller';
 
 use JSON::XS qw(encode_json);
+use CUFTS::Util::Simple;
 
 =head1 NAME
 
@@ -112,8 +113,11 @@ sub html_facets : Chained('facet_options') PathPart('facets') Args {
             last if $record->rank != 0;
             $unranked++;
         }
-        push @records, splice @records, 0, $unranked
+        push @records, splice @records, 0, $unranked;
         
+        # Put the subject into the stash in case we need the subject description
+        $c->stash->{subject_description} = $c->model('CUFTS::ERMSubjects')->find( $c->stash->{facets}->{subject} )->description;
+
     }
     else {
         # Default to title sort
@@ -183,6 +187,47 @@ sub count_facets : Chained('base') PathPart('count_facets') Args {
     $c->stash->{current_view}  = 'JSON';
 }
 
+=head2 subject_description
+
+Changes the subject description for a whole subject, applied to the ERMSubjects record.  For subjects descriptions
+specific to a resource see CUFTS::CRDB::Controller::Resources::subject_description
+
+=cut
+
+sub subject_description : Chained('base') PathPart('subject_description') Args(0) {
+    my ( $self, $c ) = @_;
+
+    $c->form({
+        required => [ qw( subject_id ) ], 
+        optional => [ qw( change subject_description ) ] 
+    });
+    
+    unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
+
+        my $subject_id  = $c->form->{valid}->{subject_id};
+
+        my $subject  = $c->model('CUFTS::ERMSubjects')->find( $subject_id )
+            or die("Unable to find subject record.");
+
+        if ( $c->form->{valid}->{change} ) {
+
+            # Try to change the description
+            
+            my $description = $c->form->{valid}->{subject_description};
+            $description = trim_string( $description );
+            $description = undef if is_empty_string( $description );
+
+            $subject->description( $description );
+            $subject->update();
+
+        }
+
+        $c->stash->{json}->{subject_description} = $subject->description;
+
+    }
+
+    $c->stash->{current_view} = 'JSON';
+}
 
 
 =head1 AUTHOR

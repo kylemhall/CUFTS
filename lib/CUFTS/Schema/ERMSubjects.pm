@@ -30,6 +30,7 @@ __PACKAGE__->add_columns( qw(
     id
     site
     subject
+    description
 ));                                                                                                        
 
 __PACKAGE__->set_primary_key( 'id' );
