@@ -411,6 +411,12 @@ div.resources-current-facets-row {
 
 div#resources-brief-records {
     clear: both;
+    padding-top: 10px;
+}
+
+div#resources-brief-records h2 {
+    margin-top: 0;
+    margin-bottom: 7px;
 }
 
 div.resource-brief-url {
