@@ -49,6 +49,8 @@ sub facet_form : Chained('base') PathPart('facet_form') Args(0) {
     
     my @search_facets;
     foreach my $param ( keys %{ $c->req->params } ) {
+         next if $param =~ /^(?:browse|search)$/;  # Get rid of common form search buttons
+                
         my $values = $c->req->params->{$param};
 
         # Special case to allow specifying JSON format as a parameter
