@@ -289,4 +289,43 @@ sub build_linkJournal {
     return \@results;
 }
 
+sub build_linkDatabase {
+    my ( $class, $records, $resource, $site, $request ) = @_;
+
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+
+    my @results;
+
+    foreach my $record (@$records) {
+
+        my $url;
+
+        if ( not_empty_string($record->database_url ) ) {
+            $url = $record->database_url;
+        }
+        else {
+            my $url_base = $resource->url_base || $default_url_base;
+
+            $url = "http://${url_base}/ovidweb.cgi?T=JS&MODE=ovid&NEWS=n&PAGE=main";
+            $url .= '&D=' . $resource->resource_identifier;
+        }
+
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+
+    }
+
+    return \@results;
+
+}
+
 1;
