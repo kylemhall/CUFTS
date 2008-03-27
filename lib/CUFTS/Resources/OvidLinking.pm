@@ -307,8 +307,8 @@ sub build_linkDatabase {
 
         my $url;
 
-        if ( not_empty_string($record->database_url ) ) {
-            $url = $record->database_url;
+        if ( not_empty_string($resource->database_url ) ) {
+            $url = $resource->database_url;
         }
         else {
             my $url_base = $resource->url_base || $default_url_base;
