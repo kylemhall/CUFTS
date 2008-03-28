@@ -1,7 +1,7 @@
 [% PROCESS facet_labels.tt %]
 [% PROCESS facet_menu_js.tt %]
 
-<div id="resources-brief-facets" style="float: left; width: 99%; background: #cdf">
+<div id="resources-brief-facets">
 
 <div style="width: 80%; float: left;">
 [% PROCESS current_facets.tt %]
@@ -10,7 +10,7 @@
  <a href="" onClick="$('#resource-facet-choice-wrapper').toggle(); return false;">filter</a>
 </div>
 
-<div id="resource-facet-choice-wrapper" style="width: 100%; float: left; [% 'display: none;' IF records.defined %] border-top: 1px solid blue; background: #def;">
+<div id="resource-facet-choice-wrapper" style="[% 'display: none;' IF records.defined %]">
 
 <div id="resources-brief-browse" style="float: left;  width: 78%;">
 

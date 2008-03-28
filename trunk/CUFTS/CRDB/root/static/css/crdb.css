@@ -409,6 +409,19 @@ div.resources-current-facets-row {
 }
 
 
+div#resources-brief-facets {
+    float: left;
+    width: 99%;
+    background: #cdf;
+}
+
+div#resource-facet-choice-wrapper {
+    width: 100%;
+    float: left;
+    border-top: 1px solid blue;
+    background: #def;
+}
+
 div#resources-brief-records {
     clear: both;
     padding-top: 10px;
