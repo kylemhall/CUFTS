@@ -653,6 +653,12 @@ __PACKAGE__->add_columns(
         is_nullable   => 1,
         size          => 64000
     },
+    'admin_notes' => {
+        data_type     => 'text',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 64000
+    },
 );
 __PACKAGE__->mk_group_accessors( column => qw/ result_name sort_name rank / );
 

@@ -137,6 +137,7 @@ __PACKAGE__->columns(All => qw(
     openurl_compliant
     access_notes
     breaches
+    admin_notes
 ));                                                                                                        
 
 __PACKAGE__->columns( Essential => __PACKAGE__->columns );
@@ -301,6 +302,13 @@ sub facet_search {
     $sql =~ s/%JOINS%/join( ' ', values( %{ $config->{joins} } ) )/e;
     $sql =~ s/%ORDER%/join( ', ', @{ $config->{order} } )/e;
     $sql =~ s/%COLUMNS%/join( ', ', @columns )/e;
+
+    if ( $offset ) {
+        $sql .= " OFFSET $offset";
+    }
+    if ( $limit ) {
+        $sql .= " LIMIT $limit";
+    }
 
 #    warn($sql);
 #    warn(Dumper(\@bind));
