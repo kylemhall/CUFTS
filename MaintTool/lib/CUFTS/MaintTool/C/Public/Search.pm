@@ -9,10 +9,10 @@ use CUFTS::DB::JournalsAuthISSNs;
 
 
 my $form_validate = {
-	required => [ 'search_field', 'search_text', 'search' ],
-	optional => [ 'fulltext' ],
-	filters => ['trim'],
-};	
+    required => [ 'search_field', 'search_text' ],
+    optional => [ 'fulltext', 'search' ],
+    filters => ['trim'],
+};  
 
 sub auto : Private {
     my ( $self, $c ) = @_;
@@ -22,13 +22,13 @@ sub auto : Private {
 }
 
 sub default : Private {
-	my ( $self, $c ) = @_;
+    my ( $self, $c ) = @_;
 
-    if ( $c->req->params->{search} ) {
+    if ( $c->req->params->{search_text} ) {
 
-    	$c->form($form_validate);
+        $c->form($form_validate);
 
-		unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
+        unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {
 
             my @journal_auths;
             if ( $c->form->valid->{search_field} eq 'issn' ) {
