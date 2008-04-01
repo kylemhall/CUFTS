@@ -40,6 +40,8 @@ sub browse_index : Chained('facet_options') PathPart('') Args(0) {
 
 Translate form parameters into a facet search path and redirect so the standard search handler runs.
 
+TODO:  Should this be merged into the html_facets and json_facets actions so they both take params as well as URI args?
+
 =cut
 
 sub facet_form : Chained('base') PathPart('facet_form') Args(0) {
@@ -67,7 +69,7 @@ sub facet_form : Chained('base') PathPart('facet_form') Args(0) {
         }
     }
 
-    return $c->redirect( $c->uri_for_site( $c->action_for('html_facets'), @search_facets, {} ) );
+    return $c->redirect( $c->uri_for_site( $c->action_for($action), @search_facets, {} ) );
 }
 
 =head2 _facet_search
