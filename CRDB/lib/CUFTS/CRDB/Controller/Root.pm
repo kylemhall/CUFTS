@@ -129,7 +129,18 @@ Attempt to render a view, if needed.
 
 =cut 
 
-sub end : ActionClass('RenderView') { }
+sub end : ActionClass('RenderView') {
+    my ( $self, $c ) = @_;
+    
+    $c->response->headers->header( 'Cache-Control' => 'no-cache' );
+    $c->response->headers->header( 'Pragma' => 'no-cache' );
+    $c->response->headers->expires( time  );
+    
+    unless ( $c->response->content_type ) {
+        $c->response->content_type('text/html; charset=iso-8859-1');
+    }
+    
+}
 
 =head1 AUTHOR
 
