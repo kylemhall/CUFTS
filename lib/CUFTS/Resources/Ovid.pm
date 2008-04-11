@@ -31,124 +31,43 @@ use strict;
 
 sub title_list_field_map {
     return {
-        'Title'     => 'title',
-        'ISSN'      => 'issn',
-        'Publisher' => 'publisher',
+        'Title'         => 'title',
+        'ISSN_NO'       => 'issn',
+        'EISSN_NO'      => 'issn',
+        'Publisher(s)'  => 'publisher',
+        'URL'           => 'journal_url',
     };
 }
 
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    $record->{title} =~ s/^" \s* (.+) \s* "$/$1/xsm;
+    $record->{title} =~ trim_string( $record->{title}, '"' );
 
-    my $coverage = $record->{'___Coverage'};
+    # Remove "®" character from title ends
+    $record->{title} =~ s/\xAE$//xsm;
 
-    $coverage =~ s/^" \s* (.+) \s* "$/$1/xsm;
-    $coverage =~ s/\sVOL\.*\s?\w*\.?\,?\s?N?O?\.?\s?\w*\-?\w*//i;
-    $coverage =~ s/[()]//g;
+    my ( $start,    $end )    = @{ parse_coverage( $record->{'___Coverage'} ) };
+    my ( $pdfstart, $pdfend ) = @{ parse_coverage( $record->{'___PDF_Coverage'} ) };
 
-    if ( $coverage =~ /^(\d{2})-(\d{2})$/ ) {
-
-        $record->{ft_start_date} = format_date( $1, undef, undef, 'start' );
-        $record->{ft_end_date}   = format_date( $2, undef, undef, 'end' );
-
+    if ( defined($start) && defined($pdfstart) ) {
+        $record->{ft_start_date} = $start <= $pdfstart ? $start : $pdfstart;
     }
-    elsif ( $coverage =~ /^(\d{1,2})\/(\d{2})-(\d{1,2})\/(\d{2})$/ ) {
-
-        $record->{ft_start_date} = format_date( $2, $1, undef, 'start' );
-        $record->{ft_end_date}   = format_date( $4, $3, undef, 'end' );
-
+    elsif ( defined($start) ) {
+        $record->{ft_start_date} = $start;
     }
-    elsif ( $coverage =~ /^(\w+)\/?(\w*)\-?\w*\s*([A-Y]{0,3})[\/\- ]?[A-Y]{0,3}[\/\- ]?[A-Y]{0,3}\/?(\d{2,4})\-?/i )
-    {
-
-        my ( $year, $month, $vol, $iss ) = ( $4, $3, $1, $2 );
-
-        $record->{ft_start_date} = format_date( $year, $month, undef, 'start' );
-
-        if ( not_empty_string($vol) ) {
-            $record->{vol_ft_start} = get_first($vol);
-        }
-
-        if ( not_empty_string($iss) ) {
-            $record->{iss_ft_start} = get_first($iss);
-        }
-
-    }
-    elsif ( $coverage =~ /^(\w+)\/?(\w*)\-?\w*\s*([A-Y]{0,3})\s\d{1,2}\/(\d{1,4})\-?/i )
-    {
-
-        my ( $year, $month, $vol, $iss ) = ( $4, $3, $1, $2 );
-
-        $record->{'ft_start_date'} = format_date( $year, $month, undef, 'start' );
-
-        if ( not_empty_string($vol) ) {
-            $record->{vol_ft_start} = get_first($vol);
-        }
-
-        if ( not_empty_string($iss) ) {
-            $record->{iss_ft_start} = get_first($iss);
-        }
-
-    }
-    elsif ( $coverage =~ /^([A-Y]{3,})\/?(\d{2,4})\-/i ) {
-
-        my ( $year, $month ) = ( $2, $1 );
-
-        $record->{'ft_start_date'} = format_date( $year, $month, undef, 'start' );
-
-    }
-    elsif ( $coverage =~ /^(\d+)\/(\d+)\/(\d{2,4})/ ) {
-
-        my ( $year, $vol, $iss ) = ( $3, $1, $2 );
-
-        if ( defined($year) ) {
-            $record->{'ft_start_date'} = format_date( $year, undef, undef, 'start' );
-        }
-
-        if ( not_empty_string($vol) ) {
-            $record->{vol_ft_start} = get_first($vol);
-        }
-
-        if ( not_empty_string($iss) ) {
-            $record->{iss_ft_start} = get_first($iss);
-        }
-
-    }
-    elsif ( $coverage =~ /^(\d+)\/(\d+)\s([A-Y]{3})\/(\d)\-/ ) {
-
-        my ( $year, $month, $vol, $iss ) = ( $4, $3, $1, $2 );
-
-        $record->{'ft_start_date'} = format_date( $year, $month, undef, 'start' );
-
-        if ( not_empty_string($vol) ) {
-            $record->{vol_ft_start} = get_first($vol);
-        }
-
-        if ( not_empty_string($iss) ) {
-            $record->{iss_ft_start} = get_first($iss);
-        }
+    else {
+        $record->{ft_start_date} = $pdfstart
     }
 
-    # coverage ending
-
-    if ( !defined( $record->{'ft_end_date'} )
-        && $coverage =~ /\-(\d+)\/(\w+)*\s.*?([A-Y]{0,3})\/?(\d{2,4})$/i )
-    {
-
-        my ( $year, $month, $vol, $iss ) = ( $4, $3, $1, $2 );
-
-        $record->{ft_end_date} = format_date( $year, $month, undef, 'end' );
-
-        if ( not_empty_string($vol) ) {
-            $record->{vol_ft_start} = get_first($vol);
-        }
-
-        if ( not_empty_string($iss) ) {
-            $record->{iss_ft_start} = get_first($iss);
-        }
-
+    if ( defined($end) && defined($pdfend) ) {
+        $record->{ft_end_date} = $end <= $pdfend ? $end : $pdfend;
+    }
+    elsif ( defined($end) ) {
+        $record->{ft_end_date} = $end;
+    }
+    else {
+        $record->{ft_end_date} = $pdfend
     }
 
     # Strip (#12345) from publishers
@@ -168,77 +87,123 @@ sub clean_data {
 
     return \@errors;
 
-    sub format_date {
-        my ( $year, $month, $day, $period ) = @_;
 
-        my $date;
 
-        $year = format_year( $year, $period );
-        defined($year) or return undef;
-        $date = $year;
+}
 
-        $month = format_month( $month, $period );
-        if ( defined($month) ) {
-            $date .= sprintf( "-%02i", $month );
-        }
 
-        return $date;
+sub parse_coverage {
+    my ( $coverage ) = @_;
+
+    my ( $start, $end );
+    
+    $coverage =~ s/^" \s* (.+) \s* "$/$1/xsm;
+
+    # Try start dates first, working from the left.  A simple split on '-' is
+    # dangerous, in the past they have used dates like "January - February 2002 - Present"
+
+    # February 1995 - March 2006
+    # January 2001-Present
+    if ( $coverage =~ /^ ([a-z]{3,}) \s+ (\d{4}) \s* \- /xsmi ) {
+
+        my ( $year, $month ) = ( $2, $1 );
+        $start = format_date( $year, $month, undef, 'start' );
+
+    }
+    # January/February 2004 - Present
+    elsif ( $coverage =~ /^ ([a-z]{3,})\/\w+ \s+ (\d{4}) \s* \- /xsmi ) {
+
+        my ( $year, $month ) = ( $2, $1 );
+        $start = format_date( $year, $month, undef, 'start' );
+
     }
 
-    sub format_year {
-        my ( $year, $period ) = @_;
-        length($year) == 4
-            and return $year;
 
-        if ( length($year) == 2 ) {
-            if ( $year > 10 ) {
-                return "19$year";
-            }
-            else {
-                return "20$year";
-            }
-        }
 
-        return undef;
+    # Work backwards from the right for end dates
+
+    # February 1995 - March 2006
+    if ( $coverage =~ / \s* ([a-z]{3,}) \s+ (\d{4}) $/xsmi ) {
+
+        my ( $year, $month ) = ( $2, $1 );
+        $end = format_date( $year, $month, undef, 'start' );
+
+    }
+    # January/February 2002 - January/February 2004
+    # Not needed, the parser above will catch this one.
+
+    return [ $start, $end ];
+}
+
+sub format_date {
+    my ( $year, $month, $day, $period ) = @_;
+
+    my $date;
+
+    $year = format_year( $year, $period );
+    defined($year) or return undef;
+    $date = $year;
+
+    $month = format_month( $month, $period );
+    if ( defined($month) ) {
+        $date .= sprintf( "-%02i", $month );
     }
 
-    sub format_month {
-        my ( $month, $period ) = @_;
+    return $date;
+}
 
-        defined($month) && $month ne ''
-            or return undef;
+sub format_year {
+    my ( $year, $period ) = @_;
+    length($year) == 4
+        and return $year;
 
-        $month =~ /^\d+$/
-            and return $month;
-
-        if    ( $month =~ /^Jan/i ) { return 1 }
-        elsif ( $month =~ /^Feb/i ) { return 2 }
-        elsif ( $month =~ /^Mar/i ) { return 3 }
-        elsif ( $month =~ /^Apr/i ) { return 4 }
-        elsif ( $month =~ /^May/i ) { return 5 }
-        elsif ( $month =~ /^Jun/i ) { return 6 }
-        elsif ( $month =~ /^Jul/i ) { return 7 }
-        elsif ( $month =~ /^Aug/i ) { return 8 }
-        elsif ( $month =~ /^Sep/i ) { return 9 }
-        elsif ( $month =~ /^Oct/i ) { return 10 }
-        elsif ( $month =~ /^Nov/i ) { return 11 }
-        elsif ( $month =~ /^Dec/i ) { return 12 }
-        elsif ( $month =~ /^Spr/i ) { return $period eq 'start' ? 1 : 6 }
-        elsif ( $month =~ /^Sum/i ) { return $period eq 'start' ? 3 : 9 }
-        elsif ( $month =~ /^Fal/i ) { return $period eq 'start' ? 6 : 12 }
-        elsif ( $month =~ /^Aut/i ) { return $period eq 'start' ? 6 : 12 }
-        elsif ( $month =~ /^Win/i ) { return $period eq 'start' ? 9 : 12 }
+    if ( length($year) == 2 ) {
+        if ( $year > 10 ) {
+            return "19$year";
+        }
         else {
-            CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
+            return "20$year";
         }
-
     }
 
-    sub get_first {
-        $_[0] =~ s/\-.*//;
-        return $_[0];
+    return undef;
+}
+
+sub format_month {
+    my ( $month, $period ) = @_;
+
+    defined($month) && $month ne ''
+        or return undef;
+
+    $month =~ /^\d+$/
+        and return $month;
+
+    if    ( $month =~ /^Jan/i ) { return 1 }
+    elsif ( $month =~ /^Feb/i ) { return 2 }
+    elsif ( $month =~ /^Mar/i ) { return 3 }
+    elsif ( $month =~ /^Apr/i ) { return 4 }
+    elsif ( $month =~ /^May/i ) { return 5 }
+    elsif ( $month =~ /^Jun/i ) { return 6 }
+    elsif ( $month =~ /^Jul/i ) { return 7 }
+    elsif ( $month =~ /^Aug/i ) { return 8 }
+    elsif ( $month =~ /^Sep/i ) { return 9 }
+    elsif ( $month =~ /^Oct/i ) { return 10 }
+    elsif ( $month =~ /^Nov/i ) { return 11 }
+    elsif ( $month =~ /^Dec/i ) { return 12 }
+    elsif ( $month =~ /^Spr/i ) { return $period eq 'start' ? 1 : 6 }
+    elsif ( $month =~ /^Sum/i ) { return $period eq 'start' ? 3 : 9 }
+    elsif ( $month =~ /^Fal/i ) { return $period eq 'start' ? 6 : 12 }
+    elsif ( $month =~ /^Aut/i ) { return $period eq 'start' ? 6 : 12 }
+    elsif ( $month =~ /^Win/i ) { return $period eq 'start' ? 9 : 12 }
+    else {
+        CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
     }
 
+}
+
+sub get_first {
+    $_[0] =~ s/\-.*//;
+    return $_[0];
 }
 
 1;
