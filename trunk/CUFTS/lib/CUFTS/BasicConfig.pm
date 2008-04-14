@@ -20,7 +20,7 @@ use vars qw(
 	$CUFTS_MAIL_FROM
 );
 
-$CUFTS_BASE_DIR = '/usr/local/devel/CUFTS';
+$CUFTS_BASE_DIR = '/opt/devel/CUFTS';
 
 $CUFTS_DB = 'CUFTS3';
 $CUFTS_USER = 'tholbroo';

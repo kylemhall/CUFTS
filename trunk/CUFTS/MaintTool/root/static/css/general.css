@@ -682,6 +682,47 @@ div#site-settings-crdb-active-fields-drop {
     overflow: auto;
 }
 
+/* ERM Find */
+
+/*div#erm-main-find {
+    clear: both;
+    float: left;
+}
+
+div#erm-main-find fieldset {
+    border: none;
+}
+
+div#erm-main-find fieldset legend {
+    
+}
+
+div#erm-main-find .text input, div#erm-main-find select {
+    font-size: 100%;
+    width: 20em;
+}
+
+div#erm-main div.find {
+    float: left;
+    clear: left;
+    width: 100%;
+    padding: .5em 0 .5em 6px;
+    margin: 1px 0;
+}
+
+div#erm-main-find .find label {
+    float: left;
+    width: 8em;
+    margin: 1px 1em 0 0;
+    padding-top: 4px;
+}
+
+div#erm-main-results {
+    clear: both;
+    float: left;
+    margin-top: 10px;
+}
+*/
 
 /* ERM Costs */
 
