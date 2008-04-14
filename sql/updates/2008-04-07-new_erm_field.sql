@@ -1,1 +1,1 @@
-ALTER TABLE erm_main ADD COLUMN print_equivalent TEXT;
+ALTER TABLE erm_main ADD COLUMN print_equivalents TEXT;
