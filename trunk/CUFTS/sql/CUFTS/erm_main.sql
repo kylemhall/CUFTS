@@ -26,7 +26,7 @@ CREATE TABLE erm_main (
     public_message      TEXT,
     group_records       VARCHAR(1024),
     active_alert        VARCHAR(1024),
-    print_equivalent    TEXT,
+    print_equivalents   TEXT,
 
     pick_and_choose     BOOLEAN,
     marc_available      BOOLEAN,
