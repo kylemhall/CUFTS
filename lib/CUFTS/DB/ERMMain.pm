@@ -55,6 +55,7 @@ __PACKAGE__->columns(All => qw(
     subscription_status
     print_included
     active_alert
+    print_equivalents
     pick_and_choose
     marc_available
     marc_history
@@ -155,6 +156,14 @@ __PACKAGE__->has_many( 'costs' => 'CUFTS::DB::ERMCosts' );
 __PACKAGE__->has_many( 'uses' => 'CUFTS::DB::ERMUses' );
 
 __PACKAGE__->sequence('erm_main_id_seq');
+
+__PACKAGE__->set_sql( with_name => << 'SQL' );
+    SELECT __ESSENTIAL(me)__, erm_names.name AS result_name%s
+    FROM   %s
+    JOIN erm_names ON (me.id = erm_names.erm_main)
+    WHERE  erm_names.main = 1 AND %s
+SQL
+
 
 
 my @fast_columns = qw(

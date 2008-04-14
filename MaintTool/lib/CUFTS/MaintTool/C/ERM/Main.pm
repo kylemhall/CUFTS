@@ -12,6 +12,7 @@ use CUFTS::DB::ERMMainLink;
 use CUFTS::DB::ERMSubjectsMain;
 
 use MARC::Record;
+use List::MoreUtils;
 
 my $form_validate = {
     required => [
@@ -47,6 +48,7 @@ my $form_validate = {
             subscription_status
             print_included
             active_alert
+            print_equivalents
             marc_available
             marc_history
             marc_alert
@@ -180,6 +182,7 @@ sub auto : Private {
         $c->stash->{$type}           = { map { $_->id => $_->$field } @records };
         $c->stash->{"${type}_order"} = [ map { $_->id } @records ];
 
+        $c->stash->{"${type}_ext"}   = encode_json( [ [undef, '&nbsp;' ], map { [$_->id, $_->$field ] } @records ] );
         $c->stash->{"${type}_json"}  = encode_json( $c->stash->{$type} );
         $c->stash->{"${field}_lookup"} = $c->stash->{$type};  # Alias for looking up when we have the "field" name rather than the type name.
 
@@ -194,25 +197,92 @@ sub default : Private {
     my ( $self, $c ) = @_;
 
     $c->stash->{template} = "erm/main/find.tt";
-    push( @{ $c->stash->{load_css} }, "erm_find.css" );
-
-    return 1;
 }
 
-sub find : Local {
-    my ( $self, $c, @facets ) = @_;
+sub selected_json : Local {
+    my ( $self, $c ) = @_;
+    
+    my @json_resources;
+    my $current_site_id = $c->stash->{current_site}->id;
 
-    my $facets = {};
-    while ( my ( $type, $data ) = splice( @facets, 0, 2 ) ) {
-        $facets->{$type} = $data;
+    if ( $c->session->{selected_erm_main} && scalar( @{$c->session->{selected_erm_main}} ) ) {
+        my @resources = CUFTS::DB::ERMMain->search(
+            {
+                id => { '-in' => $c->session->{selected_erm_main} },
+                site => $current_site_id,
+            },
+            {
+                sql_method => 'with_name',
+                order_by => 'result_name'
+            }
+        );
+        
+        foreach my $resource ( @resources ) {
+            if ( defined($resource) ) {
+                push @json_resources, {
+                    id                => $resource->id,
+                    result_name       => $resource->name,
+                    vendor            => $resource->vendor,
+                    description_brief => $resource->description_brief,
+                };
+            }
+        }
+    }
+    
+    $c->stash->{json}->{rowcount} = scalar(@json_resources);
+    $c->stash->{json}->{results}  = \@json_resources;
+    
+    $c->forward('V::JSON');
+}
+
+sub selected_add : Local {
+    my ( $self, $c ) = @_;
+
+    if ( !$c->session->{selected_erm_main} ) {
+        $c->session->{selected_erm_main} = [];
+    }
+    my $new = $c->req->params->{ids};
+    if ( ref($new) ne 'ARRAY' ) {
+        $new = [$new];
+    }
+    @{$c->session->{selected_erm_main}} = List::MoreUtils::uniq( ( @{$c->session->{selected_erm_main}}, @$new ) );
+
+    $c->forward('selected_json');
+}
+
+sub find_json : Local {
+    my ( $self, $c )  = @_;
+    
+    my @valid_params = qw(
+        name
+        keyword
+        subject
+        content_type
+        resource_type
+        content_medium
+        constoria
+    );
+
+    my $params = $c->req->params;
+    
+    my $offset = $params->{start} || 0;
+    my $rows   = $params->{limit} || 25;
+    
+    my $search = {};
+    foreach my $param ( keys %$params ) {
+        next if !grep { $param eq $_ } @valid_params;
+        my $value = $params->{$param};
+        next if is_empty_string($value);
+        $search->{$param} = $value;
     }
 
-    $c->stash->{records}  = CUFTS::DB::ERMMain->facet_search( $c->stash->{current_site}->id, $facets, 1 );
-    $c->stash->{facets}   = $facets;
-    $c->stash->{template} = "erm/main/find.tt";
-    push( @{ $c->stash->{load_css} }, "erm_find.css" );
+    my $count   = CUFTS::DB::ERMMain->facet_count(  $c->stash->{current_site}->id, $search );
+    my $results = CUFTS::DB::ERMMain->facet_search( $c->stash->{current_site}->id, $search, 1, $offset, $rows );
 
-    return 1;
+    $c->stash->{json}->{rowcount} = $count;
+    $c->stash->{json}->{results}  = $results;
+
+    $c->forward('V::JSON');
 }
 
 sub ajax_details : Local {
@@ -356,10 +426,12 @@ sub edit : Local {
                         CUFTS::DB::ERMContentTypesMain->search( { erm_main => $erm_id, content_type => $content_type_id } )->delete_all;
                     }
                 }
-                
+
                 # Handle subject changes
                 
                 foreach my $param ( keys %{ $c->form->{valid} } ) {
+
+                    # Edit an existing subject
 
                     if ( $param =~ /^erm-edit-input-subject-(\d+)-subject$/ ) {
                         my $erm_main_subject_id    = $1;
@@ -386,8 +458,9 @@ sub edit : Local {
 
                     }
                     elsif ( $param =~ /^erm-edit-input-subject-add-subject-(\d+)$/ ) {
-
-
+                        
+                        # Add a new subject
+                        
                         my $erm_add_id = $1;
                         my $subject_value = $c->form->{valid}->{$param};
 
@@ -426,11 +499,10 @@ sub edit : Local {
                         
                     }
                     elsif ( $param =~ /^erm-edit-input-names-add-name-\d+$/ ) {
-                        
-                        my $name_value = $c->form->{valid}->{$param};
 
                         # Add a new alternate name
-
+                        
+                        my $name_value = $c->form->{valid}->{$param};
                         if ( not_empty_string($name_value) ) {
 
                             CUFTS::DB::ERMNames->create({
@@ -439,6 +511,7 @@ sub edit : Local {
                             });
 
                         }
+
                     }
                 
                 }

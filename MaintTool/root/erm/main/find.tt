@@ -1,54 +1,321 @@
+[% SET uses_ext_form = 1 %]
 [% USE url %]
 
-<script type="text/javascript">
-$( function() {
+<div id="erm-main-find-form"></div>
 
- $('div.resource-brief-record:odd').addClass('resource-brief-record-alt');
+<div id="erm-main-results" style="margin-top: 5px;"></div>
 
-});
+<div id="erm-main-selected" style="margin-top: 5px;"></div>
 
-function ajax_erm_resource_details( record_id ) {
-    var container = $('#resource-brief-details-' + record_id );
-    if ( !container.is('.ajax_loaded') ) {
-        container.addClass('ajax_loaded');
-        container.prepend('<div class="ajax_loading">Loading...</div>');
-        $.getJSON( '[% url("$url_base/erm/main/ajax_details/") %]' + record_id, function(json) {
-            var container = $('#resource-brief-details-' + json.id );
-            container.find('div.ajax_loading').remove();
-            container.find('#field-resource_type').append( json.resource_type );
-            container.find('#field-resource_medium').append( json.resource_medium );
-            container.find('#field-content_types').append( json.content_types.join(', ') );
-            container.find('#field-subjects').append( json.subjects.join(', ') );
-        } );
+</div>
+
+<script>
+
+Ext.ux.AdvancedPagingToolbar = Ext.extend( Ext.PagingToolbar, {
+    doLoad: function(start) {
+        if ( this.hash_state ) {
+            this.hash_state.paging['start'] = start;
+            this.hash_state.setState();
+        }
+        Ext.ux.AdvancedPagingToolbar.superclass.doLoad.call(this, start);
     }
-    container.show();
-}
+} );
+
+HashState = function() {
+    this.params = {};
+    this.paging = {};
+    return this.getState();
+};
+
+Ext.override( HashState, {
+    getState: function() {
+        // Get state from location hash
+        var hash = window.location.hash;
+        if (hash.length > 2 && hash.charAt(0) == "#" && hash.charAt(1) == '?' ) {
+            hash = hash.substring(2);
+        }
+        else if (hash.length > 1 && hash.charAt(0) == "#" ) {
+            hash = hash.substring(1);
+        }
+
+        this.params = Ext.urlDecode(hash);
+        this.paging = {};
+
+        // Move paging from params to paging if present
+
+        Ext.each( ['start', 'limit'], function(param) {
+            if ( this.params[param] ) {
+                this.paging[param] = parseInt(this.params[param]);
+                delete this.params[param]
+            }
+        }, this );
+
+        return this;
+    },
+    
+    setState: function() {
+        var newhash = {};
+        Ext.apply( newhash, this.params, this.paging );
+        for ( var key in newhash ) {
+            if ( typeof newhash[key] == 'undefined' || newhash[key] == '' ) {
+                delete newhash[key];
+            }
+        }
+        window.location.hash = '#?' + Ext.urlEncode(newhash);
+
+        return this;
+    }
+    
+} );
+
+Ext.onReady( function() {
+    Ext.BLANK_IMAGE_URL = '/static/images/default/s.gif';
+
+    var hash_state = new HashState();
+
+    var handleEmptyCombo = function( combo, record, index ) {
+        var v = record.get('id');
+        if ( v===undefined || v === null || v==='' ) {
+            combo.clearValue();
+        }
+    };
+
+    var results_store = new Ext.data.JsonStore({
+        url: '[% url("$url_base/erm/main/find_json") %]',
+        method: 'GET',
+        root: 'results',
+        totalProperty: 'rowcount',
+        fields: [
+            'id',
+           { name: 'name', mapping: 'result_name' },
+           'description_brief',
+           'vendor'
+        ]
+    });
+    
+    var selected_store = new Ext.data.JsonStore({
+        url: '[% url("$url_base/erm/main/selected_json") %]',
+        method: 'GET',
+        root: 'results',
+        totalProperty: 'rowcount',
+        fields: [
+            'id',
+           { name: 'name', mapping: 'result_name' },
+           'description_brief',
+           'vendor'
+        ]
+    });
+    
+    var combo_stores = {};
+    [% FOREACH field_type IN [ 'subjects', 'content_types', 'resource_types', 'resource_mediums', 'consortias' ] %]
+    [%- SET field_type_data = "${field_type}_ext" %]
+    combo_stores.[% field_type %] = new Ext.data.SimpleStore({
+        fields: ['id', 'display'],
+        data: [% $field_type_data %]
+    });
+    [% END %]
+    
+    
+    var results_grid = new Ext.grid.GridPanel({
+        store: results_store,
+        columns: [
+           { header: 'name', dataIndex: 'name', width: 450 },
+           { header: 'vendor', dataIndex: 'vendor', width: 150 }
+        ],
+        sm: new Ext.grid.RowSelectionModel({singleSelect:false}),
+        frame: false,
+        style: 'margin-top: 7px;',
+        // width: 700,
+        height: 300,
+        bbar: new Ext.ux.AdvancedPagingToolbar({
+            pageSize: 25,
+            displayInfo: true,
+            displayMsg: 'Displaying {0} - {1} of {2}',
+            emptyMsg: 'No records to display',
+            store: results_store,
+            hash_state: hash_state,
+            items: [
+                '-', '   ',
+                new Ext.Button({
+                    text: 'Add to Selected',
+                    handler: function() {
+                        var selections = results_grid.getSelectionModel().getSelections();
+                        var ids = new Array();
+                        Ext.each( selections, function(item) { ids.push(item.get('id') ) } );
+                        Ext.Ajax.request({
+                            url: '[% url("$url_base/erm/main/selected_add") %]',
+                            success: function(response) {
+                                if ( response.status == 200 ) {
+                                    var results = Ext.decode( response.responseText );
+                                    selected_store.loadData(results);
+                                }
+                            },
+                            params: { ids: ids }
+                        });
+                    }
+                })
+            ]
+        }),
+        listeners: {
+            'rowdblclick': function(grid, rowIndex, e) {
+                var erm_id = grid.getStore().getAt(rowIndex).get('id');
+                window.location = '[% url("$url_base/erm/main/edit/") %]' + erm_id;
+            }
+        }
+        
+    });
+
+
+    var find_form = new Ext.form.FormPanel({
+        title: 'Find ERM Main Records',
+        tools: [
+            {
+                id: 'plus',
+                handler: function() {
+                    window.location = '[% url("$url_base/erm/main/create") %]';
+                }
+            }
+        ],
+        defaultType: 'textfield',
+        bodyStyle: 'padding: 5px',
+        width: 700,
+        labelWidth: 120,
+        items: [
+            {
+                name: 'name',
+                fieldLabel: 'Name',
+                value: hash_state.params['name']
+            },
+            {
+                name: 'keyword',
+                fieldLabel: 'Keyword',
+                value: hash_state.params['keyword']
+            },
+            {
+                fieldLabel: 'Subject',
+                xtype: 'combo',
+                hiddenName: 'subject',
+                store: combo_stores.subjects,
+                valueField: 'id',
+                displayField: 'display',
+                mode: 'local',
+                triggerAction: 'all',
+                editable: false,
+                listeners: { 'select': handleEmptyCombo },
+                value: hash_state.params['subject']
+            },
+            {
+                fieldLabel: 'Content Type',
+                xtype: 'combo',
+                hiddenName: 'content_type',
+                store: combo_stores.content_types,
+                valueField: 'id',
+                displayField: 'display',
+                mode: 'local',
+                triggerAction: 'all',
+                editable: false,
+                listeners: { 'select': handleEmptyCombo },
+                value: hash_state.params['content_type']
+            },
+            {
+                fieldLabel: 'Resource Type',
+                xtype: 'combo',
+                hiddenName: 'resource_type',
+                store: combo_stores.resource_types,
+                valueField: 'id',
+                displayField: 'display',
+                mode: 'local',
+                triggerAction: 'all',
+                editable: false,
+                listeners: { 'select': handleEmptyCombo },
+                value: hash_state.params['resource_type']
+            },
+            {
+                fieldLabel: 'Resource Medium',
+                xtype: 'combo',
+                hiddenName: 'resource_medium',
+                store: combo_stores.resource_mediums,
+                valueField: 'id',
+                displayField: 'display',
+                mode: 'local',
+                triggerAction: 'all',
+                editable: false,
+                listeners: { 'select': handleEmptyCombo },
+                value: hash_state.params['resource_medium']
+            },
+            {
+                fieldLabel: 'Consortia',
+                xtype: 'combo',
+                hiddenName: 'consortia',
+                store: combo_stores.consortias,
+                valueField: 'id',
+                displayField: 'display',
+                mode: 'local',
+                triggerAction: 'all',
+                editable: false,
+                listeners: { 'select': handleEmptyCombo },
+                value: hash_state.params['consortia']
+            },
+            {
+                xtype: 'button',
+                type: 'submit',
+                name: 'search',
+                text: 'Search',
+                style: 'margin-left: 125px;',
+                handler: search_action
+            },
+            results_grid
+        ]
+        
+    });
+
+    find_form.addListener( 'render', 
+        function( ) {
+            new Ext.KeyMap( find_form.getEl(), {
+                key: Ext.EventObject.ENTER,
+                fn: search_action
+            });
+            find_form.getForm().findField(0).focus( false, 50 );
+        }
+    );
+    
+    find_form.render('erm-main-find-form');
+
+    
+    function search_action() {
+        var params = find_form.getForm().getValues();
+        results_store.baseParams = params;
+        var paging = { start: 0, limit: 25 };
+        results_store.load( { params: paging } );
+        hash_state.params = params;
+        hash_state.paging = paging;
+        hash_state.setState();        
+    }
+        
+    var selected_grid = new Ext.grid.GridPanel({
+        renderTo: 'erm-main-selected',
+        title: 'Currently Selected Records',
+        width: 700,
+        height: 300,
+        frame: false,
+        store: selected_store,
+        columns: [
+            { header: 'name', dataIndex: 'name', width: 300 },
+            { header: 'vendor', dataIndex: 'vendor', width: 150 }
+        ]
+    });
+    
+    // Restore state
+    
+    results_store.baseParams = hash_state.params;
+    var paging = { start: 0, limit: 25 };
+    Ext.apply( paging, hash_state.paging );
+    results_store.load( { params: paging } );
+
+    selected_store.load();    
+});
 
 </script>
 
-<div style="margin-top: 5px; margin-bottom: 5px;">
- <a href="[% url("$url_base/erm/main/create") %]">Create a new ERM record</a>
-</div>
 
-[% PROCESS erm/main/facet_menu.tt %]
 
-<div id="resources-brief-records">
-
-[% FOREACH record IN records %]
- [% SET record_id = record.id %]
-<div class="resource-brief-record">
- <div class="resource-brief-field-name"><a href="[% url("$url_base/erm/main/edit/$record_id") %]">[% record.result_name %] - [% record.vendor %]</a></div>
- <div class="resource-brief-field-description">[% record.description_brief %]</div>
- <a class="trigger" id="resource-brief-details-trigger-[% record_id %]" href="[% url("$url_base/erm/main/edit/$record_id") %]" onMouseOver="javascript: ajax_erm_resource_details( [% record_id %])" onMouseOut="javascript: $('#resource-brief-details-[% record_id %]').hide()">[ details ]</a>
-
-  <div class="resource-brief-details" id="resource-brief-details-[% record_id %]">
-   <div class="resource-brief-field"><span class="resource-brief-label">Resource Type:</span><span id="field-resource_type" class="resource-brief-data"></span></div>
-   <div class="resource-brief-field"><span class="resource-brief-label">Medium:</span><span id="field-resource_medium" class="resource-brief-data"></span></div>
-   <div class="resource-brief-field"><span class="resource-brief-label">Content:</span><span id="field-content_types" class="resource-brief-data"></span></div>
-   <div class="resource-brief-field"><span class="resource-brief-label">Subjects:</span><span id="field-subjects" class="resource-brief-data"></span></div>
-  </div>
-
-</div>
-[% END %]
-
-</div>

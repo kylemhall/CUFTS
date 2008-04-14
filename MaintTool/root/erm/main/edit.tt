@@ -653,6 +653,15 @@ $( function() {
  </div>
 </div>
 
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-print_equivalents">print equivalents</label>
+  <textarea id="erm-edit-input-print_equivalents" name="print_equivalents">[% erm.print_equivalents | html %]</textarea>
+ </div>
+ <div class="help">
+  Information on any print equivalents to this resource.
+ </div>
+</div>
 
 </fieldset>
 
@@ -1404,7 +1413,7 @@ $( function() {
 <div class="field">
  <div class="data">
   <label for="erm-edit-input-breaches">breaches</label>
-  <textarea id="erm-edit-input-breaches" name="admin_notes">[% erm.breaches | html %]</textarea>
+  <textarea id="erm-edit-input-breaches" name="breaches">[% erm.breaches | html %]</textarea>
  </div>
  <div class="help">
   Record here the details on any security or access breaches that may have occurred.

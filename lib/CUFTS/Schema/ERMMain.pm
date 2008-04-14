@@ -167,6 +167,12 @@ __PACKAGE__->add_columns(
         is_nullable   => 1,
         size          => 1024
     },
+    'print_equivalents' => {
+        data_type     => 'text',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 64000
+    },
     'pick_and_choose' => {
         data_type     => 'boolean',
         default_value => undef,

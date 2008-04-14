@@ -26,6 +26,7 @@ CREATE TABLE erm_main (
     public_message      TEXT,
     group_records       VARCHAR(1024),
     active_alert        VARCHAR(1024),
+    print_equivalent    TEXT,
 
     pick_and_choose     BOOLEAN,
     marc_available      BOOLEAN,
@@ -121,7 +122,8 @@ CREATE TABLE erm_main (
     referrer_url            VARCHAR(1024),
     openurl_compliant       BOOLEAN,
     access_notes            TEXT,
-    breaches                TEXT
+    breaches                TEXT,
+    admin_notes             TEXT
     
 );
 
