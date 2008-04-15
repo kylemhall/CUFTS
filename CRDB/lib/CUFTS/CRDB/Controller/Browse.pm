@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use base 'Catalyst::Controller';
 
+use URI::Escape;
+
 use JSON::XS qw(encode_json);
 use CUFTS::Util::Simple;
 
@@ -105,6 +107,10 @@ Returns the results of a facet search in JSON.  Facets are specified as part of 
 sub html_facets : Chained('facet_options') PathPart('facets') Args {
     my ( $self, $c, @facets ) = @_;
 
+    foreach my $facet (@facets) {
+        $facet = uri_unescape($facet);
+    }
+
     my $rs = $self->_facet_search( $c, \@facets );
     my @records = $rs->all();
 
@@ -143,6 +149,10 @@ Returns the results of a facet search in JSON.  Facets are specified as part of 
 
 sub json_facets : Chained('facet_options') PathPart('facets/json') Args {
     my ( $self, $c, @facets ) = @_;
+
+    foreach my $facet (@facets) {
+        $facet = uri_unescape($facet);
+    }
 
     my $rs = $self->_facet_search( $c, \@facets );
 

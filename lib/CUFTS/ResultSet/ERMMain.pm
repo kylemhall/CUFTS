@@ -142,6 +142,8 @@ sub _facet_search_keyword {
 
     $config->{joins}->{subjects_main} = 'subject';
 
+    $data =~ s/\s+/\\s+/gsmx;
+
     $config->{search}->{'-nest'} = [
             'subject.subject'      => { '~*' => $data },
             'me.description_brief' => { '~*' => $data },
