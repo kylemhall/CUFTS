@@ -69,7 +69,7 @@ Ext.override( HashState, {
 } );
 
 Ext.onReady( function() {
-    Ext.BLANK_IMAGE_URL = '[% image_dir _ '/default/s.gif %]';
+    Ext.BLANK_IMAGE_URL = '[% image_dir _ '/default/s.gif' %]';
 
     var hash_state = new HashState();
 
