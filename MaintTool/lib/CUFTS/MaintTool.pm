@@ -21,6 +21,8 @@ CUFTS::MaintTool->config->{session} = {
     storage => '/tmp/CUFTS_MaintTool_sessions',
 };
 
+CUFTS::MaintTool->config->{'View::JSON'}->{encoding} = 'iso-8859-1';
+
 CUFTS::MaintTool->setup;
 
 ##
