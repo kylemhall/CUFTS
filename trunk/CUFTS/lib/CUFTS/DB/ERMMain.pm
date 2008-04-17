@@ -139,6 +139,9 @@ __PACKAGE__->columns(All => qw(
     access_notes
     breaches
     admin_notes
+    
+    alert
+    alert_expiry
 ));                                                                                                        
 
 __PACKAGE__->columns( Essential => __PACKAGE__->columns );
@@ -398,7 +401,13 @@ sub facet_count {
 
 sub _facet_search_name {
     my ( $class, $field, $data, $config, $sql ) = @_;
+
+    $data =~ s/\s+\&\s+/ and /g;
     $data = lc($data);
+    $data =~ s/[^a-z0-9 ]//g;
+    $data =~ s/\s\s+/ /g;
+    $data = trim_string($data);
+
     $config->{search}->{search_name} = { '~' => "^$data" };
 }
 
