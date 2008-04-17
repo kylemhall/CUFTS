@@ -69,7 +69,7 @@ Ext.override( HashState, {
 } );
 
 Ext.onReady( function() {
-    Ext.BLANK_IMAGE_URL = '/static/images/default/s.gif';
+    Ext.BLANK_IMAGE_URL = '[% image_dir _ '/default/s.gif %]';
 
     var hash_state = new HashState();
 
@@ -137,22 +137,9 @@ Ext.onReady( function() {
             items: [
                 '-', '   ',
                 new Ext.Button({
+                    iconCls: 'add-button',
                     text: 'Add to Selected',
-                    handler: function() {
-                        var selections = results_grid.getSelectionModel().getSelections();
-                        var ids = new Array();
-                        Ext.each( selections, function(item) { ids.push(item.get('id') ) } );
-                        Ext.Ajax.request({
-                            url: '[% url("$url_base/erm/main/selected_add") %]',
-                            success: function(response) {
-                                if ( response.status == 200 ) {
-                                    var results = Ext.decode( response.responseText );
-                                    selected_store.loadData(results);
-                                }
-                            },
-                            params: { ids: ids }
-                        });
-                    }
+                    handler: addSelected
                 })
             ]
         }),
@@ -185,6 +172,11 @@ Ext.onReady( function() {
                 name: 'name',
                 fieldLabel: 'Name',
                 value: hash_state.params['name']
+            },
+            {
+                name: 'vendor',
+                fieldLabel: 'Vendor',
+                value: hash_state.params['vendor']
             },
             {
                 name: 'keyword',
@@ -298,12 +290,60 @@ Ext.onReady( function() {
         width: 700,
         height: 300,
         frame: false,
+        tbar: [
+            {
+                text: 'Remove Selected',
+                iconCls: 'delete-button',
+                handler: removeSelected
+            },
+            {
+                text: 'Add Alerts',
+                iconCls: 'alert-button',
+                handler: alertSelected
+            },
+        ],
         store: selected_store,
         columns: [
             { header: 'name', dataIndex: 'name', width: 300 },
             { header: 'vendor', dataIndex: 'vendor', width: 150 }
         ]
     });
+
+    function addSelected() {
+        var selections = results_grid.getSelectionModel().getSelections();
+        var ids = new Array();
+        Ext.each( selections, function(item) { ids.push(item.get('id') ) } );
+        Ext.Ajax.request({
+            url: '[% url("$url_base/erm/main/selected_add") %]',
+            success: function(response) {
+                if ( response.status == 200 ) {
+                    var results = Ext.decode( response.responseText );
+                    selected_store.loadData(results);
+                }
+            },
+            params: { ids: ids }
+        });
+    }
+    
+    function removeSelected() {
+        var selections = selected_grid.getSelectionModel().getSelections();
+        var ids = new Array();
+        Ext.each( selections, function(item) { ids.push(item.get('id') ) } );
+        Ext.Ajax.request({
+            url: '[% url("$url_base/erm/main/selected_remove") %]',
+            success: function(response) {
+                if ( response.status == 200 ) {
+                    var results = Ext.decode( response.responseText );
+                    selected_store.loadData(results);
+                }
+            },
+            params: { ids: ids }
+        });
+    }
+    
+    function alertSelected() {
+        window.location = '[% url("$url_base/erm/alerts/alert_selected") %]';
+    }
     
     // Restore state
     
@@ -312,7 +352,7 @@ Ext.onReady( function() {
     Ext.apply( paging, hash_state.paging );
     results_store.load( { params: paging } );
 
-    selected_store.load();    
+    selected_store.load();
 });
 
 </script>
