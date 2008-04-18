@@ -443,6 +443,10 @@ div.resource-brief-access {
     margin-bottom: 5px;
 }
 
+.resource-brief-field-alert {
+    color: red;
+}
+
 div.resource-brief-rank-handle {
     margin-top: 10px;
 }
