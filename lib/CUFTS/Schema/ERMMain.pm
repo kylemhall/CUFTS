@@ -778,7 +778,7 @@ sub get_group_records {
 
     my %records = map { $_->id => $_ } $recordset->all();
     my @records;
-    foreach $id ( @record_ids ) {
+    foreach my $id ( @record_ids ) {
         push( @records, $records{$id} );
     }
 
