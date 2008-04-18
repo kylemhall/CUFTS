@@ -684,6 +684,67 @@ div#site-settings-crdb-active-fields-drop {
 
 /* ERM Find */
 
+.add-button {
+    background-image: url(../images/icons/add.png) !important;
+}
+
+.delete-button {
+    background-image: url(../images/icons/delete.png) !important;
+}
+
+.accept-button {
+    background-image: url(../images/icons/accept.png) !important;
+}
+
+.alert-button {
+    background-image: url(../images/icons/exclamation.png) !important;
+}
+
+/* ERM Alerts */
+
+#alert-selected-resources {
+    clear: both;
+}
+
+.alert-selected-resource-alert {
+    font-size: 90%;
+    margin-left: 5px;
+}
+
+.alert-selected-resource-name {
+    margin-top: 5px;
+}
+
+#alerts-resources {
+    clear: both;
+}
+
+.alerts-resource {
+    clear: both;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #aaa;
+}
+
+.alerts-resource-alert {
+    font-size: 90%;
+    margin-left: 5px;
+}
+
+.alerts-resource-name {
+    margin-top: 5px;
+}
+
+.alerts-delete-box {
+    float: left;
+    margin-top: 5px;
+    padding-right: 5px;
+}
+
+#alerts-delete-button {
+    margin-bottom: 8px;
+}
+
 /*div#erm-main-find {
     clear: both;
     float: left;

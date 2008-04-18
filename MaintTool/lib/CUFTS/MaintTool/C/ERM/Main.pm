@@ -133,6 +133,8 @@ my $form_validate = {
             openurl_compliant
             access_notes
             breaches
+            alert
+            alert_expiry
             
             erm-edit-input-content_types
         )
@@ -250,11 +252,30 @@ sub selected_add : Local {
     $c->forward('selected_json');
 }
 
+sub selected_remove : Local {
+    my ( $self, $c ) = @_;
+
+    if ( !$c->session->{selected_erm_main} ) {
+        $c->session->{selected_erm_main} = [];
+    }
+    my $delete = $c->req->params->{ids};
+    if ( ref($delete) ne 'ARRAY' ) {
+        $delete = [$delete];
+    }
+    my %to_delete = map { $_ => 1 } @$delete;
+    @{$c->session->{selected_erm_main}} = grep { not exists( $to_delete{$_} ) } @{$c->session->{selected_erm_main}};
+    
+    $c->forward('selected_json');
+}
+
+
+
 sub find_json : Local {
     my ( $self, $c )  = @_;
     
     my @valid_params = qw(
         name
+        vendor
         keyword
         subject
         content_type
