@@ -15,6 +15,7 @@ my @fast_search_columns = qw(
     url
     proxy
     access
+    alert
     license.id
 );
 

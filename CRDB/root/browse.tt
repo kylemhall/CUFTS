@@ -69,6 +69,9 @@
   <a href="[% c.uri_for_site( c.controller('Resource').action_for('default_view'), [ record_id ] ) %]">[% record.result_name %][% IF record.vendor.length %] - [% record.vendor %][% END %]</a>
  </div>
  <div class="resource-brief-field-description">[% record.description_brief %]</div>
+ [% IF record.alert %]
+  <div class="resource-brief-field-alert">[% record.alert %]</div> 
+ [% END %]
  [% IF record.url %]
   <div class="resource-brief-url"><a href="[% c.uri_for_site( c.controller('Resource').action_for('goto'), [ record_id ] ) %]">Connect</a></div>
  [% ELSIF record.access %]

@@ -27,6 +27,8 @@ CREATE TABLE erm_main (
     group_records       VARCHAR(1024),
     active_alert        VARCHAR(1024),
     print_equivalents   TEXT,
+    alert               TEXT,
+    alert_expiry        DATE,
 
     pick_and_choose     BOOLEAN,
     marc_available      BOOLEAN,
