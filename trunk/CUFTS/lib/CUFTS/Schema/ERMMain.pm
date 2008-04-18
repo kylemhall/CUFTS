@@ -665,6 +665,19 @@ __PACKAGE__->add_columns(
         is_nullable   => 1,
         size          => 64000
     },
+    'alert' => {
+        data_type     => 'text',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 64000
+    },
+    'alert_expiry' => {
+        data_type          => 'date',
+        default_value      => undef,
+        is_nullable        => 1,
+        size               => 0,
+    },
+    
 );
 __PACKAGE__->mk_group_accessors( column => qw/ result_name sort_name rank / );
 
@@ -763,7 +776,11 @@ sub get_group_records {
         }
     );
 
-    my @records = $recordset->all();
+    my %records = map { $_->id => $_ } $recordset->all();
+    my @records;
+    foreach $id ( @record_ids ) {
+        push( @records, $records{$id} );
+    }
 
     return \@records;
 }
