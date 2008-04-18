@@ -19,7 +19,7 @@
     <label for="alert-selected-expiry">Expires</label><input id="alert-selected-expiry" name="expiry" value="">
    </div>
    <div class="help">
-    Alerts expire the morning of this date.
+    Alerts expire the morning of this date.<br /><br />Format: YYYY-MM-DD
    </div>
   </div>
 
