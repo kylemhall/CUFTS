@@ -354,6 +354,28 @@ $( function() {
  </div>
 </div>
 
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-alert">alert</label>
+  <textarea id="erm-edit-input-alert" name="alert">[% erm.alert | html %]</textarea>
+ </div>
+ <div class="help">
+  Displays an alert to users about this resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-alert_expiry">alert expiry</label>
+  <input id="erm-edit-input-alert_expiry" name="alert_expiry" value="[% erm.alert_expiry | html %]" style="width: 10em" />
+ </div>
+ <div class="help">
+  Date that the current alert message will be removed.<br /><br />Format: YYYY-MM-DD
+ </div>
+</div>
+
+
 <div class="field">
  <div class="data">
   <label for="erm-edit-input-issn">ISSN</label>
@@ -373,9 +395,6 @@ $( function() {
   ISBN.
  </div>
 </div>
-
-
-<!--- ADD EXPIRY FIELD -->
 
 <div class="field">
  <div class="data">
