@@ -31,10 +31,10 @@ Ext.override( HashState, {
     getState: function() {
         // Get state from location hash
         var hash = window.location.hash;
-        if (hash.length > 2 && hash.charAt(0) == "#" && hash.charAt(1) == '?' ) {
+        if ( hash.length > 2 && hash.charAt(0) == "#" && hash.charAt(1) == '?' ) {
             hash = hash.substring(2);
         }
-        else if (hash.length > 1 && hash.charAt(0) == "#" ) {
+        else if ( hash.length > 1 && hash.charAt(0) == "#" ) {
             hash = hash.substring(1);
         }
 
@@ -46,7 +46,7 @@ Ext.override( HashState, {
         Ext.each( ['start', 'limit'], function(param) {
             if ( this.params[param] ) {
                 this.paging[param] = parseInt(this.params[param]);
-                delete this.params[param]
+                delete this.params[param];
             }
         }, this );
 
@@ -125,8 +125,9 @@ Ext.onReady( function() {
         sm: new Ext.grid.RowSelectionModel({singleSelect:false}),
         frame: false,
         style: 'margin-top: 7px;',
-        // width: 700,
+        width: 688,
         height: 300,
+        // bbar: new Ext.ux.AdvancedPagingToolbar({
         bbar: new Ext.ux.AdvancedPagingToolbar({
             pageSize: 25,
             displayInfo: true,
@@ -163,10 +164,10 @@ Ext.onReady( function() {
                 }
             }
         ],
-        defaultType: 'textfield',
         bodyStyle: 'padding: 5px',
         width: 700,
         labelWidth: 120,
+        defaultType: 'textfield',
         items: [
             {
                 name: 'name',
@@ -285,30 +286,33 @@ Ext.onReady( function() {
     }
         
     var selected_grid = new Ext.grid.GridPanel({
-        renderTo: 'erm-main-selected',
         title: 'Currently Selected Records',
         width: 700,
         height: 300,
         frame: false,
-        tbar: [
-            {
-                text: 'Remove Selected',
-                iconCls: 'delete-button',
-                handler: removeSelected
-            },
-            {
-                text: 'Add Alerts',
-                iconCls: 'alert-button',
-                handler: alertSelected
-            },
-        ],
         store: selected_store,
+        tbar: new Ext.Toolbar({
+            items: [
+                new Ext.Button({
+                    text: 'Remove Selected',
+                    iconCls: 'delete-button',
+                    handler: removeSelected
+                }),
+                new Ext.Button({
+                    text: 'Add Alerts',
+                    iconCls: 'alert-button',
+                    handler: alertSelected
+                })
+            ]
+        }),
         columns: [
             { header: 'name', dataIndex: 'name', width: 300 },
             { header: 'vendor', dataIndex: 'vendor', width: 150 }
         ]
     });
 
+    selected_grid.render('erm-main-selected');
+    
     function addSelected() {
         var selections = results_grid.getSelectionModel().getSelections();
         var ids = new Array();
