@@ -2,7 +2,7 @@
 
 <form action="[% url( "$url_base/erm/alerts/delete" ) %]" name="alerts" id="alerts" method="post">
 
-<input type="submit" name="delete" value="remove alerts" id="alerts-delete-button" />
+[% IF resources.size %]<input type="submit" name="delete" value="remove alerts" id="alerts-delete-button" />[% END %]
 
 <div id="alerts-resources">
  [% FOREACH resource IN resources %]
