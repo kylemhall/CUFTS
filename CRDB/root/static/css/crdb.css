@@ -576,6 +576,10 @@ td.resource-edit-control {
     background: #eee;
 }
 
+#resource-definition-alert {
+    color: red;
+}
+
 #resource-definition-group_records {
     margin: 5px 0px;
     padding: 9px 15px 4px;
