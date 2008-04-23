@@ -163,11 +163,11 @@ $( function() {
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-ereserves_notes">ILL notes</label>
+  <label for="erm-edit-input-ereserves_notes">e-reserves notes</label>
   <textarea id="erm-edit-input-ereserves_notes" name="ereserves_notes">[% erm.ereserves_notes | html %]</textarea>
  </div>
  <div class="help">
-  Notes and exceptions regarding ILL usage.
+  Notes and exceptions regarding e-reserves usage.
  </div>
 </div>
 
