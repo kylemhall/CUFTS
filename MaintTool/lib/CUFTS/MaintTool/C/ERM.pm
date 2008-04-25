@@ -4,7 +4,7 @@ use strict;
 use base 'Catalyst::Base';
 
 use CUFTS::Util::Simple;
-use JSON::XS qw( to_json );
+use JSON::XS qw( encode_json );
 use MARC::Record;
 
 sub auto : Private {
@@ -31,6 +31,8 @@ sub auto : Private {
         ZAR
     ) ];
     
+    $c->stash->{subscription_statuses} = ['On trial', 'Trial finished', 'Under consideration', 'To be ordered', 'On order', 'Active', 'Cancelled'];
+    $c->stash->{subscription_statuses_ext} = encode_json( [ [undef, '&nbsp;' ], map {[ $_, $_ ]} @{$c->stash->{subscription_statuses}} ] );
     
     return 1;
 }

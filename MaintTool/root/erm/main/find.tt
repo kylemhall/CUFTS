@@ -3,9 +3,9 @@
 
 <div id="erm-main-find-form"></div>
 
-<div id="erm-main-results" style="margin-top: 5px;"></div>
+<div id="erm-main-results" style="margin-top: 8px;"></div>
 
-<div id="erm-main-selected" style="margin-top: 5px;"></div>
+<div id="erm-main-selected" style="margin-top: 8px;"></div>
 
 </div>
 
@@ -107,7 +107,7 @@ Ext.onReady( function() {
     });
     
     var combo_stores = {};
-    [% FOREACH field_type IN [ 'subjects', 'content_types', 'resource_types', 'resource_mediums', 'consortias' ] %]
+    [% FOREACH field_type IN [ 'subjects', 'content_types', 'resource_types', 'resource_mediums', 'consortias', 'subscription_statuses' ] %]
     [%- SET field_type_data = "${field_type}_ext" %]
     combo_stores.[% field_type %] = new Ext.data.SimpleStore({
         fields: ['id', 'display'],
@@ -123,26 +123,30 @@ Ext.onReady( function() {
            { header: 'vendor', dataIndex: 'vendor', width: 150 }
         ],
         sm: new Ext.grid.RowSelectionModel({singleSelect:false}),
-        frame: false,
-        style: 'margin-top: 7px;',
-        width: 688,
+        title: 'Search Results',
+        width: 700,
         height: 300,
-        // bbar: new Ext.ux.AdvancedPagingToolbar({
+        tbar: new Ext.Toolbar({
+            items: [
+                new Ext.Button({
+                    iconCls: 'add-button',
+                    text: 'Add to Selected',
+                    handler: addSelected
+                }),
+                new Ext.Button({
+                    iconCls: 'add-button',
+                    text: 'Add All Results to Selected',
+                    handler: addAllSelected
+                })
+            ]
+        }),
         bbar: new Ext.ux.AdvancedPagingToolbar({
             pageSize: 25,
             displayInfo: true,
             displayMsg: 'Displaying {0} - {1} of {2}',
             emptyMsg: 'No records to display',
             store: results_store,
-            hash_state: hash_state,
-            items: [
-                '-', '   ',
-                new Ext.Button({
-                    iconCls: 'add-button',
-                    text: 'Add to Selected',
-                    handler: addSelected
-                })
-            ]
+            hash_state: hash_state
         }),
         listeners: {
             'rowdblclick': function(grid, rowIndex, e) {
@@ -150,12 +154,12 @@ Ext.onReady( function() {
                 window.location = '[% url("$url_base/erm/main/edit/") %]' + erm_id;
             }
         }
-        
     });
 
 
-    var find_form = new Ext.form.FormPanel({
+    var find_form = new Ext.FormPanel({
         title: 'Find ERM Main Records',
+        frame: true,
         tools: [
             {
                 id: 'plus',
@@ -164,100 +168,157 @@ Ext.onReady( function() {
                 }
             }
         ],
-        bodyStyle: 'padding: 5px',
         width: 700,
-        labelWidth: 120,
-        defaultType: 'textfield',
         items: [
             {
-                name: 'name',
-                fieldLabel: 'Name',
-                value: hash_state.params['name']
-            },
+                layout: 'column',
+                border: false,
+                items: [
+                    {
+                        layout: 'form',
+                        columnWidth: .5,
+                        labelWidth: 120,
+                        border: false,
+                        items: [
+                            {
+                                name: 'name',
+                                fieldLabel: 'Name',
+                                value: hash_state.params['name'],
+                                xtype: 'textfield',
+                                anchor: '95%'
+                            },
+                            {
+                                name: 'keyword',
+                                fieldLabel: 'Keyword',
+                                value: hash_state.params['keyword'],
+                                xtype: 'textfield',
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Subject',
+                                xtype: 'combo',
+                                hiddenName: 'subject',
+                                store: combo_stores.subjects,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': handleEmptyCombo },
+                                value: hash_state.params['subject'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Content Type',
+                                xtype: 'combo',
+                                hiddenName: 'content_type',
+                                store: combo_stores.content_types,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': handleEmptyCombo },
+                                value: hash_state.params['content_type'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Resource Type',
+                                xtype: 'combo',
+                                hiddenName: 'resource_type',
+                                store: combo_stores.resource_types,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': handleEmptyCombo },
+                                value: hash_state.params['resource_type'],
+                                anchor: '95%'
+                                
+                            },
+                            {
+                                fieldLabel: 'Resource Medium',
+                                xtype: 'combo',
+                                hiddenName: 'resource_medium',
+                                store: combo_stores.resource_mediums,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': handleEmptyCombo },
+                                value: hash_state.params['resource_medium'],
+                                anchor: '95%'
+                            }
+                        ]
+                    },
+                    {
+                        layout: 'form',
+                        columnWidth: .5,
+                        labelWidth: 120,
+                        border: false,
+                        items: [
+                            {
+                                name: 'publisher',
+                                fieldLabel: 'Publisher',
+                                value: hash_state.params['publisher'],
+                                xtype: 'textfield',
+                                anchor: '-2'
+                            },
+                            {
+                                name: 'vendor',
+                                fieldLabel: 'Vendor',
+                                value: hash_state.params['vendor'],
+                                xtype: 'textfield',
+                                anchor: '-2'
+                            },
+                            {
+                                fieldLabel: 'Consortia',
+                                xtype: 'combo',
+                                hiddenName: 'consortia',
+                                store: combo_stores.consortias,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': handleEmptyCombo },
+                                value: hash_state.params['consortia'],
+                                anchor: '-2'
+                            },
+                            {
+                                fieldLabel: 'Subscription Status',
+                                xtype: 'combo',
+                                hiddenName: 'subscription_status',
+                                store: combo_stores.subscription_statuses,
+                                displayField: 'display',
+                                valueField: 'id',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': handleEmptyCombo },
+                                value: hash_state.params['subscription_status'],
+                                anchor: '-2'
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        buttons: [
             {
-                name: 'vendor',
-                fieldLabel: 'Vendor',
-                value: hash_state.params['vendor']
-            },
-            {
-                name: 'keyword',
-                fieldLabel: 'Keyword',
-                value: hash_state.params['keyword']
-            },
-            {
-                fieldLabel: 'Subject',
-                xtype: 'combo',
-                hiddenName: 'subject',
-                store: combo_stores.subjects,
-                valueField: 'id',
-                displayField: 'display',
-                mode: 'local',
-                triggerAction: 'all',
-                editable: false,
-                listeners: { 'select': handleEmptyCombo },
-                value: hash_state.params['subject']
-            },
-            {
-                fieldLabel: 'Content Type',
-                xtype: 'combo',
-                hiddenName: 'content_type',
-                store: combo_stores.content_types,
-                valueField: 'id',
-                displayField: 'display',
-                mode: 'local',
-                triggerAction: 'all',
-                editable: false,
-                listeners: { 'select': handleEmptyCombo },
-                value: hash_state.params['content_type']
-            },
-            {
-                fieldLabel: 'Resource Type',
-                xtype: 'combo',
-                hiddenName: 'resource_type',
-                store: combo_stores.resource_types,
-                valueField: 'id',
-                displayField: 'display',
-                mode: 'local',
-                triggerAction: 'all',
-                editable: false,
-                listeners: { 'select': handleEmptyCombo },
-                value: hash_state.params['resource_type']
-            },
-            {
-                fieldLabel: 'Resource Medium',
-                xtype: 'combo',
-                hiddenName: 'resource_medium',
-                store: combo_stores.resource_mediums,
-                valueField: 'id',
-                displayField: 'display',
-                mode: 'local',
-                triggerAction: 'all',
-                editable: false,
-                listeners: { 'select': handleEmptyCombo },
-                value: hash_state.params['resource_medium']
-            },
-            {
-                fieldLabel: 'Consortia',
-                xtype: 'combo',
-                hiddenName: 'consortia',
-                store: combo_stores.consortias,
-                valueField: 'id',
-                displayField: 'display',
-                mode: 'local',
-                triggerAction: 'all',
-                editable: false,
-                listeners: { 'select': handleEmptyCombo },
-                value: hash_state.params['consortia']
-            },
-            {
-                xtype: 'button',
                 type: 'submit',
                 name: 'search',
                 text: 'Search',
-                style: 'margin-left: 125px;',
                 handler: search_action
             },
-            results_grid
+            {
+                type: 'reset',
+                name: 'clear',
+                text: 'Clear',
+                handler: reset_action
+            }
         ]
         
     });
@@ -272,8 +333,6 @@ Ext.onReady( function() {
         }
     );
     
-    find_form.render('erm-main-find-form');
-
     
     function search_action() {
         var params = find_form.getForm().getValues();
@@ -284,7 +343,14 @@ Ext.onReady( function() {
         hash_state.paging = paging;
         hash_state.setState();        
     }
-        
+    
+    function reset_action() {
+        // CAUTION: items.items may not be safe, using private variable to get all fields 
+        Ext.each( find_form.getForm().items.items, function( field ) {
+            field.setValue('');
+        } );
+    }
+    
     var selected_grid = new Ext.grid.GridPanel({
         title: 'Currently Selected Records',
         width: 700,
@@ -294,23 +360,41 @@ Ext.onReady( function() {
         tbar: new Ext.Toolbar({
             items: [
                 new Ext.Button({
-                    text: 'Remove Selected',
+                    text: 'Remove',
                     iconCls: 'delete-button',
                     handler: removeSelected
+                }),
+                new Ext.Button({
+                    text: 'Clear',
+                    iconCls: 'delete-button',
+                    handler: clearSelected
                 }),
                 new Ext.Button({
                     text: 'Add Alerts',
                     iconCls: 'alert-button',
                     handler: alertSelected
+                }),
+                new Ext.Button({
+                    text: 'MARC Records',
+                    iconCls: 'table-button',
+                    handler: marcSelected
                 })
             ]
         }),
         columns: [
-            { header: 'name', dataIndex: 'name', width: 300 },
+            { header: 'name', dataIndex: 'name', width: 450 },
             { header: 'vendor', dataIndex: 'vendor', width: 150 }
-        ]
+        ],
+        listeners: {
+            'rowdblclick': function(grid, rowIndex, e) {
+                var erm_id = grid.getStore().getAt(rowIndex).get('id');
+                window.location = '[% url("$url_base/erm/main/edit/") %]' + erm_id;
+            }
+        }
     });
 
+    find_form.render('erm-main-find-form');
+    results_grid.render('erm-main-results');
     selected_grid.render('erm-main-selected');
     
     function addSelected() {
@@ -326,6 +410,20 @@ Ext.onReady( function() {
                 }
             },
             params: { ids: ids }
+        });
+    }
+
+    function addAllSelected() {
+        var params = find_form.getForm().getValues();
+        Ext.Ajax.request({
+            url: '[% url("$url_base/erm/main/selected_add_all") %]',
+            success: function(response) {
+                if ( response.status == 200 ) {
+                    var results = Ext.decode( response.responseText );
+                    selected_store.loadData(results);
+                }
+            },
+            params: params
         });
     }
     
@@ -344,9 +442,25 @@ Ext.onReady( function() {
             params: { ids: ids }
         });
     }
+
+    function clearSelected() {
+        Ext.Ajax.request({
+            url: '[% url("$url_base/erm/main/selected_clear") %]',
+            success: function(response) {
+                if ( response.status == 200 ) {
+                    var results = Ext.decode( response.responseText );
+                    selected_store.loadData(results);
+                }
+            }
+        });
+    }
     
     function alertSelected() {
         window.location = '[% url("$url_base/erm/alerts/alert_selected") %]';
+    }
+
+    function marcSelected() {
+        window.location = '[% url("$url_base/erm/main/selected_marc") %]';
     }
     
     // Restore state
