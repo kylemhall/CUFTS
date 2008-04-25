@@ -252,6 +252,15 @@ sub selected_add : Local {
     $c->forward('selected_json');
 }
 
+sub selected_add_all : Local {
+    my ( $self, $c ) = @_;
+    
+    $self->_find($c);
+    $c->session->{selected_erm_main} = [ List::MoreUtils::uniq( ( @{$c->session->{selected_erm_main}}, map { $_->{id} } @{$c->stash->{json}->{results}} ) ) ];
+
+    $c->forward('selected_json');
+}
+
 sub selected_remove : Local {
     my ( $self, $c ) = @_;
 
@@ -268,9 +277,79 @@ sub selected_remove : Local {
     $c->forward('selected_json');
 }
 
+sub selected_clear : Local {
+    my ( $self, $c ) = @_;
+    $c->session->{selected_erm_main} = [];
+    $c->forward('selected_json');
+}
+
+sub selected_marc : Local {
+    my ( $self, $c ) = @_;
+    
+    if ( !$c->session->{selected_erm_main} ) {
+        $c->session->{selected_erm_main} = [];
+    }
+    
+    my $MARC_dump;
+    
+    my @erm_records = CUFTS::DB::ERMMain->search( { site => $c->stash->{current_site}->id, id => { '-in' => $c->session->{selected_erm_main} } } );
+    
+    foreach my $erm_record ( @erm_records ) {
+        if ( $c->req->params->{file} ) {
+            $MARC_dump .= $erm_record->as_marc()->as_usmarc();
+        }
+        else {
+            $MARC_dump .= $erm_record->as_marc()->as_formatted();
+            $MARC_dump .= "\n----------------------------------------------\n";
+        }
+
+        # Update records from "on order" to "ordered"
+        if ( $c->req->params->{update} ) {
+            if ( $erm_record->subscription_status eq $c->stash->{subscription_statuses}->[3] ) {
+                $erm_record->subscription_status( $c->stash->{subscription_statuses}->[4] );
+                $erm_record->update;
+            }
+        }
+
+    }
+
+    CUFTS::DB::DBI->dbi_commit();  # Should be fine, even without any real updates
+
+    if ( $c->req->params->{file} ) {
+        $c->res->content_type( 'application/marc' );
+        $c->res->headers->push_header( 'Content-Disposition' => 'attachment; filename="marc_records.mrc"' );
+        $c->res->body( $MARC_dump );
+    }
+    else {
+        $c->stash->{marc_dump_text} = $MARC_dump;
+        $c->stash->{template} = 'erm/main/selected_marc.tt';
+    }
+}
+
+
 
 
 sub find_json : Local {
+    my ( $self, $c )  = @_;
+
+    my $query = $c->req->parameters;
+    foreach my $key ( keys( %$query ) ) {
+        my $value = $query->{$key};
+        if ( is_empty_string($value) ) {
+            delete $query->{$key};
+        }
+    }
+
+    my $URI = URI->new();
+    $URI->query_form( $query );
+    $c->session->{last_erm_main_find_query} = $URI->query;
+
+    $self->_find($c);
+
+    $c->forward('V::JSON');
+}
+
+sub _find {
     my ( $self, $c )  = @_;
     
     my @valid_params = qw(
@@ -278,10 +357,12 @@ sub find_json : Local {
         vendor
         keyword
         subject
+        publisher
         content_type
         resource_type
         content_medium
         constoria
+        subscription_status
     );
 
     my $params = $c->req->params;
@@ -296,14 +377,14 @@ sub find_json : Local {
         next if is_empty_string($value);
         $search->{$param} = $value;
     }
-
+    
     my $count   = CUFTS::DB::ERMMain->facet_count(  $c->stash->{current_site}->id, $search );
     my $results = CUFTS::DB::ERMMain->facet_search( $c->stash->{current_site}->id, $search, 1, $offset, $rows );
 
     $c->stash->{json}->{rowcount} = $count;
     $c->stash->{json}->{results}  = $results;
-
-    $c->forward('V::JSON');
+    
+    return;
 }
 
 sub ajax_details : Local {
@@ -545,7 +626,8 @@ sub edit : Local {
             }
 
             CUFTS::DB::DBI->dbi_commit;
-            push @{ $c->stash->{results} }, 'ERM data updated.';
+            return $c->redirect( '/erm/main#?' . $c->session->{last_erm_main_find_query} );
+            # push @{ $c->stash->{results} }, 'ERM data updated.';
         }
     }
 
@@ -553,7 +635,6 @@ sub edit : Local {
     $c->stash->{erm}       = $erm;
     $c->stash->{erm_id}    = $erm_id;
     $c->stash->{template}  = "erm/main/edit.tt";
-
     $c->stash->{javascript_validate} = [ $c->convert_form_validate( "main-form", $form_validate, 'erm-edit-input-' ) ];
     push( @{ $c->stash->{load_css} }, "tabs.css" );
 

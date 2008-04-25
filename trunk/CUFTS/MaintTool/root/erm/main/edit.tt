@@ -478,7 +478,7 @@ $( function() {
   <label for="erm-edit-input-subscription_status">subscription status</label>
   <select id="erm-edit-input-subscription_status" name="subscription_status" style="width: 30em;">
    <option value=""></option>
-   [% FOREACH status IN ['On trial', 'Trial finished', 'Under consideration', 'To be ordered', 'On order', 'Active', 'Cancelled'] %]
+   [% FOREACH status IN subscription_statuses %]
     <option value="[% status %]" [% 'selected="selected"' IF erm.subscription_status == status %]>[% status %]</option>
    [% END %]
   </select>

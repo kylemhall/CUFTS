@@ -700,6 +700,19 @@ div#site-settings-crdb-active-fields-drop {
     background-image: url(../images/icons/exclamation.png) !important;
 }
 
+.table-button {
+    background-image: url(../images/icons/table.png) !important;
+}
+
+.float-button {
+    margin-bottom: 4px;
+}
+
+.float-button .x-btn {
+    float: left;
+}
+
+
 /* ERM Alerts */
 
 #alert-selected-resources {
