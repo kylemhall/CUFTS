@@ -157,6 +157,24 @@ sub _facet_search_keyword {
         
 }
 
+sub _facet_search_publisher {
+    my ( $class, $field, $data, $config ) = @_;
+
+    $data =~ s/\s\s+/ /g;
+    $data = trim_string($data);
+
+    $config->{search}->{publisher} = { '~*' => $data };
+}
+
+sub _facet_search_vendor {
+    my ( $class, $field, $data, $config ) = @_;
+
+    $data =~ s/\s\s+/ /g;
+    $data = trim_string($data);
+
+    $config->{search}->{vendor} = { '~*' => $data };
+}
+
 
 ##
 ## Restricted column information
