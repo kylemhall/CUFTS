@@ -454,6 +454,24 @@ my ( $class, $field, $data, $config, $sql ) = @_;
     ];
 }
 
+sub _facet_search_publisher {
+    my ( $class, $field, $data, $config, $sql ) = @_;
+
+    $data =~ s/\s\s+/ /g;
+    $data = trim_string($data);
+
+    $config->{search}->{publisher} = { '~*' => "$data" };
+}
+
+sub _facet_search_vendor {
+    my ( $class, $field, $data, $config, $sql ) = @_;
+
+    $data =~ s/\s\s+/ /g;
+    $data = trim_string($data);
+
+    $config->{search}->{vendor} = { '~*' => "$data" };
+}
+
 
 sub as_marc {
     my ( $self ) = @_;
