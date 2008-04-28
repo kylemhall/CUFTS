@@ -62,7 +62,7 @@ sub edit : Chained('base') PathPart('edit') Args(1) {
 sub get_handler {
     my ( $self, $c, $field ) = @_;
     
-    $c->stash->{display_field} = $c->model('CUFTS::ERMDisplayFields')->search( { field => $field } )->first();
+    $c->stash->{display_field} = $c->model('CUFTS::ERMDisplayFields')->search( { field => $field, site => $c->site->id } )->first();
     
     my $handler = $handler_map{$field};
 
