@@ -31,7 +31,7 @@ while (my $site = $site_iter->next) {
 	    # Check alert expiries
 	    if ( $resource->alert_expiry ) {
     	    my $alert_expiry_date = DateTime::Format::Pg->parse_date( $resource->alert_expiry );
-	        if ( $alert_expiry_date <= $now ) {
+	        if ( $alert_expiry_date->ymd le $now->ymd ) {
 	            $resource->alert(undef);
 	            $resource->alert_expiry(undef);
 	            $resource->update();
