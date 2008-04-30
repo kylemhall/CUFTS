@@ -7,7 +7,7 @@
 <div id="alerts-resources">
  [% FOREACH resource IN resources %]
   <div class="alerts-resource">
-   <div class="alerts-resource-name">[% resource.name %]</div>
+   <div class="alerts-resource-name"><a href="[% url("$url_base/erm/main/edit/" _ resource.id) %]">[% resource.name %]</a></div>
    <div class="alerts-delete-box"><input type="checkbox" name="delete_ids" value="[% resource.id %]" /></div>
    <div class="alerts-resource-alert">
    [% IF resource.alert %]
