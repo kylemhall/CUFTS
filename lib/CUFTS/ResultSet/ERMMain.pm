@@ -36,6 +36,7 @@ sub facet_search {
         search => {
             'me.site' => $site,
         },
+        main_name_only => 1
     };
 
 
@@ -56,6 +57,11 @@ sub facet_search {
         
     }
 
+    # If we're not doing a name search, limit just to main names
+    
+    if ( $config->{main_name_only} ) {
+        $config->{search}->{'names.main'} = 1;
+    }
 
     # Build select and as lists to pass as search attributes.  This pulls
     # from the column list merged with any "replace_columns" config setting
@@ -85,7 +91,7 @@ sub facet_search {
     push @select_columns, 'license.allows_downloads';
     push @as_columns,     'license.allows_downloads';
     
-    
+
     # Build join list from HASH ref.  Flatten with value 1
 
     my @joins = map { defined( $config->{joins}->{$_} ) ? { $_ => $config->{joins}->{$_} } : $_ } keys %{ $config->{joins} };
@@ -95,7 +101,7 @@ sub facet_search {
     my %search_attrs = (
         'select'   => \@select_columns,
         'as'       => \@as_columns,
-        'distinct' => 'names.erm_main',
+        'distinct' => ['names.erm_main'],
         'join'     => \@joins,
         '+as'      => \@extra_as_columns,
         '+select'  => \@extra_select_columns,
@@ -126,6 +132,7 @@ sub _facet_search_name {
 
     $data = CUFTS::Schema::ERMNames->strip_name( $data );
     $config->{search}->{'names.search_name'} = { '~' => "^$data" };
+    $config->{main_name_only} = 0;
 }
 
 
@@ -154,7 +161,7 @@ sub _facet_search_keyword {
             'me.publisher'         => { '~*' => $data },
             'names.search_name'    => { '~'  => CUFTS::Schema::ERMNames->strip_name( $data ) },
     ];
-        
+    $config->{main_name_only} = 0;
 }
 
 sub _facet_search_publisher {
