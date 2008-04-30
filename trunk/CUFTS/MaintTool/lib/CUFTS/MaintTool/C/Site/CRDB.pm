@@ -88,6 +88,8 @@ sub all_viewable_crdb_fields {
 
     $fields{content_types} = 1;
     $fields{subjects} = 1;
+    $fields{names} = 1;
+    
 
     return \%fields;
 }
