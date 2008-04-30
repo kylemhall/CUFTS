@@ -9,6 +9,8 @@
   [% SET group_record_text = undef %]
   [% PROCESS group_record_field.tt %]
   [% INCLUDE render_field field_name="group_records", hide_label = 1, field_data=group_record_text %]
+ [% CASE 'names' %]
+  [% INCLUDE render_field field_name="names", field_label="Alternate names", field_data=HTML.escape( erm.names({'main' => 0}).force_list.sort('name').map_join('name', ', ') ) %]
  [% CASE 'resource_type' %]
   [% INCLUDE render_field field_name="resource_type", field_data=HTML.escape( erm.resource_type.resource_type ) %]
  [% CASE 'subjects' %]
