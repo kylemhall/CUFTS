@@ -83,6 +83,8 @@ Builds the facet search from a list of facets and returns a result set.
 sub _facet_search  {
     my ( $self, $c, $facet_list ) = @_;
 
+    my $empty = !scalar(@$facet_list);
+
     my $facets = {};
     while ( my ( $type, $data ) = splice( @$facet_list, 0, 2 ) ) {
         $facets->{$type} = $data;
@@ -93,7 +95,7 @@ sub _facet_search  {
 
     $c->stash->{facets} = $facets;
 
-    return $c->model('ERMMain')->facet_search( $c->site->id, $search );
+    return $c->model('ERMMain')->facet_search( $c->site->id, $search, $empty ? 0 : undef );
 }
 
 

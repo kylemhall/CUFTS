@@ -20,7 +20,7 @@ my @fast_search_columns = qw(
 );
 
 sub facet_search {
-    my ( $self, $site, $fields, $no_objects, $offset, $limit ) = @_;
+    my ( $self, $site, $fields, $override_main_name, $offset, $limit ) = @_;
 
     my $config = {
         joins  => { 'names' => undef, 'license' => undef },
@@ -36,9 +36,8 @@ sub facet_search {
         search => {
             'me.site' => $site,
         },
-        main_name_only => 1
+        main_name_only => defined($override_main_name) ? $override_main_name : 1
     };
-
 
     # Dispatch to handle special setup for certain fields.  Default to normal field 
     # search if there is no matching "_facet_search..." handler.
