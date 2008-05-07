@@ -182,7 +182,7 @@ sub build_linkJournal {
         
         $db = lc($db);
 
-        my $result = new CUFTS::Result("http://search.ebscohost.com/direct.asp?db=${db}&jid=\%22${journal_id}\%22&scope=site");
+        my $result = new CUFTS::Result("http://search.ebscohost.com/direct.asp?db=${db}&jid=${journal_id}&scope=site");
         $result->record($record);
 
         push @results, $result;
