@@ -38,7 +38,12 @@ Ext.override( HashState, {
             hash = hash.substring(1);
         }
 
-        this.params = Ext.urlDecode(hash);
+        var decodedURL = Ext.urlDecode(hash);
+        var params = {};
+        for ( var key in decodedURL ) {
+            params[decodeURI(key)] = decodeURI( decodedURL[key] ).replace('+', ' ');
+        }
+        this.params = params;
         this.paging = {};
 
         // Move paging from params to paging if present
