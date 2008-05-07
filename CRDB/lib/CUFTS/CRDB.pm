@@ -131,6 +131,23 @@ sub uri_for_image {
     return $c->uri_for( '/static/images/', @_ );
 }
 
+sub uri_for_facets {
+    my ( $c, $add, $remove ) = @_;
+
+    my %new_facets = %{$c->stash->{facets}};
+    if ( defined($add) && ref($add) eq 'ARRAY' ) {
+        my ( $facet, $value ) = @$add;
+        $new_facets{$facet} = $value;
+    }
+    if ( defined($remove) ) {
+        delete $new_facets{$remove};
+    }
+
+    my @facet_array = map { $_, $new_facets{$_} } sort keys(%new_facets);
+    
+    return $c->uri_for_site( $c->action_for('html_facets'), @facet_array );
+}
+
 
 sub redirect {
     my ( $c, $uri ) = @_;
