@@ -162,21 +162,12 @@ Ext.onReady( function() {
     });
 
 
+
     var find_form = new Ext.FormPanel({
-        title: 'Find ERM Main Records',
-        frame: true,
-        tbar: new Ext.Toolbar({
-            items: [
-                new Ext.Button({
-                    text: 'Create ERM Record',
-                    iconCls: 'add-button',
-                    handler: function() {
-                        window.location = '[% url("$url_base/erm/main/create") %]';
-                    }
-                })
-            ]
-        }),
-        width: 700,
+        frame: false,
+        border: false,
+        style: 'padding: 5px 3px;',
+        id: 'erm-main-find-form',
         items: [
             {
                 layout: 'column',
@@ -341,6 +332,24 @@ Ext.onReady( function() {
         }
     );
     
+    var find_panel = new Ext.Panel({
+        title: 'Find ERM Main Records',
+        frame: false,
+        tbar: new Ext.Toolbar({
+            items: [
+                new Ext.Button({
+                    text: 'Create ERM Record',
+                    iconCls: 'add-button',
+                    handler: function() {
+                        window.location = '[% url("$url_base/erm/main/create") %]';
+                    }
+                })
+            ]
+        }),
+        items: [ find_form ],
+        width: 700,
+    })
+    
     
     function search_action() {
         var params = find_form.getForm().getValues();
@@ -401,7 +410,7 @@ Ext.onReady( function() {
         }
     });
 
-    find_form.render('erm-main-find-form');
+    find_panel.render('erm-main-find-form');
     results_grid.render('erm-main-results');
     selected_grid.render('erm-main-selected');
     
