@@ -758,43 +758,30 @@ div#site-settings-crdb-active-fields-drop {
     margin-bottom: 8px;
 }
 
-/*div#erm-main-find {
-    clear: both;
-    float: left;
+/* ERM Find */
+
+#erm-main-find-form .x-panel-body {
+    background-color: #DFE8F6;
 }
 
-div#erm-main-find fieldset {
-    border: none;
+/*#erm-main-find .x-panel-ml {
+    padding-left: 0px;
+}
+#erm-main-find .x-panel-mr {
+    padding-right: 0px;
+}
+#erm-main-find .x-panel-mc {
+    padding-top: 0px;
+}
+#erm-main-find .x-panel-tbar {
+    border-top: 0pt none;
+    border-bottom: 1px solid #99BBE8;
 }
 
-div#erm-main-find fieldset legend {
-    
+#erm-main-find .x-toolbar {
+    border-top: 0pt none;
 }
-
-div#erm-main-find .text input, div#erm-main-find select {
-    font-size: 100%;
-    width: 20em;
-}
-
-div#erm-main div.find {
-    float: left;
-    clear: left;
-    width: 100%;
-    padding: .5em 0 .5em 6px;
-    margin: 1px 0;
-}
-
-div#erm-main-find .find label {
-    float: left;
-    width: 8em;
-    margin: 1px 1em 0 0;
-    padding-top: 4px;
-}
-
-div#erm-main-results {
-    clear: both;
-    float: left;
-    margin-top: 10px;
+#erm-main-find .x-column-inner {
 }
 */
 
