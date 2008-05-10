@@ -165,14 +165,17 @@ Ext.onReady( function() {
     var find_form = new Ext.FormPanel({
         title: 'Find ERM Main Records',
         frame: true,
-        tools: [
-            {
-                id: 'plus',
-                handler: function() {
-                    window.location = '[% url("$url_base/erm/main/create") %]';
-                }
-            }
-        ],
+        tbar: new Ext.Toolbar({
+            items: [
+                new Ext.Button({
+                    text: 'Create ERM Record',
+                    iconCls: 'add-button',
+                    handler: function() {
+                        window.location = '[% url("$url_base/erm/main/create") %]';
+                    }
+                })
+            ]
+        }),
         width: 700,
         items: [
             {
