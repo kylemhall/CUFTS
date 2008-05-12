@@ -347,7 +347,7 @@ Ext.onReady( function() {
             ]
         }),
         items: [ find_form ],
-        width: 700,
+        width: 700
     })
     
     
