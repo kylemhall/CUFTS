@@ -58,7 +58,7 @@ sub view : Private {
         warn(Dumper($links));
         warn(Dumper($displays));
         
-        my @new_array = sort { $b->{rank} <=> $a->{rank} or $displays->{ $a->{resource} }->{name} cmp $displays->{ $b->{resource} } }->{name} @$links;
+        my @new_array = sort { $b->{rank} <=> $a->{rank} or $displays->{ $a->{resource} }->{name} cmp $displays->{ $b->{resource} }->{name} } @$links;
         return \@new_array;
     };
     
