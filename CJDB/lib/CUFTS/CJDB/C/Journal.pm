@@ -51,6 +51,17 @@ sub view : Private {
         };
         
     }
+    
+    $c->stash->{rank_name_sort} = sub {
+        my ( $links, $displays ) = @_;
+        use Data::Dumper;
+        warn(Dumper($links));
+        warn(Dumper($displays));
+        
+        my @new_array = sort { $b->{rank} <=> $a->{rank} or $displays->{ $a->{resource} } cmp $displays->{ $b->{resource} } } @$links;
+        return \@new_array;
+    };
+    
 
 	$c->stash->{tags} = CJDB::DB::Tags->get_tag_summary($journals_auth_id, $c->stash->{current_site}->id, (defined($c->stash->{current_account}) ? $c->stash->{current_account}->id : undef));
 	$c->stash->{journal} = $journal;	
