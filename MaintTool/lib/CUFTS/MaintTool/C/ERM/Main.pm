@@ -28,6 +28,7 @@ my $form_validate = {
 
             license
             vendor
+            internal_name
             publisher
             url
             access

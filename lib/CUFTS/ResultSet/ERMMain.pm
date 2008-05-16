@@ -43,6 +43,9 @@ sub facet_search {
     # search if there is no matching "_facet_search..." handler.
     
     foreach my $field ( keys %$fields ) {
+        # Cleanup field, it may end up in an SQL statement.
+        
+        $field =~ tr/-a-zA-Z_//cd;
 
         my $handler = "_facet_search_${field}";
         if ( $self->can($handler) ) {
@@ -150,6 +153,7 @@ sub _facet_search_keyword {
     $config->{joins}->{subjects_main} = 'subject';
 
     $data =~ s/\s+/\\s+/gsmx;
+    $data =~ s/([^\w])/\\$1/gsmx;
 
     $config->{search}->{'-nest'} = [
             'subject.subject'      => { '~*' => $data },
