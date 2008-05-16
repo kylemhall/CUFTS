@@ -451,6 +451,7 @@ my ( $class, $field, $data, $config, $sql ) = @_;
        'erm_main.key'               => { '~*' => $data },
        'erm_main.vendor'            => { '~*' => $data },
        'erm_main.publisher'         => { '~*' => $data },
+       'erm_main.internal_name'     => { '~*' => $data },
        'erm_names.search_name'      => { '~'  => lc($data) },
     ];
 }
