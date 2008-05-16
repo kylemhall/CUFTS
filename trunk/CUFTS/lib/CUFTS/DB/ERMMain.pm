@@ -36,6 +36,7 @@ __PACKAGE__->columns(All => qw(
 
     vendor
     publisher
+    internal_name
     url
     access
     resource_type

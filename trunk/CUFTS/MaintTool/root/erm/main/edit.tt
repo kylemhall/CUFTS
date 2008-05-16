@@ -163,6 +163,16 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-internal_name">internal name</label>
+  <input id="erm-edit-input-internal_name" name="internal_name" value="[% erm.internal_name | html %]" style="width: 30em;" />
+ </div>
+ <div class="help">
+  Internal name for this resource, not generally shown publicly.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-vendor">vendor</label>
   <input id="erm-edit-input-vendor" name="vendor" value="[% erm.vendor | html %]" style="width: 30em;" />
  </div>
