@@ -6,7 +6,16 @@ use CUFTS::Util::Simple;
 
 use Data::Dumper;
 
+sub auto : Private {
+    my ( $self, $c ) = @_;
 
+    $c->stash->{rank_name_sort} = sub {
+        my ( $links, $displays ) = @_;
+        my @new_array = sort { $b->{rank} <=> $a->{rank} or $displays->{ $a->{resource} }->{name} cmp $displays->{ $b->{resource} }->{name} } @$links;
+        return \@new_array;
+    };
+    
+}
 sub browse : Local {
     my ($self, $c) = @_;
 
