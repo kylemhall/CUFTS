@@ -54,10 +54,6 @@ sub view : Private {
     
     $c->stash->{rank_name_sort} = sub {
         my ( $links, $displays ) = @_;
-        use Data::Dumper;
-        warn(Dumper($links));
-        warn(Dumper($displays));
-        
         my @new_array = sort { $b->{rank} <=> $a->{rank} or $displays->{ $a->{resource} }->{name} cmp $displays->{ $b->{resource} }->{name} } @$links;
         return \@new_array;
     };
