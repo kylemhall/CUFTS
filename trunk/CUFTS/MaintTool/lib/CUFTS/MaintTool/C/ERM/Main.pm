@@ -367,9 +367,12 @@ sub _find {
     );
 
     my $params = $c->req->params;
-    
-    my $offset = $params->{start} || 0;
-    my $rows   = $params->{limit} || 25;
+    my ( $offset, $rows );
+
+    if ( defined($params->{start}) || defined($params->{limit}) ) {
+        $offset = $params->{start} || 0;
+        $rows   = $params->{limit} || 25;
+    }
     
     my $search = {};
     foreach my $param ( keys %$params ) {
@@ -711,7 +714,132 @@ sub delete : Local {
     $c->stash->{template} = 'erm/main/delete.tt';
 }
 
+sub link : Local {
+    my ( $self, $c, $erm_main_id ) = @_;
+    
+    my $erm_main = CUFTS::DB::ERMMain->search( { id => $erm_main_id, site => $c->stash->{current_site}->id } )->first;
+    
+    if ( !defined($erm_main) ) {
+        die("Could not find ERM Main record for this site: $erm_main_id");
+    }
+    
+    $c->stash->{erm_main} = $erm_main;
+    $c->stash->{template} = 'erm/main/link.tt';
+}
 
+sub link_ajax : Local {
+    my ( $self, $c, $erm_main_id, $link_type, $action ) = @_;
+
+    my $current_site_id = $c->stash->{current_site}->id;
+
+    my $erm_main = CUFTS::DB::ERMMain->search( { id => $erm_main_id, site => $current_site_id } )->first;
+    if ( !defined($erm_main) ) {
+        $c->stash->{json} = {
+            success => 'false',
+            errorMessage => 'Could not find ERM Main record for this site: $erm_main_id',
+        };
+        return $c->forward('V::JSON');
+    }
+
+    my $ids = $c->req->params->{ids};
+    if ( ref($ids) ne 'ARRAY' ) {
+        $ids = [$ids];
+    }
+    
+    my @records;
+    if ( $link_type eq 'resource' ) {
+        if ( $action eq 'clear' ) {
+            @records = CUFTS::DB::LocalResources->search( { erm_main => $erm_main_id, site => $current_site_id } );
+        }
+        else {
+            @records = CUFTS::DB::LocalResources->search( { id => { '-in' => $ids }, site => $current_site_id } );
+        }
+    }
+    elsif ( $link_type eq 'journal' ) {
+        if ( $action eq 'clear' ) {
+            @records = CUFTS::DB::LocalJournals->search( { erm_main => $erm_main_id, 'resource.site' => $current_site_id } );
+        }
+        else {
+            @records = CUFTS::DB::LocalJournals->search( { id => { '-in' => $ids }, 'resource.site' => $current_site_id } );
+        }
+    }
+    
+    
+    
+    foreach my $record ( @records ) {
+        $record->erm_main( $action eq 'add' ? $erm_main_id : undef );
+        $record->update();
+    }
+
+    CUFTS::DB::DBI->dbi_commit();
+    
+    delete($c->req->params->{ids});
+    $c->req->params->{erm_main} = $erm_main_id;
+    if ( $link_type eq 'resource' ) {
+        $c->forward( '/local/find_json' );
+    }
+    elsif ( $link_type eq 'journal' ) {
+        $c->forward( '/local/titles/find_json' );
+    }
+}
+
+sub link_clear_ajax : Local {
+    my ( $self, $c, $erm_main_id, $link_type ) = @_;
+
+    my $current_site_id = $c->stash->{current_site}->id;
+
+    my $erm_main = CUFTS::DB::ERMMain->search( { id => $erm_main_id, site => $current_site_id } )->first;
+    if ( !defined($erm_main) ) {
+        $c->stash->{json} = {
+            success => 'false',
+            errorMessage => 'Could not find ERM Main record for this site: $erm_main_id',
+        };
+        return $c->forward('V::JSON');
+    }
+    
+    my $ids = $c->req->params->{ids};
+    if ( ref($ids) ne 'ARRAY' ) {
+        $ids = [$ids];
+    }
+    
+    
+    if ( $link_type eq 'resource' ) {
+        
+        foreach my $id ( @$ids ) {
+            my $resource = CUFTS::DB::LocalResources->search( { id => $id, site => $current_site_id } )->first;
+            if ( !defined($resource) ) {
+                $c->stash->{json} = {
+                    success => 'false',
+                    errorMessage => 'Could not find resource record for this site: $id',
+                };
+                return $c->forward('V::JSON');
+            }
+            $resource->erm_main( $erm_main_id );
+            $resource->update();
+        }
+    }
+
+    CUFTS::DB::DBI->dbi_commit();
+    
+    delete($c->req->params->{ids});
+    $c->req->params->{erm_main} = $erm_main_id;
+    $c->forward( '/local/find_json' );
+}
+
+
+sub show_links_json : Local {
+    my ( $self, $c ) = @_;
+    
+    my $erm_main_id = $c->req->params->{erm_main};
+    my $link_type   = $c->req->params->{link_type};
+    
+    if ( $link_type eq 'resource') {
+        my $resources = CUFTS::DB::LocalResources->search( { erm_main => $erm_main_id, site => $c->stash->{current_site}->id } );
+        $c->stash->{json}->{rowcount} = scalar(@$resources);
+        $c->stash->{json}->{results}  = $resources;
+    }
+    
+}
 
 sub unlink_json : Local {
     my ( $self, $c ) = @_;

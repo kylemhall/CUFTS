@@ -704,6 +704,14 @@ div#site-settings-crdb-active-fields-drop {
     background-image: url(../images/icons/table.png) !important;
 }
 
+.table-edit-button {
+    background-image: url(../images/icons/table_edit.png) !important;
+}
+
+.table-relationship-button {
+    background-image: url(../images/icons/table_relationship.png) !important;
+}
+
 .float-button {
     margin-bottom: 4px;
 }
@@ -761,6 +769,10 @@ div#site-settings-crdb-active-fields-drop {
 /* ERM Find */
 
 #erm-main-find-form .x-panel-body {
+    background-color: #DFE8F6;
+}
+
+#erm-main-resources-find-form .x-panel-body {
     background-color: #DFE8F6;
 }
 

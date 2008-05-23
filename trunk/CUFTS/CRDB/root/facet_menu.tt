@@ -1,92 +1,91 @@
 [% PROCESS facet_labels.tt %]
 [% PROCESS facet_menu_js.tt %]
 
-<div id="resources-brief-facets">
 
-<div style="width: 80%; float: left;">
+<div id="resources-brief-left">
+
 [% PROCESS current_facets.tt %]
-</div>
-<div class="resources-current-facets-row" style="width: 10%; float: right;">
- <a href="" onClick="$('#resource-facet-choice-wrapper').toggle(); return false;">filter</a>
-</div>
 
-<div id="resource-facet-choice-wrapper" style="[% 'display: none;' IF records.defined %]">
+<div id="resources-brief-facet-menu-container">
 
-<div id="resources-brief-browse" style="float: left;  width: 78%;">
-
-
- <div id="resources-facet-choice-top" style="width: 100%; height: 3em;" >
-
-     <div style="width: 19em; border: none; float: left; margin-left: 5px">
-
-      <h2>Keyword</h2>
-      <div id="resources-brief-browse-keyword" class="resources-facet-choice-list" style="width: 99%; height: 100%">
-       <form method="POST" action="[% c.uri_for_site( c.controller('Browse').action_for('facet_form') ) %]" onSubmit="return false;"><input style="border: 1px solid black; width: 16em" name="keyword" type="text" onKeyPress="if (event.keyCode == 13) {  var keywordvalue = $(this).val(); add_facet( 'keyword', keywordvalue ); return false; } return true;" value="[% facets.keyword | html %]" /></form>
-      </div>
-
-     </div>
- 
-     <div style="border: none; width: 27em; overflow: show; float: left">
-
-      <h2>Titles</h2>
-      <div id="resources-brief-browse-title" style="width: 99%; height: 100%; white-space: nowrap;">
-       [% FOREACH letter IN [ 'A' .. 'Z' ] %]
-        <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'name', letter ) %]" onClick="add_facet( 'name', '[% letter %]' ); return false;">[% letter %]</a>
-       [% END %]
-       <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'name', '[^a-z]' ) %]"  onClick="add_facet( 'name', '[^a-z]'); return false;">0-9</a>
-      </div>
-  
-     </div>
-
+ <div class="resources-brief-facet-menu">
+  <div class="resources-brief-facet-menu-heading">
+   <h2>Title</h2>
+  </div>
+  <div class="resources-brief-facet-menu-content">
+   <form method="POST" action="[% c.uri_for_facets( undef, 'name' ) %]">
+    <select name="name" id="name-select">
+     <option value="[% c.uri_for_facets( undef, 'name' ) %]">All</option>
+     [% FOREACH letter IN [ 'A'..'Z' ] %]
+      <option value="[% c.uri_for_facets( [ 'name', letter ] ) %]" [% facets.name == letter ? 'selected="selected"' : '' %]>[% letter %]</option>
+     [% END %]
+    </select>
+   </form>
+  </div>
  </div>
 
- <div id="resources-facet-choice-bottom" style="width: 100%; clear: left" >
-
-  <div class="resources-facet-choice-container">
+ <div class="resources-brief-facet-menu">
+  <div class="resources-brief-facet-menu-heading">
    <h2>Subjects</h2>
-   <div id="resources-brief-browse-subject" class="resources-facet-choice-list">
-    [% FOREACH subject_id IN subjects_order %]
-     [% SET subject = subjects.$subject_id %]
-     <div class="resources-main-browse-subject-record" id="resources-main-browse-facet-subject-[% subject_id %]">
-      <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'subject', subject_id ) %]" onClick="add_facet( 'subject', '[% subject_id %]' ); return false;">[% subject %]</a>
-     </div>
-    [% END %]
-   </div>
   </div>
+  <div class="resources-brief-facet-menu-content">
+   <ul id="collapsable-subjects">
+   [% SET collapse = 0 %]
+   [% FOREACH subject_id IN subjects_order %]
+    [% SET subject = subjects.$subject_id %]
+    [% IF loop.count == 10 %]
+     [% SET collapse = 1 %]
+    [% END %]
+    <li[% IF collapse %] class="collapsable hidden"[% END %]><a href="[% c.uri_for_facets( [ 'subject', subject_id ] ) %]">[% subject %]</a></li>
+   [% END %]
+   </ul>
+   [% IF collapse %]
+    <div class="resources-brief-facet-menu-collapse-control">
+     <a href="#" onClick="return facetCollapse(this, 'subjects');">Show more</a>
+    </div>
+   [% END %]
+  </div>
+ </div>
   
-  <div class="resources-facet-choice-container">
+ <div class="resources-brief-facet-menu">
+  <div class="resources-brief-facet-menu-heading">
    <h2>Resource Types</h2>
-   <div id="resources-brief-browse-resource-type" class="resources-facet-choice-list">
+  </div>
+  <div class="resources-brief-facet-menu-content">
+   <ul>
    [% FOREACH resource_type_id IN resource_types_order %]
     [% SET resource_type = resource_types.$resource_type_id %]
-    <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'resource_type', resource_type_id ) %]" onClick="add_facet( 'resource_type', '[% resource_type_id %]'); return false;">[% resource_type %]</a> <br />
+    <li><a href="[% c.uri_for_facets( [ 'resource_type', resource_type_id ] ) %]">[% resource_type %]</a></li>
    [% END %]
-   </div>
+   </ul>
   </div>
+ </div>
   
-  <div class="resources-facet-choice-container" style="border-right: none;">
+ <div class="resources-brief-facet-menu">
+  <div class="resources-brief-facet-menu-heading">
    <h2>Content Types</h2>
-   <div id="resources-brief-browse-content-type" class="resources-facet-choice-list">
+  </div>
+  <div class="resources-brief-facet-menu-content">
+   <ul>
    [% FOREACH content_type_id IN content_types_order %]
     [% SET content_type = content_types.$content_type_id %]
-    <a href="[% c.uri_for_site( c.controller('Browse').action_for('html_facets'), 'content_type' content_type_id ) %]" onClick="add_facet( 'content_type', '[% content_type_id %]'); return false;">[% content_type %]</a><br />
+    <li><a href="[% c.uri_for_facets( [ 'content_type' content_type_id ] ) %]">[% content_type %]</a></li>
    [% END %]
-   </div>
+   </ul>
   </div>
+ </div>
 
+ <div class="resources-brief-facet-menu">
+  <div class="resources-brief-facet-menu-heading">
+   <h2>Keyword</h2>
+  </div>
+  <div class="resources-brief-facet-menu-content">
+   <form id="keyword-form" method="POST" action="[% c.uri_for_facets( undef, 'keyword' ) %]">
+    <input id="keyword-input" style="border: 1px solid black; width: 100%" name="keyword" type="text" value="" />
+   </form>
+  </div>
  </div>
 
 </div>
 
-<div id="resources-facet-change-list">
- <h2>Show:</h2>
- <ul id="chosen-facets"></ul>
- <div id="facet-count-container">Resources: <span id="facet-count"></span></div>
- <form name="browse">
-  <input type="submit" name="show" value="show"   onClick="submit_facet_changes(); return false;" />
-  <input type="submit" name="reset" value="reset" onClick="init_facets(); return false;" />
- </form>
-</div>
-
-</div>
 </div>

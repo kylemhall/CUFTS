@@ -25,6 +25,7 @@ use CUFTS::DB::HiddenFields;
 use CUFTS::DB::LocalResources_Services;
 use CUFTS::DB::Resources;
 use CUFTS::DB::ResourceTypes;
+use CUFTS::DB::ERMMain;
 
 use CUFTS::Util::Simple;
 
@@ -64,6 +65,8 @@ __PACKAGE__->columns(All => qw(
 	title_list_scanned
 
 	cjdb_note
+
+    erm_main
 
 	erm_basic_name
 	erm_basic_vendor
@@ -147,6 +150,8 @@ __PACKAGE__->has_a('site' => 'CUFTS::DB::Sites');
 __PACKAGE__->has_many('services', ['CUFTS::DB::LocalResources_Services' => 'service'], 'local_resource');
 __PACKAGE__->has_many('hidden_fields', ['CUFTS::DB::HiddenFields' => 'field'], 'resource');
 __PACKAGE__->has_many('local_journals' => 'CUFTS::DB::LocalJournals');
+
+__PACKAGE__->has_a('erm_main' => 'CUFTS::DB::ERMMain');
 
 __PACKAGE__->add_trigger('before_delete' => \&delete_titles);
 

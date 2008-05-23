@@ -1560,19 +1560,8 @@ $( function() {
 
     </fieldset>
 
-    <fieldset>
-    <legend>Linked Resources</legend>
+    <a href="[% url("$url_base/erm/main/link/$erm.id") %]">Resource and journal linking</a>
 
-    TODO
-
-    </fieldset>
-
-    <fieldset>
-    <legend>Linked Journals</legend>
-
-    TODO
-    
-    </fieldset>
 
     <div style="padding: 1em 0px;">
      <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">

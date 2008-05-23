@@ -30,6 +30,8 @@ CREATE TABLE local_resources (
 
     cjdb_note               TEXT,
 
+    erm_main                INTEGER,
+
     erm_basic_name                      VARCHAR(256),
     erm_basic_vendor                    VARCHAR(256),
     erm_basic_publisher                 VARCHAR(256),

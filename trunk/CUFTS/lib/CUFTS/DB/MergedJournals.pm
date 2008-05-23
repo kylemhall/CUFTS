@@ -1,4 +1,4 @@
-## CUFTS::DB::LocalJournals
+## CUFTS::DB::MergedJournals
 ##
 ## Copyright Todd Holbrook, Simon Fraser University (2003)
 ##
@@ -18,17 +18,22 @@
 ## with CUFTS; if not, write to the Free Software Foundation, Inc., 59
 ## Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package CUFTS::DB::LocalJournals;
+# This is for accessing a view with basic detail collated
+# for searching.
+
+#
+# NOTE: This is a view and cannot be updated at this point
+#
+
+package CUFTS::DB::MergedJournals;
+
+
+use CUFTS::Util::Simple;
 
 use strict;
 use base 'CUFTS::DB::DBI';
 
-use CUFTS::DB::Journals;
-use CUFTS::DB::JournalsAuth;
-use CUFTS::DB::LocalResources;
-use CUFTS::DB::ERMMain;
-
-__PACKAGE__->table('local_journals');
+__PACKAGE__->table('merged_journals');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
 	id
@@ -36,8 +41,10 @@ __PACKAGE__->columns(All => qw(
 	title
 	issn
 	e_issn
-	resource
-	journal
+	site
+	resource_name
+    local_resource
+    global_resource
 	active
 	vol_cit_start
 	vol_cit_end
@@ -66,40 +73,13 @@ __PACKAGE__->columns(All => qw(
 	cjdb_note
 
     erm_main
+    erm_main_key
+));                      
 
-	created
-	scanned
-	modified
-));
+                                                                                  
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 
-__PACKAGE__->sequence('local_journals_id_seq');
-
-__PACKAGE__->has_a('resource', 'CUFTS::DB::LocalResources');
-__PACKAGE__->has_a('journal', 'CUFTS::DB::Journals');
-__PACKAGE__->has_a('journal_auth', 'CUFTS::DB::JournalsAuth');
-__PACKAGE__->has_a('erm_main', 'CUFTS::DB::ERMMain');
-
-sub normalize_column_values {
-	my ($self, $values) = @_;
-	
-	# Check ISSNs for dashes and strip them out
-
-	if (exists($values->{'issn'}) && defined($values->{'issn'}) && $values->{'issn'} ne '') {
-		$values->{'issn'} =~ s/(\d{4})\-?(\d{3}[\dxX])/$1$2/ or
-			$self->_croak('issn is not valid: ' . $values->{'issn'});
-	}
-
-	if (exists($values->{'e_issn'}) && defined($values->{'e_issn'}) && $values->{'e_issn'} ne '') {
-		$values->{'e_issn'} =~ s/(\d{4})\-?(\d{3}[\dxX])/$1$2/ or
-			$self->_croak('e_issn is not valid: ' . $values->{'e_issn'});
-	}
-
-	return 1;   # ???
-}
-
-sub global_join_field {
-	return 'journal';
-}
+__PACKAGE__->has_a('erm_main' => 'CUFTS::DB::ERMMain');
 
 1;
+

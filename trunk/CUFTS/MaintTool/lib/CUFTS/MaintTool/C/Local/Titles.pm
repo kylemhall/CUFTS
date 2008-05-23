@@ -3,6 +3,8 @@ package CUFTS::MaintTool::C::Local::Titles;
 use strict;
 use base 'Catalyst::Base';
 
+use CUFTS::DB::MergedJournals;
+
 my $form_validate_titles = {
     optional => ['show', 'cancel', 'page', 'filter', 'display_per_page', 'apply_filter', 'apply', 'activate_all', 'deactivate_all', 'edit'],
     optional_regexp => qr/^(new|orig|hide)_.+/,
@@ -545,6 +547,52 @@ sub bulk_local : Local {
     }
 
     $c->stash->{template} ||= 'local/titles/bulk_local.tt';
-}   
+}
+
+
+# Returns JSON results for a simple name search.  This is used to drive AJAX (ExtJS) result lists
+
+sub find_json : Local {
+    my ( $self, $c ) = @_;
+    use Data::Dumper;
+    
+    my $params = $c->req->params;
+    
+    my %search = ( site => $c->stash->{current_site}->id );
+    if (my $term = $params->{title}) {
+        $term =~ s/([%_])/\\$1/g;
+        $term =~ s#\\#\\\\\\\\#;
+        $search{title} = { 'ilike' => "$term\%" };
+    }  
+    if (my $term = uc($params->{issn}) ) {
+        $term =~ tr/[0-9X]//cd;
+        $search{'-or'} = { issn => $term, e_issn => $term };
+    }  
+    if (my $term = $params->{local_resource}) {
+        $search{local_resource} = $term;
+    }  
+    if (my $term = $params->{erm_main}) {
+        $search{erm_main} = $term;
+    }  
+    
+    my $options = { order_by => 'LOWER(title)' };
+    $options->{rows} = $params->{limit} || 1000;  # Hard limit, too many means something is probably wrong
+    $options->{page} = ( $params->{start} / $options->{rows} ) + 1;
+
+    my ($pager, $iterator) = CUFTS::DB::MergedJournals->page( \%search, $options );
+    my @resources;
+    while ( my $resource = $iterator->next ) {
+        push @resources, $resource;
+    }
+
+    $c->stash->{json} = {
+        success  => 'true',
+        rowcount => $pager->total_entries,
+        results  => [ map { {id => $_->id, title => $_->title, resource_name => $_->resource_name, erm_main => $_->erm_main_key, issn => $_->issn, e_issn => $_->e_issn } } @resources ],
+    };
+    
+    $c->forward('V::JSON');
+}
+
 
 1;
