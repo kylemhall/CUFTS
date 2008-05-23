@@ -1,16 +1,25 @@
-<div id="resources-current-facets" class="resources-current-facets-row">
- [% IF facets.size %]
-  [% FOREACH facet IN facets.keys %]
-   [% SET facet_value = facets.$facet %]
-   [% SET facet_lookup = facet _ "_lookup" %]
-   [% IF facet_labels.$facet.defined %]
-    [% facet_labels.$facet | html %]: 
+<div id="resources-brief-current-facets">
+ <div id="resources-brief-current-facets-heading">
+  <h2>Your Current Search</h2>
+ </div>
+ <div id="resources-brief-current-facets-content">
+  [% IF facets.size %]
+   <dl>
+   [% FOREACH facet IN facets.keys %]
+     [% SET facet_value = facets.$facet %]
+     [% SET facet_lookup = facet _ "_lookup" %]
+     [% IF facet_labels.$facet.defined %]
+      <dt>[% facet_labels.$facet | html %]</dt>
+     [% END %]
+     [% SET display_value = $facet_lookup.$facet_value %]
+     <dd>
+      <a href="[% c.uri_for_facets( undef, facet ) %]"><img src="[% c.uri_for_image('delete.png') %]" /></a>
+      [% display_value.length ? display_value : facet_value | html %]
+     </dd>
    [% END %]
-   [% SET display_value = $facet_lookup.$facet_value %]
-   [% display_value.length ? display_value : facet_value | html %]
-   [% ' AND ' UNLESS loop.last %]
+  </dl>
+  [% ELSE %]
+   Showing all records.
   [% END %]
- [% ELSE %]
-  No facets selected.
- [% END %]
+ </div>
 </div>

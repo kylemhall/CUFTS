@@ -23,6 +23,8 @@ package CUFTS::DB::ERMMain;
 use strict;
 use base 'CUFTS::DB::DBI';
 
+use CUFTS::DB::Resources;
+
 use Data::Dumper;
 use CUFTS::Util::Simple;
 
@@ -158,6 +160,10 @@ __PACKAGE__->has_many( 'names' => 'CUFTS::DB::ERMNames'  );
 __PACKAGE__->has_a( 'license', 'CUFTS::DB::ERMLicense' );
 __PACKAGE__->has_many( 'costs' => 'CUFTS::DB::ERMCosts' );
 __PACKAGE__->has_many( 'uses' => 'CUFTS::DB::ERMUses' );
+
+# Enabling both of these causes a weird Class::DBI loop
+# __PACKAGE__->has_many( 'local_journals' => 'CUFTS::DB::LocalJournals' );
+# __PACKAGE__->has_many( 'local_resources' => 'CUFTS::DB::LocalResources' );
 
 __PACKAGE__->sequence('erm_main_id_seq');
 

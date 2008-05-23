@@ -40,6 +40,8 @@ CREATE TABLE local_journals (
     current_years   VARCHAR(256),   /* Years of moving wall access to current issues */
     cjdb_note       TEXT,           /* Note to display in CJDB (global may not be used, local only) */
 
+    erm_main        INTEGER,
+
     created        TIMESTAMP NOT NULL DEFAULT NOW(),
     scanned        TIMESTAMP NOT NULL DEFAULT NOW(),
     modified       TIMESTAMP NOT NULL DEFAULT NOW()

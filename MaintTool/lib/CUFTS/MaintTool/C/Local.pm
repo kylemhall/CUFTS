@@ -4,6 +4,7 @@ use strict;
 use base 'Catalyst::Base';
 
 use CUFTS::Util::Simple;
+use CUFTS::DB::MergedResources;
 
 my $form_validate_local = {
     required => ['name', 'provider', 'module', 'resource_type'],
@@ -142,6 +143,49 @@ sub menu : Local {
     $c->stash->{show} = $c->session->{local_menu_show} || 'show active';
     $c->stash->{resources} = $resources;
     $c->stash->{template} = 'local/menu.tt';
+}
+
+# Returns JSON results for a simple name search.  This is used to drive AJAX (ExtJS) result lists
+
+sub find_json : Local {
+    my ( $self, $c ) = @_;
+    use Data::Dumper;
+    
+    my $params = $c->req->params;
+    
+    
+    my %search = ( active => 'true', site => $c->stash->{current_site}->id );
+    if (my $term = $params->{name}) {
+        $term =~ s/([%_])/\\$1/g;
+        $term =~ s#\\#\\\\\\\\#;
+        $search{name} = { 'ilike' => "\%$term\%" };
+    }  
+    if (my $term = $params->{provider}) {
+        $term =~ s/([%_])/\\$1/g;
+        $term =~ s#\\#\\\\\\\\#;
+        $search{provider} = { 'ilike' => "\%$term\%" };
+    }  
+    if (my $term = $params->{erm_main}) {
+        $search{erm_main} = $term;
+    }  
+    
+    my $options = { order_by => 'LOWER(name)' };
+    $options->{rows} = $params->{limit} || 1000;  # Hard limit, too many means something is probably wrong
+    $options->{page} = ( $params->{start} / $options->{rows} ) + 1;
+
+    my ($pager, $iterator) = CUFTS::DB::MergedResources->page( \%search, $options );
+    my @resources;
+    while ( my $resource = $iterator->next ) {
+        push @resources, $resource;
+    }
+
+    $c->stash->{json} = {
+        success  => 'true',
+        rowcount => $pager->total_entries,
+        results  => [ map { {id => $_->id, name => $_->name, provider => $_->provider, erm_main => ($_->erm_main ? $_->erm_main->key : undef) } } @resources ],
+    };
+    
+    $c->forward('V::JSON');
 }
 
 

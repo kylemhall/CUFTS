@@ -157,10 +157,55 @@ Ext.onReady( function() {
             'rowdblclick': function(grid, rowIndex, e) {
                 var erm_id = grid.getStore().getAt(rowIndex).get('id');
                 window.location = '[% url("$url_base/erm/main/edit/") %]' + erm_id;
-            }
+            },
+            'rowcontextmenu': onContextClick
         }
     });
 
+    function onContextClick(grid, index, e) {
+        if(!grid.menu){ // create context menu on first right click
+            grid.menu = new Ext.menu.Menu({
+                id:'grid-ctx',
+                items: [
+                    {
+                        text: 'Edit',
+                        iconCls: 'table-edit-button',
+                        scope:grid,
+                        handler: function() {
+                            var erm_id = grid.getStore().getAt(index).get('id');
+                            window.location = '[% url("$url_base/erm/main/edit/") %]' + erm_id;
+                        }
+                    },
+                    {
+                        text: 'Link',
+                        iconCls: 'table-relationship-button',
+                        scope:grid,
+                        handler: function() {
+                            var erm_id = grid.getStore().getAt(index).get('id');
+                            window.location = '[% url("$url_base/erm/main/link/") %]' + erm_id;
+                        }
+                    }
+                ]
+            });
+            grid.menu.on('hide', onContextHide, grid);
+        }
+        e.stopEvent();
+        if(grid.ctxRow){
+            Ext.fly(grid.ctxRow).removeClass('x-node-ctx');
+            grid.ctxRow = null;
+        }
+        grid.ctxRow = grid.view.getRow(index);
+        grid.ctxRecord = grid.store.getAt(index);
+        Ext.fly(grid.ctxRow).addClass('x-node-ctx');
+        grid.menu.showAt(e.getXY());
+    }
+    
+    function onContextHide() {
+        if (this.ctxRow) {
+            Ext.fly(this.ctxRow).removeClass('x-node-ctx');
+            this.ctxRow = null;
+        }
+    }
 
 
     var find_form = new Ext.FormPanel({
@@ -203,7 +248,7 @@ Ext.onReady( function() {
                                 mode: 'local',
                                 triggerAction: 'all',
                                 editable: false,
-                                listeners: { 'select': handleEmptyCombo },
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['subject'],
                                 anchor: '95%'
                             },
@@ -217,7 +262,7 @@ Ext.onReady( function() {
                                 mode: 'local',
                                 triggerAction: 'all',
                                 editable: false,
-                                listeners: { 'select': handleEmptyCombo },
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['content_type'],
                                 anchor: '95%'
                             },
@@ -231,7 +276,7 @@ Ext.onReady( function() {
                                 mode: 'local',
                                 triggerAction: 'all',
                                 editable: false,
-                                listeners: { 'select': handleEmptyCombo },
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['resource_type'],
                                 anchor: '95%'
                                 
@@ -246,7 +291,7 @@ Ext.onReady( function() {
                                 mode: 'local',
                                 triggerAction: 'all',
                                 editable: false,
-                                listeners: { 'select': handleEmptyCombo },
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['resource_medium'],
                                 anchor: '95%'
                             }
@@ -282,7 +327,7 @@ Ext.onReady( function() {
                                 mode: 'local',
                                 triggerAction: 'all',
                                 editable: false,
-                                listeners: { 'select': handleEmptyCombo },
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['consortia'],
                                 anchor: '-2'
                             },
@@ -296,7 +341,7 @@ Ext.onReady( function() {
                                 mode: 'local',
                                 triggerAction: 'all',
                                 editable: false,
-                                listeners: { 'select': handleEmptyCombo },
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['subscription_status'],
                                 anchor: '-2'
                             }

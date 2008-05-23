@@ -12,6 +12,8 @@
 
 [% PROCESS facet_menu.tt %]
 
+<div id="resources-container">
+
 [% IF subject_description.length OR editing_enabled %]
 <div id="resources-brief-subject_description"><div id="resources-brief-subject_description-content">
 [% subject_description || 'No subject description.'%]
@@ -59,8 +61,12 @@
 
 [% END %]
 
-</div>
+[% IF records.size == 0 %]
+No records found for your current search.
+[% END %]
 
+</div>
+</div>
 
 [% BLOCK display_record %]
  [% SET record_id = record.id %]

@@ -1,19 +1,5 @@
 <script type="text/javascript">
 
-/* Zebra stripe the results */
-
-$( function() {
-
- if ( $('#resources-brief-records-top').defined ) {
-    $('#resources-brief-records-top div.resource-brief-record:odd').addClass('resource-brief-record-alt');
-    $('#resources-brief-records-other div.resource-brief-record:odd').addClass('resource-brief-record-alt');
- }
- else {
-     $('#resources-brief-records div.resource-brief-record:odd').addClass('resource-brief-record-alt');
- }
-
-} );
-
 [% IF sorting_enabled %]
 
 
