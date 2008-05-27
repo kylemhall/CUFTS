@@ -30,7 +30,7 @@ use strict;
 my $base_url = 'http://makealink.jstor.org/public-tools/GetURL?';
 
 sub title_list_extra_requires {
-    require Text::CSV;
+    require CUFTS::Util::CSVParse;
     require HTML::Entities;
 }
 
@@ -152,7 +152,7 @@ sub clean_data {
 sub title_list_split_row {
     my ( $class, $row ) = @_;
 
-    my $csv = Text::CSV->new();
+    my $csv = CUFTS::Util::CSVParse->new();
     $csv->parse($row)
         or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
 
