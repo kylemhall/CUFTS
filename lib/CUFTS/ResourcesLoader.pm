@@ -78,6 +78,7 @@ BEGIN {
         OCLC
         Ovid
         OvidLinking
+        Ovid_LWW
         Oxford
         Proquest
         ProquestMicromedia
