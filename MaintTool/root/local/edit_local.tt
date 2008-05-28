@@ -21,13 +21,14 @@
 [% END %]
 </select>
 [% PROCESS form_results.tt frf='module' %]</td></tr>
-<tr><td class="label0" align="right">ERM</td><td class="field0"><select name="erm_main">
+<tr><td class="label0" align="right">ERM</td><td class="field0" style="white-space: nowrap;"><select name="erm_main">
  <option value="">Not linked</option>
+ [% SET erm_main_id = local_resource.erm_main.id %]
  [% FOREACH erm_main_option IN erm_mains %]
-  <option value="[% erm_main_option.id %]" [% 'selected="selected"' IF local_resource.erm_main.id == erm_main_option.id %]>[% erm_main_option.result_name | html %]</option>
+  <option value="[% erm_main_option.id %]" [% 'selected="selected"' IF erm_main_id == erm_main_option.id %]>[% erm_main_option.result_name | html %]</option>
  [% END %]
-</select></td></tr>
-
+</select>
+[% IF erm_main_id %]<a href="[% url_base %]/erm/main/edit/[% erm_main_id %]">edit record</a>[% END %]</td></tr>
 <tr><td class="label1" align="right">proxy</td><td class="field1"><input type="checkbox" name="proxy" value="true" [% 'checked="checked"' IF local_resource.proxy %]></td></tr>
 <tr><td class="label0" align="right">dedupe</td><td class="field0"><input type="checkbox" name="dedupe" value="true" [% 'checked="checked"' IF local_resource.dedupe %]></td></tr>
 <tr><td class="label1" align="right">rank</td><td class="field1"><input type="text" size="3" name="rank" value="[% HTML.escape(local_resource.rank) %]"></td></tr>
