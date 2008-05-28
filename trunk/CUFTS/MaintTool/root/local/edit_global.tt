@@ -1,66 +1,5 @@
 [% USE HTML %]
-
 [% USE url %]
-
-[% load_css.push('tabs.css') %]
-
-<script type="text/javascript">
-$( function() {
-    $('#pages-container').tabs();
-} );
-
-[%# Handling for the linking AJAX %]
-
-$( function() {
-
-    $('#erm_main_do_link').click( function(event) {
-        event.preventDefault();
-        $.getJSON( '[% url("$url_base/erm/main/link_json") %]', 
-                { link_id: "[% local_resource.id %]", erm_main: $('#erm_main_link').val(), link_type: 'r' },
-                function(json) {
-                    if ( json.error ) {
-                        alert(json.error)
-                    }
-                    else {
-                        $('#resource-erm-link').hide();
-                        $('#resource-erm-unlink').show();
-                        $('#erm-summary').load( '[% url("$url_base/erm/summary/") %]' + json.erm_main, function() { $('#erm-summary').find('div.field:odd').addClass('alt'); } );
-                    }
-                }
-        );
-    } );
-
-    $('#erm_main_do_unlink').click( function(event) {
-        event.preventDefault();
-        $.getJSON( '[% url("$url_base/erm/main/unlink_json") %]',
-                { link_id: "[% local_resource.id %]", link_type: 'r' },
-                function(json) {
-                    if ( json.error ) {
-                        alert(json.error)
-                    }
-                    else {
-                        $('#erm-summary').empty();
-                        $('#resource-erm-link').show();
-                        $('#resource-erm-unlink').hide();
-                    }
-                }
-        );
-    } );
-
-});
-
-</script>
-
-<div style="padding-bottom: .5em"><span class="heading">[% global_resource.name %]</span></div>
-
-<div id="pages-container" class="tabs-nav" style="width: 100%;">
-
-<ul>
- <li><a href="#page-general"><span>General</span></a></li>
- <li><a href="#page-erm"><span>ERM</span></a></li>
-</ul>
-
-<div id="page-general">
 
 <form method="post" action="[% url_base %]/local/edit/g[% global_resource.id %]">
 
@@ -71,6 +10,12 @@ $( function() {
 <tr><td class="label1" align="right">provider</td><td class="field1">[% HTML.escape(global_resource.provider) %]</td></tr>
 <tr><td class="label0" align="right">type</td><td class="field0">[% HTML.escape(global_resource.resource_type.type) %]</td></tr>
 <tr><td class="label1" align="right">module</td><td class="field1">[% HTML.escape(global_resource.module) %]</td></tr>
+<tr><td class="label0" align="right">ERM</td><td class="field0"><select name="erm_main">
+ <option value="">Not linked</option>
+ [% FOREACH erm_main_option IN erm_mains %]
+  <option value="[% erm_main_option.id %]" [% 'selected="selected"' IF local_resource.erm_main.id == erm_main_option.id %]>[% erm_main_option.result_name | html %]</option>
+ [% END %]
+</select></td></tr>
 <tr><td class="label0" align="right">proxy</td><td class="field0"><input type="checkbox" name="proxy" value="true" [% 'checked="checked"' IF local_resource.proxy %]></td></tr>
 <tr><td class="label1" align="right">dedupe</td><td class="field1"><input type="checkbox" name="dedupe" value="true" [% 'checked="checked"' IF local_resource.dedupe %]></td></tr>
 <tr><td class="label0" align="right">auto activate</td><td class="field0"><input type="checkbox" name="auto_activate" value="true" [% 'checked="checked"' IF local_resource.auto_activate %]></td></tr>
@@ -130,35 +75,3 @@ $( function() {
 
 </div>
 
-<div id="page-erm">
-
-
-    <div id="erm-summary">
-     [% IF erm_main %]
-      [% PROCESS erm/summary.tt %]
-     [% END %]
-    </div>
-
-    <div id="resource-erm-link" style="clear: left; [% 'display: none;' IF erm_main %]">
-    <fieldset>
-     <legend>Link ERM record</legend>
-     <form method="post" action="[% url("$url_base/erm/main/link") %]">
-     <select name="erm_main" id="erm_main_link">
-      [% FOREACH erm_main_option IN erm_mains %]
-       <option value="[% erm_main_option.id %]" [% 'selected="selected"' IF erm_main.id == erm_main_option.id %]>[% erm_main_option.result_name | html %]</option>
-      [% END %]
-     </select>
-     <input type="hidden" name="link_type" value="r" /><input type="hidden" name="link_id" value="[% local_resource.id %]" />
-     <input type="submit" id="erm_main_do_link" name="link" value="link" />
-     </form>
-    </fieldset>
-    </div>
-
-    <div id="resource-erm-unlink" style="clear: left; [% 'display: none;' UNLESS erm_main %]">
-    <fieldset>
-     <legend>Link ERM record</legend>
-     <a style="padding: 3px;" id="erm_main_do_unlink" href="[% url("$url_base/erm/main/unlink/?link_id=$local_resource.id&link_type=r") %]">Unlink ERM record</a>
-    </fieldset>
-    </div>
-
-</div>
