@@ -10,7 +10,7 @@ my $form_validate_local = {
     required => ['name', 'provider', 'module', 'resource_type'],
     optional => [
         'provider', 'proxy', 'dedupe', 'rank', 'active', 'resource_services', 'submit', 'cancel',
-        'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'notes_for_local', 'cjdb_note', 'proxy_suffix'
+        'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'notes_for_local', 'cjdb_note', 'proxy_suffix', 'erm_main'
     ],
     defaults => {
         'active' => 'false',
@@ -26,7 +26,7 @@ my $form_validate_local = {
 my $form_validate_global = {
     optional => [
         'proxy', 'dedupe', 'auto_activate', 'rank', 'active', 'resource_services', 'submit', 'cancel',
-        'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'cjdb_note', 'proxy_suffix'
+        'resource_identifier', 'database_url', 'auth_name', 'auth_passwd', 'url_base', 'cjdb_note', 'proxy_suffix', 'erm_main'
     ],
     defaults => {
         'active' => 'false',
@@ -269,13 +269,6 @@ sub edit : Local {
             
             return $c->redirect('/local/menu');
         }
-    }
-
-    # Get ERM Main record if one is linked
-    
-    my $erm_main_link = CUFTS::DB::ERMMainLink->search( { link_type => 'r', link_id => $local_resource->id } )->first;
-    if ( defined($erm_main_link) ) {
-        $c->stash->{erm_main} = CUFTS::DB::ERMMain->retrieve( $erm_main_link->erm_main );
     }
 
     # Get all the ERM mains for a select box - switch this to use the search system later
