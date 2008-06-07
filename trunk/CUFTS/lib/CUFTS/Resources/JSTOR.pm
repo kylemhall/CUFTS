@@ -24,8 +24,10 @@ use base qw(CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use URI::Escape qw(uri_escape);
 
 use strict;
+
 
 my $base_url = 'http://makealink.jstor.org/public-tools/GetURL?';
 
@@ -166,6 +168,7 @@ sub can_getFulltext {
     my ( $class, $request ) = @_;
 
     return 0 if is_empty_string( $request->spage );
+    return 0 if is_empty_string( $request->volume );
     return $class->SUPER::can_getFulltext($request);
 }
 
@@ -186,24 +189,25 @@ sub build_linkFulltext {
     foreach my $record (@$records) {
         next if is_empty_string( $record->issn );
 
-        my @params;
-        defined( $request->volume )
-            and push @params, 'volume=' . $request->volume;
-            
-        defined( $request->issue )
-            and push @params, 'issue=' . $request->issue;
-            
-        if ( defined( $request->date ) ) {
-            my $date = $request->date;
-            $date =~ s/[^\d]//g;
-            push @params, 'date=' . $date;
+        # Build a SICI for linking
+        
+        # http://links.jstor.org/sici?sici=0090-5364%28198603%2914%3A1%3C1%3AOTCOBE%3E2.0.CO%3B2-U
+        # Abstract from Lynch, Clifford A. “The Integrity of Digital Information; Mechanics and Definitional Issues.” JASIS 45:10 (Dec. 1994) p. 737-44
+        # 0002-8231(199412)45:10<737:TIODIM>2.3.TX;2-M
+        # http://makealink.jstor.org.proxy.lib.sfu.ca/public-tools/GetURL?volume=54&issue=8&date=19701201&journal_title=00267902&page=562
+        # http://links.jstor.org.proxy.lib.sfu.ca/sici?sici=00267902%281970%2954:8%3A8%3C562%3E2.3.TX
+        
+        my $sici = $record->issn;
+        
+        $sici .= '(' . $request->year . $request->month . ')';
+        $sici .= $request->volume;
+        if ( defined( $request->issue ) ) {
+            $sici .= ':' . $request->issue;
         }
+        $sici .= '<' . $request->spage . '>';
+        $sici .= '2.3.TX';  # ??
 
-        push @params, 'journal_title=' . $record->issn;
-        push @params, 'page=' . $request->spage;
-
-        my $url = $base_url;
-        $url .= join '&', @params;
+        my $url = 'http://links.jstor.org.proxy.lib.sfu.ca/sici?sici=' . uri_escape($sici);
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
@@ -216,6 +220,8 @@ sub build_linkFulltext {
 
 sub can_getTOC {
     my ( $class, $request ) = @_;
+
+    return 0;   # Turn off for now until I can figure out if it works with SICI style links
 
     return 0
         if is_empty_string( $request->volume )
