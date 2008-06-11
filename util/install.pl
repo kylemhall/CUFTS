@@ -42,6 +42,7 @@ my @modules = qw(
     Business::ISSN
     Catalyst
     Catalyst::Plugin::FillInForm
+    Chart::OFC
     Class::Accessor
     Class::DBI
     Class::DBI::AbstractSearch
@@ -50,6 +51,7 @@ my @modules = qw(
     Class::DBI::Plugin::Type
     Class::DBI::Sweet
     Date::Calc
+    DateTime
     Exception::Class
     Exception::Class::DBI
     Getopt::Long
@@ -257,7 +259,7 @@ if ($no_psql) {
 		unless ($db_exists) {
 			print "Creating CUFTS database. If you have entered a password above, you will be asked to enter it again.\n";
 			my $pw = defined($config->{'CUFTS_PASSWORD'}) && $config->{'CUFTS_PASSWORD'} ne '' ? '--password' : '';
-			my $result = `createdb --encoding=SQL_ASCII --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
+			my $result = `createdb -e --encoding=SQL_ASCII --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
 			if ($result !~ /CREATE\sDATABASE/) {
 				die("Error creating database: $result\n\nIf the above error is something like FATAL: IDENT auth failed,\nyou are trying to create the database as a user other than\nthe one you are currently logged in as, and PostgreSQL is set\nto use 'ident' authentication. See the pg_hba.conf PostgreSQL config file.\n");
 			}
@@ -544,7 +546,7 @@ sub drop_databases {
 
 	print "Dropping CUFTS database. If you have entered a password above, you will be asked to enter it again.\n";
 	my $pw = defined($config->{'CUFTS_PASSWORD'}) && $config->{'CUFTS_PASSWORD'} ne '' ? '--password' : '';
-	my $result = `dropdb --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
+	my $result = `dropdb -e --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
 	if ($result !~ /DROP\sDATABASE/) {
 		die("Error dropping database: $result");
 	}
