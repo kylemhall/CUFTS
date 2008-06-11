@@ -18,6 +18,10 @@
 
 <script>
 Ext.onReady( function() {
+        
+    var hash_state = new HashState();
+    var current_report = hash_state.params.current_report || null;
+    var report_uri = null;
 
     var report_config = [% report_config.json %];
     var default_help  = [% default_help.json %];
@@ -67,52 +71,62 @@ Ext.onReady( function() {
                 valueField: 'id',
                 store: reports_store,
                 displayField: 'report',
-                value: null,
+                value: current_report,
                 listeners: {
                     select: function(combo, record) {
-                        var setup_form = Ext.getCmp('report-setup-form');
-                        var items = setup_form.items.items;
-
-                        var val = record.get('id');
-                        if ( !val ) {
-                            Ext.getCmp('statistics-help-panel').getEl().update( default_help );
-                            Ext.getCmp('run-report-button').disable();
-                            Ext.each( items, function(field) {
-                                field.disable();
-                            } );
-                            return;
-                        }
-
-                        // var config_entry = report_config[val];
-                        
-                        Ext.getCmp('statistics-help-panel').getEl().update( report_config[val].help, false );
-                        Ext.getCmp('run-report-button').enable();
-
-                        setup_form.getForm().getEl().set( { action: report_config[val].uri } );
-                        
-                        Ext.each( items, function(field) {
-                            if ( field.getName() == 'selected_resources' ) { return true; }  // Do not disable resource list
-
-                            var found = false;
-                            Ext.each( report_config[val].fields, function(f_config) {
-                                if ( field.getName() == f_config ) {
-                                    found = true;
-                                    return false;
-                                }
-                            } );
-                            if ( found ) {
-                                field.enable();
-                            }
-                            else {
-                                field.disable();
-                            }
-                        } );
-                        
+                        activateReport( record.get('id') )
                     }
                 }
             })
         ]
     });
+
+    function activateReport( report_id ) {
+        
+        var setup_form = Ext.getCmp('report-setup-form');
+        var items = setup_form.items.items;
+
+        // Show help 
+
+        if ( !report_id ) {
+            Ext.getCmp('statistics-help-panel').getEl().update( default_help );
+            Ext.getCmp('run-report-button').disable();
+            Ext.each( items, function(field) {
+                if ( field.getName() == 'selected_resources' ) { return true; }  // Do not disable resource list
+                field.disable();
+            } );
+            return;
+        }
+
+        // var config_entry = report_config[report_id];
+        
+        Ext.getCmp('statistics-help-panel').getEl().update( report_config[report_id].help, false );
+        Ext.getCmp('run-report-button').enable();
+
+        setup_form.getForm().getEl().set( { action: report_config[report_id].uri } );
+        
+        Ext.each( items, function(field) {
+            if ( field.getName() == 'selected_resources' ) { return true; }  // Do not disable resource list
+
+            var found = false;
+            Ext.each( report_config[report_id].fields, function(f_config) {
+                if ( field.getName() == f_config ) {
+                    found = true;
+                    return false;
+                }
+            } );
+            if ( found ) {
+                field.enable();
+            }
+            else {
+                field.disable();
+            }
+        } );
+        
+        current_report = report_id;
+        
+    }
+
 
     var help_panel = new Ext.Panel({
         id: 'statistics-help-panel',
@@ -132,7 +146,8 @@ Ext.onReady( function() {
                 fieldLabel: 'Start Date',
                 format: 'Y-m-d',
                 allowBlank: false,
-                disabled: true
+                disabled: true,
+                value: hash_state.params['start_date']
             }),
             new Ext.form.DateField({
                 name: 'end_date',
@@ -140,7 +155,8 @@ Ext.onReady( function() {
                 fieldLabel: 'End Date',
                 format: 'Y-m-d',
                 allowBlank: false,
-                disabled: true
+                disabled: true,
+                value: hash_state.params['end_date']
             }),
             new Ext.form.ComboBox({
                 hiddenName: 'granularity',
@@ -156,7 +172,8 @@ Ext.onReady( function() {
                 store: granularity_store,
                 displayField: 'granularity',
                 value: 'year',
-                disabled: true
+                disabled: true,
+                value: hash_state.params['granularity']
             }),
             new Ext.form.ComboBox({
                 hiddenName: 'format',
@@ -172,7 +189,8 @@ Ext.onReady( function() {
                 store: format_store,
                 displayField: 'format_name',
                 value: 'html',
-                disabled: true
+                disabled: true,
+                value: hash_state.params['format']
             }),
             new Ext.form.Hidden({
                 name: 'selected_resources',
@@ -189,6 +207,10 @@ Ext.onReady( function() {
                     var form = Ext.getCmp('report-setup-form').getForm();
                     
                     if ( form.isValid() ) {
+                        var params = form.getValues();
+                        hash_state.params = params;
+                        hash_state.params.current_report = current_report;
+                        hash_state.setState();
                         form.getEl().dom.submit();
                     }
                 }
@@ -207,9 +229,8 @@ Ext.onReady( function() {
         items: [ select_report_panel, help_panel, report_setup_form ]
     });
     
+    activateReport( current_report );
 
-
-    
 } );
 
 
