@@ -712,6 +712,10 @@ div#site-settings-crdb-active-fields-drop {
     background-image: url(../images/icons/table_relationship.png) !important;
 }
 
+.chart-line-button {
+    background-image: url(../images/icons/chart_line.png) !important;    
+}
+
 .float-button {
     margin-bottom: 4px;
 }
@@ -818,3 +822,89 @@ table.erm-costs-edit input {
 tr.highlight td {
     background: #ee8 !important;
 }
+
+/* ERM Statistics */
+
+#statistics-help-panel {
+    font-size: 14px;
+    margin: 5px;
+    padding: 10px;
+    border: 1px solid #559955;
+    background: #AAEEAA;
+}
+
+#statistics-help-panel .x-panel-body {
+    background: #AAEEAA;
+}
+
+#erm-statistics-report-info {
+    margin-bottom: 10px;
+}
+
+.erm-statistics-report table {
+}
+
+.erm-statistics-report th {
+    background: #ccc;
+    padding: 6px 6px 3px;
+}
+
+.erm-statistics-report td {
+    border: 1px solid #ddd;
+    padding: 2px 5px;
+}
+
+
+.erm-statistics-report tr {
+    background: #ddd;
+}
+
+.erm-statistics-report tr.alt {
+    background: #eee;
+}
+
+.erm-statistics-report td.data {
+    text-align: right;
+}
+
+.erm-statistics-report td.label {
+    color: black;
+    font-weight: bold;
+}
+
+.erm-statistics-report .force-width {
+    width: 20em;
+}
+
+
+/* ExtJS styling */
+
+.grid-hide-header .x-grid3-header { display: none; }
+
+
+/* Fake ExtJS looks for when we want the style but not the overhead of loading the JS */
+
+div.fake-ext-white {
+    border: 1px solid #99BBE8;
+    
+}
+
+div.fake-ext-blue {
+    border: 1px solid #99BBE8;
+    
+}
+
+
+h2.fake-ext {
+    border-bottom: 1px solid #99BBE8;
+    background: #DFE8F6 url(../images/default/panel/white-top-bottom.gif) repeat-x scroll 0pt -1px;
+    color: #15428B;
+    font-family: tahoma, arial, verdana, sans-serif;
+    margin: 0;
+    padding: 5px 4px;
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: bold;
+}
+
+
