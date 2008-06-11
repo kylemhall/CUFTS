@@ -101,7 +101,8 @@ sub clickthroughs : Local {
 
     # Build two hashes of the results, one keyed on date the other on resource
 
-    my ( %date_hash, %resource_hash, $max );
+    my ( %date_hash, %resource_hash );
+    my $max = 0;
     foreach my $use ( @$uses ) {
         my ( $resource_id, $count, $date ) = @$use;
         $resource_hash{$resource_id}->{$date} = $count;
@@ -144,8 +145,8 @@ sub clickthrough_ofc : Private {
     );
     my $y_axis = Chart::OFC::YAxis->new(
         axis_label  => 'Clickthroughs',
-        max         => $stash->{clickthrough_max},
-        label_steps => 1,
+        max         => $stash->{clickthrough_max} || 1,
+        label_steps => int( ($stash->{clickthrough_max} || 1) / 10 ) || 1,
     );
 
     my @dates = map { $_->{date} } @{$stash->{dates}};
@@ -172,7 +173,7 @@ sub clickthrough_ofc : Private {
 
     # Calculate a width/height that will allow all data points to be seen (hopefully)
     
-    $c->stash->{chart_width} = scalar( @{$stash->{dates}} ) * 60;
+    $c->stash->{chart_width} = 250 + scalar( @{$stash->{dates}} ) * 50;
     
     $c->stash->{template} = 'erm/statistics/ofc.tt';
     $c->stash->{data_url} = $c->uri_for('ofc_flash');
