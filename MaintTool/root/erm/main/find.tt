@@ -41,7 +41,7 @@ Ext.override( HashState, {
         var decodedURL = Ext.urlDecode(hash);
         var params = {};
         for ( var key in decodedURL ) {
-            params[decodeURI(key)] = decodeURI( decodedURL[key] ).replace('+', ' ');
+            params[decodeURI(key)] = decodeURI( decodedURL[key] ).replace(/\+/g, ' ');
         }
         this.params = params;
         this.paging = {};
@@ -440,7 +440,13 @@ Ext.onReady( function() {
                     text: 'MARC Records',
                     iconCls: 'table-button',
                     handler: marcSelected
+                }),
+                new Ext.Button({
+                    text: 'Statistics',
+                    iconCls: 'chart-line-button',
+                    handler: statsSelected
                 })
+                
             ]
         }),
         columns: [
@@ -522,7 +528,21 @@ Ext.onReady( function() {
     }
 
     function marcSelected() {
-        window.location = '[% url("$url_base/erm/main/selected_marc") %]';
+        if (selected_store.getCount()) {
+            window.location = '[% url("$url_base/erm/main/selected_marc") %]';
+        }
+        else {
+            Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')
+        }
+    }
+
+    function statsSelected() {
+        if (selected_store.getCount()) {
+            window.location = '[% url("$url_base/erm/statistics/") %]';
+        }
+        else {
+            Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')
+        }
     }
     
     // Restore state
