@@ -56,3 +56,68 @@ Ext.ux.utils = {
     
 };
 
+Ext.ux.AdvancedPagingToolbar = Ext.extend( Ext.PagingToolbar, {
+    doLoad: function(start) {
+        if ( this.hash_state ) {
+            this.hash_state.paging['start'] = start;
+            this.hash_state.setState();
+        }
+        Ext.ux.AdvancedPagingToolbar.superclass.doLoad.call(this, start);
+    }
+} );
+
+
+// Get and set state using URI hashes
+
+HashState = function() {
+    this.params = {};
+    this.paging = {};
+    return this.getState();
+};
+
+Ext.override( HashState, {
+    getState: function() {
+        // Get state from location hash
+        var hash = window.location.hash;
+        if ( hash.length > 2 && hash.charAt(0) == "#" && hash.charAt(1) == '?' ) {
+            hash = hash.substring(2);
+        }
+        else if ( hash.length > 1 && hash.charAt(0) == "#" ) {
+            hash = hash.substring(1);
+        }
+
+        var decodedURL = Ext.urlDecode(hash);
+        var params = {};
+        for ( var key in decodedURL ) {
+            params[decodeURI(key)] = decodeURI( decodedURL[key] ).replace(/\+/g, ' ');
+        }
+        this.params = params;
+        this.paging = {};
+
+        // Move paging from params to paging if present
+
+        Ext.each( ['start', 'limit'], function(param) {
+            if ( this.params[param] ) {
+                this.paging[param] = parseInt(this.params[param]);
+                delete this.params[param];
+            }
+        }, this );
+
+        return this;
+    },
+    
+    setState: function() {
+        var newhash = {};
+        Ext.apply( newhash, this.params, this.paging );
+        for ( var key in newhash ) {
+            if ( typeof newhash[key] == 'undefined' || newhash[key] == '' ) {
+                delete newhash[key];
+            }
+        }
+        window.location.hash = '#?' + Ext.urlEncode(newhash);
+
+        return this;
+    }
+    
+} );
+
