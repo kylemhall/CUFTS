@@ -10,7 +10,8 @@ use CUFTS::CJDB::Util;
 
 __PACKAGE__->config->{WRAPPER} = 'layout.tt';
 __PACKAGE__->config->{FILTERS} = {
-    'marc8' => \&CUFTS::CJDB::Util::marc8_to_latin1,
+    'marc8'   => \&CUFTS::CJDB::Util::marc8_to_latin1,
+    'js_data' => \&js_data_filter,
 };
 
 $Template::Stash::HASH_OPS->{ in } = sub {
@@ -53,9 +54,21 @@ $Template::Stash::LIST_OPS->{ simple_difference } = sub {
 	return \@aonly;
 };
 
+$Template::Stash::LIST_OPS->{ map_join } = sub {
+    my ( $list, $field, $join_sep ) = @_;
+    return join $join_sep, map {$_->$field} @$list;
+};
 
 $Template::Stash::SCALAR_OPS->{substr} = sub { my ($scalar, $offset, $length) = @_; return defined($length) ? substr($scalar, $offset, $length) : substr($scalar, $offset); };
 $Template::Stash::SCALAR_OPS->{ceil} = sub { return (int($_[0]) < $_[0]) ? int($_[0] + 1) : int($_[0]) };  # Cheap
+
+
+sub js_data_filter {
+    my $text = shift;
+    $text =~ s{'}{\\'}g;
+    $text =~ s{\r?\n}{\\n}g;
+    return $text;
+}
 
 
 =head1 NAME
