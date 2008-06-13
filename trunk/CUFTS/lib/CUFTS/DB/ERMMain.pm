@@ -90,6 +90,7 @@ __PACKAGE__->columns(All => qw(
     gst_amount
     pst_amount
     payment_status
+    order_date
     contract_start
     contract_end
     original_term
@@ -102,6 +103,7 @@ __PACKAGE__->columns(All => qw(
     review_notes
     local_bib
     local_vendor
+    local_vendor_code
     local_acquisitions
     local_fund
     journal_auth
