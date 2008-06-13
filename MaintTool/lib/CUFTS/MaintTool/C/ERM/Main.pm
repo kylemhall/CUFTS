@@ -6,6 +6,7 @@ use base 'Catalyst::Base';
 use JSON::XS qw( encode_json );
 
 use CUFTS::Util::Simple;
+use DateTime;
 
 use CUFTS::DB::ERMMain;
 use CUFTS::DB::ERMMainLink;
@@ -82,6 +83,7 @@ my $form_validate = {
             gst_amount
             pst_amount
             payment_status
+            order_date
             contract_start
             contract_end
             original_term
@@ -94,6 +96,7 @@ my $form_validate = {
             review_notes
             local_bib
             local_vendor
+            local_vendor_code
             local_acquisitions
             local_fund
             journal_auth
@@ -304,12 +307,15 @@ sub selected_marc : Local {
             $MARC_dump .= "\n----------------------------------------------\n";
         }
 
-        # Update records from "on order" to "ordered"
+        # Update records from "on order" to "ordered" and add an order date if there isn't one.
         if ( $c->req->params->{update} ) {
             if ( $erm_record->subscription_status eq $c->stash->{subscription_statuses}->[3] ) {
                 $erm_record->subscription_status( $c->stash->{subscription_statuses}->[4] );
-                $erm_record->update;
             }
+            if ( is_empty_string($erm_record->order_date ) ) {
+                $erm_record->order_date( DateTime->now()->ymd );
+            }
+            $erm_record->update;
         }
 
     }

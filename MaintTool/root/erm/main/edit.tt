@@ -868,6 +868,16 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-order_date">order date</label>
+  <input id="erm-edit-input-order_date" name="order_date" value="[% erm.order_date | html %]" style="width: 10em;" />
+ </div>
+ <div class="help">
+  Date the order was placed.<br /><br />Format: YYYY-MM-DD
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-contract_start">contract start</label>
   <input id="erm-edit-input-contract_start" name="contract_start" value="[% erm.contract_start | html %]" style="width: 10em;" />
  </div>
@@ -930,6 +940,16 @@ $( function() {
  </div>
  <div class="help">
   Local vendor number used in other systems.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-local_vendor_code">local vendor code</label>
+  <input id="erm-edit-input-local_vendor_code" name="local_vendor_code" value="[% erm.local_vendor_code | html %]" />
+ </div>
+ <div class="help">
+  Local vendor code used in other systems.
  </div>
 </div>
 

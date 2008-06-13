@@ -32,7 +32,7 @@ __PACKAGE__->table('erm_main');
 __PACKAGE__->add_columns(
     'id' => {
         data_type           => 'integer',
-        'is_auto_increment' => 1,
+        is_auto_increment   => 1,
         default_value       => undef,
         is_nullable         => 0,
         size                => 8,
@@ -383,6 +383,12 @@ __PACKAGE__->add_columns(
         is_nullable        => 1,
         size               => 0,
     },
+    'order_date' => {
+        data_type          => 'date',
+        default_value      => undef,
+        is_nullable        => 1,
+        size               => 0,
+    },
     'original_term' => {
         data_type     => 'varchar',
         default_value => undef,
@@ -438,6 +444,12 @@ __PACKAGE__->add_columns(
         size          => 1024
     },
     'local_vendor' => {
+        data_type     => 'varchar',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 1024,
+    },
+    'local_vendor_code' => {
         data_type     => 'varchar',
         default_value => undef,
         is_nullable   => 1,
