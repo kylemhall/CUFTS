@@ -152,7 +152,6 @@ sub _facet_search_keyword {
 
     $config->{joins}->{subjects_main} = 'subject';
 
-    $data =~ s/\s+/\\s+/gsmx;
     $data =~ s/([^\w])/\\$1/gsmx;
 
     $config->{search}->{'-nest'} = [
