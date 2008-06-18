@@ -81,6 +81,7 @@ CREATE TABLE erm_main (
     review_by               VARCHAR(1024),
     review_notes            TEXT,
     local_bib               VARCHAR(1024),
+    local_customer          VARCHAR(1024),
     local_vendor            VARCHAR(1024),
     local_vendor_code       VARCHAR(1024),
     local_acquisitions      VARCHAR(1024),

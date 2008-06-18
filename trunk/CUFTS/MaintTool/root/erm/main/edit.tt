@@ -935,6 +935,16 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-local_customer">local customer number</label>
+  <input id="erm-edit-input-local_customer" name="local_customer" value="[% erm.local_customer | html %]" />
+ </div>
+ <div class="help">
+  The record number that is assigned by a local library management system to the customer record for the resource.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-local_vendor">local vendor number</label>
   <input id="erm-edit-input-local_vendor" name="local_vendor" value="[% erm.local_vendor | html %]" />
  </div>
@@ -1126,7 +1136,7 @@ $( function() {
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-misc_notes">consortia notes</label>
+  <label for="erm-edit-input-misc_notes">miscellaneous notes</label>
   <textarea id="erm-edit-input-misc_notes" name="misc_notes">[% erm.misc_notes | html %]</textarea>
  </div>
  <div class="help">
