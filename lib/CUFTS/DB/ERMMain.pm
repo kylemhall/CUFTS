@@ -507,7 +507,7 @@ sub as_marc {
         $MARC->append_fields( MARC::Field->new( '035', '', '', 'a' => $self->local_acquisitions ) );
     }
     if ( not_empty_string( $self->journal_auth ) ) {
-        $MARC->append_fields( MARC::Field->new( '035', '', '', 's' => $self->journal_auth ) );
+        $MARC->append_fields( MARC::Field->new( '035', '', '', 's' => "CJDB" . $self->journal_auth ) );
     }
 
 
