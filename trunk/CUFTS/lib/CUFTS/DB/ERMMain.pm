@@ -24,7 +24,7 @@ use strict;
 use base 'CUFTS::DB::DBI';
 
 use CUFTS::DB::Resources;
-
+use DateTime;
 use Data::Dumper;
 use CUFTS::Util::Simple;
 
@@ -102,6 +102,7 @@ __PACKAGE__->columns(All => qw(
     review_by
     review_notes
     local_bib
+    local_customer
     local_vendor
     local_vendor_code
     local_acquisitions
@@ -484,7 +485,9 @@ sub _facet_search_vendor {
 
 
 sub as_marc {
-    my ( $self ) = @_;
+    my ( $self, $url_base ) = @_;
+
+    my @subfields;
     
     my $MARC = MARC::Record->new();
 
@@ -496,14 +499,34 @@ sub as_marc {
         $MARC->append_fields( MARC::Field->new( '022', '', '', 'a' => $self->issn ) );
     }
 
+    
+    if ( not_empty_string( $self->local_bib ) ) {
+        $MARC->append_fields( MARC::Field->new( '035', '', '', 'a' => $self->local_bib ) );
+    }
+    if ( not_empty_string( $self->local_acquisitions ) ) {
+        $MARC->append_fields( MARC::Field->new( '035', '', '', 'a' => $self->local_acquisitions ) );
+    }
     if ( not_empty_string( $self->journal_auth ) ) {
-        $MARC->append_fields( MARC::Field->new( '035', '', '', 'a' => $self->journal_auth ) );
+        $MARC->append_fields( MARC::Field->new( '035', '', '', 's' => $self->journal_auth ) );
     }
 
-    $MARC->append_fields( MARC::Field->new( '245', '', '', 'a' => $self->main_name ) );
+
     $MARC->append_fields( MARC::Field->new( '935', '', '', 'a' => 'e' . $self->id ) );
 
-    my @subfields;
+
+    $MARC->append_fields( MARC::Field->new( '245', '', '', 'a' => $self->main_name ) );
+    $MARC->append_fields( MARC::Field->new( '260', '', '', 'b' => $self->publisher ) );
+    
+    $MARC->append_fields( MARC::Field->new( '856', '', '', 'u' => $url_base . $self->id ) );
+
+
+
+    @subfields = ();
+    push @subfields, 'q', DateTime->now()->ymd;
+
+    if ( not_empty_string( $self->cost ) ) {
+        push @subfields, 's', $self->cost;
+    }
 
     if ( not_empty_string( $self->local_fund ) ) {
         push @subfields, 'u', $self->local_fund;
@@ -512,23 +535,30 @@ sub as_marc {
     if ( not_empty_string( $self->vendor ) ) {
         push @subfields, 'v', $self->vendor;
     }
-    
-    if ( scalar(@subfields) ) {
-        $MARC->append_fields( MARC::Field->new( '960', '', '', @subfields ) );
+
+    if ( not_empty_string( $self->local_vendor_code ) ) {
+        push @subfields, 'w', $self->local_vendor_code;
     }
+    $MARC->append_fields( MARC::Field->new( '960', '', '', @subfields ) );
+
+    foreach my $field ( qw( subscription_notes subscription_ownership_notes pricing_model_notes review_notes consortia_notes date_cost_notes consortia_notes ) ) {
+        my $content = $self->$field();
+        if ( not_empty_string( $content ) ) {
+            (my $label = uc($field)) =~ tr/_/ /;
+            $MARC->append_fields( MARC::Field->new( '961', '', '', 'c' => "$label\n$content" ) );
+        }
+    }
+
+
 
     @subfields = ();
 
-    if ( not_empty_string( $self->currency ) ) {
-        push @subfields, 'z', $self->currency;
-    }
-
-    if ( not_empty_string( $self->currency ) ) {
-        push @subfields, 'c', $self->currency;
-    }
-
     if ( not_empty_string( $self->local_vendor ) ) {
         push @subfields, 'i', $self->local_vendor;
+    }
+
+    if ( not_empty_string( $self->currency ) ) {
+        push @subfields, 'z', $self->currency;
     }
 
     if ( scalar(@subfields) ) {
