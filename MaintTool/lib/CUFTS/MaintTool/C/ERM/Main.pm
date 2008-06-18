@@ -95,6 +95,7 @@ my $form_validate = {
             review_by
             review_notes
             local_bib
+            local_customer
             local_vendor
             local_vendor_code
             local_acquisitions
