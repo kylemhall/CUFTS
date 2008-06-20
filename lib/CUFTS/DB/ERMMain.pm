@@ -559,6 +559,10 @@ sub as_marc {
         push @subfields, 'i', $self->local_vendor;
     }
 
+    if ( not_empty_string( $self->local_customer ) ) {
+        push @subfields, 'j', $self->local_customer;
+    }
+
     if ( not_empty_string( $self->currency ) ) {
         push @subfields, 'z', $self->currency;
     }
