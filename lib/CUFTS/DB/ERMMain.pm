@@ -516,7 +516,7 @@ sub as_marc {
 
     $MARC->append_fields( MARC::Field->new( '245', '', '', 'a' => $self->main_name ) );
     
-    foreach $name ( $self->names ) {
+    foreach my $name ( $self->names ) {
         next if $name->main;
         $MARC->append_fields( MARC::Field->new( '246', '', '', 'a' => $name->name ) );
     }
