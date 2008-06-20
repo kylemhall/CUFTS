@@ -544,8 +544,10 @@ sub as_marc {
     foreach my $field ( qw( subscription_notes subscription_ownership_notes pricing_model_notes review_notes consortia_notes date_cost_notes consortia_notes ) ) {
         my $content = $self->$field();
         if ( not_empty_string( $content ) ) {
-            (my $label = uc($field)) =~ tr/_/ /;
-            $MARC->append_fields( MARC::Field->new( '961', '', '', 'c' => "$label\n$content" ) );
+            my $label = $field;
+            $label =~ tr/_/ /;
+            $label =~ s/\n/: /g;
+            $MARC->append_fields( MARC::Field->new( '961', '', '', 'c' => "$label: $content" ) );
         }
     }
 
