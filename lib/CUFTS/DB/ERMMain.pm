@@ -515,6 +515,12 @@ sub as_marc {
 
 
     $MARC->append_fields( MARC::Field->new( '245', '', '', 'a' => $self->main_name ) );
+    
+    foreach $name ( $self->names ) {
+        next if $name->main;
+        $MARC->append_fields( MARC::Field->new( '246', '', '', 'a' => $name->name ) );
+    }
+    
     $MARC->append_fields( MARC::Field->new( '260', '', '', 'b' => $self->publisher ) );
     
     $MARC->append_fields( MARC::Field->new( '856', '', '', 'u' => $url_base . $self->id ) );
