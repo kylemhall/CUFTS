@@ -554,7 +554,7 @@ sub as_marc {
     if ( not_empty_string( $self->misc_notes ) ) {
         my $content = $self->misc_notes;
         $content =~ s/\n/: /g;
-        $MARC->append_fields( MARC::Field->new( '961', '', '', 'd' => "miscellaneous notes: $content" ) );
+        $MARC->append_fields( MARC::Field->new( '961', '', '', 'd' => $content ) );
     }
 
     @subfields = ();
