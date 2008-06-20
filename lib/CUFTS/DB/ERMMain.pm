@@ -551,9 +551,17 @@ sub as_marc {
         }
     }
 
-
+    if ( not_empty_string( $self->misc_notes ) ) {
+        my $content = $self->misc_notes;
+        $content =~ s/\n/: /g;
+        $MARC->append_fields( MARC::Field->new( '961', '', '', 'd' => "miscellaneous notes: $content" ) );
+    }
 
     @subfields = ();
+
+    if ( $self->print_included ) {
+        push @subfields, 'e', ( $self->print_included ? 'yes' : 'no' ); 
+    }
 
     if ( not_empty_string( $self->local_vendor ) ) {
         push @subfields, 'i', $self->local_vendor;
