@@ -546,7 +546,7 @@ sub as_marc {
         if ( not_empty_string( $content ) ) {
             my $label = $field;
             $label =~ tr/_/ /;
-            $label =~ s/\n/: /g;
+            $content =~ s/\n/: /g;
             $MARC->append_fields( MARC::Field->new( '961', '', '', 'c' => "$label: $content" ) );
         }
     }
