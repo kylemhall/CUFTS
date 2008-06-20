@@ -520,6 +520,14 @@ sub as_marc {
         next if $name->main;
         $MARC->append_fields( MARC::Field->new( '246', '', '', 'a' => $name->name ) );
     }
+
+    if ( not_empty_string( $self->key ) ) {
+        $MARC->append_fields( MARC::Field->new( '246', '', '', 'a' => $self->key ) );
+    }
+
+    if ( not_empty_string( $self->internal_name ) ) {
+        $MARC->append_fields( MARC::Field->new( '246', '', '', 'a' => $self->internal_name ) );
+    }
     
     $MARC->append_fields( MARC::Field->new( '260', '', '', 'b' => $self->publisher ) );
     
