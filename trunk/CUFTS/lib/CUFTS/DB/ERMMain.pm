@@ -559,7 +559,7 @@ sub as_marc {
 
     @subfields = ();
 
-    if ( $self->print_included ) {
+    if ( defined( $self->print_included ) ) {
         push @subfields, 'e', ( $self->print_included ? 'yes' : 'no' ); 
     }
 
