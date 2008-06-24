@@ -324,14 +324,14 @@ sub deflate_packed_field_lists {
     return join( ',', @list );
 }
 
-__PACKAGE__->inflate_column( 'erm_patron_fields', {
-    inflate => \&inflate_packed_field_lists,
-    deflate => \&deflate_packed_field_lists,
-} );
-__PACKAGE__->inflate_column( 'erm_staff_fields', {
-    inflate => \&inflate_packed_field_lists,
-    deflate => \&deflate_packed_field_lists,
-} );
+# __PACKAGE__->inflate_column( 'erm_patron_fields', {
+#     inflate => \&inflate_packed_field_lists,
+#     deflate => \&deflate_packed_field_lists,
+# } );
+# __PACKAGE__->inflate_column( 'erm_staff_fields', {
+#     inflate => \&inflate_packed_field_lists,
+#     deflate => \&deflate_packed_field_lists,
+# } );
 
 
 
