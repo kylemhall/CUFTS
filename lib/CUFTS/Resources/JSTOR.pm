@@ -194,8 +194,8 @@ sub build_linkFulltext {
         # http://links.jstor.org/sici?sici=0090-5364%28198603%2914%3A1%3C1%3AOTCOBE%3E2.0.CO%3B2-U
         # Abstract from Lynch, Clifford A. “The Integrity of Digital Information; Mechanics and Definitional Issues.” JASIS 45:10 (Dec. 1994) p. 737-44
         # 0002-8231(199412)45:10<737:TIODIM>2.3.TX;2-M
-        # http://makealink.jstor.org.proxy.lib.sfu.ca/public-tools/GetURL?volume=54&issue=8&date=19701201&journal_title=00267902&page=562
-        # http://links.jstor.org.proxy.lib.sfu.ca/sici?sici=00267902%281970%2954:8%3A8%3C562%3E2.3.TX
+        # http://makealink.jstor.org/public-tools/GetURL?volume=54&issue=8&date=19701201&journal_title=00267902&page=562
+        # http://links.jstor.org/sici?sici=00267902%281970%2954:8%3A8%3C562%3E2.3.TX
         
         my $sici = $record->issn;
         
@@ -207,7 +207,7 @@ sub build_linkFulltext {
         $sici .= '<' . $request->spage . '>';
         $sici .= '2.3.TX';  # ??
 
-        my $url = 'http://links.jstor.org.proxy.lib.sfu.ca/sici?sici=' . uri_escape($sici);
+        my $url = 'http://links.jstor.org/sici?sici=' . uri_escape($sici);
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
