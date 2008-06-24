@@ -153,18 +153,6 @@ __PACKAGE__->add_columns(
       'is_nullable' => 1,
       'size' => '1024'
     },
-    'erm_patron_fields' => {
-        'data_type' => 'text',
-        'default_value' => undef,
-        'is_nullable' => 1,
-        'size' => '64000'
-    },
-    'erm_staff_fields' => {
-        'data_type' => 'text',
-        'default_value' => undef,
-        'is_nullable' => 1,
-        'size' => '64000'
-    },
     'marc_dump_856_link_label' => {
       'data_type' => 'varchar',
       'default_value' => undef,
