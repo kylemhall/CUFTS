@@ -181,7 +181,7 @@ sub menu_crdb : Local {
     my @crdb_sandbox_css = grep !/^\./, readdir SANDBOX;
     closedir SANDBOX;
 
-    $c->stash->{cjdb_url} = $CUFTS::Config::CJDB_URL;
+    $c->stash->{crdb_url} = $CUFTS::Config::CRDB_URL;
 
     $c->stash->{templates}          = \@crdb_template_list;
     $c->stash->{active_templates}   = \@crdb_active_templates;
