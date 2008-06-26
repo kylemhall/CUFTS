@@ -37,22 +37,31 @@ sub site : Chained('/') PathPart('') CaptureArgs(1) {
     if ( !defined($site) ) {
         die("Unrecognized site key: $site_key");
     }
+    $c->site( $site );
     
-    # TODO: Add support for sandbox
-    
+    $c->stash->{sandbox} = $c->session->{sandbox};
+    my $box = $c->session->{sandbox} ? 'sandbox' : 'active';
+
     # Set up site specific CSS file if it exists
     
-    my $site_css =   '/sites/' . $site->id . '/static/css/active/crdb.css';
+    my $site_css =   '/sites/' . $site->id . "/static/css/${box}/crdb.css";
                   
     if ( -e ($c->config->{root} . $site_css) ) {
         $c->stash->{site_css_file} = $c->uri_for( $site_css );
     }
     
-    $c->stash->{additional_template_paths} = [ $c->config->{root} . '/sites/' . $site->id . '/active' ];    
+    $c->stash->{additional_template_paths} = [ $c->config->{root} . '/sites/' . $site->id . "/${box}" ];    
     $c->stash->{extra_js} = [];
-    $c->site( $site );
     
     return 1;
+}
+
+sub set_box : Chained('site') PathPart('set_box') Args(1) {
+    my ( $self, $c, $box ) = @_;
+    
+    $c->session->{sandbox} = $box eq 'sandbox' ? 1 : 0;
+    
+    $c->redirect( $c->uri_for_site( $c->action_for('app_root') ) );
 }
 
 sub facet_options : Chained('site') PathPart('') CaptureArgs(0) {
