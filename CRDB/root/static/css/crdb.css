@@ -320,6 +320,8 @@ div#resources-brief-subject_description {
     border: 1px solid #555;
     color: #000;
     background: #eee;
+    clear: none;
+    float: none;
 }
 
 div#resources-brief-subject_description-content {
@@ -347,6 +349,7 @@ input#resources-brief-subject_description-cancel {
 
 div#resources-brief-records {
     padding: 0;
+    clear: none;
 }
     
 
@@ -463,11 +466,6 @@ div#resource-facet-choice-wrapper {
     float: left;
     border-top: 1px solid blue;
     background: #def;
-}
-
-div#resources-brief-records {
-    clear: none;
-    padding-top: none;
 }
 
 div#resources-brief-records-top {
