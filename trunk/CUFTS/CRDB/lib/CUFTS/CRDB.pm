@@ -167,7 +167,7 @@ sub save_current_action {
     
     $c->stash->{ return_to } = $saved_action || $c->uri_for_site('/');
 
-    warn( "Saving action: $saved_action" );
+    # warn( "Saving action: $saved_action" );
     
     $c->flash->{return_to} = $saved_action || $c->uri_for_site('/');
 #    $c->session->{prev_action} = $saved_action;
