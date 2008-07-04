@@ -39,6 +39,7 @@ BEGIN {
         CH_PCI
         Chicago
         CrossRef
+        deGruyter
         Dekker
         DOAJ
         EBSCO_CINAHL
