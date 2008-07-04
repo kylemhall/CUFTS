@@ -5,6 +5,7 @@
  [%# FOREACH link IN journal.display_links.nsort('rank').reverse %]
  [% FOREACH link IN rank_name_sort( journal.display_links, resources_display ) %]
   [% SET resource = undef %]
+  [% SET link_id = link.id %]
   [% IF link.link_type > 0 %]
    [% SET resource_id = link.resource %]
    [% SET resource = resources_display.$resource_id %]
@@ -58,6 +59,59 @@
      [% resource.cjdb_note | html %]
     </div>
    </div>
+  [% END %]
+
+  [% IF erm AND erm.$link_id %]
+   [% SET erm_main = erm.$link_id %]
+   [% SET erm_license = erm_main.license %]
+   [% IF erm_license %]
+    <div class="availability-erm">
+     <div class="availability-label">ERM License:</div>
+     <div class="availability-data">[% erm_license.key %]</div>
+    </div>
+    <div class="availability-erm">
+     <div class="availability-label">Allows ILL:</div>
+     <div class="availability-data">[% erm_license.allows_ill.defined ? erm_license.allows_ill ? 'yes' : 'no' : 'unknown' %]</div>
+    </div>
+    [% IF erm_license.ill_notes %]
+     <div class="availability-erm">
+      <div class="availability-label">ILL notes:</div>
+      <div class="availability-data">[% erm_license.ill_notes.replace("\n", "<br />\n") %]</div>
+     </div>
+    [% END %]
+    <div class="availability-erm">
+     <div class="availability-label">Allows coursepack:</div>
+     <div class="availability-data">[% erm_license.allows_coursepacks.defined ? erm_license.allows_coursepacks ? 'yes' : 'no' : 'unknown' %]</div>
+    </div>
+    [% IF erm_license.coursepack_notes %]
+     <div class="availability-erm">
+      <div class="availability-label">Coursepack notes:</div>
+      <div class="availability-data">[% erm_license.coursepack_notes.replace("\n", "<br />\n") %]</div>
+     </div>
+    [% END %]
+    <div class="availability-erm">
+     <div class="availability-label">Allows distance ed:</div>
+     <div class="availability-data">[% erm_license.allows_distance_ed.defined ? erm_license.allows_distance_ed ? 'yes' : 'no' : 'unknown' %]</div>
+    </div>
+    <div class="availability-erm">
+     <div class="availability-label">Allows downloads:</div>
+     <div class="availability-data">[% erm_license.allows_downloads.defined ? erm_license.allows_downloads ? 'yes' : 'no' : 'unknown' %]</div>
+    </div>
+    <div class="availability-erm">
+     <div class="availability-label">Allows prints:</div>
+     <div class="availability-data">[% erm_license.allows_prints.defined ? erm_license.allows_prints ? 'yes' : 'no' : 'unknown' %]</div>
+    </div>
+    <div class="availability-erm">
+     <div class="availability-label">Allows emails:</div>
+     <div class="availability-data">[% erm_license.allows_emails.defined ? erm_license.allows_emails ? 'yes' : 'no' : 'unknown' %]</div>
+    </div>
+    [% IF erm_license.emails_notes %]
+     <div class="availability-erm">
+      <div class="availability-label">Email notes:</div>
+      <div class="availability-data">[% erm_license.emails_notes.replace("\n", "<br />\n") %]</div>
+     </div>
+    [% END %]
+   [% END %]
   [% END %]
 
  [% END %]
