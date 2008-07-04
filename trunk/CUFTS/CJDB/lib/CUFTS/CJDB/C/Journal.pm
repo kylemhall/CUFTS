@@ -57,7 +57,27 @@ sub view : Private {
         my @new_array = sort { $b->{rank} <=> $a->{rank} or $displays->{ $a->{resource} }->{name} cmp $displays->{ $b->{resource} }->{name} } @$links;
         return \@new_array;
     };
+
+    # Check for attached ERM records
     
+    if ( $c->stash->{current_account} ) {
+        my $role = CJDB::DB::Roles->search({ role => 'staff' })->first;
+        if ( CJDB::DB::AccountsRoles->count_search({ role => $role->id, account => $c->stash->{current_account}->id }) > 0 ) {
+            foreach my $link ( $journal->links ) {
+                my $resource = CUFTS::DB::LocalResources->retrieve($link->resource);
+                my $local_journal  = CUFTS::DB::LocalJournals->retrieve($link->local_journal);
+                my $erm;
+                if ( $erm = $resource->erm_main ) {
+                    $c->stash->{erm}->{$link->id} = $erm;
+                }
+                elsif ( $erm = $local_journal->erm_main ) {
+                    $c->stash->{erm}->{$link->id} = $erm;
+                }
+                
+            }
+        }
+    }
+
 
     $c->stash->{tags} = CJDB::DB::Tags->get_tag_summary($journals_auth_id, $c->stash->{current_site}->id, (defined($c->stash->{current_account}) ? $c->stash->{current_account}->id : undef));
     $c->stash->{journal} = $journal;    
