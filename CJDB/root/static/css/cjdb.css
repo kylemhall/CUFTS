@@ -529,6 +529,7 @@ div#navline {
 	vertical-align: middle;
 	border-bottom: solid 1px #004997;
 	float: left;
+	width: 100%;
 }
 
 div#menu {
