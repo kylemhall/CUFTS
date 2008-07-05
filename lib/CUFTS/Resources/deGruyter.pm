@@ -25,6 +25,7 @@ use base qw(CUFTS::Resources::Base::SFXLoader);
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
 use URI::Escape;
+use Unicode::String qw(utf8);
 
 use strict;
 
@@ -44,6 +45,14 @@ sub title_list_fields {
             journal_url
         )
     ];
+}
+
+sub clean_data {
+    my ( $class, $record ) = @_;
+
+    $record->{title} = utf8( $record->{title} )->latin1;
+
+    return $class->SUPER::clean_data( $record );
 }
 
 ## -------------------------------------------------------------------------------------------
