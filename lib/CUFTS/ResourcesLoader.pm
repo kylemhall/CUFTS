@@ -66,6 +66,7 @@ BEGIN {
         Ingenta
         IngentaConnect
         JournalAuth
+        JStage
         JSTOR
         Karger
         Kluwer
