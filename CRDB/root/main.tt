@@ -25,6 +25,7 @@
   <h2>Browse databases by title:</h2>
  </div>
  <div class="main-box-content">
+  <a href="[% facet_browse_url _ '/name_regex/%5E[%5Ea-z]' %]">0-9</a>
   [% FOREACH letter IN [ 'A' .. 'Z' ] %]
    <a href="[% facet_browse_url _ '/name/' _ letter %]">[% letter %]</a>
   [% END %]
