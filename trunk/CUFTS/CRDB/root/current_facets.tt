@@ -1,3 +1,4 @@
+[%- PROCESS facet_lookups.tt -%]
 <div id="resources-brief-current-facets">
  <div id="resources-brief-current-facets-heading">
   <h2>Your Current Search</h2>

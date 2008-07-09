@@ -4,6 +4,7 @@
     content_type    => "Content Type",
     keyword         => "Keyword",
     name            => "Name",
+    name_regex      => "Name",
     resource_type   => "Resource Type",
     resource_medium => "Resource Medium",
     subject         => "Subject",

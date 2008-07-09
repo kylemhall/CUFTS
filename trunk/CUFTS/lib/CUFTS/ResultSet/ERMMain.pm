@@ -137,6 +137,16 @@ sub _facet_search_name {
     $config->{main_name_only} = 0;
 }
 
+sub _facet_search_name_regex {
+    my ( $self, $field, $data, $config ) = @_;
+    
+    warn('IN NAME REGEX');
+
+    $config->{search}->{'names.search_name'} = { '~' => $data };
+    $config->{main_name_only} = 0;
+}
+
+
 
 sub _facet_search_content_type {
     my ( $class, $field, $data, $config ) = @_;
