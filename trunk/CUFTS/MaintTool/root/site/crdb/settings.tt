@@ -4,7 +4,7 @@
 <tr><td class="heading-bar" colspan="3">CRDB full display fields</td></tr>
 <tr><td class="heading-bar">all fields</td><td class="heading-bar">active fields</td><td class="heading-bar" style="text-align: right">staff view | edit</td></tr>
 <tr>
- <td id="site-settings-crdb-all-fields" colspan="2">
+ <td id="site-settings-crdb-all-fields">
   <div id="site-settings-crdb-all-fields-drop">
    [% FOREACH field IN all_fields.keys.sort %]
     [% SET is_active = active_fields.$field %]
@@ -12,7 +12,7 @@
    [% END %]
   </div>
  </td>
- <td id="site-settings-crdb-active-fields">
+ <td id="site-settings-crdb-active-fields" colspan="2">
   <div id="site-settings-crdb-active-fields-drop">
    [% FOREACH record IN active_ordered %]
     [% field = record.field %]
