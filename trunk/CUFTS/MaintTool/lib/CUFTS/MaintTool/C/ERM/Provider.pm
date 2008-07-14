@@ -1,9 +1,9 @@
-package CUFTS::MaintTool::C::ERM::License;
+package CUFTS::MaintTool::C::ERM::Provider;
 
 use strict;
 use base 'Catalyst::Base';
 
-use CUFTS::DB::ERMLicense;
+use CUFTS::DB::ERMProviders;
 
 my $form_validate = {
     required => [
@@ -16,45 +16,30 @@ my $form_validate = {
             submit 
             cancel
 
-            full_on_campus_access
-            full_on_campus_notes
-            allows_remote_access
-            allows_proxy_access
-            allows_commercial_use
-            allows_walkins
-            allows_ill
-            ill_notes
-            allows_ereserves
-            ereserves_notes
-            allows_coursepacks
-            coursepack_notes
-            allows_distance_ed
-            allows_downloads
-            allows_prints
-            allows_emails
-            emails_notes
-            allows_archiving
-            archiving_notes
-            own_data
-            citation_requirements
-            requires_print
-            requires_print_plus
-            additional_requirements
-            allowable_downtime
-            online_terms
-            user_restrictions
-            terms_notes
-            termination_requirements
-            perpetual_access
-            perpetual_access_notes
-       
-            contact_name
-            contact_role
-            contact_address
-            contact_phone
-            contact_fax
-            contact_email
-            contact_notes
+            provider_name
+            local_provider_name
+
+            admin_user
+            admin_password
+            admin_url
+            support_url
+
+            stats_available
+            stats_url
+            stats_frequency
+            stats_delivery
+            stats_counter
+            stats_user
+            stats_password
+            stats_notes
+
+            provider_contact
+            provider_notes
+
+            support_email
+            support_phone
+            knowledgebase
+            customer_number
         )
     ],
     filters  => ['trim'],
@@ -72,24 +57,24 @@ sub default : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->req->params->{submit} ) {
-        my $id = $c->req->params->{license};
+        my $id = $c->req->params->{provider};
         
         if ( $id eq 'new' ) {
-            $c->redirect('/erm/license/create');
+            $c->redirect('/erm/provider/create');
         }
         else {
-            $c->redirect("/erm/license/edit/$id");
+            $c->redirect("/erm/provider/edit/$id");
         }
     }
 
-    my @records = CUFTS::DB::ERMLicense->search( site => $c->stash->{current_site}->id, { order_by => 'LOWER(key)' } );
+    my @records = CUFTS::DB::ERMProviders->search( site => $c->stash->{current_site}->id );
     $c->stash->{records} = \@records;
-    $c->stash->{template} = "erm/license/find.tt";
+    $c->stash->{template} = "erm/provider/find.tt";
 
     return 1;
 }
 
-# find_json - Gets a list of license keys and ids starting with the passed in key.  This is used for ExtJS
+# find_json - Gets a list of provider keys and ids starting with the passed in key.  This is used for ExtJS
 #             combo box lookups, but could be expanded out to cover other uses.
 
 sub find_json : Local {
@@ -102,7 +87,7 @@ sub find_json : Local {
         $search->{key} = { ilike => "$key\%" };
     }
 
-    @records = CUFTS::DB::ERMLicense->search( $search, { order_by => 'LOWER(key)' } );
+    @records = CUFTS::DB::ERMProviders->search( $search, { order_by => 'LOWER(key)' } );
 
     $c->stash->{json}->{rowcount} = scalar(@records);
 
@@ -116,7 +101,7 @@ sub find_json : Local {
 sub create : Local {
     my ( $self, $c ) = @_;
 
-    return $c->redirect('/erm/license/') if $c->req->params->{cancel};
+    return $c->redirect('/erm/provider/') if $c->req->params->{cancel};
 
     if ( $c->req->params->{save} ) {
 
@@ -126,7 +111,7 @@ sub create : Local {
 
             my $erm;
             eval {
-                $erm = CUFTS::DB::ERMLicense->create({
+                $erm = CUFTS::DB::ERMProviders->create({
                     site => $c->stash->{current_site}->id,
                     key  => $c->form->{valid}->{key},
                 });
@@ -140,34 +125,34 @@ sub create : Local {
 
             CUFTS::DB::DBI->dbi_commit;
 
-            return $c->redirect( "/erm/license/edit/" . $erm->id );
+            return $c->redirect( "/erm/provider/edit/" . $erm->id );
 
         }
 
     }
 
-    $c->stash->{template}  = "erm/license/create.tt";
+    $c->stash->{template}  = "erm/provider/create.tt";
 
     $c->stash->{javascript_validate} = [ $c->convert_form_validate( 'erm-create', $form_validate_new, 'erm-create-' ) ];
 }
 
 # .. /erm/edit/main/123         (erm_main)
-# .. /erm/edit/license/423523   (erm_license)
+# .. /erm/edit/provider/423523   (erm_provider)
 
 sub edit : Local {
     my ( $self, $c, $erm_id  ) = @_;
 
     $c->req->params->{cancel}
-        and return $c->redirect('/erm/license/');
+        and return $c->redirect('/erm/provider/');
 
 
-    my $erm = CUFTS::DB::ERMLicense->search({
+    my $erm = CUFTS::DB::ERMProviders->search({
         id   => $erm_id,
         site => $c->stash->{current_site}->id,
     })->first;
 
     if ( !defined($erm) ) {
-        die("Unable to find ERMLicense record: $erm_id for site " . $c->stash->{current_site}->id);
+        die("Unable to find ERMProviders record: $erm_id for site " . $c->stash->{current_site}->id);
     }
     
     if ( $c->req->params->{submit} ) {
@@ -193,48 +178,48 @@ sub edit : Local {
 
     $c->stash->{erm}       = $erm;
     $c->stash->{erm_id}    = $erm_id;
-    $c->stash->{template}  = 'erm/license/edit.tt';
+    $c->stash->{template}  = 'erm/provider/edit.tt';
     push @{$c->stash->{load_css}}, 'tabs.css';
 
-    $c->stash->{javascript_validate} = [ $c->convert_form_validate( 'license-form', $form_validate, 'erm-edit-input-' ) ];
+    $c->stash->{javascript_validate} = [ $c->convert_form_validate( 'provider-form', $form_validate, 'erm-edit-input-' ) ];
 }
 
 sub delete : Local {
     my ( $self, $c ) = @_;
     
     $c->form({
-        required => [ qw( erm_license_id ) ],
+        required => [ qw( erm_provider_id ) ],
         optional => [ qw( confirm cancel delete ) ],
     });
 
     unless ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
 
         if ( $c->form->{valid}->{cancel} ) {
-            return $c->forward('/erm/license/edit/' . $c->form->{valid}->{erm_license_id} );
+            return $c->forward('/erm/provider/edit/' . $c->form->{valid}->{erm_provider_id} );
         }
     
-        my $erm_license = CUFTS::DB::ERMLicense->search({
+        my $erm_provider = CUFTS::DB::ERMProviders->search({
             site => $c->stash->{current_site}->id,
-            id => $c->form->{valid}->{erm_license_id},
+            id => $c->form->{valid}->{erm_provider_id},
         })->first;
 
-        my @erm_mains = CUFTS::DB::ERMMain->search( { license => $erm_license->id, site => $c->stash->{current_site}->id });
+        my @erm_mains = CUFTS::DB::ERMMain->search( { provider => $erm_provider->id, site => $c->stash->{current_site}->id });
 
         $c->stash->{erm_mains} = \@erm_mains;
-        $c->stash->{erm_license} = $erm_license;
+        $c->stash->{erm_provider} = $erm_provider;
 
-        if ( defined($erm_license) ) {
+        if ( defined($erm_provider) ) {
 
             if ( $c->form->{valid}->{confirm} ) {
 
                 eval {
                 
                     foreach my $erm_main ( @erm_mains ) {
-                        $erm_main->license( undef );
+                        $erm_main->provider( undef );
                         $erm_main->update();
                     }
                     
-                    $erm_license->delete();
+                    $erm_provider->delete();
                 };
 
                 if ($@) {
@@ -244,16 +229,16 @@ sub delete : Local {
                 }
             
                 CUFTS::DB::ERMMain->dbi_commit();
-                $c->stash->{result} = "ERM License record deleted.";
+                $c->stash->{result} = "ERM provider record deleted.";
             }
         }
         else {
-            $c->stash->{error} = "Unable to locate ERM record: " . $c->form->{valid}->{erm_license_id};
+            $c->stash->{error} = "Unable to locate ERM provider record: " . $c->form->{valid}->{erm_provider_id};
         }
 
     }
 
-    $c->stash->{template} = 'erm/license/delete.tt';
+    $c->stash->{template} = 'erm/provider/delete.tt';
 }
 
 

@@ -55,6 +55,12 @@ __PACKAGE__->add_columns(
         is_nullable   => 1,
         size          => 10,
     },
+    'provider' => {
+        data_type     => 'integer',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 10,
+    },
     'vendor' => {
         data_type     => 'varchar',
         default_value => undef,
@@ -702,6 +708,56 @@ __PACKAGE__->add_columns(
         size               => 0,
     },
     
+    'provider_name' => {
+        data_type     => 'varchar',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 1024
+    },
+    'local_provider_name' => {
+        data_type     => 'varchar',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 1024
+    },
+    'provider_contact' => {
+        data_type     => 'text',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 64000
+    },
+    'provider_notes' => {
+        data_type     => 'text',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 64000
+    },
+    'support_email' => {
+        data_type     => 'varchar',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 1024
+    },
+    'support_phone' => {
+        data_type     => 'varchar',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 1024
+    },
+    'knowledgebase' => {
+        data_type     => 'varchar',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 1024
+    },
+    'customer_number' => {
+        data_type     => 'varchar',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 1024
+    },
+    
+    
 );
 __PACKAGE__->mk_group_accessors( column => qw/ result_name sort_name rank / );
 
@@ -732,6 +788,7 @@ __PACKAGE__->belongs_to( consortia       => 'CUFTS::Schema::ERMConsortia' );
 __PACKAGE__->belongs_to( pricing_model   => 'CUFTS::Schema::ERMPricingModels' );
 __PACKAGE__->belongs_to( resource_medium => 'CUFTS::Schema::ERMResourceMediums' );
 __PACKAGE__->belongs_to( resource_type   => 'CUFTS::Schema::ERMResourceTypes' );
+__PACKAGE__->belongs_to( provider        => 'CUFTS::Schema::ERMProviders' );
 
 sub main_name {
     my ( $self, $new_name ) = @_;

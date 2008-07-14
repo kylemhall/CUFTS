@@ -69,6 +69,7 @@ sub all_viewable_crdb_fields {
         key
         site
         license
+        provider
         created
         modified
     );
@@ -81,7 +82,11 @@ sub all_viewable_crdb_fields {
     }
     foreach my $field ( CUFTS::DB::ERMLicense->columns() ) {
         next if grep {$_ eq $field} @ignore_fields;
-        $fields{ $field } = 0;
+        $fields{ $field } ||= 0;
+    }
+    foreach my $field ( CUFTS::DB::ERMProviders->columns() ) {
+        next if grep {$_ eq $field} @ignore_fields;
+        $fields{ $field } ||= 0;
     }
 
     # Add relationship fields where useful (subjects, etc.)
