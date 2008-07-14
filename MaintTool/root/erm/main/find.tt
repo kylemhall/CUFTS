@@ -57,6 +57,18 @@ Ext.onReady( function() {
     });
     [% END %]
     
+    combo_stores.licenses = new Ext.data.JsonStore({
+        url: '[% url("$url_base/erm/license/find_json") %]',
+        root: 'results',
+        fields: [ 'id', 'key' ]
+    });
+
+    combo_stores.providers = new Ext.data.JsonStore({
+        url: '[% url("$url_base/erm/provider/find_json") %]',
+        root: 'results',
+        fields: [ 'id', 'key' ]
+    });
+    
     
     var results_grid = new Ext.grid.GridPanel({
         store: results_store,
@@ -281,7 +293,42 @@ Ext.onReady( function() {
                                 listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['subscription_status'],
                                 anchor: '-2'
+                            },
+                            {
+                                fieldLabel: 'License',
+                                xtype: 'combo',
+                                hiddenName: 'license',
+                                store: combo_stores.licenses,
+                                displayField: 'key',
+                                valueField: 'id',
+                                mode: 'remote',
+                                queryParam: 'key',
+                                minChars: 1,
+                                forceSelection: true,
+                                queryDelay: 250,
+                                triggerAction: 'all',
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['license'],
+                                anchor: '-2'
+                            },
+                            {
+                                fieldLabel: 'Provider',
+                                xtype: 'combo',
+                                hiddenName: 'provider',
+                                store: combo_stores.providers,
+                                displayField: 'key',
+                                valueField: 'id',
+                                queryParam: 'key',
+                                minChars: 1,
+                                mode: 'remote',
+                                forceSelection: true,
+                                queryDelay: 250,
+                                triggerAction: 'all',
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['provider'],
+                                anchor: '-2'
                             }
+                            
                         ]
                     }
                 ]

@@ -28,6 +28,7 @@ my $form_validate = {
             cancel
 
             license
+            provider
             vendor
             internal_name
             publisher
@@ -140,6 +141,15 @@ my $form_validate = {
             breaches
             alert
             alert_expiry
+            
+            provider_name
+            local_provider_name
+            provider_contact
+            provider_notes
+            support_email
+            support_phone
+            knowledgebase
+            customer_number
             
             erm-edit-input-content_types
         )
@@ -366,6 +376,8 @@ sub _find {
         keyword
         subject
         publisher
+        provider
+        license
         content_type
         resource_type
         content_medium
@@ -505,10 +517,13 @@ sub edit : Local {
     
     # Get ERM License records for linking
     
-    my @erm_licenses = CUFTS::DB::ERMLicense->search({
-        site => $c->stash->{current_site}->id,
-    });
+    my @erm_licenses = CUFTS::DB::ERMLicense->search( { site => $c->stash->{current_site}->id }, { order_by => 'LOWER(key)' } );
     $c->stash->{erm_licenses} = \@erm_licenses;
+
+    # Get ERM Provider records for linking
+
+    my @erm_providers = CUFTS::DB::ERMProviders->search( { site => $c->stash->{current_site}->id }, { order_by => 'LOWER(key)' } );
+    $c->stash->{erm_providers} = \@erm_providers;
     
     if ( $c->req->params->{submit} ) {
 
@@ -641,6 +656,9 @@ sub edit : Local {
             # push @{ $c->stash->{results} }, 'ERM data updated.';
         }
     }
+
+    $c->stash->{license_record} = $erm->license;
+    $c->stash->{provider_record} = $erm->provider;
 
     $c->stash->{active_content_types} = { map { $_->id, 1 } $erm->content_types() };
     $c->stash->{erm}       = $erm;

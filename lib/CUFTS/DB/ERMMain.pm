@@ -35,6 +35,7 @@ __PACKAGE__->columns(All => qw(
     key
     site
     license
+    provider
 
     vendor
     publisher
@@ -148,6 +149,16 @@ __PACKAGE__->columns(All => qw(
     
     alert
     alert_expiry
+    
+    provider_name
+    local_provider_name
+    provider_contact
+    provider_notes
+    support_email
+    support_phone
+    knowledgebase
+    customer_number
+    
 ));                                                                                                        
 
 __PACKAGE__->columns( Essential => __PACKAGE__->columns );
@@ -161,6 +172,7 @@ __PACKAGE__->has_many('subjectsmain' => 'CUFTS::DB::ERMSubjectsMain');
 __PACKAGE__->has_many('content_types', ['CUFTS::DB::ERMContentTypesMain' => 'content_type'], 'erm_main');
 __PACKAGE__->has_many( 'names' => 'CUFTS::DB::ERMNames'  );
 __PACKAGE__->has_a( 'license', 'CUFTS::DB::ERMLicense' );
+__PACKAGE__->has_a( 'provider', 'CUFTS::DB::ERMProviders' );
 __PACKAGE__->has_many( 'costs' => 'CUFTS::DB::ERMCosts' );
 __PACKAGE__->has_many( 'uses' => 'CUFTS::DB::ERMUses' );
 
@@ -570,6 +582,11 @@ sub as_marc {
         $content =~ s/\n/: /g;
         $MARC->append_fields( MARC::Field->new( '961', '', '', 'd' => $content ) );
     }
+    
+    if ( not_empty_string( $self->coverage ) ) {
+        $MARC->append_fields( MARC::Field->new( '961', '', '', 'f' => $self->coverage ) );
+    }
+    
 
     @subfields = ();
 

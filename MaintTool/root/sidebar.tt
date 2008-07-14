@@ -12,6 +12,7 @@
             [
                 [ '/erm/main', 'Main' ],
                 [ '/erm/license', 'License' ],
+                [ '/erm/provider', 'Provider' ],
                 [ '/erm/tables/edit', 'Tables' ],
                 [ '/erm/alerts', 'Alerts' ],
             ],

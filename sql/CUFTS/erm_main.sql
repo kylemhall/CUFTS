@@ -3,6 +3,7 @@ CREATE TABLE erm_main (
     key         VARCHAR(1024),
     site        INTEGER NOT NULL,
     license     INTEGER,   -- linked table (erm_license)
+    provider    INTEGER,   -- linked table (erm_providers)
     
 -- Resource Information
 
@@ -128,7 +129,19 @@ CREATE TABLE erm_main (
     openurl_compliant       BOOLEAN,
     access_notes            TEXT,
     breaches                TEXT,
-    admin_notes             TEXT
+    admin_notes             TEXT,
     
+-- Provder
+
+    provider_name           VARCHAR(1024),
+    local_provider_name     VARCHAR(1024),
+
+    provider_contact        TEXT,
+    provider_notes          TEXT,
+
+    support_email           VARCHAR(1024),
+    support_phone           VARCHAR(1024),
+    knowledgebase           VARCHAR(1024),
+    customer_number         VARCHAR(1024)
 );
 
