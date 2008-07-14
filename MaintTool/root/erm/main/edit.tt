@@ -1179,7 +1179,7 @@ $( function() {
 <div class="field">
  <div class="data">
   <label for="erm-edit-input-stats_available">stats available</label>
-  [% IF provider_record %]<span class="linked-data"><span class="linked-data-label">Provider:</span> [% defined(provider_record.stats_available) ? provider_record.stats_available ? 'yes' : 'no' : '' | html %]</span><br />[% END %]
+  [% IF provider_record %]<span class="linked-data"><span class="linked-data-label">Provider:</span> [% provider_record.stats_available.defined ? provider_record.stats_available ? 'yes' : 'no' : '' | html %]</span><br />[% END %]
    <select id="erm-edit-input-stats_available" name="stats_available" style="width: 4em;">
     <option value=""></option>
     <option value="1" [% 'selected="selected"' IF erm.stats_available == 1 %]>Yes</option>
@@ -1239,7 +1239,7 @@ $( function() {
 <div class="field">
  <div class="data">
   <label for="erm-edit-input-stats_counter">COUNTER stats</label>
-  [% IF provider_record %]<span class="linked-data"><span class="linked-data-label">Provider:</span> [% defined(provider_record.stats_counter) ? provider_record.stats_counter ? 'yes' : 'no' : ''  | html %]</span><br />[% END %]
+  [% IF provider_record %]<span class="linked-data"><span class="linked-data-label">Provider:</span> [% provider_record.stats_counter.defined ? provider_record.stats_counter ? 'yes' : 'no' : ''  | html %]</span><br />[% END %]
    <select id="erm-edit-input-stats_counter" name="stats_counter" style="width: 4em;">
     <option value=""></option>
     <option value="1" [% 'selected="selected"' IF erm.stats_counter == 1 %]>Yes</option>
