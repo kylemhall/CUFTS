@@ -42,6 +42,11 @@ my @modules = qw(
     Business::ISSN
     Catalyst
     Catalyst::Plugin::FillInForm
+    Catalyst::Plugin::FormValidator
+    Catalyst::Plugin::Session::Store::FastMmap
+    Catalyst::Plugin::Session::State::Cookie
+    Catalyst::View::JSON
+    Catalyst::View::TT
     Chart::OFC
     Class::Accessor
     Class::DBI
@@ -66,10 +71,12 @@ my @modules = qw(
     SQL::Abstract
     String::Approx
     Template
+    Template::Plugin::JSON
     Term::ReadLine
     Text::CSV
     URI::Escape
     URI::OpenURL
+    XML::DOM
     XML::Parser::Lite::Tree
     XML::RAI
 );
