@@ -35,6 +35,7 @@ my @write_to_directories = qw(
     logs
     data
     CJDB/root/sites
+    CRDB/root/sites
     Resolver/root/sites
 );
 
