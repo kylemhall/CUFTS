@@ -531,7 +531,7 @@ $( function() {
   <textarea id="erm-edit-input-subscription_notes" name="subscription_notes">[% erm.subscription_notes | html %]</textarea>
  </div>
  <div class="help">
-  Enter further information about the subscription here..
+  Enter further information about the subscription here.
  </div>
 </div>
 
@@ -552,6 +552,31 @@ $( function() {
  </div>
  <div class="help">
   Enter further information about the subscription ownership here.
+ </div>
+</div>
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-cancellation_cap">cancellation cap?</label>
+  <select id="erm-edit-input-cancellation_cap" name="cancellation_cap" style="width: 4em;">
+   <option value=""></option>
+   <option value="1" [% 'selected="selected"' IF erm.cancellation_cap == 1 %]>Yes</option>
+   <option value="0" [% 'selected="selected"' IF erm.cancellation_cap == 0 %]>No</option>
+  </select>
+ </div>
+ <div class="help">
+  Does this resource have a cancellation cap?
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
+  <label for="erm-edit-input-cancellation_cap_notes">cancellation cap notes</label>
+  <textarea id="erm-edit-input-cancellation_cap_notes" name="cancellation_cap_notes">[% erm.cancellation_cap_notes | html %]</textarea>
+ </div>
+ <div class="help">
+  Notes about the cancellation cap.
  </div>
 </div>
 

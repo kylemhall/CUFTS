@@ -158,6 +158,9 @@ __PACKAGE__->columns(All => qw(
     support_phone
     knowledgebase
     customer_number
+
+    cancellation_cap
+    cancellation_cap_notes
     
 ));                                                                                                        
 

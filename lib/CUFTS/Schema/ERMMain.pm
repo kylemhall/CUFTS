@@ -756,6 +756,19 @@ __PACKAGE__->add_columns(
         is_nullable   => 1,
         size          => 1024
     },
+    'cancellation_cap' => {
+        data_type     => 'boolean',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 0
+    },
+    'cancellation_cap_notes' => {
+        data_type     => 'text',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 64000
+    },
+    
     
     
 );

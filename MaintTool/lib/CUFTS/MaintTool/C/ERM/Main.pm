@@ -73,6 +73,8 @@ my $form_validate = {
             misc_notes
             issn
             isbn
+            cancellation_cap
+            cancellation_cap_notes
 
             cost
             invoice_amount
