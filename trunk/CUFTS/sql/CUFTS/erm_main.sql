@@ -52,6 +52,8 @@ CREATE TABLE erm_main (
     subscription_notes           TEXT,
     subscription_ownership       VARCHAR(1024),
     subscription_ownership_notes TEXT,
+    cancellation_cap             BOOLEAN,
+    cancellation_cap_notes       TEXT,
     
     issn        VARCHAR(1024),
     isbn        VARCHAR(1024),

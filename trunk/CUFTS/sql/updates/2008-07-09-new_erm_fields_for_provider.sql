@@ -1,3 +1,4 @@
+ALTER TABLE erm_main ADD COLUMN provider INTEGER;
 ALTER TABLE erm_main ADD COLUMN provider_name VARCHAR(1024);
 ALTER TABLE erm_main ADD COLUMN local_provider_name VARCHAR(1024);
 ALTER TABLE erm_main ADD COLUMN provider_contact TEXT;
