@@ -40,7 +40,7 @@ sub get_title {
     
     my $title = join ' ', @data;
     eval {
-        $title = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_title( $title ) );
+        $title = $self->encode_to_latin1( $self->clean_title( $title ) );
     };
     if ( $@ ) {
         warn($@);
@@ -72,7 +72,7 @@ sub get_sort_title {
         $title = $self->get_title( $record );
     }
     eval {
-        $title = CUFTS::CJDB::Util::marc8_to_latin1($title);
+        $title = $self->encode_to_latin1($title);
     };
     if ( $@ ) {
         warn($@);
@@ -148,7 +148,7 @@ ALT_TITLE:
         # Fix up diacritics
 
         eval {
-            $title = CUFTS::CJDB::Util::marc8_to_latin1($title);
+            $title = $self->encode_to_latin1($title);
         };
         if ( $@ ) {
             warn($@);
@@ -217,7 +217,7 @@ sub get_MARC_subjects {
 
         my $subject = join ' ', @data;
         eval {
-            $subject = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_subject( $subject ) );
+            $subject = $self->encode_to_latin1( $self->clean_subject( $subject ) );
         };
         if ( $@ ) {
             warn($@);
@@ -288,7 +288,7 @@ sub get_associations {
 
     foreach my $association (@marc_associations) {
         eval {
-            my $association_string = CUFTS::CJDB::Util::marc8_to_latin1( $self->clean_association( $association->as_string ) );
+            my $association_string = $self->encode_to_latin1( $self->clean_association( $association->as_string ) );
             push @associations, $association_string;
         };
         if ( $@ ) {
@@ -334,7 +334,7 @@ sub _get_relation {
     my $title = $field->subfield('t');
 
     eval {
-        $title = CUFTS::CJDB::Util::marc8_to_latin1( $title );
+        $title = $self->encode_to_latin1( $title );
     };
     if ( $@ ) {
         warn($@);
@@ -350,11 +350,11 @@ sub _get_relation {
 
         if ( grep { $_ eq $stripped_sort_title } @CUFTS::CJDB::Util::generic_titles ) {
             $title .= ' / '
-                   . $self->clean_title( CUFTS::CJDB::Util::marc8_to_latin1( $field->subfield('a') ) );
+                   . $self->clean_title( $self->encode_to_latin1( $field->subfield('a') ) );
         }
 
         $relation->{title} = $title 
-                             || $self->clean_title( CUFTS::CJDB::Util::marc8_to_latin1( $field->subfield('a') ) );
+                             || $self->clean_title( $self->encode_to_latin1( $field->subfield('a') ) );
     };
     if ( $@ ) {
         warn($@);
@@ -469,6 +469,11 @@ sub MARC_subject_subfield_order {
 
 sub MARC_title_subfield_order {
     return [ qw( a b c f g h k n p s ) ];
+}
+
+sub encode_to_latin1 {
+    my $self = shift(@_);
+    return CUFTS::CJDB::Util::marc8_to_latin1(@_);
 }
 
 1;
