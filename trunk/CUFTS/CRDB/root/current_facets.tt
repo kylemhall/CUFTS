@@ -1,7 +1,7 @@
 [%- PROCESS facet_lookups.tt -%]
 <div id="resources-brief-current-facets">
  <div id="resources-brief-current-facets-heading">
-  <h2>Your Current Search</h2>
+  <h1>Your Current Search</h1>
  </div>
  <div id="resources-brief-current-facets-content">
   [% IF facets.size %]
@@ -14,7 +14,7 @@
      [% END %]
      [% SET display_value = $facet_lookup.$facet_value %]
      <dd>
-      <a href="[% c.uri_for_facets( undef, facet ) %]" title="remove search term"><img alt="remove" src="[% c.uri_for_image('delete.png') %]" /></a>
+      <a href="[% c.uri_for_facets( undef, facet ) %]" title="remove search term"><img alt="remove" src="[% c.uri_for_image('cross.png') %]" /></a>
       [% display_value.length ? display_value : facet_value | html %]
      </dd>
    [% END %]

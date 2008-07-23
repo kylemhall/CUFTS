@@ -658,34 +658,61 @@ td.resource-edit-control {
     padding: 0;
     float: left;
     width: 100%;
+    margin-top: 8px;
+    border: 1px solid #555;
 }
 
 .resources-brief-facet-menu {
-    border: 1px solid #555;
     float: left;
-    margin: 8px 0 0 0;
     padding: 0;
     width: 100%;
     background: #efefef;
 }
 
-.resources-brief-facet-menu-heading {
+
+.resources-brief-facet-menu-main-heading {
     margin: 0;
     padding: 0;
     width: 100%;
     background: #aaa;
 }
 
+.resources-brief-facet-menu-main-heading h1 {
+    font-weight: bold;
+    font-size: 110%;
+    padding: 4px;
+    margin: 0;
+    color: #222;
+}
+
+.resources-brief-facet-menu-heading {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background: #ccc;
+    height: 1.9em;
+}
+
+.resources-brief-facet-menu-button {
+    float: right;
+    margin: .4em .4em 0 .2em;
+    clear: none;
+    cursor: pointer;
+}
+
+
 .resources-brief-facet-menu-content {
     padding: 3px;
 }
 
 .resources-brief-facet-menu h2 {
+    float: left;
     font-weight: bold;
     font-size: 100%;
     padding: 4px;
     margin: 0;
     color: #222;
+    display: inline;
 }
 
 .resources-brief-facet-menu ul {
@@ -706,19 +733,19 @@ td.resource-edit-control {
     margin: 0;
     padding: 0;
     width: 100%;
-    background: #efefef;
+    background: #83CFEB;
 }
 
 #resources-brief-current-facets-heading {
     margin: 0;
     padding: 0;
     width: 100%;
-    background: #aaa;
+    background: #649EB3;
 }
 
-#resources-brief-current-facets-heading h2 {
+#resources-brief-current-facets-heading h1 {
     font-weight: bold;
-    font-size: 100%;
+    font-size: 110%;
     padding: 4px;
     margin: 0;
     color: #222;

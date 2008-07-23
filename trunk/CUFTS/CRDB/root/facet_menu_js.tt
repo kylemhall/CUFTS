@@ -11,6 +11,13 @@
      
      return true;
  }
+ 
+ function facetToggle( name ) {
+     var menu = $('#resources-brief-facet-menu-' + name);
+     menu.find('div.resources-brief-facet-menu-content').toggleClass('hidden');
+     menu.find('img.resources-brief-facet-menu-button').toggleClass('hidden');
+ }
+ 
 
 $( function() {
     $('#keyword-input').bind('keypress', function(e) {
