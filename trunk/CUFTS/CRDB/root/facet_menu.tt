@@ -21,6 +21,7 @@
   <div class="resources-brief-facet-menu-content">
    <form method="POST" action="[% c.uri_for_facets( undef, 'name' ) %]">
     <select name="name" id="name-select">
+     <option value="[% c.uri_for_facets( [ 'name', undef ], 'name' ) %]"></option>
      [% FOREACH letter IN [ 'A'..'Z' ] %]
       <option value="[% c.uri_for_facets( [ 'name', letter ], 'name_regex' ) %]" [% facets.name == letter ? 'selected="selected"' : '' %]>[% letter %]</option>
      [% END %]
