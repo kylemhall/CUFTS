@@ -695,6 +695,7 @@ sub has_fulltext {
     or assert_ne( $record->vol_ft_end )
     or assert_ne( $record->iss_ft_start )
     or assert_ne( $record->iss_ft_end )
+    or assert_ne( $record->coverage )
     or return 0;
 
     return 1;
@@ -744,11 +745,10 @@ sub check_fulltext_vol_iss {
 sub check_fulltext_dates {
     my ( $class, $record, $resource, $site, $request ) = @_;
 
-    my ( $year, $month, $day )
-        = ( $request->year, $request->month, $request->day );
+    my ( $year, $month, $day ) = ( $request->year, $request->month, $request->day );
+
     return 0
-        unless $class->_check_date_range( $year, $month, $day,
-        $record->ft_start_date, $record->ft_end_date );
+        unless $class->_check_date_range( $year, $month, $day, $record->ft_start_date, $record->ft_end_date );
 
     return 1;
 }
