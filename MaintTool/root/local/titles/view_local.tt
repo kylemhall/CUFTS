@@ -37,6 +37,7 @@
  <form method="post" action="[% url("$url_base/local/titles/view/l$local_resource.id") %]">
   Search within this list: <input type="text" name="filter" value="[% filter %]"> <input type="submit" name="apply_filter" value="filter">
  </form>
+ <a style="margin-left: 20px;" href="[% url("$url_base/local/titles/edit_local/l$local_resource.id?paging_page=$paging_page") %]">New Journal Record</a>
 </div>
 
 <div style="margin-top: 1em;">
@@ -53,7 +54,7 @@
    [% FOREACH col IN columns %]
     <td class="[% class %]">
      [% IF col == "id" %]
-      [% title.id %]
+     <a href="[% url("$url_base/local/titles/edit_local/l$local_resource.id?local_id=$title.id&paging_page=$paging_page") %]">[% title.id %]</a>
      [% ELSE %]
       [% IF local_title.$col.defined %]
        <span class="local-override">[% local_title.$col | html %]</span>

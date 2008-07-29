@@ -25,6 +25,13 @@ my $form_validate_single = {
     missing_optional_valid => 1,
 };
 
+my $form_validate_edit_local = {
+    required => ['local_id'],
+    optional => ['paging_page', 'apply'],
+    filters => ['trim'],
+    missing_optional_valid => 1,
+};
+
 my $form_validate_bulk_global_upload = {
     required => ['file', 'upload', 'type', 'deactivate', 'match'],
 };
@@ -383,6 +390,10 @@ sub hidden_fields : Local {
 }
 
 
+##
+## single - edits a single local title *attached to a global title*.  See edit_local for editing a local only title.
+##
+
 sub single : Local {
     my ($self, $c, $resource_id) = @_;
     
@@ -427,6 +438,65 @@ sub single : Local {
     $c->stash->{template} = 'local/titles/single.tt';
 }   
 
+
+sub edit_local : Local {
+    my ($self, $c, $resource_id) = @_;
+    
+    my $local_resource = $c->stash->{local_resource};
+    my %validate = %$form_validate_edit_local;
+    my $override_fields = $c->stash->{override_fields} = $local_resource->do_module('title_list_fields');
+    push @{$validate{optional}}, @$override_fields;
+
+    $c->form(\%validate);
+
+    my $local_title = $c->stash->{local_title} = $local_resource->do_module('local_db_module')->search({
+        id => $c->form->valid->{local_id},
+        resource => $local_resource->id,
+    })->first;
+
+    if ($c->form->valid->{apply}) {
+
+        eval {
+            if (defined($local_title)) {
+                $local_title->update_from_form($c->form);
+            } else {
+                $c->form->valid->{resource} = $local_resource->id;
+                $local_title = $local_resource->do_module('local_db_module')->create_from_form($c->form);
+            }
+        };
+        if ($@) {
+            my $err = $@;
+            CUFTS::DB::DBI->dbi_rollback;
+            die($err);
+        }
+
+        CUFTS::DB::DBI->dbi_commit;
+
+        return $c->redirect('/local/titles/view/l' . $local_resource->id . '?page=' . $c->form->valid->{paging_page});
+    }
+
+    $c->stash->{paging_page} = $c->form->valid->{paging_page};
+    $c->stash->{template} = 'local/titles/edit_local.tt';
+}
+
+sub delete_local : Local {
+    my ($self, $c, $resource_id) = @_;
+    
+    my $local_resource = $c->stash->{local_resource};
+
+    $c->form({required => ['local_id']});
+
+    my $local_title = $c->stash->{local_title} = $local_resource->do_module('local_db_module')->search({
+        id => $c->form->valid->{local_id},
+        resource => $local_resource->id,
+    })->first;
+
+    if ( $local_title ) {
+        $local_title->delete;
+    }
+
+    return $c->redirect('/local/titles/view/l' . $local_resource->id . '?page=' . $c->form->valid->{paging_page});
+}
 
 sub bulk_global : Local {
     my ($self, $c, $resource_id) = @_;
