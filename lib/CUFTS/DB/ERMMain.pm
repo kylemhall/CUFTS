@@ -595,7 +595,7 @@ sub as_marc {
     }
 
     if ( not_empty_string( $self->contract_start ) || not_empty_string( $self->contract_end ) ) {
-        $MARC->append_fields( MARC::Field->new( '961', '', '', 'h' => 'contract start: ' . $self->contract_start . ' contract end: ' . $self->contract_end ) );
+        $MARC->append_fields( MARC::Field->new( '961', '', '', 'h' => 'contract start: ' . $self->contract_start . '; contract end: ' . $self->contract_end ) );
     }
 
     @subfields = ();
