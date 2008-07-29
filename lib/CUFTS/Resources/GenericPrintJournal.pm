@@ -1,4 +1,4 @@
-## CUFTS::Resources::GenericJournal
+## CUFTS::Resources::GenericPrintJournal
 ##
 ## Copyright Todd Holbrook - Simon Fraser University (2003)
 ##
@@ -18,7 +18,7 @@
 ## with CUFTS; if not, write to the Free Software Foundation, Inc., 59
 ## Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package CUFTS::Resources::GenericJournal;
+package CUFTS::Resources::GenericPrintJournal;
 
 use base qw(CUFTS::Resources::Base::Journals);
 
@@ -99,9 +99,7 @@ sub build_linkJournal {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->journal_url );
-
-        my $result = new CUFTS::Result( $record->journal_url );
+        my $result = new CUFTS::Result( $record->journal_url || '' );
         $result->record($record);
 
         push @results, $result;
@@ -117,5 +115,34 @@ sub can_getFulltext {
 sub can_getTOC {
     return 0;
 }
+
+##
+## CJDB specific code
+##
+
+sub modify_cjdb_link_hash {
+    my ( $self, $type, $hash ) = @_;
+
+    # $hash the link hash from the CJDB loader:
+    # {
+    #    URL => '',
+    #    link_type => 1,  # 0 - print, 1 - fulltext, 2 - database
+    #    fulltext_coverage => '',
+    #    citation_coverage => '',
+    #    embargo => '',  # moving wall
+    #    current => '',  # moving wall
+    # }
+    
+    # Hash should be directly modified here, if necessary.
+
+    # Convert fulltext to print
+    
+    $hash->{link_type} = 0;
+    $hash->{print_coverage} = delete $hash->{fulltext_coverage};
+
+    return 1;
+}
+
+
 
 1;

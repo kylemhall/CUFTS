@@ -33,6 +33,7 @@ CREATE VIEW merged_journals AS
            COALESCE( local_journals.abbreviation, journals.abbreviation ) AS abbreviation,
            COALESCE( local_journals.current_months, journals.current_months ) AS current_months,
            COALESCE( local_journals.current_years, journals.current_years ) AS current_years,
+           COALESCE( local_journals.coverage, journals.coverage ) AS coverage,
            local_journals.erm_main AS erm_main,
            erm_main.key AS erm_main_key
 

@@ -36,41 +36,42 @@ use base 'CUFTS::DB::DBI';
 __PACKAGE__->table('merged_journals');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw(
-	id
+    id
 
-	title
-	issn
-	e_issn
-	site
-	resource_name
+    title
+    issn
+    e_issn
+    site
+    resource_name
     local_resource
     global_resource
-	active
-	vol_cit_start
-	vol_cit_end
-	vol_ft_start
-	vol_ft_end
-	iss_cit_start
-	iss_cit_end
-	iss_ft_start
-	iss_ft_end
-	cit_start_date
-	cit_end_date
-	ft_start_date
-	ft_end_date
-	embargo_months
-	embargo_days
-	journal_auth
+    active
+    vol_cit_start
+    vol_cit_end
+    vol_ft_start
+    vol_ft_end
+    iss_cit_start
+    iss_cit_end
+    iss_ft_start
+    iss_ft_end
+    cit_start_date
+    cit_end_date
+    ft_start_date
+    ft_end_date
+    embargo_months
+    embargo_days
+    journal_auth
 
-	db_identifier	
-	toc_url
-	journal_url
-	urlbase
-	publisher
-	abbreviation
-	current_months
-	current_years
-	cjdb_note
+    db_identifier   
+    toc_url
+    journal_url
+    urlbase
+    publisher
+    abbreviation
+    current_months
+    current_years
+    cjdb_note
+    coverage
 
     erm_main
     erm_main_key
