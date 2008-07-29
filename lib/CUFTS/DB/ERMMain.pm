@@ -570,7 +570,7 @@ sub as_marc {
     }
     $MARC->append_fields( MARC::Field->new( '960', '', '', @subfields ) );
 
-    foreach my $field ( qw( subscription_notes subscription_ownership_notes pricing_model_notes review_notes consortia_notes date_cost_notes consortia_notes ) ) {
+    foreach my $field ( qw( subscription_notes subscription_ownership_notes pricing_model_notes review_notes consortia_notes date_cost_notes ) ) {
         my $content = $self->$field();
         if ( not_empty_string( $content ) ) {
             my $label = $field;
@@ -590,6 +590,13 @@ sub as_marc {
         $MARC->append_fields( MARC::Field->new( '961', '', '', 'f' => $self->coverage ) );
     }
     
+    if ( $self->resource_type ) {
+        $MARC->append_fields( MARC::Field->new( '961', '', '', 'g' => 'resource type: ' . $self->resource_type->resource_type ) );
+    }
+
+    if ( not_empty_string( $self->contract_start ) || not_empty_string( $self->contract_end ) ) {
+        $MARC->append_fields( MARC::Field->new( '961', '', '', 'h' => 'contract start: ' . $self->contract_start . ' contract end: ' . $self->contract_end ) );
+    }
 
     @subfields = ();
 
