@@ -57,6 +57,7 @@ BEGIN {
         Gale
         GenericJournal
         GenericJournalDOI
+        GenericPrintJournal
         Google::GoogleSearch
         Highwire
         HighwireFree

@@ -92,6 +92,9 @@ sub title_list_fields {
             ft_end_date
             embargo_months
             embargo_days
+            current_months
+            current_years
+            coverage
             vol_ft_start
             vol_ft_end
             iss_ft_start
@@ -103,7 +106,15 @@ sub title_list_fields {
             vol_cit_end
             iss_cit_start
             iss_cit_end
-            )
+
+            db_identifier
+            toc_url
+            journal_url
+            urlbase
+            publisher
+            abbreviation
+            
+        )
     ];
 }
 
@@ -119,6 +130,16 @@ sub overridable_title_list_fields {
             embargo_months
             embargo_days
             current_months
+            current_years
+            coverage
+            
+            db_identifier   
+            toc_url
+            journal_url
+            urlbase
+            publisher
+            abbreviation
+            
 
             cit_start_date
             cit_end_date
@@ -126,10 +147,9 @@ sub overridable_title_list_fields {
             iss_cit_start
             vol_cit_end
             iss_cit_end
-            journal_url
 
             cjdb_note
-            )
+        )
     ];
 }
 
@@ -153,6 +173,8 @@ sub title_list_field_map {
         'publisher'      => 'publisher',
         'abbreviation'   => 'abbreviation',
         'current_months' => 'current_months',
+        'current_years'  => 'current_years',
+        'coverage'       => 'coverage',
         'cjdb_note'      => 'cjdb_note',
     };
 }
@@ -1013,7 +1035,7 @@ sub overlay_global_title_data {
         or return $local;
 
     foreach my $column (
-        qw(title issn e_issn vol_cit_start vol_cit_end iss_cit_start iss_cit_end vol_ft_start vol_ft_end iss_ft_start iss_ft_end cit_start_date cit_end_date ft_start_date ft_end_date embargo_months embargo_days urlbase db_identifier journal_url toc_url publisher abbreviation current_months journal_auth)
+        qw(title issn e_issn vol_cit_start vol_cit_end iss_cit_start iss_cit_end vol_ft_start vol_ft_end iss_ft_start iss_ft_end cit_start_date cit_end_date ft_start_date ft_end_date embargo_months embargo_days urlbase db_identifier journal_url toc_url publisher abbreviation current_months coverage journal_auth)
     )
     {
         $local->$column( $global->$column ) unless defined( $local->$column );
@@ -1022,5 +1044,29 @@ sub overlay_global_title_data {
     $local->ignore_changes;
     return $local;
 }
+
+
+##
+## CJDB specific code
+##
+
+sub modify_cjdb_link_hash {
+    my ( $self, $type, $hash ) = @_;
+
+    # $hash the link hash from the CJDB loader:
+    # {
+    #    URL => '',
+    #    link_type => 1,  # 0 - print, 1 - fulltext, 2 - database
+    #    fulltext_coverage => '',
+    #    citation_coverage => '',
+    #    embargo => '',  # moving wall
+    #    current => '',  # moving wall
+    # }
+    
+    # Hash should be directly modified here, if necessary.
+    
+    return 1;
+}
+
 
 1;

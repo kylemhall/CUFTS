@@ -31,6 +31,7 @@ CREATE VIEW journals_active AS
            journals.abbreviation,
            journals.current_months,
            journals.current_years,
-           journals.cjdb_note 
+           journals.cjdb_note,
+           journals.coverage
     FROM (journals JOIN local_journals ON ((local_journals.journal = journals.id))) 
     WHERE (local_journals.active = true);

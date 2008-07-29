@@ -461,6 +461,7 @@ sub edit_local : Local {
                 $local_title->update_from_form($c->form);
             } else {
                 $c->form->valid->{resource} = $local_resource->id;
+                $c->form->valid->{active} = 'true';
                 $local_title = $local_resource->do_module('local_db_module')->create_from_form($c->form);
             }
         };

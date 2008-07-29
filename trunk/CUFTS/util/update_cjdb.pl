@@ -339,7 +339,7 @@ sub load_cufts {
 
         my $count = 0;
 
-    JOURNAL:
+        JOURNAL:
         while ( my $local_journal = $journals_iter->next ) {
             $count++;
             if ($PROGRESS) {
@@ -365,22 +365,22 @@ sub load_cufts {
 
             my $ft_coverage = get_cufts_ft_coverage($local_journal);
             defined($ft_coverage)
-                and $new_link->{'fulltext_coverage'} = $ft_coverage;
+                and $new_link->{fulltext_coverage} = $ft_coverage;
 
             my $cit_coverage = get_cufts_cit_coverage($local_journal);
             defined($cit_coverage)
-                and $new_link->{'citation_coverage'} = $cit_coverage;
+                and $new_link->{citation_coverage} = $cit_coverage;
 
             if ( defined( $local_journal->embargo_days ) ) {
-                $new_link->{'embargo'} = $local_journal->embargo_days . ' days';
+                $new_link->{embargo} = $local_journal->embargo_days . ' days';
             }
 
             if ( defined( $local_journal->embargo_months ) ) {
-                $new_link->{'embargo'} = $local_journal->embargo_months . ' months';
+                $new_link->{embargo} = $local_journal->embargo_months . ' months';
             }
 
             if ( defined( $local_journal->current_months ) ) {
-                $new_link->{'current'} = $local_journal->current_months . ' months';
+                $new_link->{current} = $local_journal->current_months . ' months';
             }
 
             # Skip if citations are turned off and we have no fulltext coverage data
@@ -388,9 +388,8 @@ sub load_cufts {
             if (   is_empty_string( $new_link->{'fulltext_coverage'} )
                 && is_empty_string( $new_link->{'embargo'} )
                 && is_empty_string( $new_link->{'current'} )
-                && (
-                    !$site->cjdb_show_citations || is_empty_string( $new_link->{'citation_coverage'} )
-                ) )
+                && ( !$site->cjdb_show_citations || is_empty_string( $new_link->{'citation_coverage'} ) )
+            )
             {
                 if ( $DEBUG_UPDATE_CJDB ) { print STDERR "Skipping journal '", $local_journal->title, "' due to no fulltext coverage information.\n" }
                 next JOURNAL;
@@ -416,6 +415,7 @@ sub load_cufts {
                     $new_link->{URL} = $result->url;
                     $new_link->{link_type} = 1;
                     my %temp_hash = %{$new_link};
+                    $module->modify_cjdb_link_hash( 'journal', \%temp_hash );
                     push @links, \%temp_hash;
                 }
 
@@ -426,9 +426,10 @@ sub load_cufts {
                 $results = $module->build_linkDatabase( [$local_journal], $resource, $site, $request );
                 foreach my $result (@$results) {
                     $module->prepend_proxy( $result, $local_resource, $site, $request );
-                    $new_link->{'URL'} = $result->url;
+                    $new_link->{URL} = $result->url;
                     $new_link->{link_type} = 2;
                     my %temp_hash = %{$new_link};
+                    $module->modify_cjdb_link_hash( 'database', \%temp_hash );
                     push @links, \%temp_hash;
                 }
 
@@ -499,6 +500,10 @@ sub load_cufts {
 
 sub get_cufts_ft_coverage {
     my ($local_journal) = @_;
+
+    if ( not_empty_string($local_journal->coverage) ) {
+        return $local_journal->coverage;
+    }
 
     my $ft_coverage;
 

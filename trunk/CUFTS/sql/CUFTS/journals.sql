@@ -1,6 +1,6 @@
 CREATE TABLE journals (
     id              SERIAL PRIMARY KEY,
-    title           VARCHAR(512),
+    title           VARCHAR(1024),
     issn            VARCHAR(8),        /* ISSN with no dash */
     e_issn          VARCHAR(8),        /* Electronic ISSN if one exists (no dash) */
 
@@ -32,6 +32,7 @@ CREATE TABLE journals (
     urlbase         VARCHAR(1024),  /* URL base used for creating links */
     publisher       VARCHAR(1024),  /* Journal publisher */
     abbreviation    VARCHAR(1024),  /* Journal abbreviation */
+    coverage        VARCHAR(1024),  /* Freetext coverage description if start/end dates are not usable */
 
     current_months  VARCHAR(256),   /* Months of moving wall access to current issues */
     current_years   VARCHAR(256),   /* Years of moving wall access to current issues */
