@@ -37,7 +37,7 @@
  <form method="post" action="[% url("$url_base/local/titles/view/l$local_resource.id") %]">
   Search within this list: <input type="text" name="filter" value="[% filter %]"> <input type="submit" name="apply_filter" value="filter">
  </form>
- <a style="margin-left: 20px;" href="[% url("$url_base/local/titles/edit_local/l$local_resource.id?paging_page=$paging_page") %]">New Journal Record</a>
+ <a style="margin-left: 20px;" href="[% url("$url_base/local/titles/edit_local/l$local_resource.id?paging_page=$paging_page") %]">New Record</a>
 </div>
 
 <div style="margin-top: 1em;">
