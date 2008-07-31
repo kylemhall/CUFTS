@@ -2,7 +2,7 @@
 
 <div>
     <span class="heading">[% local_title.title | html %]</span>
-    [% IF local_title %]<a href="[% url("$url_base/local/titles/delete_local/l$local_resource.id?local_id=$local_title.id") %]" onClick="return confirmDelete()">delete journal</a>[% END %]
+    [% IF local_title %]<a href="[% url("$url_base/local/titles/delete_local/l$local_resource.id?local_id=$local_title.id") %]" onClick="return confirmDelete()">delete record</a>[% END %]
 </div>
 
 <form method="post">
