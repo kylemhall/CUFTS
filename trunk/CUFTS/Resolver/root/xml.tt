@@ -16,9 +16,9 @@
 				[% IF result.atitle %]<title>[% result.atitle | html %]</title>[% END %]
 				[% SET record = result.record %]
 				[% IF record.defined %]
-					[% IF record.ft_start_date %]<ft_start_date>[% record.ft_start_date | html %]</ft_start_date>[% END %]
-					[% IF record.ft_end_date %]<ft_end_date>[% record.ft_end_date | html %]</ft_end_date>[% END %]
-					[% IF record.cjdb_note %]<cjdb_note>[% record.cjdb_note | html %]</cjdb_note>[% END %]
+				    [% FOREACH field IN [ 'ft_start_date', 'ft_end_date', 'embargo_months', 'embargo_days', 'current_months', 'current_years', 'coverage', 'vol_ft_start', 'vol_ft_end', 'iss_ft_start', 'iss_ft_end', 'cjdb_note' ] %]
+                        [% IF record.$field %]<[% field %]>[% record.$field | html %]</[% field %]>[% END %]
+                    [% END %]
 				[% END %]
 			</result>
 		[% END %]
