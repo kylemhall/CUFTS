@@ -493,7 +493,14 @@ sub delete_local : Local {
     })->first;
 
     if ( $local_title ) {
-        $local_title->delete;
+        eval { $local_title->delete; };
+        if ($@) {
+            my $err = $@;
+            CUFTS::DB::DBI->dbi_rollback;
+            die($err);
+        }
+
+        CUFTS::DB::DBI->dbi_commit;
     }
 
     return $c->redirect('/local/titles/view/l' . $local_resource->id . '?page=' . $c->form->valid->{paging_page});
