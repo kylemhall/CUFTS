@@ -14,7 +14,7 @@
 
  <div class="resources-brief-facet-menu" id="resources-brief-facet-menu-title">
   <div class="resources-brief-facet-menu-heading">
-   <h2>By Title</h2>
+   <h2>[% IF facets.name %]Change[% ELSE %]Add[% END %] Title</h2>
    <img class="resources-brief-facet-menu-button minus" src="[% c.uri_for_image('bullet_minus.png') %]" onClick="return facetToggle('title');"/>
    <img class="resources-brief-facet-menu-button plus hidden" src="[% c.uri_for_image('bullet_plus.png') %]" onClick="return facetToggle('title');"/>
   </div>
@@ -34,7 +34,7 @@
 
  <div class="resources-brief-facet-menu" id="resources-brief-facet-menu-subjects">
   <div class="resources-brief-facet-menu-heading">
-   <h2>By Subject</h2>
+   <h2>[% IF facets.subject %]Change[% ELSE %]Add[% END %] Subject</h2>
    <img class="resources-brief-facet-menu-button minus" src="[% c.uri_for_image('bullet_minus.png') %]" onClick="return facetToggle('subjects');"/>
    <img class="resources-brief-facet-menu-button plus hidden" src="[% c.uri_for_image('bullet_plus.png') %]" onClick="return facetToggle('subjects');"/>
   </div>
@@ -59,7 +59,7 @@
   
  <div class="resources-brief-facet-menu" id="resources-brief-facet-menu-resource_type">
   <div class="resources-brief-facet-menu-heading">
-   <h2>By Resource Type</h2>
+   <h2>[% IF facets.resource_type %]Change[% ELSE %]Add[% END %] Resource Type</h2>
    <img class="resources-brief-facet-menu-button minus" src="[% c.uri_for_image('bullet_minus.png') %]" onClick="return facetToggle('resource_type');"/>
    <img class="resources-brief-facet-menu-button plus hidden" src="[% c.uri_for_image('bullet_plus.png') %]" onClick="return facetToggle('resource_type');"/>
   </div>
@@ -84,7 +84,7 @@
   
  <div class="resources-brief-facet-menu" id="resources-brief-facet-menu-content_type">
   <div class="resources-brief-facet-menu-heading">
-   <h2>By Content Type</h2>
+   <h2>[% IF facets.content_type %]Change[% ELSE %]Add[% END %] Content Type</h2>
    <img class="resources-brief-facet-menu-button minus" src="[% c.uri_for_image('bullet_minus.png') %]" onClick="return facetToggle('content_type');"/>
    <img class="resources-brief-facet-menu-button plus hidden" src="[% c.uri_for_image('bullet_plus.png') %]" onClick="return facetToggle('content_type');"/>
   </div>
