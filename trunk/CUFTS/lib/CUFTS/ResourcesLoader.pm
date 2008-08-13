@@ -49,6 +49,7 @@ BEGIN {
         EBSCO
         Elsevier_CNSLP
         Elsevier
+        ElsevierEurope
         Emerald
         Erudit
         Extenza
