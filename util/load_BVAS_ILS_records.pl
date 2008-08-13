@@ -5,8 +5,7 @@ use strict;
 
 use Data::Dumper;
 
-# use CUFTS::Schema;
-use CUFTS::DB::ERMMain;
+use CUFTS::Schema;
 use Date::Manip;
 use Unicode::String qw(utf8);
 use CUFTS::CJDB::Util;
@@ -67,11 +66,9 @@ while ($row = <>) {
     
     # Find or create ERM Main record
     
-    # my $erm = $schema->resultset('ERMMain')->search( { site => $site_id, 'local_bib' => $record->{record_num} } )->first();
-    my $erm = CUFTS::DB::ERMMain->search( { site => $site_id, 'local_bib' => $record->{record_num} } )->first();
+    my $erm = $schema->resultset('ERMMain')->search( { site => $site_id, 'local_bib' => $record->{record_num} } )->first();
     if ( !defined($erm) ) {
-        # $erm = $schema->resultset('ERMMain')->create( {
-        $erm = CUFTS::DB::ERMMain->create( {
+        $erm = $schema->resultset('ERMMain')->create( {
             site  => $site_id,
             key   => $record->{title},
             issn  => join( ', ', map { substr($_, 0, 4) . '-' . substr($_, 4, 4) } @{ $record->{issns} } ),
@@ -86,43 +83,41 @@ while ($row = <>) {
     else {
         print "* FOUND ERM MAIN: ", $erm->id, "\n";
     }
+        
+    foreach my $payment ( sort { $b->{end_date} cmp $a->{end_date} } @{ $record->{payments} } ) {
+        print "   ", $payment->{invoice_date};
+        print "   ", $payment->{start_date}, ' - ', $payment->{end_date};
+        printf( "%8i", $payment->{voucher} );
+        printf( "   \$ %9.2f  %3s \$ %9.2f", $payment->{amount_paid}, $payment->{currency_billed}, $payment->{amount_billed} );
+        print "  ($payment->{references})" if exists $payment->{references};
+        if ( $payment->{sub_from} =~ /\d/ || $payment->{sub_to} =~ /\d/ ) {
+            print "   FROM: ", $payment->{sub_from}, ' - TO: ', $payment->{sub_to};
+        }
+        print "\n";
+        
+        my $cost = $schema->resultset('ERMCosts')->search( { erm_main => $erm->id, number => $payment->{voucher} } )->first();
+        if ( !defined($cost) ) {
+            $cost = $schema->resultset('ERMCosts')->create( {
+                erm_main         => $erm->id,
+                number           => $payment->{voucher},
+                reference        => $payment->{references},
+                date             => $payment->{invoice_date},
+                period_start     => $payment->{start_date},
+                period_end       => $payment->{end_date},
+                paid             => $payment->{amount_paid},
+                paid_currency    => 'USD',  # ???
+                invoice          => $payment->{amount_billed},
+                invoice_currency => $payment->{currency_billed},
+            } );
+            print "* CREATED COSTS: ", $cost->id, "\n";
+        }
+        else {
+            print "* FOUND EXISTING COSTS: ", $cost->id, "\n";
+        }
+        
     
-    CUFTS::DB::DBI->dbi_commit;
+    }
     
-    # foreach my $payment ( sort { $b->{end_date} cmp $a->{end_date} } @{ $record->{payments} } ) {
-    #     print "   ", $payment->{invoice_date};
-    #     print "   ", $payment->{start_date}, ' - ', $payment->{end_date};
-    #     printf( "%8i", $payment->{voucher} );
-    #     printf( "   \$ %9.2f  %3s \$ %9.2f", $payment->{amount_paid}, $payment->{currency_billed}, $payment->{amount_billed} );
-    #     print "  ($payment->{references})" if exists $payment->{references};
-    #     if ( $payment->{sub_from} =~ /\d/ || $payment->{sub_to} =~ /\d/ ) {
-    #         print "   FROM: ", $payment->{sub_from}, ' - TO: ', $payment->{sub_to};
-    #     }
-    #     print "\n";
-    #     
-    #     my $cost = $schema->resultset('ERMCosts')->search( { erm_main => $erm->id, number => $payment->{voucher} } )->first();
-    #     if ( !defined($cost) ) {
-    #         $cost = $schema->resultset('ERMCosts')->create( {
-    #             erm_main         => $erm->id,
-    #             number           => $payment->{voucher},
-    #             reference        => $payment->{references},
-    #             date             => $payment->{invoice_date},
-    #             period_start     => $payment->{start_date},
-    #             period_end       => $payment->{end_date},
-    #             paid             => $payment->{amount_paid},
-    #             paid_currency    => 'USD',  # ???
-    #             invoice          => $payment->{amount_billed},
-    #             invoice_currency => $payment->{currency_billed},
-    #         } );
-    #         print "* CREATED COSTS: ", $cost->id, "\n";
-    #     }
-    #     else {
-    #         print "* FOUND EXISTING COSTS: ", $cost->id, "\n";
-    #     }
-    #     
-    # 
-    # }
-    # 
 }
 
 
