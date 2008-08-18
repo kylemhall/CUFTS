@@ -15,8 +15,8 @@
 [% FOREACH issn IN journal_auth.issns %]
  [% SET max_field = loop.count %]
  <div class="row[% loop.count % 2 %]">
-  <input type="text" size="10" maxlength="9" name="[% issn.id %]_issn" value="[% issn.issn %]" />
-  <input type="text" size="30" maxlength="512" name="[% issn.id %]_info" value="[% issn.info %]" />
+  <input type="text" size="10" maxlength="9" name="[% issn.id %]_issn" value="[% issn.issn | html %]" />
+  <input type="text" size="30" maxlength="512" name="[% issn.id %]_info" value="[% issn.info | html %]" />
  </div>
 [% END %]
 [% FOREACH x IN [ 1 .. 25 ] %]
@@ -40,8 +40,8 @@ window['field_max']['issn'] = [% max_field.max(max_issn_field) %];
 [% FOREACH title IN journal_auth.titles %]
 [% SET max_field = loop.count %]
  <div class="row[% loop.count % 2 %]">
-  <input type="text" size="40" maxlength="1024" name="[% title.id %]_title" value="[% title.title %]" />
-  <input type="text" size="4" maxlength="3" name="[% title.id %]_count" value="[% title.title_count %]" />
+  <input type="text" size="40" maxlength="1024" name="[% title.id %]_title" value="[% title.title | html %]" />
+  <input type="text" size="4" maxlength="3" name="[% title.id %]_count" value="[% title.title_count | html %]" />
  </div>
 [% END %]
 [% FOREACH x IN [ 1 .. 25 ] %]
