@@ -48,6 +48,7 @@ sub title_list_fields {
             current_years
             coverage
             journal_url
+            journal_auth
             cjdb_note
         )
     ];
