@@ -114,6 +114,8 @@ sub title_list_fields {
             publisher
             abbreviation
             
+            journal_auth
+            
         )
     ];
 }
@@ -149,6 +151,8 @@ sub overridable_title_list_fields {
             iss_cit_end
 
             cjdb_note
+
+            journal_auth
         )
     ];
 }
@@ -176,6 +180,7 @@ sub title_list_field_map {
         'current_years'  => 'current_years',
         'coverage'       => 'coverage',
         'cjdb_note'      => 'cjdb_note',
+        'journal_auth'   => 'journal_auth',
     };
 }
 
