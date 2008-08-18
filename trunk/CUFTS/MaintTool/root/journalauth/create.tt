@@ -1,27 +1,13 @@
 [% USE url %]
 
-<a href="[% url("$url_base/journalauth/create") %]">Create new journal auth record</a> <br /><br />
-<div>
-<form method="post" action="[% url("$url_base/journalauth/search") %]">
-Search:
-<input type="text" name="string" value="[% string %]" size="30" maxlength="128" />
-in
-<select name="field">
- <option value="title" [% 'selected="selected"' IF field == 'title' %]>titles</option>
- <option value="official_title" [% 'selected="selected"' IF field == 'official_title' %]>official title</option>
- <option value="issn" [% 'selected="selected"' IF field == 'issn' %]>ISSNs</option>
- <option value="ids" [% 'selected="selected"' IF field == 'ids' %]>ids</option>
-</select>
-<input type="submit" name="search" value="search">
-<input type="submit" name="cancel" value="cancel">
-</form>
-</div>
+<form method="post" name="journal_auth" action="[% url("$url_base/journalauth/create") %]">
 
-<div style="margin-top: 1em;">
-<form name="merge_form" method="post" action="[% url("$url_base/journalauth/merge") %]">
-[% FOREACH journal_auth IN journal_auths %]
+[% IF records %]
+
+Similar records found:<br />
+
+[% FOREACH journal_auth IN records %]
  <div class="journal-auth-record">
-  <input type="checkbox" name="merge" value="[% journal_auth.id %]" />
   <span class="heading">[% journal_auth.title | html %]</span>
   <span style="font-size: 80%">[% journal_auth.id %]</span>
   [% FOREACH issn IN journal_auth.issns %]([% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %]) [% END %]
@@ -30,8 +16,8 @@ in
   <div class="journal-auth-titles">
    <div id="journal-auth-titles-heading">Titles</div>
    <table>
-   [% FOREACH title IN journal_auth.titles %]
-    <tr><td>[% title.title | html %]</td><td>[% title.title_count %]</td></tr>
+   [% FOREACH found_title IN journal_auth.titles %]
+    <tr><td>[% found_title.title | html %]</td><td>[% found_title.title_count %]</td></tr>
    [% END %]
    </table>
   </div>
@@ -66,8 +52,53 @@ in
   </div>
  </div>
 [% END %]
-
-[% IF journal_auths.size > 1 %]
-<input type="submit" name="merge_records" value="merge" style="margin-top: 1em;" /></form>
-[% END %]
+<br />Record to create: <br />
+<div id="journal-auth-edit-titles">
+<div class="heading">Title</div>
+<div class="row0">
+ [% title | html %]
 </div>
+</div>
+
+<div id="journal-auth-edit-issns">
+<div class="heading">ISSNs</div>
+<div class="row0">
+ [% issn1 | html %]
+</div>
+<div class="row1">
+ [% issn2 | html %]
+</div>
+</div>
+
+<input type="hidden" name="title" value="[% title %]" />
+<input type="hidden" name="issn1" value="[% issn1 %]" />
+<input type="hidden" name="issn2" value="[% issn2 %]" />
+<input type="hidden" name="confirm" value="1" />
+<div id="submit" style="margin-top: 1em; margin-bottom: 1em;">
+Create this record anyway: <input type="submit" name="create" value="create" />
+</div>
+
+[% ELSE %]
+<div id="journal-auth-edit-titles">
+<div class="heading">Title</div>
+<div class="row0">
+ <input type="text" size="60" maxlength="1024" name="title" value="[% title | html %]" />
+</div>
+</div>
+
+<div id="journal-auth-edit-issns">
+<div class="heading">ISSNs</div>
+<div class="row0">
+ <input type="text" size="10" maxlength="9" name="issn1" value="[% issn1 | html %]" />
+</div>
+<div class="row1">
+ <input type="text" size="10" maxlength="9" name="issn2" value="[% issn2 | html %]" />
+</div>
+</div>
+
+<div id="submit" style="margin-top: 1em; margin-bottom: 1em;">
+<input type="submit" name="create" value="create" />
+</div>
+[% END %]
+
+</form>

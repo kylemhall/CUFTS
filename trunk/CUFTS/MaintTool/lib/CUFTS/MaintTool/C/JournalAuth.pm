@@ -71,6 +71,13 @@ my $marc_fields = {
              },
 };
 
+my $form_validate_create = {
+    required => [ 'title', 'create' ],
+    optional => [ 'issn1', 'issn2', 'confirm' ],
+    filters  => [ 'trim' ],
+    missing_optional_valid => 1,
+};
+
 my $form_validate_search = {
     optional => [
         'string', 'field', 'search', 'cancel',
@@ -102,6 +109,73 @@ sub auto : Private {
     push( @{ $c->stash->{load_css} }, 'journal_auth.css' );
 
     return 1;
+}
+
+sub create : Local {
+    my ( $self, $c ) = @_;
+    
+    if ( $c->req->params->{create} ) {
+        $c->form($form_validate_create);
+        
+        $c->stash->{title} = $c->form->valid->{title};
+        $c->stash->{issn1} = $c->form->valid->{issn1};
+        $c->stash->{issn2} = $c->form->valid->{issn2};
+        
+        unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {      
+
+            my @records;
+            if ( !$c->form->valid->{confirm} ) {
+                # Check for existing similar records
+
+                push @records, CUFTS::DB::JournalsAuth->search_by_title($c->form->valid->{title});
+                if ( $c->form->valid->{issn1} ) {
+                    push @records, CUFTS::DB::JournalsAuth->search_by_issns($c->form->valid->{issn1});
+                }
+                if ( $c->form->valid->{issn2} ) {
+                    push @records, CUFTS::DB::JournalsAuth->search_by_issns($c->form->valid->{issn2});
+                }
+            
+                if ( scalar(@records) > 0 ) {
+                    $c->stash->{records} = \@records;
+                }
+            }
+
+            if ( $c->form->valid->{confirm} || !scalar(@records) ) {
+                # User has confirmed new record, or no close matches were found
+
+                my $ja = CUFTS::DB::JournalsAuth->create({title => $c->form->valid->{title}});
+                $ja->add_to_titles({title => $c->form->valid->{title}});
+            
+                foreach my $field ( 'issn1', 'issn2' ) {
+
+                    if ( not_empty_string($c->form->valid->{$field}) ) {
+                        my $issn = $c->form->valid->{$field};
+                        if ( $issn =~ / (\d{4}) -? (\d{3}[\dxX]) /xsm ) {
+                            $ja->add_to_issns({
+                                issn  => uc("$1$2"),
+                                info  => 'New from form',
+                            });
+                        } else {
+                            push @{$c->stash->{errors}}, "Invalid ISSN: $issn";
+                        }
+                    }
+
+                }
+
+                if ( defined($c->stash->{errors}) ) {
+                    CUFTS::DB::DBI->dbi_rollback();
+                } else {
+                    CUFTS::DB::DBI->dbi_commit();
+                    return $c->redirect('/journalauth/search?search=sesarch&field=ids&string=' . $ja->id);
+                }
+
+            }
+
+        }
+
+    }
+    
+    $c->stash->{template} = 'journalauth/create.tt';
 }
 
 sub search : Local {
