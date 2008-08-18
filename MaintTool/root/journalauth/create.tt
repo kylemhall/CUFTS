@@ -6,7 +6,10 @@
 
 Similar records found:<br />
 
+[% SET seen = {} %]
 [% FOREACH journal_auth IN records %]
+ [% ja_id = journal_auth.id %]
+ [% NEXT IF seen.$ja_id %] [% SET seen.$ja_id = 1 %]
  <div class="journal-auth-record">
   <span class="heading">[% journal_auth.title | html %]</span>
   <span style="font-size: 80%">[% journal_auth.id %]</span>
