@@ -59,6 +59,8 @@ JOURNAL:
             if ( $c->form->valid->{fulltext} ) {
                 if (    !defined($journal->ft_start_date  )
                      && !defined($journal->ft_end_date    )
+                     && !defined($journal->current_months )
+                     && !defined($journal->current_years  )
                      && !defined($journal->embargo_days   )
                      && !defined($journal->embargo_months ) ) {
                          next JOURNAL;
