@@ -128,7 +128,7 @@ sub load_site {
             $jas{$ja_id}->{start} = $ft_start_date;
         }
 
-        if ( !defined($ft_end_date) ) {
+        if ( !defined($ft_end_date) || $ft_end_date eq '2038-12-31' ) {
             $jas{$ja_id}->{end} = '9999-99-99';
         }
         elsif ( !defined($jas{$ja_id}->{end}) || $ft_end_date gt $jas{$ja_id}->{end} ) {
