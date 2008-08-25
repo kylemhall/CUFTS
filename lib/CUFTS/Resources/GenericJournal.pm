@@ -49,6 +49,7 @@ sub title_list_fields {
             coverage
             journal_url
             cjdb_note
+            journal_auth
         )
     ];
 }
