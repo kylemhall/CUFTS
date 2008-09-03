@@ -147,11 +147,13 @@ sub clean_data {
     sub parse_date {
         my ($date) = @_;
         
-        if ( my ( $month, $day, $year ) = $date =~ m{ (\d{1,2}) / (\d{1,2}) / (\d{2}) }xsm ) {
+        my ( $month, $day, $year );
+
+        if ( ( $month, $day, $year ) = $date =~ m{ (\d{1,2}) / (\d{1,2}) / (\d{2}) }xsm ) {
             $year += $year < 20 ? 2000 : 1900;
             return sprintf( "%04i-%02i-%02i", $year, $month, $day );
         }
-        elsif ( my ( $month, $day, $year ) = $date =~ /(\w+)\s+(\d+)\s+(\d{4})/ ) {
+        elsif ( ( $month, $day, $year ) = $date =~ /(\w+)\s+(\d+)\s+(\d{4})/ ) {
             if    ( $month =~ /^Jan/i ) { $month = 1 }
             elsif ( $month =~ /^Feb/i ) { $month = 2 }
             elsif ( $month =~ /^Mar/i ) { $month = 3 }
