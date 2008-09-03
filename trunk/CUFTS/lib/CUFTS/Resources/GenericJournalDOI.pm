@@ -46,6 +46,7 @@ sub title_list_fields {
             embargo_days
             journal_url
             cjdb_note
+            local_note
         )
     ];
 }

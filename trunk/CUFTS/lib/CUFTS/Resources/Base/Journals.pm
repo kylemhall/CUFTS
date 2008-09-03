@@ -151,6 +151,7 @@ sub overridable_title_list_fields {
             iss_cit_end
 
             cjdb_note
+            local_note
 
             journal_auth
         )
@@ -180,12 +181,9 @@ sub title_list_field_map {
         'current_years'  => 'current_years',
         'coverage'       => 'coverage',
         'cjdb_note'      => 'cjdb_note',
+        'local_note'     => 'local_note',
         'journal_auth'   => 'journal_auth',
     };
-}
-
-sub local_title_list_fields {
-    return [ 'local_note', 'wtf' ];
 }
 
 sub local_matchable_on_columns {

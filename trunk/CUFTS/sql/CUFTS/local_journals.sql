@@ -40,6 +40,7 @@ CREATE TABLE local_journals (
     current_months  VARCHAR(256),   /* Months of moving wall access to current issues */
     current_years   VARCHAR(256),   /* Years of moving wall access to current issues */
     cjdb_note       TEXT,           /* Note to display in CJDB (global may not be used, local only) */
+    local_note      TEXT,           /* Note to display in editing tool, meant for local use only (but can be edited at global level) */
 
     erm_main        INTEGER,
 
