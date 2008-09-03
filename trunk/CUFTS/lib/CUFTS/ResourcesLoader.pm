@@ -93,6 +93,7 @@ BEGIN {
         Springer
         Taylor
         Swets
+        SwetsALPSP
         Wiley
         WileyBackfile
         Wilson
