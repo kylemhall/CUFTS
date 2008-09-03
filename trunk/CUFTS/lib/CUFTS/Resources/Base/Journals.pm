@@ -184,6 +184,10 @@ sub title_list_field_map {
     };
 }
 
+sub local_title_list_fields {
+    return [ 'local_note', 'wtf' ];
+}
+
 sub local_matchable_on_columns {
     return [ '', 'issn', 'title', 'issn,title' ];
 }

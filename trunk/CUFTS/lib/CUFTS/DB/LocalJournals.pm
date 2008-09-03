@@ -66,6 +66,8 @@ __PACKAGE__->columns(All => qw(
     cjdb_note
     coverage
     
+    local_note
+    
     erm_main
 
     created
