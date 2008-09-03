@@ -34,6 +34,7 @@ CREATE VIEW merged_journals AS
            COALESCE( local_journals.current_months, journals.current_months ) AS current_months,
            COALESCE( local_journals.current_years, journals.current_years ) AS current_years,
            COALESCE( local_journals.coverage, journals.coverage ) AS coverage,
+           COALESCE( local_journals.local_note, journals.local_note ) AS local_note,
            local_journals.erm_main AS erm_main,
            erm_main.key AS erm_main_key
 

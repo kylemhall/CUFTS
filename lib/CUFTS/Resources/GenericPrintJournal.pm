@@ -50,6 +50,7 @@ sub title_list_fields {
             journal_url
             journal_auth
             cjdb_note
+            local_note
         )
     ];
 }

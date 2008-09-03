@@ -447,7 +447,6 @@ sub edit_local : Local {
     my $local_resource = $c->stash->{local_resource};
     my %validate = %$form_validate_edit_local;
     my $override_fields = $c->stash->{override_fields} = $local_resource->do_module('title_list_fields');
-    push @$override_fields, @{ $local_resource->do_module('local_title_list_fields') };
     push @{$validate{optional}}, @$override_fields;
 
     $c->form(\%validate);

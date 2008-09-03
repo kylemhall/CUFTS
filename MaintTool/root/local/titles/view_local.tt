@@ -1,8 +1,6 @@
 [% USE url %]
 
 [% SET temp_cols  = local_resource.do_module('title_list_fields') %]
-[% SET extra_cols = local_resource.do_module('local_title_list_fields') %]
-[% FOREACH col IN extra_cols; temp_cols.push( col ); END %]
 
 
 [%# *********************************************
