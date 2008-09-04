@@ -62,6 +62,7 @@ __PACKAGE__->columns(All => qw(
     current_years
     coverage
     cjdb_note
+    local_note
 
     journal_auth
 
