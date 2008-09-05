@@ -1,16 +1,17 @@
 [% extra_js.push( c.uri_for_js('jquery.selectboxes.js') ) %]
 <script>
-var CRDB_show_nodata_fields = 0;
+var CRDB = {};
+CRDB.show_nodata_fields = 0;
 
 
 function toggle_nodata_fields( ) {
-    CRDB_show_nodata_fields = !CRDB_show_nodata_fields;
+    CRDB.show_nodata_fields = !CRDB.show_nodata_fields;
     nodata_fields();
 }
 
 function nodata_fields( ) {
     $('.no_data').each( function(i) {
-        this.style.display = CRDB_show_nodata_fields ? '' : 'none';
+        this.style.display = CRDB.show_nodata_fields ? '' : 'none';
     });
 }
 
@@ -64,10 +65,10 @@ function ajax_save_edit( field, url ) {
 }
 
 function delete_subject( subject_id ) {
-    CRDB_to_delete[ subject_id ] = 1;
-    CRDB_to_add[ subject_id ] = 0;
+    CRDB.to_delete[ subject_id ] = 1;
+    CRDB.to_add[ subject_id ] = 0;
     
-    $('#edit-subjects-add').addOption( subject_id, CRDB_all_subjects[subject_id], false ).sortOptions();
+    $('#edit-subjects-add').addOption( subject_id, CRDB.all_subjects[subject_id], false ).sortOptions();
     $('div#edit-all-subjects-' + subject_id).hide();
     
     update_subject_fields();
@@ -78,8 +79,8 @@ function delete_subject( subject_id ) {
 function add_subject() {
     var subject_id = $('#edit-subjects-add').find("option:selected")[0].value;
 
-    CRDB_to_delete[ subject_id ] = 0;
-    CRDB_to_add[ subject_id ] = 1;
+    CRDB.to_delete[ subject_id ] = 0;
+    CRDB.to_add[ subject_id ] = 1;
 
     $('#edit-subjects-add').removeOption( subject_id, false );
     $('div#edit-all-subjects-' + subject_id).show();
@@ -92,16 +93,16 @@ function add_subject() {
 function update_subject_fields() {
     var key;
     var array = new Array();
-    for (key in CRDB_to_add) {
-        if ( CRDB_to_add[key] ) {
+    for (key in CRDB.to_add) {
+        if ( CRDB.to_add[key] ) {
             array.push(key)
         }
     }
     $('#edit-subjects-add-field').val( array.join(',') );
 
     array = new Array();
-    for (key in CRDB_to_delete) {
-        if ( CRDB_to_delete[key] ) {
+    for (key in CRDB.to_delete) {
+        if ( CRDB.to_delete[key] ) {
             array.push(key)
         }
     }
