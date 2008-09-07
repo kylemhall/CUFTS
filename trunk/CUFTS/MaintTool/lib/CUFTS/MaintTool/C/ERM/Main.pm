@@ -347,6 +347,30 @@ sub selected_marc : Local {
 }
 
 
+sub selected_export : Local {
+    my ( $self, $c, $format ) = @_;
+    
+    if ( !$c->session->{selected_erm_main} ) {
+        $c->session->{selected_erm_main} = [];
+    }
+    
+    my @erm_records = CUFTS::DB::ERMMain->search( { site => $c->stash->{current_site}->id, id => { '-in' => $c->session->{selected_erm_main} } } );
+    my @flattened_records = map { $_->to_hash } @erm_records;
+    
+    if ( $format eq 'json' ) {
+        $c->stash->{json} = \@flattened_records;
+        $c->forward('V::JSON');
+    }
+    elsif ( $format eq 'csv' ) {
+        my @columns = sort ( CUFTS::DB::ERMMain->columns, qw( subjects content_types names ) );
+        $c->stash->{csv}->{data} = [ \@columns ];
+        foreach my $record ( @flattened_records ) {
+            push @{$c->stash->{csv}->{data}}, [ map { $record->{$_} } @columns ];
+        }
+        $c->forward('V::CSV');
+    }
+}
+
 
 
 sub find_json : Local {
@@ -359,6 +383,8 @@ sub find_json : Local {
             delete $query->{$key};
         }
     }
+    
+    $query->{site} = $c->stash->{current_site}->id;
 
     my $URI = URI->new();
     $URI->query_form( $query );
@@ -373,18 +399,20 @@ sub _find {
     my ( $self, $c )  = @_;
     
     my @valid_params = qw(
-        name
-        vendor
-        keyword
-        subject
-        publisher
-        provider
-        license
-        content_type
-        resource_type
-        content_medium
         constoria
+        content_medium
+        content_type
+        keyword
+        license
+        name
+        provider
+        public
+        public_list
+        publisher
+        resource_type
+        subject
         subscription_status
+        vendor
     );
 
     my $params = $c->req->params;

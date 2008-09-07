@@ -193,6 +193,39 @@ __PACKAGE__->set_sql( with_name => << 'SQL' );
 SQL
 
 
+sub to_hash {
+    my ( $self ) = @_;
+
+    my %hash;
+    foreach my $column ( __PACKAGE__->columns ) {
+        next if !defined($self->$column);
+        
+        # Handle has-a relationship columns
+        if ( grep { $_ eq $column } qw( consortia pricing_model resource_medium resource_type ) ) {
+            $hash{$column} = $self->$column->$column;
+        }
+        elsif ( $column eq 'license') {
+            $hash{$column} = $self->license->key;
+        }
+        elsif ( $column eq 'provider') {
+            $hash{$column} = $self->provider->provider_name;
+        }
+        else {
+            $hash{$column} = $self->$column();
+        }
+        
+    }
+
+    # Add flattened has-many/many-to-many columns
+    
+    $hash{subjects}      = join ', ', sort map { $_->subject }      $self->subjects;
+    $hash{content_types} = join ', ', sort map { $_->content_type } $self->content_types;
+    $hash{names}         = join ', ', sort map { $_->name }         $self->names;
+    
+    return \%hash;
+}
+
+
 
 my @fast_columns = qw(
     id
