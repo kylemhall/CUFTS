@@ -441,6 +441,10 @@ Ext.onReady( function() {
                             {
                                 text: 'CSV',
                                 handler: exportSelectedCSV
+                            },
+                            {
+                                text: 'HTML',
+                                handler: exportSelectedHTML
                             }
                         ]
                     }
@@ -556,6 +560,15 @@ Ext.onReady( function() {
     function exportSelectedCSV() {
         if (selected_store.getCount()) {
             window.location = '[% url("$url_base/erm/main/selected_export/csv") %]';
+        }
+        else {
+            Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')
+        }
+    }
+
+    function exportSelectedHTML() {
+        if (selected_store.getCount()) {
+            window.location = '[% url("$url_base/erm/main/selected_export/html") %]';
         }
         else {
             Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')

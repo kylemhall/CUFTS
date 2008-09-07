@@ -354,20 +354,25 @@ sub selected_export : Local {
         $c->session->{selected_erm_main} = [];
     }
     
-    my @erm_records = CUFTS::DB::ERMMain->search( { site => $c->stash->{current_site}->id, id => { '-in' => $c->session->{selected_erm_main} } } );
+    my @erm_records = CUFTS::DB::ERMMain->search( { site => $c->stash->{current_site}->id, id => { '-in' => $c->session->{selected_erm_main} } }, { order_by => 'id' } );
     my @flattened_records = map { $_->to_hash } @erm_records;
+    my @columns = sort ( CUFTS::DB::ERMMain->columns, qw( subjects content_types names ) );
     
     if ( $format eq 'json' ) {
         $c->stash->{json} = \@flattened_records;
         $c->forward('V::JSON');
     }
     elsif ( $format eq 'csv' ) {
-        my @columns = sort ( CUFTS::DB::ERMMain->columns, qw( subjects content_types names ) );
         $c->stash->{csv}->{data} = [ \@columns ];
         foreach my $record ( @flattened_records ) {
             push @{$c->stash->{csv}->{data}}, [ map { $record->{$_} } @columns ];
         }
         $c->forward('V::CSV');
+    }
+    else {
+        $c->stash->{columns}  = \@columns;
+        $c->stash->{records}  = \@flattened_records;
+        $c->stash->{template} = 'erm/main/export_html.tt';
     }
 }
 
