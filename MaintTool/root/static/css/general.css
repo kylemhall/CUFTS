@@ -878,6 +878,23 @@ tr.highlight td {
 }
 
 
+/* ERM selected records export */
+
+table.erm-selected-export-html {
+}
+
+.erm-selected-export-html th {
+    border: 1px solid #ddd;
+    background: #ccc;
+    padding: 6px 6px 3px;
+}
+
+.erm-selected-export-html td {
+    border: 1px solid #ddd;
+    padding: 2px 5px;
+}
+
+
 /* ExtJS styling */
 
 .grid-hide-header .x-grid3-header { display: none; }
