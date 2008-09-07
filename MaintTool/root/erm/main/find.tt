@@ -429,6 +429,21 @@ Ext.onReady( function() {
                     text: 'Statistics',
                     iconCls: 'chart-line-button',
                     handler: statsSelected
+                }),
+                new Ext.Button({
+                    text: 'Export',
+                    menu: {
+                        items: [
+                            {
+                                text: 'JSON',
+                                handler: exportSelectedJSON
+                            },
+                            {
+                                text: 'CSV',
+                                handler: exportSelectedCSV
+                            }
+                        ]
+                    }
                 })
                 
             ]
@@ -523,6 +538,24 @@ Ext.onReady( function() {
     function statsSelected() {
         if (selected_store.getCount()) {
             window.location = '[% url("$url_base/erm/statistics/") %]';
+        }
+        else {
+            Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')
+        }
+    }
+
+    function exportSelectedJSON() {
+        if (selected_store.getCount()) {
+            window.location = '[% url("$url_base/erm/main/selected_export/json") %]';
+        }
+        else {
+            Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')
+        }
+    }
+    
+    function exportSelectedCSV() {
+        if (selected_store.getCount()) {
+            window.location = '[% url("$url_base/erm/main/selected_export/csv") %]';
         }
         else {
             Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')
