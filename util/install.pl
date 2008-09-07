@@ -46,6 +46,7 @@ my @modules = qw(
     Catalyst::Plugin::FormValidator
     Catalyst::Plugin::Session::Store::FastMmap
     Catalyst::Plugin::Session::State::Cookie
+    Catalyst::View::Download::CSV
     Catalyst::View::JSON
     Catalyst::View::TT
     Chart::OFC
