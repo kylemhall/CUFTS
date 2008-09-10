@@ -603,7 +603,26 @@ sub as_marc {
     }
     $MARC->append_fields( MARC::Field->new( '960', '', '', @subfields ) );
 
-    foreach my $field ( qw( subscription_notes subscription_ownership_notes pricing_model_notes review_notes consortia_notes date_cost_notes ) ) {
+    my @other_data = (
+        [ 'subscription type', $self->subscription_type, $self->subscription_notes ],
+        [ 'subscription ownership', $self->subscription_ownership, $self->subscription_ownership_notes ],
+        [ 'consortia', ( defined($self->consortia) ? $self->consortia->consortia : undef), $self->consortia_notes ],
+        [ 'pricing model', ( defined($self->pricing_model) ? $self->pricing_model->pricing_model : undef), $self->pricing_model_notes ],
+    );
+
+    foreach my $data ( @other_data ) {
+        my ( $label, $field, $notes ) = @$data;
+        next if is_empty_string($field) && is_empty_string($notes);
+        $notes =~ s/\n/: /g;
+        my $content = "${label}: [${field}]";
+        if ( not_empty_string($notes) ) {
+            $content .= "; notes: [${notes}]";
+        }
+        
+        $MARC->append_fields( MARC::Field->new( '961', '', '', 'c' => $content ) );
+    }
+
+    foreach my $field ( qw( review_notes  date_cost_notes ) ) {
         my $content = $self->$field();
         if ( not_empty_string( $content ) ) {
             my $label = $field;
