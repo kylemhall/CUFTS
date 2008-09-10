@@ -404,7 +404,7 @@ sub _find {
     my ( $self, $c )  = @_;
     
     my @valid_params = qw(
-        constoria
+        consortia
         content_medium
         content_type
         keyword
