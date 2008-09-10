@@ -50,7 +50,7 @@ my $marc_fields = {
                repeats   => 1,
              },
     '650' => {
-               subfields => [ qw(a b z y x0 x1 v) ],
+               subfields => [ qw(a b z y x0 x1 x2 x3 v) ],
                size      => [ 30, 30, 10, 10, 10, 10, 10 ],
                repeats   => 1,
              },
