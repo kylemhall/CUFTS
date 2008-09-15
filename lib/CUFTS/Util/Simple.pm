@@ -57,4 +57,81 @@ sub dashed_issn :Export( :DEFAULT ) {
     return $string;
 }
 
+##
+## Converts latin-1 characters with diacritics to their base character.  When we switch to UTF-8, this should
+## be replaced with something that uses character decomposition and normalization.
+##
+
+# Character maps borrowed from Greenstone
+
+my %diacritic_map = (
+    'à' => 'a',   # A WITH GRAVE
+    'À' => 'a',
+    'á' => 'a',   # A WITH ACUTE
+    'Á' => 'a',
+    'â' => 'a',   # A WITH CIRCUMFLEX
+    'Â' => 'a',
+    'ã' => 'a',   # A WITH TILDE
+    'Ã' => 'a',
+    'å' => 'a',   # A WITH RING ABOVE
+    'æ' => 'a',   # AE
+    'ç' => 'c',   # C WITH CEDILLA
+    'Ç' => 'c',
+    'è' => 'e',   # E WITH GRAVE
+    'È' => 'e',
+    'é' => 'e',   # E WITH ACUTE
+    'É' => 'e',
+    'ê' => 'e',   # E WITH CIRCUMFLEX
+    'Ê' => 'e',
+    'ë' => 'e',   # E WITH DIAERESIS
+    'Ë' => 'e',
+    'ì' => 'i',   # I WITH GRAVE
+    'Ì' => 'i',
+    'í' => 'i',   # I WITH ACUTE
+    'Í' => 'i',
+    'î' => 'i',   # I WITH CIRCUMFLEX
+    'Î' => 'i',
+    'ï' => 'i',   # I WITH DIAERESIS
+    'Ï' => 'i',
+    'ð' => 'dh',  # ETH
+    'ñ' => 'n',   # N WITH TILDE
+    'Ñ' => 'n',
+    'ò' => 'o',   # O WITH GRAVE
+    'Ò' => 'o',
+    'ó' => 'o',   # O WITH ACUTE
+    'Ó' => 'o',
+    'ô' => 'o',   # O WITH CIRCUMFLEX
+    'Ô' => 'o',
+    'õ' => 'o',   # O WITH TILDE
+    'Õ' => 'O',
+    'ø' => 'o',   # O WITH STROKE
+    'Ø' => 'o',
+    'ù' => 'u',   # U WITH GRAVE
+    'Ù' => 'u',
+    'ú' => 'u',   # U WITH ACUTE
+    'Ú' => 'u',
+    'û' => 'u',   # U WITH CIRCUMFLEX
+    'Û' => 'u',
+    'ý' => 'y',   # Y WITH ACUTE
+    'þ' => 'th',  # THORN
+    'ÿ' => 'y',   # Y WITH DIAERESIS
+    'ä' => 'ae',  # A WITH DIAERESIS
+    'Ä' => 'ae',  
+    'ö' => 'oe',  # O WITH DIAERESIS
+    'Ö' => 'oe',
+    'ü' => 'ue',  # U WITH DIAERESIS
+    'Ü' => 'ue',
+    'ß' => 'ss'   # SHARP S
+);
+
+my $regex_search_string = join('|', keys(%diacritic_map));
+
+sub convert_diacritics {
+    my ( $string ) = @_;
+    
+    $string =~ s/($regex_search_string)/$diacritic_map{$1}/g;
+
+    return $string;
+}
+
 1;

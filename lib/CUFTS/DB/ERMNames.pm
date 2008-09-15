@@ -52,6 +52,7 @@ sub strip_name {
     
     $name =~ s/\s+\&\s+/ and /g;
     $name = lc($name);
+    $name = CUFTS::Util::Simple::convert_diacritics( $name );
     $name =~ s/[^a-z0-9 ]//g;
     $name =~ s/\s\s+/ /g;
     $name = trim_string($name);

@@ -448,8 +448,8 @@ sub facet_count {
     $sql =~ s/%WHERE%/$where/e;
     $sql =~ s/%JOINS%/join( ' ', values( %{ $config->{joins} } ) )/e;
 
-#    warn($sql);
-#    warn(Dumper(\@bind));
+   warn($sql);
+   warn(Dumper(\@bind));
 
     my $sth = $class->db_Main()->prepare( $sql, {pg_server_prepare => 1} );
     $sth->execute( @bind );
@@ -462,6 +462,7 @@ sub _facet_search_name {
 
     $data =~ s/\s+\&\s+/ and /g;
     $data = lc($data);
+    $data = CUFTS::Util::Simple::convert_diacritics($data);
     $data =~ s/[^a-z0-9 ]//g;
     $data =~ s/\s\s+/ /g;
     $data = trim_string($data);

@@ -46,6 +46,11 @@ sub _build_journal_search_field {
     my ( $class, $title, $issn ) = @_;
 
     my $search_fields = $class->_search_fields();
+
+    if ( !not_empty_string($issn) ) {
+        return $search_fields->{issn} . '=' . $issn;
+    }
+
     return $search_fields->{title} . '=' . uri_escape($title);
 }
 

@@ -10,8 +10,14 @@
 </div>
 
 <script>
+
+// Don't UTF-8 encode
+encodeURIComponent=escape;
+decodeURIComponent=unescape;
+
 Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '[% image_dir _ '/default/s.gif' %]';
+
 
     var hash_state = new HashState();
 
