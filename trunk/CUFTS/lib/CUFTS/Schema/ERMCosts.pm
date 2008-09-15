@@ -40,11 +40,20 @@ __PACKAGE__->add_columns(
       is_nullable => 0,
       size => 8,
     },
+    number => {
+        data_type => 'varchar',
+        size => 256,
+        is_nullable => 1,
+    },
+    reference => {
+        data_type => 'varchar',
+        size => 256,
+        is_nullable => 1,
+    },
     date => {
         data_type => 'date',
         is_nullable => 0,
     },
-    
     invoice => {
         data_type => 'number',
         is_nullable => 1,

@@ -817,7 +817,8 @@ sub main_name {
             }
         }
         else {
-            $name_record = CUFTS::Schema::ERMNames->create(
+            my $schema = $self->result_source->schema;
+            $name_record = $schema->resultset('ERMNames')->create(
                 {   name     => $new_name,
                     erm_main => $self->id,
                     main     => 1,
