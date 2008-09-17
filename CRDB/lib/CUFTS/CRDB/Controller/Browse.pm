@@ -5,6 +5,7 @@ use warnings;
 use base 'Catalyst::Controller';
 
 use URI::Escape;
+use Unicode::String qw(utf8);
 
 use JSON::XS qw(encode_json);
 use CUFTS::Util::Simple;
@@ -110,7 +111,11 @@ sub html_facets : Chained('facet_options') PathPart('facets') Args {
     my ( $self, $c, @facets ) = @_;
 
     foreach my $facet (@facets) {
+        my $utf8 = $facet =~ /\%[Cc]3/ ? 1 : 0;  # Do a UTF8 decode if there's a %C3
         $facet = uri_unescape($facet);
+        if ( $utf8 ) {
+            $facet = ( utf8( $facet ) )->latin1;
+        }
     }
 
     my $rs = $self->_facet_search( $c, \@facets );
@@ -153,7 +158,11 @@ sub json_facets : Chained('facet_options') PathPart('facets/json') Args {
     my ( $self, $c, @facets ) = @_;
 
     foreach my $facet (@facets) {
+        my $utf8 = $facet =~ /\%[Cc]3/ ? 1 : 0;  # Do a UTF8 decode if there's a %FC
         $facet = uri_unescape($facet);
+        if ( $utf8 ) {
+            $facet = ( utf8( $facet ) )->latin1;
+        }
     }
 
     my $rs = $self->_facet_search( $c, \@facets );

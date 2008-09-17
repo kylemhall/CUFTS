@@ -460,12 +460,7 @@ sub facet_count {
 sub _facet_search_name {
     my ( $class, $field, $data, $config, $sql ) = @_;
 
-    $data =~ s/\s+\&\s+/ and /g;
-    $data = lc($data);
-    $data = CUFTS::Util::Simple::convert_diacritics($data);
-    $data =~ s/[^a-z0-9 ]//g;
-    $data =~ s/\s\s+/ /g;
-    $data = trim_string($data);
+    $data = CUFTS::DB::ERMNames->strip_name( $data );
 
     $config->{search}->{search_name} = { '~' => "^$data" };
 }
@@ -500,17 +495,20 @@ my ( $class, $field, $data, $config, $sql ) = @_;
     if ( !exists( $config->{joins}->{consortia} ) ) {
         $config->{joins}->{consortia} = ' LEFT JOIN erm_consortia ON ( erm_main.consortia = erm_consortia.id )';
     }
+    
+    my $escaped = $data;
+    $escaped =~ s/([^\w])/'\x' . unpack('H*', $1) /gsemx;
 
     $config->{search}->{'-nest'} = [
-       'erm_subjects.subject'       => { '~*' => $data },
-       'erm_consortia.consortia'    => { '~*' => $data },
-       'erm_main.description_brief' => { '~*' => $data },
-       'erm_main.description_full'  => { '~*' => $data },
-       'erm_main.key'               => { '~*' => $data },
-       'erm_main.vendor'            => { '~*' => $data },
-       'erm_main.publisher'         => { '~*' => $data },
-       'erm_main.internal_name'     => { '~*' => $data },
-       'erm_names.search_name'      => { '~'  => lc($data) },
+       'erm_subjects.subject'       => { '~*' => $escaped },
+       'erm_consortia.consortia'    => { '~*' => $escaped },
+       'erm_main.description_brief' => { '~*' => $escaped },
+       'erm_main.description_full'  => { '~*' => $escaped },
+       'erm_main.key'               => { '~*' => $escaped },
+       'erm_main.vendor'            => { '~*' => $escaped },
+       'erm_main.publisher'         => { '~*' => $escaped },
+       'erm_main.internal_name'     => { '~*' => $escaped },
+       'erm_names.search_name'      => { '~'  => CUFTS::DB::ERMNames->strip_name( $data ) },
     ];
 }
 

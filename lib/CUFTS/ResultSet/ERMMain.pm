@@ -140,8 +140,6 @@ sub _facet_search_name {
 sub _facet_search_name_regex {
     my ( $self, $field, $data, $config ) = @_;
     
-    warn('IN NAME REGEX');
-
     $config->{search}->{'names.search_name'} = { '~' => $data };
     $config->{main_name_only} = 0;
 }
@@ -162,15 +160,16 @@ sub _facet_search_keyword {
 
     $config->{joins}->{subjects_main} = 'subject';
 
-    $data =~ s/([^\w])/\\$1/gsmx;
+    my $escaped = $data;
+    $escaped =~ s/([^\w])/'\x' . unpack('H*', $1) /gsemx;
 
     $config->{search}->{'-nest'} = [
-            'subject.subject'      => { '~*' => $data },
-            'me.description_brief' => { '~*' => $data },
-            'me.description_full'  => { '~*' => $data },
-            'me.key'               => { '~*' => $data },
-            'me.vendor'            => { '~*' => $data },
-            'me.publisher'         => { '~*' => $data },
+            'subject.subject'      => { '~*' => $escaped },
+            'me.description_brief' => { '~*' => $escaped },
+            'me.description_full'  => { '~*' => $escaped },
+            'me.key'               => { '~*' => $escaped },
+            'me.vendor'            => { '~*' => $escaped },
+            'me.publisher'         => { '~*' => $escaped },
             'names.search_name'    => { '~'  => CUFTS::Schema::ERMNames->strip_name( $data ) },
     ];
     $config->{main_name_only} = 0;
