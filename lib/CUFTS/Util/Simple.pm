@@ -116,12 +116,12 @@ my %diacritic_map = (
     'þ' => 'th',  # THORN
     'ÿ' => 'y',   # Y WITH DIAERESIS
     'ä' => 'ae',  # A WITH DIAERESIS
-    'Ä' => 'ae',  
+    'Ä' => 'ae',
     'ö' => 'oe',  # O WITH DIAERESIS
     'Ö' => 'oe',
     'ü' => 'ue',  # U WITH DIAERESIS
     'Ü' => 'ue',
-    'ß' => 'ss'   # SHARP S
+    'ß' => 'ss',  # SHARP S
 );
 
 my $regex_search_string = join('|', keys(%diacritic_map));
