@@ -8,8 +8,8 @@ __PACKAGE__->config( {
     expose_stash    => 'json'
 } );
 
-sub encode_json {
-    my($self, $c, $data) = @_;
+sub encode_json($) {
+    my ($self, $c, $data) = @_;
     my $encoder = JSON::XS->new->latin1;
     $encoder->encode($data);
 }
