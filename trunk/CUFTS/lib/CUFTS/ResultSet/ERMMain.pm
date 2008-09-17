@@ -103,6 +103,7 @@ sub facet_search {
     my %search_attrs = (
         'select'   => \@select_columns,
         'as'       => \@as_columns,
+        'distinct' => 1,
         'join'     => \@joins,
         '+as'      => \@extra_as_columns,
         '+select'  => \@extra_select_columns,
