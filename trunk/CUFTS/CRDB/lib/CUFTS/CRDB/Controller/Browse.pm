@@ -186,6 +186,8 @@ sub json_facets : Chained('facet_options') PathPart('facets/json') Args {
         @records = sort { $a->{sort_name} cmp $b->{sort_name} } @records;
     }
     
+    $c->response->content_type('application/json; charset=iso-8859-1');
+
     $c->stash->{json}->{records} = \@records;
     $c->stash->{current_view}  = 'JSON';
 }
