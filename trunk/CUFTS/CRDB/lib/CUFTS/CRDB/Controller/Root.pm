@@ -145,7 +145,7 @@ sub end : ActionClass('RenderView') {
     $c->response->headers->header( 'Pragma' => 'no-cache' );
     $c->response->headers->expires( time  );
     
-    unless ( $c->response->content_type ) {
+    if ( $c->response->content_type ) {
         $c->response->content_type('text/html; charset=iso-8859-1');
     }
     

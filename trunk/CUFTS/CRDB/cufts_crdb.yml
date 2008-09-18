@@ -24,6 +24,8 @@ View::JSON:
     expose_stash: json
     callback_param: json_callback
     allow_callback: 1
+    encoding: iso-8859-1
+
 
 View::TT:
     WRAPPER: layout.tt

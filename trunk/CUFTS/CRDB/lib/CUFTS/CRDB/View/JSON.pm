@@ -2,6 +2,7 @@ package CUFTS::CRDB::View::JSON;
 
 use strict;
 use base 'Catalyst::View::JSON';
+use JSON::XS;
 
 sub encode_json($) {
     my ($self, $c, $data) = @_;
