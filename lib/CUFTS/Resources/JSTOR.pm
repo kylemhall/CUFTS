@@ -25,6 +25,7 @@ use base qw(CUFTS::Resources::Base::Journals);
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
 use URI::Escape qw(uri_escape);
+use Unicode::String qw(utf8);
 
 use strict;
 
@@ -145,7 +146,11 @@ sub clean_data {
 
     }
 
-    $record->{title} = HTML::Entities::decode_entities( $record->{title} );
+    $record->{title}     = HTML::Entities::decode_entities( $record->{title} );
+    $record->{publisher} = HTML::Entities::decode_entities( $record->{publisher} );
+
+    $record->{title}     = utf8( $record->{title}     )->latin1;
+    $record->{publisher} = utf8( $record->{publisher} )->latin1;
 
     return $class->SUPER::clean_data($record);
 
