@@ -3,6 +3,12 @@ package CUFTS::CRDB::View::JSON;
 use strict;
 use base 'Catalyst::View::JSON';
 
+sub encode_json($) {
+    my ($self, $c, $data) = @_;
+    my $encoder = JSON::XS->new->latin1;
+    $encoder->encode($data);
+}
+
 =head1 NAME
 
 CUFTS::CRDB::View::JSON - Catalyst JSON View
