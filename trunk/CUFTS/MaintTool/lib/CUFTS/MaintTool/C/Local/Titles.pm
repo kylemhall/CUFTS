@@ -45,7 +45,8 @@ my $form_validate_bulk_local_upload = {
 };
 
 my $form_validate_bulk_local_export = {
-    required => ['export', 'format'],
+    required => ['format'],
+    optional => ['export'],
 };
 
 sub edit : Local {
@@ -642,7 +643,7 @@ sub bulk_local_export : Local {
     my $local_resource = $c->stash->{local_resource};
 
     my @local_titles;
-    unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {  
+    unless ($c->form->has_missing || $c->form->has_invalid) {  
         @local_titles = $local_resource->do_module('local_db_module')->search({resource => $local_resource->id}, {order_by => 'title'});
 
         $c->stash->{local_titles} = \@local_titles;
