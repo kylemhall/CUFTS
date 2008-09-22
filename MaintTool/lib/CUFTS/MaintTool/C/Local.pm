@@ -291,7 +291,7 @@ sub edit : Local {
     }
 }
 
-    
+
 sub delete : Local {
     my ($self, $c, $resource_id) = @_;
     

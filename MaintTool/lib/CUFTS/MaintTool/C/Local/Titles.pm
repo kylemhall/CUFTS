@@ -44,6 +44,10 @@ my $form_validate_bulk_local_upload = {
     required => ['file', 'upload'],
 };
 
+my $form_validate_bulk_local_export = {
+    required => ['export', 'format'],
+};
+
 sub edit : Local {
     my ($self, $c) = @_;
     if (defined($c->stash->{global_resource})) {
@@ -627,6 +631,26 @@ sub bulk_local : Local {
     }
 
     $c->stash->{template} ||= 'local/titles/bulk_local.tt';
+}
+
+
+sub bulk_local_export : Local {
+    my ($self, $c, $resource_id) = @_;
+
+    $c->form($form_validate_bulk_local_export);    
+
+    my $local_resource = $c->stash->{local_resource};
+
+    my @local_titles;
+    unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {  
+        @local_titles = $local_resource->do_module('local_db_module')->search({resource => $local_resource->id}, {order_by => 'title'});
+
+        $c->stash->{local_titles} = \@local_titles;
+
+        $c->stash->{template} = 'local/titles/export/' . $c->form->valid->{format} . '_local.tt';
+    } else {
+        die("Error in bulk_local_export form.  Validation failed.");
+    }
 }
 
 
