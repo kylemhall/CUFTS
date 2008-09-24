@@ -537,6 +537,10 @@ sub as_marc {
     my @subfields;
     
     my $MARC = MARC::Record->new();
+    
+    if ( not_empty_string( $self->key ) ) {
+        $MARC->append_fields( MARC::Field->new( '001', '', '', 'a' => $self->key ) );
+    }
 
     if ( not_empty_string( $self->isbn ) ) {
         $MARC->append_fields( MARC::Field->new( '020', '', '', 'a' => $self->isbn ) );
@@ -566,10 +570,6 @@ sub as_marc {
     foreach my $name ( $self->names ) {
         next if $name->main;
         $MARC->append_fields( MARC::Field->new( '246', '', '', 'a' => $name->name ) );
-    }
-
-    if ( not_empty_string( $self->key ) ) {
-        $MARC->append_fields( MARC::Field->new( '246', '', '', 'a' => $self->key ) );
     }
 
     if ( not_empty_string( $self->internal_name ) ) {
