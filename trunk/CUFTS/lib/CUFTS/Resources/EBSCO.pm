@@ -45,6 +45,7 @@ sub title_list_fields {
             cit_end_date
             embargo_months
             embargo_days
+            publisher
 
             db_identifier
         )
@@ -95,6 +96,7 @@ sub title_list_field_map {
         'FULLTEXT_END'   => 'ft_end_date',
         'DB_IDENTIFIER'  => 'db_identifier',
         'URLBASE'        => 'journal_url',
+        'PUBLISHER'      => 'publisher',
     };
 }
 
@@ -103,7 +105,6 @@ sub clean_data {
     my @errors;
 
     if ( defined( $record->{'___EMBARGO'} ) && $record->{'___EMBARGO'} =~ /(\d+)\s+(\w+)/ ) {
-
             my ( $amount, $period ) = ( $1, $2 );
             if ( $period =~ /^month/ ) {
                 $record->{embargo_months} = $amount;
@@ -111,9 +112,19 @@ sub clean_data {
             elsif ( $period =~ /^day/ ) {
                 $record->{embargo_days} = $amount;
             }
-
     }
 
+
+    # Some EBSCO lists now have MM/DD/YY format for dates
+    
+    foreach my $field ( qw( ft_start_date ft_end_date cit_start_date cit_end_date ) ) {
+        if ( $record->{$field} =~ m{^ (\d{1,2}) / (\d{2}) / (\d{2}) $}xsm ) {
+            my ( $month, $day, $year ) = ( $1, $2, $3 );
+            $year += $year < 20 ? 2000 : 1900;
+            $record->{$field} = sprintf( '%04i-%02i-%02i', $year, $month, $day );
+        }
+    }
+    
     # Clear embargo months/days if there's no fulltext start/end dates
 
     if ( is_empty_string($record->{ft_start_date}) && is_empty_string($record->{ft_end_date}) ) {
