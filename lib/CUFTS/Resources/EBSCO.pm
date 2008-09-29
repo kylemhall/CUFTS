@@ -118,7 +118,7 @@ sub clean_data {
     # Some EBSCO lists now have MM/DD/YY format for dates
     
     foreach my $field ( qw( ft_start_date ft_end_date cit_start_date cit_end_date ) ) {
-        if ( $record->{$field} =~ m{^ (\d{1,2}) / (\d{2}) / (\d{2}) $}xsm ) {
+        if ( not_empty_string($record->{$field}) && $record->{$field} =~ m{^ (\d{1,2}) / (\d{2}) / (\d{2}) $}xsm ) {
             my ( $month, $day, $year ) = ( $1, $2, $3 );
             $year += $year < 20 ? 2000 : 1900;
             $record->{$field} = sprintf( '%04i-%02i-%02i', $year, $month, $day );
