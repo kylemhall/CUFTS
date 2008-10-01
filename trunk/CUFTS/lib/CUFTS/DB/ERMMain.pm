@@ -539,7 +539,7 @@ sub as_marc {
     my $MARC = MARC::Record->new();
     
     if ( not_empty_string( $self->key ) ) {
-        $MARC->append_fields( MARC::Field->new( '001', '', '', 'a' => $self->key ) );
+        $MARC->append_fields( MARC::Field->new( '001', $self->key ) );
     }
 
     if ( not_empty_string( $self->isbn ) ) {
