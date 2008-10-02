@@ -73,6 +73,10 @@
 <tr><td class="label0">Medium text</td><td class="field0">
 <input type="text" name="marc_dump_medium_text" value="[% current_site.marc_dump_medium_text %]" maxlength="1024" size="30"/>
 </td></tr>
+<tr><td class="label1">Dump direct 856 links</td><td class="field1"><select name="marc_dump_direct_links">
+<option value="1" [% IF current_site.marc_dump_direct_links %]selected="selected"[% END %]>Yes</option>
+<option value="0" [% IF !current_site.marc_dump_direct_links.defined OR !current_site.marc_dump_direct_links %]selected="selected"[% END %]>No</option>
+</select></td></tr>
 </table>
 <br />
 
