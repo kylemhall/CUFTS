@@ -525,11 +525,11 @@ sub get_cufts_ft_coverage {
 
         $ft_coverage .= ' - ';
 
-	my $end_date = $local_journal->ft_end_date;
-	$end_date =~ s/\-//g;
-	
-	my $current_date = get_current_date();
-	if ( $end_date <= $current_date ) {
+    my $end_date = $local_journal->ft_end_date;
+    $end_date =~ s/\-//g;
+    
+    my $current_date = get_current_date();
+    if ( $end_date <= $current_date ) {
 
             $ft_coverage .= $local_journal->ft_end_date;
 
@@ -777,24 +777,24 @@ sub create_brief_MARC {
 
     # ISSNs
 
-	foreach my $issn ( map {$_->issn_dash} $journals_auth->issns ) {
-		$MARC_record->append_fields( MARC::Field->new( '022', '#', '#', 'a' => $issn ) );
-	}
+    foreach my $issn ( map {$_->issn_dash} $journals_auth->issns ) {
+        $MARC_record->append_fields( MARC::Field->new( '022', '#', '#', 'a' => $issn ) );
+    }
 
     # Title
 
     my $title = $journals_auth->title;
     $seen{title}{ lc($title) }++;
     my $article_count = CUFTS::CJDB::Util::count_articles($title);
-	$MARC_record->append_fields( MARC::Field->new( '245', '0', $article_count, 'a' => latin1_to_marc8($title) ) );
+    $MARC_record->append_fields( MARC::Field->new( '245', '0', $article_count, 'a' => latin1_to_marc8($title) ) );
 
     # Alternate titles
 
     foreach my $title_field ($journals_auth->titles) {
-		next if $seen{title}{ lc($title_field->title) }++;
-		$MARC_record->append_fields( MARC::Field->new( '246', '0', '#', 'a' => latin1_to_marc8($title_field->title) ) );
-	}
-	
+        next if $seen{title}{ lc($title_field->title) }++;
+        $MARC_record->append_fields( MARC::Field->new( '246', '0', '#', 'a' => latin1_to_marc8($title_field->title) ) );
+    }
+    
     return $MARC_record;
 }
 
@@ -881,7 +881,7 @@ CJDB_RECORD:
         # Add holdings statements, skip if no electronic so we don't duplicate print only journals uselessly
 
         my $has_holdings = 0;
-	    if ( not_empty_string($site->marc_dump_holdings_field) && not_empty_string($site->marc_dump_holdings_subfield) ) {
+        if ( not_empty_string($site->marc_dump_holdings_field) && not_empty_string($site->marc_dump_holdings_subfield) ) {
             foreach my $link ( $cjdb_record->links ) {
                 next if is_empty_string( $link->fulltext_coverage )
                      && is_empty_string( $link->embargo )
@@ -910,7 +910,7 @@ CJDB_RECORD:
                 $has_holdings = 1;
 
             }
-	    }
+        }
         next CJDB_RECORD if !$has_holdings;
 
 
@@ -929,13 +929,31 @@ CJDB_RECORD:
                 MARC::Field->new( '005', $datestamp )
         );
         
-        # Add 856 link
+        # Add 856 link(s)
+        
+        if ( $site->marc_dump_direct_links ) {
+            foreach my $link ( $cjdb_record->links ) {
+                next if is_empty_string( $link->fulltext_coverage )
+                     && is_empty_string( $link->embargo )
+                     && is_empty_string( $link->current );
 
-        my $field_856 = MARC::Field->new( '856', '4', '0', 'u' => $base_url . $journals_auth_id );
-        if ( not_empty_string($site->marc_dump_856_link_label) ) {
-            $field_856->add_subfields( 'z' => latin1_to_marc8($site->marc_dump_856_link_label) );
+                next if not_empty_string( $link->print_coverage );
+
+                my $resource_name = $resources_display{$link->resource}->{name} || 'Unknown resource';
+
+                my $field_856 = MARC::Field->new( '856', '4', '0', 'u' => $link->URL, 'z' => latin1_to_marc8($resource_name) );
+                $MARC_record->append_fields( $field_856 );
+            
+            }
         }
-	    $MARC_record->append_fields( $field_856 );
+        else {
+            my $field_856 = MARC::Field->new( '856', '4', '0', 'u' => $base_url . $journals_auth_id );
+            if ( not_empty_string($site->marc_dump_856_link_label) ) {
+                $field_856->add_subfields( 'z' => latin1_to_marc8($site->marc_dump_856_link_label) );
+            }
+            $MARC_record->append_fields( $field_856 );
+        }
+
 
         # Add medium to title fields
 
@@ -962,18 +980,18 @@ CJDB_RECORD:
                 }
             }
         }
-	    
-	    # Add CJDB identifier if defined
-	    
-	    if ( not_empty_string($site->marc_dump_cjdb_id_field) && not_empty_string($site->marc_dump_cjdb_id_subfield) ) {
-	        my $identifier_field = MARC::Field->new( 
-	            $site->marc_dump_cjdb_id_field,
-	            $site->marc_dump_cjdb_id_indicator1,
-	            $site->marc_dump_cjdb_id_indicator2,
-	            $site->marc_dump_cjdb_id_subfield => 'CJDB' . $journals_auth_id
-	        );
-    	    $MARC_record->append_fields( $identifier_field );
-	    }
+        
+        # Add CJDB identifier if defined
+        
+        if ( not_empty_string($site->marc_dump_cjdb_id_field) && not_empty_string($site->marc_dump_cjdb_id_subfield) ) {
+            my $identifier_field = MARC::Field->new( 
+                $site->marc_dump_cjdb_id_field,
+                $site->marc_dump_cjdb_id_indicator1,
+                $site->marc_dump_cjdb_id_indicator2,
+                $site->marc_dump_cjdb_id_subfield => 'CJDB' . $journals_auth_id
+            );
+            $MARC_record->append_fields( $identifier_field );
+        }
         
         print MARC_OUTPUT  $MARC_record->as_usmarc();
         print ASCII_OUTPUT $MARC_record->as_formatted(), "\n\n";
@@ -1026,11 +1044,11 @@ sub latin1_to_marc8 {
 }
 
 sub get_current_date {
-	my ( $day, $mon, $year ) = (localtime())[3..5];
-	$mon += 1;
-	$year += 1900;
-	
-	return sprintf( "%04i%02i%02i", $year, $mon, $day );
+    my ( $day, $mon, $year ) = (localtime())[3..5];
+    $mon += 1;
+    $year += 1900;
+    
+    return sprintf( "%04i%02i%02i", $year, $mon, $day );
 }
 
 

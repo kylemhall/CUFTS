@@ -35,7 +35,8 @@ CREATE TABLE sites (
     marc_dump_holdings_indicator2       VARCHAR(1024),
     marc_dump_holdings_subfield         VARCHAR(1024),
     marc_dump_medium_text               VARCHAR(1024),
-
+    marc_dump_direct_links              BOOLEAN DEFAULT false,
+    
     rebuild_cjdb                        VARCHAR(1024),
     rebuild_MARC                        VARCHAR(1024),
     rebuild_ejournals_only              VARCHAR(1024),

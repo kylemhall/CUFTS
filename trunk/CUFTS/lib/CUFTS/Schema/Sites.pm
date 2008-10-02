@@ -219,6 +219,10 @@ __PACKAGE__->add_columns(
       'is_nullable' => 1,
       'size' => '1024'
     },
+    'marc_dump_direct_links' => {
+        'data_type'     => 'boolean',
+        'default_value' => 0,
+    },
     'rebuild_cjdb' => {
       'data_type' => 'varchar',
       'default_value' => undef,

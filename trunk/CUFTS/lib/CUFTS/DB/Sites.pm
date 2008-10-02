@@ -71,6 +71,7 @@ __PACKAGE__->columns(
         marc_dump_holdings_indicator2
         marc_dump_holdings_subfield
         marc_dump_medium_text
+        marc_dump_direct_links
 
         rebuild_cjdb
         rebuild_MARC

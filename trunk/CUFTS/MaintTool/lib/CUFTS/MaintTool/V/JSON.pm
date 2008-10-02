@@ -5,7 +5,7 @@ use base 'Catalyst::View::JSON';
 use JSON::XS;
 
 __PACKAGE__->config( {
-    expose_stash    => 'json'
+    expose_stash    => 'json',
 } );
 
 sub encode_json($) {
