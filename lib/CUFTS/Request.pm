@@ -101,6 +101,9 @@ sub month {
     if ( $self->date =~ /^\d{4}-(\d{2})/ ) {
         return $1;
     }
+    elsif ( $self->date =~ /^ \d{4} ([01]\d) [0123]\d $/xsm ) {
+        return $1;
+    }
 
     return undef;
 }
@@ -114,6 +117,9 @@ sub day {
     return undef if !defined( $self->date );
 
     if ( $self->date =~ /^\d{4}-\d{2}-(\d{2})/ ) {
+        return $1;
+    }
+    elsif ( $self->date =~ /^ \d{4} [01]\d ([0123]\d) $/xsm ) {
         return $1;
     }
 
