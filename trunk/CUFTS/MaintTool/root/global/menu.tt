@@ -8,8 +8,33 @@
 </div>
 
 <table class="grid">
-<tr><td class="heading" align="left">&nbsp;</td><td class="heading">id</td><td class="heading">resource</td><td class="heading">provider</td><td class="heading">type</td><td align="left" class="heading">titles</td><td align="center" class="heading">active</td><td align="right" class="heading">title list scanned</td></tr>
-[% FOREACH resource IN resources.sort('name') %]
+<tr><td class="heading" align="left">&nbsp;</td><td class="heading">id</td>
+ <td class="heading">
+  [% IF sort.defined AND sort != 'name' %]
+   <a href="[% url_base %]/global/menu?sort=name">resource</a>
+  [% ELSE %]
+   resource <img src="[% url_base %]/static/images/arrow-down.gif" />
+  [% END %]
+ </td>
+ <td class="heading">
+  [% IF sort != 'provider' %]
+   <a href="[% url_base %]/global/menu?sort=provider">provider</a>
+  [% ELSE %]
+   provider <img src="[% url_base %]/static/images/arrow-down.gif" />
+  [% END %]
+ </td>
+ <td class="heading">type</td>
+ <td align="left" class="heading">titles</td>
+ <td align="center" class="heading">active</td>
+ <td align="right" class="heading">
+  [% IF sort != 'scanned' %]
+   <a href="[% url_base %]/global/menu?sort=scanned">title list scanned</a>
+  [% ELSE %]
+   title list scanned <img src="[% url_base %]/static/images/arrow-down.gif" />
+  [% END %]
+ </td>
+</tr>
+[% FOREACH resource IN resources %]
  [% SET class = (resource.active ? 'active-field' : 'inactive-field') _ (loop.count % 2) %]
  <tr>
  <td class="[% class %]" style="white-space: nowrap;">

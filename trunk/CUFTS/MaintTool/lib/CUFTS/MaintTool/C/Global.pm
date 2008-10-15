@@ -17,7 +17,7 @@ my $form_validate = {
 };
 
 my $form_validate_menu = {
-    optional => ['show', 'filter', 'apply_filter'],
+    optional => ['show', 'filter', 'apply_filter', 'sort'],
     filters  => ['trim'],
 };
 
@@ -65,6 +65,9 @@ sub menu : Local {
     $c->form->valid->{apply_filter} and
         $c->session->{global_menu_filter} = $c->form->valid->{filter};
 
+    $c->form->valid->{sort} and
+        $c->session->{global_menu_sort} = $c->form->valid->{sort};
+
     my %search;
     if ($c->session->{global_menu_filter}) {
         my $filter = $c->session->{global_menu_filter};
@@ -81,15 +84,29 @@ sub menu : Local {
     defined($c->session->{global_menu_show}) && $c->session->{global_menu_show} eq 'show active' and
         $search{active} = 'true';
 
+    my $search_options = {
+        order_by => 'LOWER(name)',
+    };
+
+    if ( defined($c->session->{global_menu_sort}) ) {
+        if ( $c->session->{global_menu_sort} eq 'provider' ) {
+            $search_options->{order_by} = 'LOWER(provider), LOWER(name)';
+        }
+        elsif ( $c->session->{global_menu_sort} eq 'scanned' ) {
+            $search_options->{order_by} = 'title_list_scanned, LOWER(name)';
+        }
+    }
+
     my @resources = scalar(keys %search) > 0 
-                    ? CUFTS::DB::Resources->search_where(\%search) 
-                    : CUFTS::DB::Resources->retrieve_all;
+                    ? CUFTS::DB::Resources->search_where(\%search, $search_options) 
+                    : CUFTS::DB::Resources->search({}, $search_options);
 
     # Delete the title list filter, it should be clear when we go to 
     # browse a new list
     
     delete $c->session->{global_titles_filter};
 
+    $c->stash->{sort} = $c->session->{global_menu_sort};
     $c->stash->{filter} = $c->session->{global_menu_filter};
     $c->stash->{show} = $c->session->{global_menu_show} || 'show all';
     $c->stash->{resources} = \@resources;
