@@ -13,14 +13,14 @@
   [% IF sort.defined AND sort != 'name' %]
    <a href="[% url_base %]/global/menu?sort=name">resource</a>
   [% ELSE %]
-   resource <img src="[% url_base %]/static/images/arrow-down.gif" />
+   resource <img src="[% url_base %]/static/images/arrow-down.gif" style="vertical-align: bottom" />
   [% END %]
  </td>
  <td class="heading">
   [% IF sort != 'provider' %]
    <a href="[% url_base %]/global/menu?sort=provider">provider</a>
   [% ELSE %]
-   provider <img src="[% url_base %]/static/images/arrow-down.gif" />
+   provider <img src="[% url_base %]/static/images/arrow-down.gif" style="vertical-align: bottom" />
   [% END %]
  </td>
  <td class="heading">type</td>
@@ -30,7 +30,7 @@
   [% IF sort != 'scanned' %]
    <a href="[% url_base %]/global/menu?sort=scanned">title list scanned</a>
   [% ELSE %]
-   title list scanned <img src="[% url_base %]/static/images/arrow-down.gif" />
+   title list scanned <img src="[% url_base %]/static/images/arrow-down.gif" style="vertical-align: bottom" />
   [% END %]
  </td>
 </tr>
