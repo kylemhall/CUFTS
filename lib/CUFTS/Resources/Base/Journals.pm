@@ -628,7 +628,15 @@ sub _search_active {
         $search_terms{'-nest'} = \@issn_search;
     }
     elsif ( assert_ne( $request->title ) ) {
-        $search_terms{'title'} = { 'ilike', $request->title };
+        if ( scalar($request->journal_auths) ) {
+            $search_terms{'-nest'} = [ '-or', 
+                { 'title' => { 'ilike' => $request->title } },
+                { 'journal_auth' => { '-in' => $request->journal_auths } }
+            ];
+        }
+        else {
+            $search_terms{'title'} = { 'ilike', $request->title };
+        }
     }
     else {
         return [];

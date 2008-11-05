@@ -37,26 +37,39 @@ sub has_title_list               { return 0     }
 sub get_records {
     my ( $class, $resource, $site, $request ) = @_;
 
-    my $issn = $request->issn;
-    if ( is_empty_string( $issn ) ) {
-        $issn = $request->eissn;
-    }
+    my $issn = is_empty_string( $request->issn ) ? $request->issn : $request->eissn;
 
-    my @ja_match = CUFTS::DB::JournalsAuthISSNs->search( issn => $issn );
-    if ( scalar(@ja_match) != 1 ) {
-        # No matches, or multiple matches that we can't disambiguate yet.
-        return undef;
-    }
-    
-    my @ja_issns = CUFTS::DB::JournalsAuthISSNs->search( journal_auth => $ja_match[0]->journal_auth, issn => { '!=' => $issn } );
-    if ( scalar(@ja_issns) ) {
-        my $existing_issns = $request->other_issns;
-        if ( !defined($existing_issns) ) {
-            $existing_issns = [];
+    if ( not_empty_string($issn) ) {
+
+        my @ja_match = CUFTS::DB::JournalsAuthISSNs->search( issn => $issn );
+        if ( scalar(@ja_match) != 1 ) {
+            # No matches, or multiple matches that we can't disambiguate yet.
+            return undef;
         }
-        push @$existing_issns, map { $_->issn } @ja_issns;
-        $request->other_issns( $existing_issns );
+    
+        my @ja_issns = CUFTS::DB::JournalsAuthISSNs->search( journal_auth => $ja_match[0]->journal_auth, issn => { '!=' => $issn } );
+        if ( scalar(@ja_issns) ) {
+            my $existing_issns = $request->other_issns;
+            if ( !defined($existing_issns) ) {
+                $existing_issns = [];
+            }
+            push @$existing_issns, map { $_->issn } @ja_issns;
+            $request->other_issns( $existing_issns );
+        }
     }
+    elsif ( not_empty_string($request->title) ) {
+        # No ISSN found, try a title lookup to grab some JA records and attach their ids to the request
+        
+        my %ja_titles = map { $_->journal_auth => 1 } CUFTS::DB::JournalsAuthTitles->search({
+            title => $request->title
+        });
+        
+        my @ja_ids = keys(%ja_titles);
+        if ( scalar(@ja_ids) && scalar(@ja_ids) < 10 ) {
+            $request->journal_auths( \@ja_ids );
+        }
+    }    
+    
 
     return undef;
 }
@@ -64,11 +77,10 @@ sub get_records {
 sub can_getMetadata {
     my ( $class, $request ) = @_;
 
-    if ( is_empty_string( $request->issn ) && not_empty_string( $request->eissn ) ) {
-        return 1;
-    }
-
-    if ( is_empty_string( $request->eissn ) && not_empty_string( $request->issn ) ) {
+    if (    not_empty_string( $request->issn ) 
+         || not_empty_string( $request->eissn )
+         || not_empty_string( $request->title )
+    ) {
         return 1;
     }
 

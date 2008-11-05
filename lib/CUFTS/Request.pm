@@ -73,6 +73,7 @@ __PACKAGE__->mk_accessors( qw(
         pid
         
         other_issns
+        journal_auths
 ));
 
 sub year {
