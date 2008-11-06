@@ -536,7 +536,7 @@ $( function() {
  [%- SET file_id = license_file.id -%]
  [%- SET class = 'field' _ loop.count % 2 -%]
  <tr>
-  <td class="[% class %]"><a href="[% url("$url_base/static/erm_files/l/$filename") %]">view</a> | <a href="[% url("$url_base/erm/license/delete_file/$erm_id/$file_id") %]">delete</td>
+  <td class="[% class %]"><a href="[% url("$url_base/static/erm_files/l/$filename") %]">view</a> | <a href="[% url("$url_base/erm/license/delete_file/$erm_id/$file_id") %]" onClick="return confirmDelete()">delete</td>
   <td class="[% class %]">[% license_file.description %]</td>
   <td class="[% class %]">[% license_file.created.substr(0,10) %]</td>
   <td class="[% class %]">[% license_file.ext %]</td>
