@@ -37,6 +37,7 @@ my @write_to_directories = qw(
     CJDB/root/sites
     CRDB/root/sites
     Resolver/root/sites
+    MaintTool/root/static/erm_files
 );
 
 my @modules = qw(
