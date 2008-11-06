@@ -26,7 +26,7 @@ use CUFTS::Util::Simple;
 use strict;
 use base qw/DBIx::Class/;
 
-__PACKAGE__->load_components(qw/PK::Auto Core/);
+__PACKAGE__->load_components(qw/Core/);
 
 __PACKAGE__->table('erm_main');
 __PACKAGE__->add_columns(

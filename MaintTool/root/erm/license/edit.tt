@@ -13,17 +13,18 @@ $( function() {
  </form> 
 </div>
 
-<form method="post" name="license-form" id="license-form">
 
 <div id="pages-container" class="tabs-nav" style="width: 100%;">
 
 <ul>
  <li><a href="#page-terms"><span>Terms</span></a></li>
  <li><a href="#page-contacts"><span>Contacts</span></a></li>
+ <li><a href="#page-files"><span>Files</span></a></li>
 </ul>
 
+<form method="post" name="license-form" id="license-form">
 
-<div id="page-terms">
+<div id="page-terms" class="tabs-nav-page">
 
 <div style="padding: 1em 0px;">
  <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
@@ -433,7 +434,7 @@ $( function() {
 
 </div>
 
-<div id="page-contacts">
+<div id="page-contacts" class="tabs-nav-page">
 
 <div style="padding: 1em 0px;">
  <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
@@ -522,6 +523,53 @@ $( function() {
     
 </div>
 
-</div> <!-- tab-container -->
+</form>
+
+
+<div id="page-files" class="tabs-nav-page">
+
+
+<table class="wide-outlined">
+ <tr><td class="heading-bar">&nbsp;</td><td class="heading-bar">description</td><td class="heading-bar">created</td><td class="heading-bar">extension</td></tr>
+ [% FOREACH license_file IN license_files %]
+ [%- SET filename = license_file.UUID _ '.' _ license_file.ext -%]
+ [%- SET file_id = license_file.id -%]
+ [%- SET class = 'field' _ loop.count % 2 -%]
+ <tr>
+  <td class="[% class %]"><a href="[% url("$url_base/static/erm_files/l/$filename") %]">view</a> | <a href="[% url("$url_base/erm/license/delete_file/$erm_id/$file_id") %]">delete</td>
+  <td class="[% class %]">[% license_file.description %]</td>
+  <td class="[% class %]">[% license_file.created.substr(0,10) %]</td>
+  <td class="[% class %]">[% license_file.ext %]</td>
+ </tr>
+ [% END %]
+</table>
+
+<form method="post" enctype="multipart/form-data" name="license-form" id="license-form" action="[% url("$url_base/erm/license/edit/$erm_id") %]">
+<fieldset style="margin-top: 10px">
+<legend>Attach New File</legend>
+<div style="padding: 1em 0px;">
+ <div class="field">
+  <div class="data">
+   <label for="erm-licence-file-description">Description</label>
+   <input id="erm-licence-file-description" type="textfield" name="file_description" value="" />
+  </div>
+ </div>
+ <div class="field">
+  <div class="data">
+   <label for="erm-licence-file-description">File</label>
+   <input type="file" name="file" value="" />
+  </div>
+ </div>
+</div>
+</fieldset>
+
+<div style="padding: 1em 0px;">
+ <input type="submit" name="upload" value="upload">
+</div>
 
 </form>
+
+</div>
+
+</div> <!-- tab-container -->
+
