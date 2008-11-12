@@ -55,6 +55,7 @@ BEGIN {
         Extenza
         Gale_CWI
         Gale_II
+        Gale_III
         Gale
         GenericJournal
         GenericJournalDOI
