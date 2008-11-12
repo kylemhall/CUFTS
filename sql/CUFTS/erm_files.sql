@@ -4,7 +4,7 @@ CREATE TABLE erm_files (
     link_type       CHAR(1),
     description     TEXT,
     ext             VARCHAR(64),
-    UUID            VARCHAR(32),
+    UUID            VARCHAR(36),
     created         TIMESTAMP DEFAULT NOW()
 );
 
