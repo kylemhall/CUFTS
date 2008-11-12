@@ -171,7 +171,7 @@ sub _facet_search_keyword {
             'me.key'               => { '~*' => $escaped },
             'me.vendor'            => { '~*' => $escaped },
             'me.publisher'         => { '~*' => $escaped },
-            'names.search_name'    => { '~'  => CUFTS::Schema::ERMNames->strip_name( $data ) },
+            'names.search_name'    => { '~'  => '[[:<:]]' . CUFTS::Schema::ERMNames->strip_name( $data ) },
     ];
     $config->{main_name_only} = 0;
 }
