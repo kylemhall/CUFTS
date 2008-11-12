@@ -151,6 +151,10 @@ sub clean_data {
 
     $record->{title} =~ s/\*$//;
 
+    # HTML decoding of the title
+
+    $record->{title} = HTML::Entities::decode_entities( $record->{title} );
+
     return $class->SUPER::clean_data($record);
 }
 
