@@ -68,7 +68,7 @@ sub title_list_field_map {
 }
 
 sub title_list_extra_requires {
-    require Text::CSV;
+    require CUFTS::Util::CSVParse;
 }
 
 sub title_list_split_row {
@@ -78,9 +78,14 @@ sub title_list_split_row {
     $row =~ s/"{2,3}/"/g;
 
     $row =~ s/"?;"?/;/g;
-    $row =~ s/Subscribed,"Journal/Subscribed","Journal/;
+    $row =~ s/^"Subscribed,"/"Subscribed","/;
+#    $row =~ s/Subscribed,"Journal/Subscribed","Journal/;
 
-    my $csv = Text::CSV->new();
+#	$row =~ s/"\s*"//g;
+#	$row =~ s/\s*"/"/g;
+#	$row =~ s/[\s\t]+$//;
+
+    my $csv = CUFTS::Util::CSVParse->new();
     $csv->parse($row)
         or CUFTS::Exception::App->throw(
         'Error parsing CSV line: ' . $csv->error_input() );
@@ -92,6 +97,18 @@ sub title_list_split_row {
 sub clean_data {
     my ( $class, $record ) = @_;
 
+#    if ( $record->{ft_start_date} =~ /(\d+) (\w+) (\d+)/xsm ) {
+#	my ( $day, $month, $year ) = ( $1, $2, $3 );
+#print STDERR "$day / $month / $year\n";
+#	$month = get_month( $month, 'start' );
+#	if (!$month){
+#	    delete $record->{ft_start_date};
+#	}elsif (!$day){
+#	    $record->{ft_start_date} = sprintf( "%04d-%02d-00", $year, $month );
+#	}else{
+#	    $record->{ft_start_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
+#	}
+#    }
     if ( $record->{ft_start_date} =~ / (\d+) - (\w+) - (\d+) /xsm ) {
         my ( $day, $month, $year ) = ( $1, $2, $3 );
         $month = get_month( $month, 'start' );
@@ -143,25 +160,26 @@ sub clean_data {
     sub get_month {
         my ( $month, $period ) = @_;
 
-        if    ( $month =~ /^Jan/i ) { return 1 }
-        elsif ( $month =~ /^Feb/i ) { return 2 }
-        elsif ( $month =~ /^Mar/i ) { return 3 }
-        elsif ( $month =~ /^Apr/i ) { return 4 }
+        if    ( $month =~ /^January/i ) { return 1 }
+        elsif ( $month =~ /^February/i ) { return 2 }
+        elsif ( $month =~ /^March/i ) { return 3 }
+        elsif ( $month =~ /^April/i ) { return 4 }
         elsif ( $month =~ /^May/i ) { return 5 }
-        elsif ( $month =~ /^Jun/i ) { return 6 }
-        elsif ( $month =~ /^Jul/i ) { return 7 }
-        elsif ( $month =~ /^Aug/i ) { return 8 }
-        elsif ( $month =~ /^Sep/i ) { return 9 }
-        elsif ( $month =~ /^Oct/i ) { return 10 }
-        elsif ( $month =~ /^Nov/i ) { return 11 }
-        elsif ( $month =~ /^Dec/i ) { return 12 }
+        elsif ( $month =~ /^June/i ) { return 6 }
+        elsif ( $month =~ /^July/i ) { return 7 }
+        elsif ( $month =~ /^August/i ) { return 8 }
+        elsif ( $month =~ /^September/i ) { return 9 }
+        elsif ( $month =~ /^October/i ) { return 10 }
+        elsif ( $month =~ /^November/i ) { return 11 }
+        elsif ( $month =~ /^December/i ) { return 12 }
         elsif ( $month =~ /^Spr/i ) { return $period eq 'start' ? 1 : 6 }
         elsif ( $month =~ /^Sum/i ) { return $period eq 'start' ? 3 : 9 }
         elsif ( $month =~ /^Fal/i ) { return $period eq 'start' ? 6 : 12 }
         elsif ( $month =~ /^Aut/i ) { return $period eq 'start' ? 6 : 12 }
         elsif ( $month =~ /^Win/i ) { return $period eq 'start' ? 9 : 12 }
         else {
-            CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
+	    return 0;
+#            CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
         }
     }
 
