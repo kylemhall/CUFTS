@@ -225,7 +225,7 @@ sub build_linkJournal {
         my $title = $record->title;
         $title =~ tr/ /+/;
         $title = uri_escape($title);
-        $url .= "__jn+%22$title%22";
+        $url .= "_jn+%22$title%22";
 
         $url .= __add_proxy_suffix($url, $resource->proxy_suffix);
 
