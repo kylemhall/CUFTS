@@ -132,6 +132,10 @@ sub clean_data {
             delete $record->{embargo_days};
     }
 
+    # HTML decoding of the title
+
+    $record->{title} = HTML::Entities::decode_entities( $record->{title} );
+
     my $errors = $class->SUPER::clean_data($record);
     push @errors, @$errors if defined($errors);
 
