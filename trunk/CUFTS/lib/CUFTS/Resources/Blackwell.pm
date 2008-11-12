@@ -47,10 +47,15 @@ sub title_list_fields {
             vol_ft_end
             iss_ft_start
             iss_ft_end
-
-            journal_url
         )
     ];
+}
+
+sub clean_data {
+    my ( $self, $record ) = @_;
+    my $record = $self->SUPER::clean_data( $record );
+    delete $record->{journal_url};
+    return $record;
 }
 
 ## global_resource_details - Controls which details are displayed on the global
@@ -120,9 +125,11 @@ sub build_linkJournal {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->journal_url );
+        my $url = 'http://www3.interscience.wiley.com/cgi-bin/issn?DESCRIPTOR=PRINTISSN&VALUE=';
+        my $issn = $record->{issn} || $record->{e_issn};
+        substr( $issn, 4, 0 ) = '-';
 
-        my $result = new CUFTS::Result( $record->journal_url );
+        my $result = new CUFTS::Result( $url . $issn );
         $result->record($record);
 
         push @results, $result;
