@@ -162,6 +162,7 @@ sub _facet_search_keyword {
 
     my $escaped = $data;
     $escaped =~ s/([^\w])/'\x' . unpack('H*', $1) /gsemx;
+    $escaped = '[[:<:]]' . $escaped . '[[:>:]]';   # Match only whole words
 
     $config->{search}->{'-nest'} = [
             'subject.subject'      => { '~*' => $escaped },
