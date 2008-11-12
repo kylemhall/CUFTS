@@ -53,7 +53,7 @@ sub title_list_fields {
 
 sub clean_data {
     my ( $self, $record ) = @_;
-    my $record = $self->SUPER::clean_data( $record );
+    $record = $self->SUPER::clean_data( $record );
     delete $record->{journal_url};
     return $record;
 }
