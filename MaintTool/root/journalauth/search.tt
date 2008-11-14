@@ -45,7 +45,7 @@ in
   <div id="journal-auth-global-resources-heading">Global Resources</div>
    <table>
    [% FOREACH journal IN journal_auth.global_journals %]
-    <tr><td>[% journal.resource.name | html %]</td><td>[% journal.resource.provider | html %]</td></tr> 
+    <tr><td><a href="[% url("$url_base/global/titles/$journal.resource.id") %]">[% journal.resource.name | html %]</a></td><td>[% journal.resource.provider | html %]</td></tr> 
    [% END %]
    </table>
   </div>
