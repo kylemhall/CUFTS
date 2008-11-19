@@ -6,6 +6,7 @@
 </div>
 
 <form method="post">
+<input type="hidden" name="page" value="[% paging_page %]" />
 <table class="grid" style="margin-top: 1em;">
 <tr>
  <td class="heading">field</td>
