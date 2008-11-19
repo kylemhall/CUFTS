@@ -46,6 +46,7 @@ Search within this list: <input type="text" name="filter" value="[% filter %]"> 
 </form>
 [% UNLESS local_resource.auto_activate %]
  <form method="post" action="[% url("$url_base/local/titles/apply_view/g$global_resource.id") %]">
+ <input type="hidden" name="page" value="[% paging_page %]" />
  <input type="submit" style="margin-left: 2em;" name="show" value="[% show == 'show all' ? 'show active' : 'show all' %]">
  <input type="submit" name="activate_all" value="activate all" onClick="return confirmActivate()" />
  <input type="submit" name="deactivate_all" value="deactivate all" onClick="return confirmDeactivate()" />
