@@ -29,6 +29,7 @@
   <input type="submit" style="margin-left: 2em;" name="show" value="[% show == 'show all' ? 'show active' : 'show all' %]">
  [% END %]
  <input type="submit" name="apply" value="apply changes" style="margin-left: 2em;" />
+ <input type="hidden" name="page" value="[% paging_page %]" />
 </div>
 
 <div style="margin-top: 1em;">
