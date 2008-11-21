@@ -79,11 +79,22 @@ sub clean_data {
         my $temp_date = get_date( $1, $2 );
         $record->{cit_start_date} = substr( $temp_date, 0, 4 ) . '-' . substr( $temp_date, 4, 2 );
     }
+    elsif ( defined( $record->{'___Index Start'} )
+        && $record->{'___Index Start'} =~ /(\d{1,2})\/(\d{4})/ )
+    {
+        $record->{cit_start_date} = sprintf( "%04i-%02i", $2, $1);
+    }
+
     if ( defined( $record->{'___Index End'} )
         && $record->{'___Index End'} =~ /(\w{3})-(\d{2})/ )
     {
         my $temp_date = get_date( $1, $2 );
         $record->{cit_end_date} = substr( $temp_date, 0, 4 ) . '-' . substr( $temp_date, 4, 2 );
+    }
+    elsif ( defined( $record->{'___Index End'} )
+        && $record->{'___Index End'} =~ /(\d{1,2})\/(\d{4})/ )
+    {   
+        $record->{cit_end_date} = sprintf( "%04i-%02i", $2, $1);
     }
 
     # Gale can't seem to keep their columns consistent, so try an alternative
@@ -100,10 +111,21 @@ sub clean_data {
     {
         $ft_start_date = get_date( $1, $2 );
     }
+    elsif ( defined( $record->{'___Full-text Start'} )
+        && $record->{'___Full-text Start'} =~ /(\d{1,2})\/(\d{4})/ )
+    {
+        $ft_start_date = sprintf( "%04i%02i", $2, $1);
+    }
+
     if ( defined( $record->{'___Full-text End'} )
         && $record->{'___Full-text End'} =~ /(\w{3})-(\d{2})/ )
     {
         $ft_end_date = get_date( $1, $2 );
+    }
+    elsif ( defined( $record->{'___Full-text End'} )
+        && $record->{'___Full-text End'} =~ /(\d{1,2})\/(\d{4})/ )
+    {
+        $ft_end_date = sprintf( "%04i%02i", $2, $1);
     }
 
     # Check the Image dates to see if they are better than the fulltext ones
@@ -116,11 +138,28 @@ sub clean_data {
             $ft_start_date = $temp_date;
         }
     }
+    elsif ( defined( $record->{'___Image Start'} )
+        && $record->{'___Image Start'} =~ /(\d{1,2})\/(\d{4})/ )
+    {
+	my $temp_date = sprintf( "%04i%02i", $2, $1);
+	if ( int($temp_date) < int($ft_start_date) ) {
+            $ft_start_date = $temp_date;
+        }
+    }
+
     if ( defined( $record->{'___Image End'} )
         && $record->{'___Image Start'} =~ /(\w{3})-(\d{2})/ )
     {
         my $temp_date = get_date( $1, $2 );
         if ( int($temp_date) > int($ft_end_date) ) {
+            $ft_end_date = $temp_date;
+        }
+    }
+    elsif ( defined( $record->{'___Image End'} )
+        && $record->{'___Image End'} =~ /(\d{1,2})\/(\d{4})/ )
+    {
+        my $temp_date = sprintf( "%04i%02i", $2, $1);
+        if ( int($temp_date) < int($ft_end_date) ) {
             $ft_end_date = $temp_date;
         }
     }
