@@ -371,24 +371,24 @@ sub load_cufts {
             defined($cit_coverage)
                 and $new_link->{citation_coverage} = $cit_coverage;
 
-            if ( defined( $local_journal->embargo_days ) ) {
+            if ( not_empty_string($local_journal->embargo_days) && $local_journal->embargo_days ne '0' ) {
                 $new_link->{embargo} = $local_journal->embargo_days . ' days';
             }
 
-            if ( defined( $local_journal->embargo_months ) ) {
+            if ( not_empty_string($local_journal->embargo_months) && $local_journal->embargo_months ne '0' ) {
                 $new_link->{embargo} = $local_journal->embargo_months . ' months';
             }
 
-            if ( defined( $local_journal->current_months ) ) {
+            if ( not_empty_string($local_journal->current_months) && $local_journal->current_months ne '0' ) {
                 $new_link->{current} = $local_journal->current_months . ' months';
             }
 
             # Skip if citations are turned off and we have no fulltext coverage data
 
-            if (   is_empty_string( $new_link->{'fulltext_coverage'} )
-                && is_empty_string( $new_link->{'embargo'} )
-                && is_empty_string( $new_link->{'current'} )
-                && ( !$site->cjdb_show_citations || is_empty_string( $new_link->{'citation_coverage'} ) )
+            if (   is_empty_string($new_link->{fulltext_coverage})
+                && is_empty_string($new_link->{embargo})
+                && is_empty_string($new_link->{current})
+                && ( !$site->cjdb_show_citations || is_empty_string($new_link->{citation_coverage}) )
             )
             {
                 if ( $DEBUG_UPDATE_CJDB ) { print STDERR "Skipping journal '", $local_journal->title, "' due to no fulltext coverage information.\n" }
