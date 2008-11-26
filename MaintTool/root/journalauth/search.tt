@@ -26,7 +26,8 @@ in
   <span style="font-size: 80%">[% journal_auth.id %]</span>
   [% FOREACH issn IN journal_auth.issns %]([% issn.issn.substr(0,4) %]-[% issn.issn.substr(4,4) %]) [% END %]
   <a href="[% url("$url_base/journalauth/edit/$journal_auth.id") %]">edit JA record</a> | 
-  <a href="[% url("$url_base/journalauth/edit_marc/$journal_auth.id") %]">edit MARC</a><br />
+  <a href="[% url("$url_base/journalauth/edit_marc/$journal_auth.id") %]">edit MARC</a> |
+  <a href="[% url("$url_base/journalauth/marc_file/$journal_auth.id") %]">MARC file</a><br />
   <div class="journal-auth-titles">
    <div id="journal-auth-titles-heading">Titles</div>
    <table>

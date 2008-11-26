@@ -94,6 +94,13 @@ my $form_validate_marc = {
     filters => ['trim'],
 };
 
+my $form_validate_marc_upload = {
+    optional    => [ 'upload' ],
+    dependency_groups => {
+        data_upload => [ 'upload', 'upload_data' ],
+    },
+};
+
 my $form_validate_merge = {
     required => [ 'merge_records', 'merge'],
 };
@@ -388,6 +395,47 @@ sub done_edits : Local {
         'search' => 'search',
     });
     return $c->forward('/journalauth/search');
+}
+
+sub marc_file : Local {
+    my ( $self, $c, $journal_auth_id) = @_;
+
+    my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($journal_auth_id);
+    
+    if ( $c->req->params->{upload} ) {
+        
+        $c->form($form_validate_marc_upload);
+        unless ($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) {      
+        
+            my $marc_string = $c->request->upload('upload_data')->slurp();
+            my $record;
+
+            eval {
+                $record = MARC::Record->new_from_usmarc($marc_string);
+            };
+            if ($@) {
+                CUFTS::DB::DBI->dbi_rollback();
+                push @{$c->stash->{errors}}, "Error creating MARC record: $@";
+            } else {
+                $journal_auth->marc($record->as_usmarc());
+                $journal_auth->update();
+                CUFTS::DB::JournalsAuth->dbi_commit();
+                return $c->forward('/journalauth/done_edits');
+            }
+        }
+    }
+
+    $c->stash->{journal_auth} = $journal_auth;
+    $c->stash->{template} = 'journalauth/marc_file.tt';
+}
+
+sub marc_download : Local {
+    my ( $self, $c, $journal_auth_id) = @_;
+
+    my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($journal_auth_id);
+    $c->res->content_type( 'application/marc' );
+    $c->res->headers->push_header( 'Content-Disposition' => "attachment; filename=\"${journal_auth_id}.mrc\"" );
+    $c->res->body( $journal_auth->marc );
 }
 
 
