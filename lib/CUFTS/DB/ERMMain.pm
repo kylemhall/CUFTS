@@ -613,9 +613,9 @@ sub as_marc {
         my ( $label, $field, $notes ) = @$data;
         next if is_empty_string($field) && is_empty_string($notes);
         $notes =~ s/\n/: /g;
-        my $content = "${label}: [${field}]";
+        my $content = "${label}: ${field}";
         if ( not_empty_string($notes) ) {
-            $content .= "; notes: [${notes}]";
+            $content .= "; notes: ${notes}";
         }
         
         $MARC->append_fields( MARC::Field->new( '961', '', '', 'c' => $content ) );
