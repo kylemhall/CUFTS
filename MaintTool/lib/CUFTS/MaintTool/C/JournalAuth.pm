@@ -412,10 +412,16 @@ sub marc_file : Local {
 
             eval {
                 $record = MARC::Record->new_from_usmarc($marc_string);
+                if ( !scalar($record->fields) ) {
+                    push @{$c->stash->{errors}}, 'No fields loaded, please ensure the uploaded file is in MARC communications format.';
+                }
             };
             if ($@) {
-                CUFTS::DB::DBI->dbi_rollback();
                 push @{$c->stash->{errors}}, "Error creating MARC record: $@";
+            }
+            
+            if ( defined($c->stash->{errors}) && scalar(@{$c->stash->{errors}}) ) {
+                CUFTS::DB::DBI->dbi_rollback();
             } else {
                 $journal_auth->marc($record->as_usmarc());
                 $journal_auth->update();
