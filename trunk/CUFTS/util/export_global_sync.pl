@@ -27,13 +27,13 @@ use Getopt::Long;
 
 use strict;
 
-my $tmp_dir = '/tmp/global_export';
-
+my $output_dir = '/tmp/global_export' ;
 
 my %options;
-GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_keys=s', 'prev_days=i' );
+GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_keys=s', 'prev_days=i', 'output_dir=s' );
 
 my $prev_days = $options{prev_days};
+my $force_output_dir = $options{output_dir};
 my $check_timestamp = $options{timestamp};
 my $resource_keys = $options{resource_keys};
 
@@ -85,10 +85,15 @@ sub export {
     my $site_id = $site->id;
 
     my $timestamp = get_timestamp();
-    $tmp_dir .= '_' . $timestamp;
+    if ( defined($force_output_dir) ) {
+        $output_dir = $force_output_dir;
+    }
+    else {
+        $output_dir .= '_' . $timestamp;
+    }
 
-    mkdir ${tmp_dir} or
-        die("Unable to create temp dir: $!");
+    mkdir ${output_dir} or
+        die("Unable to create output dir: $!");
 
     my $local_resources_iter = CUFTS::DB::LocalResources->search( 
         site => $site_id, 
@@ -163,7 +168,7 @@ RESOURCE:
         my $columns = $resource->do_module( 'title_list_fields' );
         next RESOURCE if !defined($columns);
         
-        open OUTPUT, ">$tmp_dir/$key" or
+        open OUTPUT, ">$output_dir/$key" or
             die "Unable to create output file: $!";
             
         @$columns = grep { $_ ne 'id' } @$columns;
@@ -189,16 +194,16 @@ RESOURCE:
 
     }
     
-    open OUTPUT, ">$tmp_dir/update.xml" or
+    open OUTPUT, ">$output_dir/update.xml" or
         die "Unable to create XML output file: $!";
         
     print OUTPUT "<xml>\n" . $resource_xml . "</xml>\n";
     
     close OUTPUT;
     
-    `cd $tmp_dir; tar --create --gzip  --file ${tmp_dir}/update.tgz .`;
+    `cd $output_dir; tar --create --gzip  --file ${output_dir}/update.tgz .`;
  
-    print "Your update file is done:\n${tmp_dir}/update.tgz\n";
+    print "Your update file is done:\n${output_dir}/update.tgz\n";
     
 }
 
