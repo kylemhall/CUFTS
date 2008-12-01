@@ -7,6 +7,7 @@
 use lib qw(lib);
 
 use HTML::Entities;
+use Date::Calc qw();
 
 use CUFTS::Exceptions;
 use CUFTS::Config;
@@ -30,10 +31,21 @@ my $tmp_dir = '/tmp/global_export';
 
 
 my %options;
-GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_keys=s' );
+GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_keys=s', 'prev_days=i' );
 
+my $prev_days = $options{prev_days};
 my $check_timestamp = $options{timestamp};
 my $resource_keys = $options{resource_keys};
+
+# Try to find a business week day at least $prev_days in the past
+if ( defined($prev_days) ) {
+    my @dc = Date::Calc::Today(); 
+    while ( $prev_days > 0 || Date::Calc::Day_of_Week(@dc) > 5 ) {
+        @dc = Date::Calc::Add_Delta_Days( @dc, -1 );
+        $prev_days--;
+    }
+    $check_timestamp = join( '-', @dc );
+}
 
 if ( defined($check_timestamp) ) {
 
