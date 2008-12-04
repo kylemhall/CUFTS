@@ -44,7 +44,7 @@ if ( defined($prev_days) ) {
         @dc = Date::Calc::Add_Delta_Days( @dc, -1 );
         $prev_days--;
     }
-    $check_timestamp = join( '-', @dc );
+    $check_timestamp = sprintf( "%4i-%02i-%02i", @dc );
 }
 
 if ( defined($check_timestamp) ) {
