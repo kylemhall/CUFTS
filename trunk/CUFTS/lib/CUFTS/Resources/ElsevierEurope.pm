@@ -114,7 +114,7 @@ sub clean_data {
 	    $record->{ft_start_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
 	}
     }
-    elsif ( $record->{ft_start_date} =~ / (\d+) - (\w+) - (\d+) /xsm ) {
+    elsif ( $record->{ft_start_date} =~ /(\d+)-(\w+)-(\d+)/xsm ) {
         my ( $day, $month, $year ) = ( $1, $2, $3 );
         $month = get_month( $month, 'start' );
         $record->{ft_start_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
@@ -139,7 +139,7 @@ sub clean_data {
             $record->{ft_end_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
         }
     }
-    elsif ( $record->{ft_end_date} =~ / (\d+) - (\w+) - (\d+) /xsm ) {
+    elsif ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d+)/xsm ) {
         my ( $day, $month, $year ) = ( $1, $2, $3 );
         # Remove end periods if the year matches the current year
         my $current_year = (localtime)[5] + 1900;
@@ -185,18 +185,18 @@ sub clean_data {
     sub get_month {
         my ( $month, $period ) = @_;
 
-        if    ( $month =~ /^January/i ) { return 1 }
-        elsif ( $month =~ /^February/i ) { return 2 }
-        elsif ( $month =~ /^March/i ) { return 3 }
-        elsif ( $month =~ /^April/i ) { return 4 }
-        elsif ( $month =~ /^May/i ) { return 5 }
-        elsif ( $month =~ /^June/i ) { return 6 }
-        elsif ( $month =~ /^July/i ) { return 7 }
-        elsif ( $month =~ /^August/i ) { return 8 }
-        elsif ( $month =~ /^September/i ) { return 9 }
-        elsif ( $month =~ /^October/i ) { return 10 }
-        elsif ( $month =~ /^November/i ) { return 11 }
-        elsif ( $month =~ /^December/i ) { return 12 }
+        if    ( $month =~ /^January/i || $month =~ /^Jan/i ) { return 1 }
+        elsif ( $month =~ /^February/i || $month =~ /^Feb/i ) { return 2 }
+        elsif ( $month =~ /^March/i || $month =~ /^Mar/i ) { return 3 }
+        elsif ( $month =~ /^April/i || $month =~ /^Apr/i ) { return 4 }
+        elsif ( $month =~ /^May/i || $month =~ /^May/i ) { return 5 }
+        elsif ( $month =~ /^June/i || $month =~ /^Jun/i ) { return 6 }
+        elsif ( $month =~ /^July/i || $month =~ /^Jul/i ) { return 7 }
+        elsif ( $month =~ /^August/i || $month =~ /^Aug/i ) { return 8 }
+        elsif ( $month =~ /^September/i || $month =~ /^Sep/i ) { return 9 }
+        elsif ( $month =~ /^October/i || $month =~ /^Oct/i ) { return 10 }
+        elsif ( $month =~ /^November/i || $month =~ /^Nov/i ) { return 11 }
+        elsif ( $month =~ /^December/i || $month =~ /^Dec/i ) { return 12 }
         elsif ( $month =~ /^Spr/i ) { return $period eq 'start' ? 1 : 6 }
         elsif ( $month =~ /^Sum/i ) { return $period eq 'start' ? 3 : 9 }
         elsif ( $month =~ /^Fal/i ) { return $period eq 'start' ? 6 : 12 }
