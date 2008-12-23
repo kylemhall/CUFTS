@@ -54,15 +54,13 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'Journal Name'                               => 'title',
-        'What is the print ISSN number?'             => 'issn',
-        'What is the online ISSN number?'            => 'e_issn',
-        'What is the main URL for the journal site?' => 'journal_url',
-        'Who is the publisher?'                      => 'publisher',
-        'db_identifier'                              => 'db_identifier',
-        'ft_start_date'                              => 'ft_start_date',
-        'ft_end_date'                                => 'ft_end_date',
-        'embargo_months'                             => 'embargo_months',
+        'Journal Name'                  => 'title',
+        'Print ISSN number'             => 'issn',
+        'Online ISSN number'            => 'e_issn',
+        'Main URL for the journal site' => 'journal_url',
+        'Publisher'                     => 'publisher',
+        'Start-date of full text'       => 'ft_start_date',
+        'End-date of full text'         => 'ft_end_date',
     };
 }
 
@@ -77,32 +75,21 @@ sub clean_data {
         delete( $record->{e_issn} );
     }
 
-    if ( defined( $record->{'___What is the range of content online?'} ) ) {
-        my $dates = get_dates($record->{'___What is the range of content online?'} );
-
-        if (    defined( $dates->{'HTML'} )
-             && ( !defined( $dates->{'PDF'} ) || int( $dates->{'PDF'} ) > int( $dates->{'HTML'} ) )
-           )
-        {
-            $record->{ft_start_date} = $dates->{'HTML'};
-            $record->{db_identifier} = 'HTML';
-        }
-        elsif ( defined( $dates->{'PDF'} ) ) {
-            $record->{ft_start_date} = $dates->{'PDF'};
-            $record->{db_identifier} = 'PDF';
-        }
+    if ( defined( $record->{ft_end_date} ) && $record->{ft_end_date} eq 'current' ) {
+        delete( $record->{ft_end_date} );
     }
+
+    $record->{ft_start_date} = get_date($record->{ft_start_date});
 
     $class->SUPER::clean_data($record);
 
-    sub get_dates {
+    sub get_date {
         my ($string) = @_;
 
         my %dates;
 
-        while ( $string =~ /(html|pdf)\s*fulltext\sdate\:?\s*([a-z]{3})\s*(\d{2}),?\s*(\d{4})/ig )
-        {
-            my ( $identifier, $month, $day, $year ) = ( uc($1), $2, $3, $4 );
+        if ( $string =~ /(\d+)-([a-z]{3})-(\d{4})/ig ) {
+            my ( $day, $month, $year ) = ( $1, $2, $3 );
 
             if    ( $month =~ /^Jan/i ) { $month = 1 }
             elsif ( $month =~ /^Feb/i ) { $month = 2 }
@@ -120,9 +107,10 @@ sub clean_data {
                 CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
             }
 
-            $dates{$identifier} = sprintf( "%04i%02i%02i", $year, $month, $day );
+            return sprintf( "%04i-%02i-%02i", $year, $month, $day );
         }
-        return \%dates;
+        
+        return undef;
     }
 }
 
