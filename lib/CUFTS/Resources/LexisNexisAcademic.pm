@@ -55,6 +55,7 @@ sub title_list_field_map {
         'Article Link CSI' => 'db_identifier',
         'Title Search URL' => 'journal_url',
         'Title Level URL'  => 'journal_url',
+        'Publisher'        => 'publisher',
     };
 }
 
@@ -81,11 +82,17 @@ sub clean_data {
     if ( not_empty_string( $record->{ft_start_date} ) ) {
         $record->{ft_start_date} =~ s/(\d{4})(\d{2})(\d{2})/$1-$2-$3/;
     }
+    else {
+        $record->{ft_start_date} = get_date($record->{'___Coverage Begin'});
+    }
 
     if ( not_empty_string( $record->{ft_end_date} ) ) {
         $record->{ft_end_date} =~ s/(\d{4})(\d{2})(\d{2})/$1-$2-$3/;
     }
-
+    else {
+        $record->{ft_end_date} = get_date($record->{'___Coverage End'});
+    }
+    
     # Unless the Coverage Level includes "Full-text", assume it has abstracts only and move the fulltext dates to citation dates
 
     if ( not_empty_string( $record->{'___Coverage Level'} ) && $record->{'___Coverage Level'} !~ /full.?text/i ) {
@@ -94,6 +101,37 @@ sub clean_data {
     }
 
     return $self->SUPER::clean_data($record);
+
+    sub get_date {
+        my ($string) = @_;
+
+        my %dates;
+
+        if ( $string =~ /(\d+)-([a-z]{3})-(\d{4})/ig ) {
+            my ( $day, $month, $year ) = ( $1, $2, $3 );
+
+            if    ( $month =~ /^Jan/i ) { $month = 1 }
+            elsif ( $month =~ /^Feb/i ) { $month = 2 }
+            elsif ( $month =~ /^Mar/i ) { $month = 3 }
+            elsif ( $month =~ /^Apr/i ) { $month = 4 }
+            elsif ( $month =~ /^May/i ) { $month = 5 }
+            elsif ( $month =~ /^Jun/i ) { $month = 6 }
+            elsif ( $month =~ /^Jul/i ) { $month = 7 }
+            elsif ( $month =~ /^Aug/i ) { $month = 8 }
+            elsif ( $month =~ /^Sep/i ) { $month = 9 }
+            elsif ( $month =~ /^Oct/i ) { $month = 10 }
+            elsif ( $month =~ /^Nov/i ) { $month = 11 }
+            elsif ( $month =~ /^Dec/i ) { $month = 12 }
+            else {
+                CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
+            }
+
+            return sprintf( "%04i-%02i-%02i", $year, $month, $day );
+        }
+        
+        return undef;
+    }
+
 }
 
 
