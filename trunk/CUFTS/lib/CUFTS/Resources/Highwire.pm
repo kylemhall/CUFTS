@@ -41,7 +41,6 @@ sub title_list_fields {
             ft_start_date
             ft_end_date
             journal_url
-            db_identifier
             publisher
             embargo_months
         )
@@ -80,6 +79,9 @@ sub clean_data {
     }
 
     $record->{ft_start_date} = get_date($record->{ft_start_date});
+
+    $record->{publisher} = trim_string($record->{publisher}, '"');
+    $record->{publisher} = trim_string($record->{publisher});
 
     $class->SUPER::clean_data($record);
 
