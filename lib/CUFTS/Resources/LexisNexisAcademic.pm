@@ -53,6 +53,7 @@ sub title_list_field_map {
         'begin_yyyymmdd'   => 'ft_start_date',
         'end_yyyymmdd'     => 'ft_end_date',
         'Article Link CSI' => 'db_identifier',
+        'Linking CSI'      => 'db_identifier',
         'Title Search URL' => 'journal_url',
         'Title Level URL'  => 'journal_url',
         'Publisher'        => 'publisher',
