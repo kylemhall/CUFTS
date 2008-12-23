@@ -106,9 +106,7 @@ sub clean_data {
     sub get_date {
         my ($string) = @_;
 
-        my %dates;
-
-        if ( $string =~ /(\d+)-([a-z]{3})-(\d{4})/ig ) {
+        if ( defined($string) && $string =~ /(\d+)-([a-z]{3})-(\d{4})/ig ) {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
 
             if    ( $month =~ /^Jan/i ) { $month = 1 }
