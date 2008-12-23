@@ -66,10 +66,10 @@ sub skip_record {
 
     return 1 if is_empty_string( $record->{'___Coverage Level'} );
 
-    return 1 if is_empty_string( $record->{ft_start_date}  )
-             && is_empty_string( $record->{ft_end_date}    )
-             && is_empty_string( $record->{cit_start_date} )
-             && is_empty_string( $record->{cit_end_date}   );
+    # return 1 if is_empty_string( $record->{ft_start_date}  )
+    #          && is_empty_string( $record->{ft_end_date}    )
+    #          && is_empty_string( $record->{cit_start_date} )
+    #          && is_empty_string( $record->{cit_end_date}   );
 
     return 0;
 }
