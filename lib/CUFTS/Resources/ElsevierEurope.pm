@@ -41,6 +41,7 @@ sub title_list_fields {
             iss_ft_end
             publisher
             current_months
+	    journal_url
         )
     ];
 }
@@ -64,6 +65,7 @@ sub title_list_field_map {
         'Coverage Ends Issue'    => 'iss_ft_end',
         'Coverage Begins Date'   => 'ft_start_date',
         'Coverage Ends Date'     => 'ft_end_date',
+	'Home Page URL'          => 'journal_url',
     };
 }
 
@@ -211,30 +213,30 @@ sub clean_data {
     return $class->SUPER::clean_data($record);
 }
 
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $result = new CUFTS::Result;
-        $result->url('http://www.sciencedirect.com/science/journal/' . $record->issn );
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
-}
+#sub build_linkJournal {
+#    my ( $class, $records, $resource, $site, $request ) = @_;
+#
+#    defined($records) && scalar(@$records) > 0
+#        or return [];
+#    defined($resource)
+#        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+#    defined($site)
+#        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+#    defined($request)
+#        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+#
+#    my @results;
+#    foreach my $record (@$records) {
+#        next if is_empty_string( $record->issn );
+#
+#        my $result = new CUFTS::Result;
+#        $result->url('http://www.sciencedirect.com/science/journal/' . $record->issn );
+#        $result->record($record);
+#
+#        push @results, $result;
+#    }
+#
+#    return \@results;
+#}
 
 1;
