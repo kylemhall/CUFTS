@@ -93,6 +93,7 @@ sub title_list_split_row {
     $row =~ s/"\s*/"/g;
     $row =~ s/([^",])"([^",])/$1'$2/g;
     $row =~ s/"""/","/;
+    $row =~ s/'\s*'//g;
 
     my $csv = CUFTS::Util::CSVParse->new();
     $csv->parse($row)
@@ -183,6 +184,7 @@ sub clean_data {
     }
 
     $record->{title} = HTML::Entities::decode_entities( $record->{title} );
+    $record->{publisher} = HTML::Entities::decode_entities( $record->{publisher} );
 
     sub get_month {
         my ( $month, $period ) = @_;
