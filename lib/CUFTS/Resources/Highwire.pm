@@ -1,6 +1,6 @@
 ## CUFTS::Resources::Highwire.pm
 ##
-## Copyright Michelle Gauthier - Simon Fraser University (2003)
+## Copyright Todd Holbrook - Simon Fraser University (2003)
 ##
 ## This file is part of CUFTS.
 ##
@@ -60,11 +60,24 @@ sub title_list_field_map {
         'Publisher'                     => 'publisher',
         'Start-date of full text'       => 'ft_start_date',
         'End-date of full text'         => 'ft_end_date',
-    };
+
+        'What is the print ISSN number?'             => 'issn', 
+        'What is the online ISSN number?'            => 'e_issn', 
+        'What is the main URL for the journal site?' => 'journal_url', 
+        'Who is the publisher?'                      => 'publisher',
+    }
 }
 
 sub clean_data {
     my ( $class, $record ) = @_;
+
+    # Try to guess a title field if a clean one wasn't found
+    if ( !defined($record->{title}) ) {
+        my @headers = grep { $_ =~ /Journal\s+Name/ } keys %$record;
+        if ( scalar(@headers) == 1 ) {
+            $record->{title} = $record->{$headers[0]};
+        }
+    }
 
     if ( defined( $record->{issn} ) && $record->{issn} eq 'Unknown' ) {
         delete( $record->{issn} );
