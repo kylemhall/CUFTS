@@ -34,27 +34,30 @@ GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_keys=
 
 my $prev_days = $options{prev_days};
 my $force_output_dir = $options{output_dir};
-my $check_timestamp = $options{timestamp};
+my $after_timestamp = $options{timestamp};
 my $resource_keys = $options{resource_keys};
+my $exact_timestamp;
 
 # Try to find a business week day at least $prev_days in the past
+
 if ( defined($prev_days) ) {
+
     my @dc = Date::Calc::Today(); 
     while ( $prev_days > 0 || Date::Calc::Day_of_Week(@dc) > 5 ) {
         @dc = Date::Calc::Add_Delta_Days( @dc, -1 );
         $prev_days--;
     }
-    $check_timestamp = sprintf( "%4i-%02i-%02i", @dc );
+    $exact_timestamp = sprintf( "%4i%02i%02i", @dc );
+
 }
+elsif ( defined($after_timestamp) ) {
 
-if ( defined($check_timestamp) ) {
-
-    if ( $check_timestamp =~ / (\d{4}) - (\d{2}) - (\d{2}) /xsm ) {
-        $check_timestamp = "$1$2$3";
-        print "Checking for title updates after: $check_timestamp\n";
+    if ( $after_timestamp =~ / (\d{4}) - (\d{2}) - (\d{2}) /xsm ) {
+        $after_timestamp = "$1$2$3";
+        print "Checking for title updates after: $after_timestamp\n";
     }
     else {
-        die("Timestamp does not match YYYY-MM-DD format: $check_timestamp");
+        die("Timestamp does not match YYYY-MM-DD format: $after_timestamp");
     }
     
 }
@@ -115,18 +118,21 @@ RESOURCE:
             next RESOURCE;
         }
 
-        if ( defined($check_timestamp) ) {
+        if ( defined($after_timestamp) || defined($exact_timestamp) ) {
             my $scanned = $resource->title_list_scanned;
             if ( $scanned =~ /^ (\d{4}) - (\d{2}) - (\d{2}) /xsm ) {
                 $scanned = "$1$2$3";
             }
             else {
-                print "Unable to match date in timetamp: " . $resource->title_list_scanned . "\n";
+                print "Unable to match date in timestamp: " . $resource->title_list_scanned . "\n";
                 next RESOURCE;
             }
 
-            if ( $scanned >= $check_timestamp ) {
+            if ( $scanned >= $after_timestamp ) {
                 print "Updated after timestamp check date.\n";
+            }
+            elsif ( $scanned == $exact_timestamp ) {
+                print "Updated on exact timestamp date.\n";
             }
             else {
                 print "Not updated after timestamp check date: $scanned\n";
