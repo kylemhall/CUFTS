@@ -128,10 +128,10 @@ RESOURCE:
                 next RESOURCE;
             }
 
-            if ( $scanned >= $after_timestamp ) {
+            if ( defined($after_timestamp) && $scanned >= $after_timestamp ) {
                 print "Updated after timestamp check date.\n";
             }
-            elsif ( $scanned == $exact_timestamp ) {
+            elsif ( defined($exact_timestamp) && $scanned == $exact_timestamp ) {
                 print "Updated on exact timestamp date.\n";
             }
             else {
