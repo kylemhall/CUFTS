@@ -534,144 +534,124 @@ sub _facet_search_vendor {
 sub as_marc {
     my ( $self, $url_base ) = @_;
 
+    my $default_subfield_join = '; ';
+
+    my $configuration = [
+        '001' => [ { indicators => [] }, undef, [ 'key' ] ],
+        '020' => [ {}, 'a', [ 'isbn' ] ],
+        '022' => [ {}, 'a', [ 'issn' ] ],
+        '035' => [ {}, 'a', [ 'local_bib' ] ],
+        '035' => [ {}, 'a', [ 'local_acquisitions' ] ],
+        '035' => [ {}, 's', [ 'journal_auth', { prepend => 'CJDB' } ] ],
+        '935' => [ {}, 'a', [ 'id', { prepend => 'e' } ] ],
+        '245' => [ {}, 'a', [ 'main_name' ] ],
+        '246' => [ { repeats => 1, repeat_field => 'names' }, 'a', [ 'name' ] ],
+        '246' => [ {}, 'a', [ 'internal_name' ] ],
+        '260' => [ {}, 'a', [ 'publisher' ] ],
+        '856' => [ {}, 'a', [ 'id', { prepend_url => 1 } ] ],
+        '960' => [ {}, 'a', [ '', { timestamp => 1, label => 'Date of file creation: ' } ],
+                       'b', [ 'cost', { label => 'Cost: ' } ],
+                       'c', [ 'local_fund', { label => 'Local fund number: ' } ],
+                       'd', [ 'vendor', { label => 'Vendor name: ' } ],
+                       'e', [ 'local_vendor_code', { label => 'Local vendor code: ' } ],
+        ],
+        '961' => [ {}, 'a', [ 'subscription_type',              { label => 'Subscription type: ' },
+                              'subscription_notes',             { label => 'Notes: ' }
+                            ],
+                       'b', [ 'subscription_ownership',         { label => 'Subscription ownership: ' },
+                              'subscription_ownership_notes',   { label => 'Notes: ' },
+                            ],
+                       'c', [ 'consortia',                      { label => 'Consortia: ', call_method => 'consortia' },
+                              'consortia_notes',                { label => 'Notes: ' }
+                            ],
+                       'd', [ 'pricing_model',                  { label => 'Pricing model: ', call_method => 'pricing_model' },
+                              'pricing_model_notes',            { label => 'Notes: ' }
+                            ],
+                       'e', [ 'review_notes',                   { label => 'Review notes: '} ],
+                       'f', [ 'date_cost_notes',                { label => 'Date cost notes: '} ],
+                       'g', [ 'misc_notes',                     { label => 'Miscellaneous notes: '} ],
+                       'h', [ 'coverage',                       { label => 'Coverage: '} ],
+                       'i', [ 'resource_type',                  { label => 'Resource type: ', call_method => 'resource_type' } ],
+                       'j', [ 'contract_start',                 { label => 'Contract start: ' } ],
+                       'k', [ 'contract_end',                   { label => 'Contract end: ' } ],
+                       'l', [ 'print_included',                 { label => 'Print included: ', boolean => 1 } ],
+                       'm', [ 'local_vendor',                   { label => 'Local vendor number: ' } ],
+                       'n', [ 'local_customer',                 { label => 'Local customer number: ' } ],
+                       'z', [ 'currency',                       { label => 'Currency: ' } ],
+        ]
+    ];
+
     my @subfields;
     
     my $MARC = MARC::Record->new();
-    
-    if ( not_empty_string( $self->key ) ) {
-        $MARC->append_fields( MARC::Field->new( '001', $self->key ) );
-    }
 
-    if ( not_empty_string( $self->isbn ) ) {
-        $MARC->append_fields( MARC::Field->new( '020', '', '', 'a' => $self->isbn ) );
-    }
+    while ( my ( $field_num, $field_conf ) = splice( @$configuration, 0, 2 ) ) {
 
-    if ( not_empty_string( $self->issn ) ) {
-        $MARC->append_fields( MARC::Field->new( '022', '', '', 'a' => $self->issn ) );
-    }
-
-    
-    if ( not_empty_string( $self->local_bib ) ) {
-        $MARC->append_fields( MARC::Field->new( '035', '', '', 'a' => $self->local_bib ) );
-    }
-    if ( not_empty_string( $self->local_acquisitions ) ) {
-        $MARC->append_fields( MARC::Field->new( '035', '', '', 'a' => $self->local_acquisitions ) );
-    }
-    if ( not_empty_string( $self->journal_auth ) ) {
-        $MARC->append_fields( MARC::Field->new( '035', '', '', 's' => "CJDB" . $self->journal_auth ) );
-    }
-
-
-    $MARC->append_fields( MARC::Field->new( '935', '', '', 'a' => 'e' . $self->id ) );
-
-
-    $MARC->append_fields( MARC::Field->new( '245', '', '', 'a' => $self->main_name ) );
-    
-    foreach my $name ( $self->names ) {
-        next if $name->main;
-        $MARC->append_fields( MARC::Field->new( '246', '', '', 'a' => $name->name ) );
-    }
-
-    if ( not_empty_string( $self->internal_name ) ) {
-        $MARC->append_fields( MARC::Field->new( '246', '', '', 'a' => $self->internal_name ) );
-    }
-    
-    $MARC->append_fields( MARC::Field->new( '260', '', '', 'b' => $self->publisher ) );
-    
-    $MARC->append_fields( MARC::Field->new( '856', '', '', 'u' => $url_base . $self->id ) );
-
-
-
-    @subfields = ();
-    push @subfields, 'q', DateTime->now()->ymd;
-
-    if ( not_empty_string( $self->cost ) ) {
-        push @subfields, 's', $self->cost;
-    }
-
-    if ( not_empty_string( $self->local_fund ) ) {
-        push @subfields, 'u', $self->local_fund;
-    }
-
-    if ( not_empty_string( $self->vendor ) ) {
-        push @subfields, 'v', $self->vendor;
-    }
-
-    if ( not_empty_string( $self->local_vendor_code ) ) {
-        push @subfields, 'w', $self->local_vendor_code;
-    }
-    $MARC->append_fields( MARC::Field->new( '960', '', '', @subfields ) );
-
-    my @other_data = (
-        [ 'subscription type', $self->subscription_type, $self->subscription_notes ],
-        [ 'subscription ownership', $self->subscription_ownership, $self->subscription_ownership_notes ],
-        [ 'consortia', ( defined($self->consortia) ? $self->consortia->consortia : undef), $self->consortia_notes ],
-        [ 'pricing model', ( defined($self->pricing_model) ? $self->pricing_model->pricing_model : undef), $self->pricing_model_notes ],
-    );
-
-    foreach my $data ( @other_data ) {
-        my ( $label, $field, $notes ) = @$data;
-        next if is_empty_string($field) && is_empty_string($notes);
-        $notes =~ s/\n/: /g;
-        my $content = "${label}: ${field}";
-        if ( not_empty_string($notes) ) {
-            $content .= "; notes: ${notes}";
-        }
         
-        $MARC->append_fields( MARC::Field->new( '961', '', '', 'c' => $content ) );
-    }
-
-    foreach my $field ( qw( review_notes  date_cost_notes ) ) {
-        my $content = $self->$field();
-        if ( not_empty_string( $content ) ) {
-            my $label = $field;
-            $label =~ tr/_/ /;
-            $content =~ s/\n/: /g;
-            $MARC->append_fields( MARC::Field->new( '961', '', '', 'c' => "$label: $content" ) );
+        my $extra_conf = shift(@$field_conf);
+        
+        my @values = (undef);
+        if ( $extra_conf->{repeats} ) {
+            my $repeat_field = $extra_conf->{repeat_field};
+            @values = $self->$repeat_field();
         }
+
+        foreach my $current_value ( @values ) {
+
+            my @subfields;
+            my @field_conf = @$field_conf;  # Clone so we can splice off items but still use it for repeating fields
+            while ( my ( $subfield_num, $subfield_conf ) = splice( @field_conf, 0, 2 ) ) {
+
+                my @contents;
+                my $keep_contents = 0;
+                my @subfield_conf = @$subfield_conf;  # Clone so we can splice off items but still use it for repeating fields
+                while ( my ( $erm_field, $content_conf ) = splice( @subfield_conf, 0, 2 ) ) {
+
+                    my $label      = $content_conf->{label}   || '';
+                    my $prepend    = $content_conf->{prepend} || ( $content_conf->{prepend_url} ? $url_base : '' );
+                    my $append     = $content_conf->{append}  || '';
+
+                    my $value = $extra_conf->{repeats}     ? ( $erm_field ? $current_value->$erm_field() : $current_value )
+                              : $content_conf->{timestamp} ? DateTime->now()->ymd
+                              : $self->$erm_field();
+
+                    if ( $content_conf->{call_method} && defined($value) ) {
+                        my $method = $content_conf->{call_method};
+                        $value = $value->$method();
+                    }
+                    
+                    if ( is_empty_string($value) ) {
+                        $value = '';
+                    }
+                    else {
+                        $keep_contents = 1;                        
+                    }
+
+                    if ( $content_conf->{boolean} ) {
+                        $value = $value ? 'yes' : 'no';
+                    }
+                    
+                    $value =~ s/[\r\n]+/: /g;
+
+                    push @contents, "${label}${prepend}${value}${append}";
+
+                }
+                if ( $keep_contents && scalar(@contents) ) {
+                    push @subfields, (defined($subfield_num) ? $subfield_num : () ), join($default_subfield_join, @contents);
+                }
+            }
+
+            if ( scalar(@subfields) ) {
+                my @indicators = defined( $extra_conf->{indicators} ) ?  @{$extra_conf->{indicators}} : ( '', '' );
+                $MARC->append_fields( MARC::Field->new( $field_num, @indicators, @subfields ) );
+            }
+
+        }
+
     }
 
-    if ( not_empty_string( $self->misc_notes ) ) {
-        my $content = $self->misc_notes;
-        $content =~ s/\n/: /g;
-        $MARC->append_fields( MARC::Field->new( '961', '', '', 'd' => $content ) );
-    }
-    
-    if ( not_empty_string( $self->coverage ) ) {
-        $MARC->append_fields( MARC::Field->new( '961', '', '', 'f' => $self->coverage ) );
-    }
-    
-    if ( $self->resource_type ) {
-        $MARC->append_fields( MARC::Field->new( '961', '', '', 'g' => 'resource type: ' . $self->resource_type->resource_type ) );
-    }
-
-    if ( not_empty_string( $self->contract_start ) || not_empty_string( $self->contract_end ) ) {
-        $MARC->append_fields( MARC::Field->new( '961', '', '', 'h' => 'contract start: ' . $self->contract_start . '; contract end: ' . $self->contract_end ) );
-    }
-
-    @subfields = ();
-
-    if ( defined( $self->print_included ) ) {
-        push @subfields, 'e', ( $self->print_included ? 'yes' : 'no' ); 
-    }
-
-    if ( not_empty_string( $self->local_vendor ) ) {
-        push @subfields, 'i', $self->local_vendor;
-    }
-
-    if ( not_empty_string( $self->local_customer ) ) {
-        push @subfields, 'j', $self->local_customer;
-    }
-
-    if ( not_empty_string( $self->currency ) ) {
-        push @subfields, 'z', $self->currency;
-    }
-
-    if ( scalar(@subfields) ) {
-        $MARC->append_fields( MARC::Field->new( '961', '', '', @subfields ) );
-    }   
-    
     return $MARC;
+
 }
 
 1;
