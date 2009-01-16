@@ -44,9 +44,12 @@ sub title_list_fields {
             iss_ft_end
             embargo_months
             embargo_days
+            coverage
+            publisher
             journal_url
             cjdb_note
             local_note
+            journal_auth
         )
     ];
 }
