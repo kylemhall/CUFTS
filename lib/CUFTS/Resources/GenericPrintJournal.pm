@@ -47,10 +47,11 @@ sub title_list_fields {
             current_months
             current_years
             coverage
+            publisher
             journal_url
-            journal_auth
             cjdb_note
             local_note
+            journal_auth
         )
     ];
 }

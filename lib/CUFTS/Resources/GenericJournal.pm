@@ -47,6 +47,7 @@ sub title_list_fields {
             current_months
             current_years
             coverage
+            publisher
             journal_url
             cjdb_note
             local_note
