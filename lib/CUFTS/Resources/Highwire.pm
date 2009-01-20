@@ -92,6 +92,7 @@ sub clean_data {
     }
 
     $record->{ft_start_date} = get_date($record->{ft_start_date});
+    $record->{ft_end_date} = get_date($record->{ft_end_date});
 
     $record->{publisher} = trim_string($record->{publisher}, '"');
     $record->{publisher} = trim_string($record->{publisher});
