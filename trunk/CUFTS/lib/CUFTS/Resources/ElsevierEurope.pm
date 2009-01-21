@@ -20,7 +20,7 @@
 
 package CUFTS::Resources::ElsevierEurope;
 
-use base qw(CUFTS::Resources::Base::GenericJournalDOI);
+use base qw(CUFTS::Resources::GenericJournalDOI);
 
 use CUFTS::Util::Simple;
 use HTML::Entities;
