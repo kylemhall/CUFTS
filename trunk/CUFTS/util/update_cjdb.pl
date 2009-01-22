@@ -859,8 +859,11 @@ sub build_dump {
             or die("Unable to create directory $dir: $!");
 
 
-    open MARC_OUTPUT,  ">$dir/marc_dump.mrc";
-    open ASCII_OUTPUT, ">$dir/marc_dump.txt";
+    open MARC_OUTPUT,  ">$dir/marc_dump.mrc" or
+        die("Unable to open MARC dump file for MARC: $!");
+        
+    open ASCII_OUTPUT, ">$dir/marc_dump.txt" or
+        die("Unable to open MARC dump file for text: $!");
 
 CJDB_RECORD:
     while (my $cjdb_record = $cjdb_record_iter->next) {
