@@ -24,6 +24,7 @@ use base qw(CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use HTML::Entities qw();
 
 use strict;
 
@@ -31,10 +32,6 @@ my $url_base = 'http://www.bioone.org/bioone/?request=';
 
 ## title_list_fields - Controls what fields get displayed and loaded from
 ## title lists.
-
-sub title_list_extra_requires {
-    require Text::CSV;
-}
 
 sub title_list_fields {
     return [
@@ -70,6 +67,9 @@ sub title_list_field_map {
 
 sub clean_data {
     my ( $class, $request ) = @_;
+
+    $request->{title}     = HTML::Entities::decode_entities( $request->{title} );
+    $request->{publisher} = HTML::Entities::decode_entities( $request->{publisher} );
 
     $request->{title}     = trim_string(trim_string($request->{title}, '"'));
     $request->{publisher} = trim_string(trim_string($request->{title}, '"'));
