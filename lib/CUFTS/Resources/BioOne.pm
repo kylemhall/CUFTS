@@ -43,7 +43,9 @@ sub title_list_fields {
             title
             issn
             ft_start_date
+            ft_end_date
             vol_ft_start
+            vol_ft_end
             journal_url
             publisher
         )
@@ -56,47 +58,21 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'title'         => 'title',
-        'issn'          => 'issn',
-        'ft_start_date' => 'ft_start_date',
-        'vol_ft_start'  => 'vol_ft_start',
-        'journal_url'   => 'journal_url',
-        'publisher'     => 'publisher',
+        'Journal Title'     => 'title',
+        'ISSN'              => 'issn',
+        'Beginning Year'    => 'ft_start_date',
+        'Beginning Volume'  => 'vol_ft_start',
+        'URL'               => 'journal_url',
+        'Publisher'         => 'publisher',
     };
 }
 
-sub title_list_split_row {
-    my ( $class, $row ) = @_;
-
-    my $csv = Text::CSV->new();
-    $csv->parse($row)
-        or CUFTS::Exception::App->throw( 'Error parsing CSV line: ' . $csv->error_input() );
-
-    my @fields = $csv->fields;
-    return \@fields;
-}
-
-sub title_list_get_field_headings {
-    return [
-        qw(
-            issn
-            vol_ft_start
-            ft_start_date
-            title
-            publisher
-            journal_url
-        )
-    ];
-}
 
 sub clean_data {
     my ( $class, $request ) = @_;
 
-    $request->{'title'} =~ s/^"//;
-    $request->{'title'} =~ s/"$//;
-
-    $request->{'publisher'} =~ s/^"//;
-    $request->{'publisher'} =~ s/"$//;
+    $request->{title}     = trim_string(trim_string($request->{title}, '"'));
+    $request->{publisher} = trim_string(trim_string($request->{title}, '"'));
 
     return $class->SUPER::clean_data($request);
 }
