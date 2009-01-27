@@ -61,6 +61,8 @@ sub title_list_field_map {
         'Beginning Volume'  => 'vol_ft_start',
         'URL'               => 'journal_url',
         'Publisher'         => 'publisher',
+        'ft_end_date'       => 'ft_end_date',
+        'vol_ft_end'        => 'vol_ft_end',
     };
 }
 
