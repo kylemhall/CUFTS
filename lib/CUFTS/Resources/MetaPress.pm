@@ -149,7 +149,10 @@ sub clean_data {
         
         my ( $month, $day, $year );
 
-        if ( ( $month, $day, $year ) = $date =~ m{ (\d{1,2}) / (\d{1,2}) / (\d{4}) }xsm ) {
+        if ( ( $year, $month, $day ) = $date =~ m{ (\d{4}) - (\d{1,2}) - (\d{1,2}) }xsm ) {
+            return sprintf( "%04i-%02i-%02i", $year, $month, $day );
+        }
+        elsif ( ( $month, $day, $year ) = $date =~ m{ (\d{1,2}) / (\d{1,2}) / (\d{4}) }xsm ) {
             return sprintf( "%04i-%02i-%02i", $year, $month, $day );
         }
         elsif ( ( $month, $day, $year ) = $date =~ m{ (\d{1,2}) / (\d{1,2}) / (\d{2}) }xsm ) {
