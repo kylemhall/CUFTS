@@ -42,6 +42,7 @@ sub title_list_fields {
             ft_end_date
             cit_start_date
             cit_end_date
+            embargo_days
         )
     ];
 }
@@ -264,24 +265,23 @@ sub build_linkDatabase {
 
     foreach my $record (@$records) {
 
-        my $url = $resource->url_base;
+        my $url = $resource->database_url;
         if ( is_empty_string($url) ) { 
-            $url = $resource->database_url;
+            $url = $resource->url_base;
+            if ( $resource->auth_name ) {
+                $url .= $resource->auth_name;
+            }
+
+            if ( $resource->resource_identifier ) {
+                if ( $url =~ /IOURL/ ) {
+                    $url .= '?prod=' . $resource->resource_identifier;
+                } else {
+                    $url .= '?db=' . $resource->resource_identifier;
+                }
+            }
         }
         if ( is_empty_string($url) ) {
             return [];
-        }
-
-        if ( $resource->auth_name ) {
-            $url .= $resource->auth_name;
-        }
-
-        if ( $resource->resource_identifier ) {
-            if ( $url =~ /IOURL/ ) {
-                $url .= '?prod=' . $resource->resource_identifier;
-            } else {
-                $url .= '?db=' . $resource->resource_identifier;
-            }
         }
 
         $url .= __add_proxy_suffix($url, $resource->proxy_suffix);
