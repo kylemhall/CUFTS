@@ -28,7 +28,7 @@ use HTML::Entities qw();
 
 use strict;
 
-my $url_base = 'http://www.bioone.org/bioone/?request=';
+my $url_base = 'http://www.bioone.org/perlserv/?request=';
 
 ## title_list_fields - Controls what fields get displayed and loaded from
 ## title lists.
