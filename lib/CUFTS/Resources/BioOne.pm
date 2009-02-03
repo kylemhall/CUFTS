@@ -193,7 +193,7 @@ sub build_linkJournal {
 
         next if is_empty_string( $record->issn );
 
-        my $url = $url_base . 'get-journals-list&issn=';
+        my $url = $url_base . 'get-archive&issn=';
         $url .= substr( $record->issn, 0, 4 ) . '-' . substr( $record->issn, 4, 4 );
 
         my $result = new CUFTS::Result($url);
