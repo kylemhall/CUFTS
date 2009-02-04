@@ -49,7 +49,7 @@ sub title_list_field_map {
         'Full Title of Journal' => 'title',
         'ISSN'                  => 'issn',
         'Access URL'            => 'journal_url',
-	'Fulltext Available From' => 'ft_start_date',
+        'Fulltext Available From' => 'ft_start_date',
         'First Fulltext Online Volume'  => 'vol_ft_start',
         'First Fulltext Online Issue'   => 'iss_ft_start',
         'Final Fulltext Online Year'    => 'ft_end_date',
@@ -64,7 +64,7 @@ sub clean_data {
     $record->{title} = trim_string( $record->{title}, '"' );
     $record->{title} =~ s/ \s* \*+ \s* $//xsm;
 
-    if ( $record->{ft_start_date} !~ /^ \d{4} $/xsm ) {
+    if ( defined($record->{ft_start_date}) && $record->{ft_start_date} !~ /^ \d{4} $/xsm ) {
        delete $record->{ft_start_date};
        delete $record->{vol_ft_start};
        delete $record->{iss_ft_start};
