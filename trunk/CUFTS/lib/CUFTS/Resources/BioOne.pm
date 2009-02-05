@@ -30,21 +30,22 @@ use strict;
 
 my $url_base = 'http://www.bioone.org/perlserv/?request=';
 
+sub title_list_extra_requires {
+    require CUFTS::Util::CSVParse;
+}
+
 ## title_list_fields - Controls what fields get displayed and loaded from
 ## title lists.
 
 sub title_list_fields {
     return [
         qw(
-            id
             title
             issn
             ft_start_date
             ft_end_date
             vol_ft_start
             vol_ft_end
-            journal_url
-            publisher
         )
     ];
 }
@@ -55,28 +56,48 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'Journal Title'     => 'title',
-        'ISSN'              => 'issn',
-        'Beginning Year'    => 'ft_start_date',
-        'Beginning Volume'  => 'vol_ft_start',
-        'URL'               => 'journal_url',
-        'Publisher'         => 'publisher',
-        'ft_end_date'       => 'ft_end_date',
-        'vol_ft_end'        => 'vol_ft_end',
+        'Title'		=> 'title',
+        'ISSN'		=> 'issn',
     };
 }
 
+sub title_list_split_row {
+    my ( $class, $row ) = @_;
+
+    my $csv = CUFTS::Util::CSVParse->new();
+    $csv->parse($row)
+        or CUFTS::Exception::App->throw(
+                'Error parsing CSV line: ' . $csv->error_input() );
+    my @fields = $csv->fields;
+    return \@fields;
+}
 
 sub clean_data {
-    my ( $class, $request ) = @_;
+    my ( $class, $record ) = @_;
 
-    $request->{title}     = HTML::Entities::decode_entities( $request->{title} );
-    $request->{publisher} = HTML::Entities::decode_entities( $request->{publisher} );
+    my $availability = $record->{'___Availability'};
+    my ($start, $end) = split(" \- ", $availability, 2);
+    $start =~ /(.*)\((.*)\)/;
+    my $start_vol = $1;
+    my $start_date = $2;
+    $start_vol =~ /[v|n]\. (\d+)/;
+    $start_vol = $1;
 
-    $request->{title}     = trim_string(trim_string($request->{title}, '"'));
-    $request->{publisher} = trim_string(trim_string($request->{title}, '"'));
+    if ( !($end eq "current issue") ){
+        $end =~ /(.*)\((.*)\)/;
+        my $end_vol = $1;
+        my $end_date = $2;
+        $end_vol =~ /[v|n]\. (\d+)/;
+        $end_vol = $1;
 
-    return $class->SUPER::clean_data($request);
+        $record->{'ft_end_date'} = $end_date;
+        $record->{'vol_ft_end'} = $end_vol;
+    }
+
+    $record->{'ft_start_date'} = $start_date;
+    $record->{'vol_ft_start'} = $start_vol;
+
+    return $class->SUPER::clean_data($record);
 }
 
 ## -------------------------------------------------------------------------------------------
