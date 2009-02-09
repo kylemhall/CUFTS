@@ -41,6 +41,9 @@ sub title_list_fields {
             ft_start_date
             vol_ft_start
             iss_ft_start
+            ft_end_date
+            vol_ft_end
+            iss_ft_end
             db_identifier
         )
     ];
