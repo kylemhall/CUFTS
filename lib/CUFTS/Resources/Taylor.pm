@@ -72,7 +72,7 @@ sub clean_data {
     
     my $year = (localtime())[5] + 1900;
     
-    if ( $record->{ft_end_date} >= ($year - 1) ) {
+    if ( defined($record->{ft_end_date}) && $record->{ft_end_date} >= ($year - 1) ) {
         delete $record->{ft_end_date};
         delete $record->{vol_ft_end};
         delete $record->{iss_ft_end};
