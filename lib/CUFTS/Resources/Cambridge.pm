@@ -222,10 +222,15 @@ sub build_linkTOC {
 
     foreach my $record (@$records) {
 
+        my $volume = $request->volume;
+        my $issue  = $request->issue;
+        $volume =~ tr/0-9//cd;
+        $issue  =~ tr/0-9//cd;
+
         my $url = $url_base . 'issue_' . prepTitle( $record->title );
         $url .= '/Vol'
-            . sprintf( "%02u", $request->volume ) . 'No'
-            . sprintf( "%02u", $request->issue );
+            . sprintf( "%02u", $volume ) . 'No'
+            . sprintf( "%02u", $issue );
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
