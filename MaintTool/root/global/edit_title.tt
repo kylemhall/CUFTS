@@ -12,7 +12,7 @@
  [% NEXT IF field == 'id' %]
  <tr>
   <td class="label[% loop.count % 2 %]">[% field.replace('_', ' ') | html %]</td>
-  <td class="field[% loop.count % 2 %]"><input name="[% field %]" value="[% title.$field | html %]" size="10" maxlength="255" /></td>
+  <td class="field[% loop.count % 2 %]"><input name="[% field %]" value="[% title.$field | html %]" size="30" maxlength="255" /></td>
  </tr>
 [% END %]
 </table>
