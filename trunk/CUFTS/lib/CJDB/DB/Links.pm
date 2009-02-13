@@ -71,9 +71,11 @@ sub local_resource {
 }
 
 __PACKAGE__->set_sql(display => qq{
-    SELECT cjdb_links.*, local_journals.cjdb_note AS journal_cjdb_note FROM cjdb_links
+    SELECT cjdb_links.*, COALESCE(local_journals.cjdb_note, journals.cjdb_note) AS journal_cjdb_note FROM cjdb_links
     LEFT OUTER JOIN local_journals 
     ON cjdb_links.local_journal = local_journals.id
+    LEFT OUTER JOIN journals 
+    ON local_journals.journal = journals.id
     WHERE cjdb_links.journal = ?;
 });
 
