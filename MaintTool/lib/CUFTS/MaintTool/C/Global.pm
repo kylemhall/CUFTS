@@ -306,7 +306,12 @@ sub edit_title : Local {
     my ($self, $c, $resource_id) = @_;
     
     my $resource = $c->stash->{resource};
-    my $fields = $c->stash->{fields} = [ @{$resource->do_module('title_list_fields')}, 'journal_auth' ];
+    my $fields = [ @{$resource->do_module('title_list_fields')} ];
+    if ( !grep { $_ eq 'journal_auth' } @$fields ) {
+        push @$fields, 'journal_auth';
+    }
+    $c->stash->{fields} = $fields;
+    
     my %validate = %$form_validate_edit_title;
     push @{$validate{optional}}, @$fields;
 
