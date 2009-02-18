@@ -161,7 +161,8 @@ __PACKAGE__->columns(All => qw(
 
     cancellation_cap
     cancellation_cap_notes
-    
+
+    counter_source
 ));                                                                                                        
 
 __PACKAGE__->columns( Essential => __PACKAGE__->columns );
@@ -178,6 +179,7 @@ __PACKAGE__->has_a( 'license', 'CUFTS::DB::ERMLicense' );
 __PACKAGE__->has_a( 'provider', 'CUFTS::DB::ERMProviders' );
 __PACKAGE__->has_many( 'costs' => 'CUFTS::DB::ERMCosts' );
 __PACKAGE__->has_many( 'uses' => 'CUFTS::DB::ERMUses' );
+__PACKAGE__->has_a( 'counter_source', 'CUFTS::DB::ERMCounterSources' );
 
 # Enabling both of these causes a weird Class::DBI loop
 # __PACKAGE__->has_many( 'local_journals' => 'CUFTS::DB::LocalJournals' );
@@ -260,6 +262,18 @@ sub main_name {
     }
 
     return defined($name_record) ? $name_record->name : undef;
+}
+
+sub alternate_names {
+    my ( $self ) = @_;
+
+    return CUFTS::DB::ERMNames->search({
+        erm_main => $self->id,
+        main => 0,
+    },
+    {
+        order_by => 'search_name',
+    });
 }
 
 sub retrieve_all_for_site {
@@ -545,7 +559,7 @@ sub as_marc {
         '035' => [ {}, 's', [ 'journal_auth', { prepend => 'CJDB' } ] ],
         '935' => [ {}, 'a', [ 'id', { prepend => 'e' } ] ],
         '245' => [ {}, 'a', [ 'main_name' ] ],
-        '246' => [ { repeats => 1, repeat_field => 'names' }, 'a', [ 'name' ] ],
+        '246' => [ { repeats => 1, repeat_field => 'alternate_names' }, 'a', [ 'name' ] ],
         '246' => [ {}, 'a', [ 'internal_name' ] ],
         '260' => [ {}, 'a', [ 'publisher' ] ],
         '856' => [ {}, 'a', [ 'id', { prepend_url => 1 } ] ],
