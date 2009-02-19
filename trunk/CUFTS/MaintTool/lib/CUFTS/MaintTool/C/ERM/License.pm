@@ -229,7 +229,7 @@ sub edit : Local {
 
             if ( defined($filename) ) {
                 $upload->copy_to( $filename ) or
-                    die("Error copying file: $@");
+                    die("Error copying file: $!");
             }
 
             CUFTS::DB::DBI->commit();
