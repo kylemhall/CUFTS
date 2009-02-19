@@ -25,6 +25,8 @@ use base qw(CUFTS::Resources::Base::SFXLoader CUFTS::Resources::Base::DOI);
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
 
+use Unicode::String qw(utf8);
+
 use strict;
 
 sub title_list_fields {
@@ -63,6 +65,8 @@ sub clean_data {
     if ( defined($record->{e_issn}) && $record->{e_issn} !~ /\d{4}-?\d{3}[xX\d]/ ) {
         delete $record->{e_issn};
     }
+    
+    $record->{title} = utf8( $record->{title} )->latin1;
 
     return $class->SUPER::clean_data($record);
 }
