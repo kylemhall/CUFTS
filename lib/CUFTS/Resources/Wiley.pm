@@ -76,7 +76,7 @@ sub skip_record {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    if ( $record->{'issn'} =~ /:99/ ) {
+    if ( defined($record->{issn}) && $record->{issn} =~ /:99/ ) {
         return ['Skipping due to non-fulltext backfile entry'];
     }
 
@@ -86,7 +86,7 @@ sub clean_data {
 
     $record->{title} = trim_string( $record->{title}, '"' );
 
-    if ( $record->{e_issn} !~ / \d{4} - \d{3}[\dxX] /xsm ) {
+    if ( defined($record->{e_issn}) && $record->{e_issn} !~ / \d{4} - \d{3}[\dxX] /xsm ) {
         delete $record->{e_issn};
     }
 
