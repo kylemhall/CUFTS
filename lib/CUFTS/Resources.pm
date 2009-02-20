@@ -251,7 +251,7 @@ sub load_title_list {
     
     if ( $title_count == 0 ) {
         $module->dbi_rollback;
-        die("All titles will be deleted by this load.  Rolling back changes.  There is probably an error in the resource module or the title list format has changed.");
+        die("All titles will be deleted by this load.  Rolling back changes.  There is probably an error in the resource module or the title list format has changed.  Resource ID: " . $resource->id);
     }
 
     $local eq 'global' and
