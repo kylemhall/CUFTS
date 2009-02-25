@@ -30,9 +30,9 @@ use strict;
 
 my $url_base = 'http://www.bioone.org/perlserv/?request=';
 
-sub title_list_extra_requires {
-    require CUFTS::Util::CSVParse;
-}
+# sub title_list_extra_requires {
+#     require CUFTS::Util::CSVParse;
+# }
 
 ## title_list_fields - Controls what fields get displayed and loaded from
 ## title lists.
@@ -46,6 +46,7 @@ sub title_list_fields {
             ft_end_date
             vol_ft_start
             vol_ft_end
+            journal_url
         )
     ];
 }
@@ -63,16 +64,16 @@ sub title_list_field_map {
     };
 }
 
-sub title_list_split_row {
-    my ( $class, $row ) = @_;
-
-    my $csv = CUFTS::Util::CSVParse->new();
-    $csv->parse($row)
-        or CUFTS::Exception::App->throw(
-                'Error parsing CSV line: ' . $csv->error_input() );
-    my @fields = $csv->fields;
-    return \@fields;
-}
+# sub title_list_split_row {
+#     my ( $class, $row ) = @_;
+# 
+#     my $csv = CUFTS::Util::CSVParse->new();
+#     $csv->parse($row)
+#         or CUFTS::Exception::App->throw(
+#                 'Error parsing CSV line: ' . $csv->error_input() );
+#     my @fields = $csv->fields;
+#     return \@fields;
+# }
 
 sub clean_data {
     my ( $class, $record ) = @_;
