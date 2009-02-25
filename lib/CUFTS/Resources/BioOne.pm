@@ -56,8 +56,10 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'Title'		=> 'title',
-        'ISSN'		=> 'issn',
+        'Title' => 'title',
+        'ISSN'  => 'issn',
+        'TITLE' => 'title',
+        'URL'   => 'journal_url',
     };
 }
 
@@ -75,7 +77,7 @@ sub title_list_split_row {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    my $availability = $record->{'___Availability'};
+    my $availability = $record->{'___Availability'} || $record->{'___AVAILABILITY'};
     my ($start, $end) = split(" \- ", $availability, 2);
     $start =~ /(.*)\((.*)\)/;
     my $start_vol = $1;
