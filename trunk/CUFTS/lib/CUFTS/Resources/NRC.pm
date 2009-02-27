@@ -53,17 +53,17 @@ sub title_list_fields {
 ## internal field names
 ##
 
-sub title_list_field_map {
-    return {
-        'title'         => 'title',
-        'issn'          => 'issn',
-        'e_issn'        => 'e_issn',
-        'ft_start_date' => 'ft_start_date',
-        'vol_ft_start'  => 'vol_ft_start',
-        'iss_ft_start'  => 'iss_ft_start',
-        'db_identifier' => 'db_identifier'
-    };
-}
+# sub title_list_field_map {
+#     return {
+#         'title'         => 'title',
+#         'issn'          => 'issn',
+#         'e_issn'        => 'e_issn',
+#         'ft_start_date' => 'ft_start_date',
+#         'vol_ft_start'  => 'vol_ft_start',
+#         'iss_ft_start'  => 'iss_ft_start',
+#         'db_identifier' => 'db_identifier'
+#     };
+# }
 
 ## -------------------------------------------------------------------------------------------
 
