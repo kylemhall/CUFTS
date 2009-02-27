@@ -137,11 +137,11 @@ sub clean_data {
 
     if ( defined( $record->{title} ) ) {
         $record->{title} =~ s/\([^\)]+?\)$//;
-        $record->{title} = utf8( $record->{title} )->latin1;
+        # $record->{title} = utf8( $record->{title} )->latin1;
     }
 
     if ( defined( $record->{'publisher'} ) ) {
-        $record->{'publisher'} = ( utf8( $record->{'publisher'} ) )->latin1;
+        # $record->{'publisher'} = ( utf8( $record->{'publisher'} ) )->latin1;
     }
 
     sub parse_date {
@@ -152,10 +152,10 @@ sub clean_data {
         if ( ( $year, $month, $day ) = $date =~ m{ (\d{4}) - (\d{1,2}) - (\d{1,2}) }xsm ) {
             return sprintf( "%04i-%02i-%02i", $year, $month, $day );
         }
-        elsif ( ( $month, $day, $year ) = $date =~ m{ (\d{1,2}) / (\d{1,2}) / (\d{4}) }xsm ) {
+        elsif ( ( $day, $month, $year ) = $date =~ m{ (\d{1,2}) / (\d{1,2}) / (\d{4}) }xsm ) {
             return sprintf( "%04i-%02i-%02i", $year, $month, $day );
         }
-        elsif ( ( $month, $day, $year ) = $date =~ m{ (\d{1,2}) / (\d{1,2}) / (\d{2}) }xsm ) {
+        elsif ( ( $day, $month, $year ) = $date =~ m{ (\d{1,2}) / (\d{1,2}) / (\d{2}) }xsm ) {
             $year += $year < 20 ? 2000 : 1900;
             return sprintf( "%04i-%02i-%02i", $year, $month, $day );
         }
