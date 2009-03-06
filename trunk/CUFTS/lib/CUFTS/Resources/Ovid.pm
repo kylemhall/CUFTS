@@ -64,11 +64,11 @@ sub clean_data {
     # Parse coverage
 
     if ( $record->{'___Start Coverage'} =~ /(\w+) \s* (\d{4})/xsm ) {
-        $record->{ft_start_date} = parse_date($2, $1, 'start');
+        $record->{ft_start_date} = format_date($2, $1, 'start');
     }
 
     if ( $record->{'___End Coverage'} =~ /(\w+) \s* (\d{4})/xsm ) {
-        $record->{ft_start_date} = parse_date($2, $1, 'start');
+        $record->{ft_start_date} = format_date($2, $1, 'end');
     }
 
     return $class->SUPER::clean_data($record);
