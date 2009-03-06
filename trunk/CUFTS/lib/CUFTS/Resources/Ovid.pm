@@ -51,7 +51,7 @@ sub clean_data {
 
     # Skip records with no titles, they're not very useful
 
-    if ( is_empty_string( $record->{title} ) || $record->{issn} eq 'N/A' || $record->{eissn} eq 'Catalog Product' ) {
+    if ( is_empty_string( $record->{title} ) || $record->{issn} =~ m{N/A} || $record->{eissn} =~ /Catalog/ || $record->{'___Coverage'} =~ /Catalog/ ) {
         return ['Title is empty or issn/eissn indicate "catalog product", skipping record'];
     }
 
