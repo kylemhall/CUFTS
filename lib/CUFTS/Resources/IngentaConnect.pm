@@ -139,95 +139,95 @@ sub title_list_get_field_headings {
 ##                   write a temp file and open it.  In this case, we're just deleting
 ##                   tons of duplicate lines
 
-sub preprocess_file {
-    my ( $class, $IN ) = @_;
-
-    use File::Temp;
-
-    my ( $fh, $filename ) = File::Temp::tempfile();
-    my %seen;
-
-    # publisher, title, issn, e_issn, coverage, url
-    while ( my $line = <$IN> ) {
-        my ( $publisher, $title, $issn, $e_issn, $coverage, $url )
-            = @{ $class->title_list_split_row($line) };
-
-        if ( !defined( $seen{$url} ) ) {
-            $seen{$url} = {};
-        }
-
-        $seen{$url}->{publisher} ||= $publisher;
-        $seen{$url}->{title}     ||= $title;
-
-        my @temp_issns;
-        if ( defined($issn) 
-             && $issn ne '0000-0000' 
-             && $issn =~ /\d{4}-\d{3}[\dxX]/ ) 
-        {
-            push @temp_issns, $issn;
-        }
-            
-
-        if ( defined($e_issn)
-            && $e_issn ne '0000-0000'
-            && $e_issn =~ /\d{4}-\d{3}[\dxX]/ )
-        {
-            push @temp_issns, $e_issn;
-        }
-
-        foreach my $temp_issn (@temp_issns) {
-
-            if ( !defined( $seen{$url}->{issns} ) ) {
-                $seen{$url}->{issns} = [];
-            }
-
-            push @{ $seen{$url}->{issns} }, $temp_issn;
-        }
-
-        my ( $temp_start, $temp_end ) = split /-/, $coverage;
-        
-        if (defined($temp_start)
-            && ( !defined( $seen{$url}->{start} )
-                || $temp_start < $seen{$url}->{start} )
-            )
-        {
-            $seen{$url}->{start} = $temp_start;
-        }
-        
-        if (defined($temp_end)
-            && ( !defined( $seen{$url}->{end} )
-                || $temp_end > $seen{$url}->{end} )
-            )
-        {
-            $seen{$url}->{end} = $temp_end;
-        }
-    }
-
-    foreach my $url ( keys %seen ) {
-        print $fh '"', $seen{$url}->{publisher}, '",';
-        print $fh '"', $seen{$url}->{title},     '",';
-
-        if ( defined( $seen{$url}->{issns} ) ) {
-            print $fh shift( @{ $seen{$url}->{issns} } );
-        }
-        print $fh ',';
-
-        if ( defined( $seen{$url}->{issns} ) ) {
-            print $fh shift( @{ $seen{$url}->{issns} } );
-        }
-        print $fh ',';
-
-        print $fh $seen{$url}->{start}, '-', $seen{$url}->{end}, ',';
-
-        print $fh $url;
-        print $fh "\n";
-    }
-
-    close *$IN;
-    seek *$fh, 0, 0;
-
-    return $fh;
-}
+# sub preprocess_file {
+#     my ( $class, $IN ) = @_;
+# 
+#     use File::Temp;
+# 
+#     my ( $fh, $filename ) = File::Temp::tempfile();
+#     my %seen;
+# 
+#     # publisher, title, issn, e_issn, coverage, url
+#     while ( my $line = <$IN> ) {
+#         my ( $publisher, $title, $issn, $e_issn, $coverage, $url )
+#             = @{ $class->title_list_split_row($line) };
+# 
+#         if ( !defined( $seen{$url} ) ) {
+#             $seen{$url} = {};
+#         }
+# 
+#         $seen{$url}->{publisher} ||= $publisher;
+#         $seen{$url}->{title}     ||= $title;
+# 
+#         my @temp_issns;
+#         if ( defined($issn) 
+#              && $issn ne '0000-0000' 
+#              && $issn =~ /\d{4}-\d{3}[\dxX]/ ) 
+#         {
+#             push @temp_issns, $issn;
+#         }
+#             
+# 
+#         if ( defined($e_issn)
+#             && $e_issn ne '0000-0000'
+#             && $e_issn =~ /\d{4}-\d{3}[\dxX]/ )
+#         {
+#             push @temp_issns, $e_issn;
+#         }
+# 
+#         foreach my $temp_issn (@temp_issns) {
+# 
+#             if ( !defined( $seen{$url}->{issns} ) ) {
+#                 $seen{$url}->{issns} = [];
+#             }
+# 
+#             push @{ $seen{$url}->{issns} }, $temp_issn;
+#         }
+# 
+#         my ( $temp_start, $temp_end ) = split /-/, $coverage;
+#         
+#         if (defined($temp_start)
+#             && ( !defined( $seen{$url}->{start} )
+#                 || $temp_start < $seen{$url}->{start} )
+#             )
+#         {
+#             $seen{$url}->{start} = $temp_start;
+#         }
+#         
+#         if (defined($temp_end)
+#             && ( !defined( $seen{$url}->{end} )
+#                 || $temp_end > $seen{$url}->{end} )
+#             )
+#         {
+#             $seen{$url}->{end} = $temp_end;
+#         }
+#     }
+# 
+#     foreach my $url ( keys %seen ) {
+#         print $fh '"', $seen{$url}->{publisher}, '",';
+#         print $fh '"', $seen{$url}->{title},     '",';
+# 
+#         if ( defined( $seen{$url}->{issns} ) ) {
+#             print $fh shift( @{ $seen{$url}->{issns} } );
+#         }
+#         print $fh ',';
+# 
+#         if ( defined( $seen{$url}->{issns} ) ) {
+#             print $fh shift( @{ $seen{$url}->{issns} } );
+#         }
+#         print $fh ',';
+# 
+#         print $fh $seen{$url}->{start}, '-', $seen{$url}->{end}, ',';
+# 
+#         print $fh $url;
+#         print $fh "\n";
+#     }
+# 
+#     close *$IN;
+#     seek *$fh, 0, 0;
+# 
+#     return $fh;
+# }
 
 sub build_linkJournal {
     my ( $class, $records, $resource, $site, $request ) = @_;
