@@ -64,7 +64,7 @@ sub clean_data {
     $record->{title} = HTML::Entities::decode_entities( $record->{title} );
     
     if ( length($record->{issn}) > 9 ) {
-        return [ 'Skipping monograph with ISBN: ' . $record->issn ];
+        return [ 'Skipping monograph with ISBN: ' . $record->{issn} ];
     }
     
     if ( defined( $record->{ft_start_date} ) ) {
