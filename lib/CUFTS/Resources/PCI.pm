@@ -32,73 +32,69 @@ use CUFTS::Exceptions qw(assert_ne);
 
 use strict;
 
-INIT {
- eval { CUFTS::ResourcesLoader->add_module('PCI'); };
-}
-
 sub title_list_fields {
-	return [qw(
-		id
+    return [qw(
+        id
 
-		title
-		issn
+        title
+        issn
 
-		ft_start_date
-		ft_end_date
-	)];
+        ft_start_date
+        ft_end_date
+    )];
 }
 
 sub overridable_resource_details {
-	return undef;
+    return undef;
 }
-	
+    
 
 sub title_list_field_map {
-	return {
-		'Maintitle' 		=> 'title',
-		'ISSN' 			=> 'issn',
-		
-	};
+    return {
+        'Maintitle'         => 'title',
+        'ISSN'          => 'issn',
+        
+    };
 }
 
 sub clean_data {
-	my ($self, $record) = @_;
+    my ($self, $record) = @_;
 
-	# Strip quotes from titles
+    # Strip quotes from titles
 
-	$record->{'title'} =~ s/^"/;
-	$record->{'title'} =~ s/"$/;
-	
-	# Figure out fulltext field
-	
-	my $ft_field;
-	foreach my $field (keys $record) {
-		if ($field =~ /^___.+Full\s+Text\s+coverage/i) {
-			$ft_field = $field;
-			last;
-		}
-	}
-		
-	if (defined($ft_field)) {			
-		my $coverage = $record->{$ft_field};
-		if ($coverage =~ /(\d{4}).*\-.*(\d{4})/) {
-			$record->{'ft_start_date'} = $1;
-			$record->{'ft_end_date'} = $2;
-		} elsif ($coverage =~ /(\d{4})/) {
-			$record->{'ft_start_date'} = $1;
-		}
-	}
-	
-	return $self->SUPER::clean_data($record);
+    $record->{'title'} =~ s/^"/;
+    $record->{'title'} =~ s/"$/;
+    
+    # Figure out fulltext field
+    
+    my $ft_field;
+    foreach my $field (keys $record) {
+        if ($field =~ /^___.+Full\s+Text\s+coverage/i) {
+            $ft_field = $field;
+            last;
+        }
+    }
+        
+    if (defined($ft_field)) {           
+        my $coverage = $record->{$ft_field};
+        if ($coverage =~ /(\d{4}).*\-.*(\d{4})/) {
+            $record->{'ft_start_date'} = $1;
+            $record->{'ft_end_date'} = $2;
+        } elsif ($coverage =~ /(\d{4})/) {
+            $record->{'ft_start_date'} = $1;
+        }
+    }
+    
+    return $self->SUPER::clean_data($record);
 }
 
 
 
 sub can_getFulltext {
-	return 0;
+    return 0;
 }
 sub can_getTOC {
-	return 0;
+    return 0;
 }
 
 1;
