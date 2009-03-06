@@ -43,6 +43,11 @@ sub title_list_fields {
             ft_start_date
             ft_end_date
 
+            vol_ft_start
+            vol_ft_end
+            iss_ft_start
+            iss_ft_end
+
             publisher
             journal_url
         )
@@ -57,6 +62,10 @@ sub clean_data {
     my ( $class, $record ) = @_;
 
     $record->{title} = HTML::Entities::decode_entities( $record->{title} );
+    
+    if ( length($record->issn) == 13 ) {
+        return [ 'Skipping monograph with ISBN: ' . $record->issn ];
+    }
     
     if ( defined( $record->{ft_start_date} ) ) {
 
@@ -86,6 +95,14 @@ sub clean_data {
     {
         delete $record->{issn};
     }
+    
+    if ( $record->{___vol_range} =~ m{ (\d+)/(\d+) - (\d+)/(\d+) }msx ) {
+        $record->{vol_ft_start} = $1;
+        $record->{iss_ft_start} = $2;
+        $record->{vol_ft_end}   = $3;
+        $record->{iss_ft_start} = $4;
+    }
+    
 
     return $class->SUPER::clean_data($record);
 }
@@ -112,6 +129,7 @@ sub title_list_get_field_headings {
             issn
             e_issn
             ft_start_date
+            ___vol_range
             journal_url
         )
     ];
