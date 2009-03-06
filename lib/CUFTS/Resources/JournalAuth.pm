@@ -37,7 +37,7 @@ sub has_title_list               { return 0     }
 sub get_records {
     my ( $class, $resource, $site, $request ) = @_;
 
-    my $issn = is_empty_string( $request->issn ) ? $request->issn : $request->eissn;
+    my $issn = not_empty_string( $request->issn ) ? $request->issn : $request->eissn;
 
     if ( not_empty_string($issn) ) {
 
