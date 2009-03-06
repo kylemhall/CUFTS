@@ -31,109 +31,49 @@ use strict;
 
 sub title_list_field_map {
     return {
-        'Title'         => 'title',
-        'ISSN_NO'       => 'issn',
-        'EISSN_NO'      => 'issn',
-        'Publisher(s)'  => 'publisher',
-        'URL'           => 'journal_url',
+        'Journal Title'  => 'title',
+        'ISSN'           => 'issn',
+        'eISSN'          => 'issn',
+        'Publisher'      => 'publisher',
+        'Jumpstart'      => 'journal_url',
     };
 }
 
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    $record->{title} =~ trim_string( $record->{title}, '"' );
+    $record->{title}  =~ trim_string( $record->{title}, '"' );
+    $record->{issn}   =~ trim_string( $record->{issn} );
+    $record->{e_issn} =~ trim_string( $record->{e_issn} );
 
     # Remove "®" character from title ends
     $record->{title} =~ s/\xAE$//xsm;
 
-    my ( $start,    $end )    = @{ parse_coverage( $record->{'___Coverage'} ) };
-    my ( $pdfstart, $pdfend ) = @{ parse_coverage( $record->{'___PDF_Coverage'} ) };
+    # Skip records with no titles, they're not very useful
 
-    if ( defined($start) && defined($pdfstart) ) {
-        $record->{ft_start_date} = $start <= $pdfstart ? $start : $pdfstart;
-    }
-    elsif ( defined($start) ) {
-        $record->{ft_start_date} = $start;
-    }
-    else {
-        $record->{ft_start_date} = $pdfstart
-    }
-
-    if ( defined($end) && defined($pdfend) ) {
-        $record->{ft_end_date} = $end <= $pdfend ? $end : $pdfend;
-    }
-    elsif ( defined($end) ) {
-        $record->{ft_end_date} = $end;
-    }
-    else {
-        $record->{ft_end_date} = $pdfend
+    if ( is_empty_string( $record->{title} ) || $record->{issn} eq 'N/A' || $record->{eissn} eq 'Catalog Product' ) {
+        return ['Title is empty or issn/eissn indicate "catalog product", skipping record'];
     }
 
     # Strip (#12345) from publishers
 
-    $record->{publisher} =~ s/^"(.+)"$/$1/;
+    $record->{publisher} = trim_string( $record->{publisher}, '"');
+    $record->{publisher} = trim_string( $record->{publisher} );
     $record->{publisher} =~ s/\s*\(#.+?\)$//;
 
-    my @errors;
+    # Parse coverage
 
-    # Skip records with no titles, they're not very useful
-
-    if ( is_empty_string( $record->{title} ) ) {
-        push @errors, 'Title is empty, skipping record';
+    if ( $record->{'___Start Coverage'} =~ /(\w+) \s* (\d{4})/xsm ) {
+        $record->{ft_start_date} = parse_date($2, $1, 'start');
     }
 
-    push @errors, @{ $class->SUPER::clean_data($record) };
+    if ( $record->{'___End Coverage'} =~ /(\w+) \s* (\d{4})/xsm ) {
+        $record->{ft_start_date} = parse_date($2, $1, 'start');
+    }
 
-    return \@errors;
-
-
-
+    return $class->SUPER::clean_data($record);
 }
 
-
-sub parse_coverage {
-    my ( $coverage ) = @_;
-
-    my ( $start, $end );
-    
-    $coverage =~ s/^" \s* (.+) \s* "$/$1/xsm;
-
-    # Try start dates first, working from the left.  A simple split on '-' is
-    # dangerous, in the past they have used dates like "January - February 2002 - Present"
-
-    # February 1995 - March 2006
-    # January 2001-Present
-    if ( $coverage =~ /^ ([a-z]{3,}) \s+ (\d{4}) \s* \- /xsmi ) {
-
-        my ( $year, $month ) = ( $2, $1 );
-        $start = format_date( $year, $month, undef, 'start' );
-
-    }
-    # January/February 2004 - Present
-    elsif ( $coverage =~ /^ ([a-z]{3,})\/\w+ \s+ (\d{4}) \s* \- /xsmi ) {
-
-        my ( $year, $month ) = ( $2, $1 );
-        $start = format_date( $year, $month, undef, 'start' );
-
-    }
-
-
-
-    # Work backwards from the right for end dates
-
-    # February 1995 - March 2006
-    if ( $coverage =~ / \s* ([a-z]{3,}) \s+ (\d{4}) $/xsmi ) {
-
-        my ( $year, $month ) = ( $2, $1 );
-        $end = format_date( $year, $month, undef, 'start' );
-
-    }
-    # January/February 2002 - January/February 2004
-    # Not needed, the parser above will catch this one.
-
-    return [ $start, $end ];
-}
 
 sub format_date {
     my ( $year, $month, $day, $period ) = @_;
