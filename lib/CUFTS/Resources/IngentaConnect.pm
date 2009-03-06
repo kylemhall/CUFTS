@@ -63,7 +63,7 @@ sub clean_data {
 
     $record->{title} = HTML::Entities::decode_entities( $record->{title} );
     
-    if ( length($record->{issn}) == 13 ) {
+    if ( length($record->{issn}) > 9 ) {
         return [ 'Skipping monograph with ISBN: ' . $record->issn ];
     }
     
@@ -96,7 +96,7 @@ sub clean_data {
         delete $record->{issn};
     }
     
-    if ( $record->{___vol_range} =~ m{ (\d+)/(\d+) - (\d+)/(\d+) }msx ) {
+    if ( $record->{___vol_range} =~ m{^ (\d+)/(\d+) - (\d+)/(\d+) $}msx ) {
         $record->{vol_ft_start} = $1;
         $record->{iss_ft_start} = $2;
         $record->{vol_ft_end}   = $3;
