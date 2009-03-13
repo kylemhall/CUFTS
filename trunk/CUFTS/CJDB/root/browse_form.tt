@@ -1,7 +1,7 @@
 [% USE url %]
 [% PROCESS setup_browse.tt %]
 
-<form method="post" name="browse" action="[% url("$url_base/browse/show") %]">
+<form method="get" name="browse" action="[% url("$url_base/browse/show") %]">
 <span class="highlight">Search</span> for journals by:
 <p>
 <select name="browse_field" onchange="return changeBrowse();">
