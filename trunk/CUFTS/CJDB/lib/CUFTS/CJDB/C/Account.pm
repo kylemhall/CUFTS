@@ -6,6 +6,15 @@ use base 'Catalyst::Base';
 use CUFTS::CJDB::Authentication::LDAP;
 use CUFTS::Util::Simple;
 
+sub auto : Private {
+    my ($self, $c) = @_;
+
+    my $forward_to = '/' . $c->session->{prev_action};
+    $c->stash->{forward_to} = $forward_to eq '/' ? '/browse' : $forward_to;
+    
+    return 1;
+}
+
 sub logout : Local {
     my ($self, $c) = @_;
 
@@ -13,67 +22,65 @@ sub logout : Local {
     delete $c->stash->{current_account};
 
     $c->req->params($c->session->{prev_params});
-    
-    my $forward_to = '/' . $c->session->{prev_action};
-    if ( $forward_to eq '/') {
-        $forward_to = '/browse';
-    }
-    
-    return $c->forward($forward_to, $c->session->{prev_arguments});
+    return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
 }
 
 
 sub login : Local {
     my ($self, $c) = @_;
 
-    $c->form({'required' => ['key', 'password', 'login'], 'filters' => ['trim']});
+    if ( $c->req->params->{login} ) {
+        
+        $c->form({'required' => ['key', 'password'], 'optional' => 'login', 'filters' => ['trim']});
 
-    if (defined($c->form->{valid}->{key})) {
-        my $key      = $c->form->{valid}->{key};
-        my $password = $c->form->{valid}->{password};
-        my $site     = $c->stash->{current_site};
-        my $account;
+        if (defined($c->form->{valid}->{key})) {
+            my $key      = $c->form->{valid}->{key};
+            my $password = $c->form->{valid}->{password};
+            my $site     = $c->stash->{current_site};
+            my $account;
 
-        if ( not_empty_string($site->cjdb_authentication_module) ) {
-            # Get our internal record, then check external system for password
+            if ( not_empty_string($site->cjdb_authentication_module) ) {
+                # Get our internal record, then check external system for password
 
-            $account = CJDB::DB::Accounts->search( site => $site->id, key => $key)->first;
-            if ( defined($account) ) {
-                my $module = 'CUFTS::CJDB::Authentication::' . $site->cjdb_authentication_module;
-                eval {
-                    $module->authenticate($site, $key, $password);
-                };
-                if ($@) {
-                    # External validation error.
-                    warn($@);
-                    $account = undef;
+                $account = CJDB::DB::Accounts->search( site => $site->id, key => $key)->first;
+                if ( defined($account) ) {
+                    my $module = 'CUFTS::CJDB::Authentication::' . $site->cjdb_authentication_module;
+                    eval {
+                        $module->authenticate($site, $key, $password);
+                    };
+                    if ($@) {
+                        # External validation error.
+                        warn($@);
+                        $account = undef;
+                    }
                 }
             }
-        }
-        else {
-            # Use internal authentication
-
-            my $crypted_pass = crypt($password, $key);
-            $account = CJDB::DB::Accounts->search( site => $site->id, key => $key, password => $crypted_pass)->first;
-        }
-        
-        if ( defined($account) ) {
-        
-            if ( $account->active ) {
-                $c->stash->{current_account} = $account;
-                $c->session->{ $c->stash->{current_site}->id }->{current_account_id} = $account->id;
-            
-                $c->req->params($c->session->{prev_params});
-                return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
-            }
             else {
-                $c->stash->{error} = ['This account has been disabled by library administrators.'];
+                # Use internal authentication
+
+                my $crypted_pass = crypt($password, $key);
+                $account = CJDB::DB::Accounts->search( site => $site->id, key => $key, password => $crypted_pass)->first;
             }
 
-        } else {
-            $c->stash->{error} = ['The password or account was not recognized. Please check that you have entered the correct login name and password. If you are still having problems, please contact your administrator.'];
-        }
-    } 
+            if ( defined($account) ) {
+
+                if ( $account->active ) {
+                    $c->stash->{current_account} = $account;
+                    $c->session->{ $c->stash->{current_site}->id }->{current_account_id} = $account->id;
+
+                    $c->req->params($c->session->{prev_params});
+                    return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
+                }
+                else {
+                    $c->stash->{error} = ['This account has been disabled by library administrators.'];
+                }
+
+            } else {
+                $c->stash->{error} = ['The password or account was not recognized. Please check that you have entered the correct login name and password. If you are still having problems, please contact your administrator.'];
+            }
+        }        
+    }
+
     
     $c->stash->{template} = 'login.tt';
 }
@@ -83,7 +90,7 @@ sub create : Local {
 
     if (defined($c->req->params->{cancel})) {
         $c->req->params($c->session->{prev_params});
-        return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
+        return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
     }
 
     $c->stash->{template} = 'account_create.tt';
@@ -156,7 +163,7 @@ sub create : Local {
             CJDB::DB::DBI->dbi_commit();
 
             $c->req->params($c->session->{prev_params});
-            return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
+            return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
         }
     } 
 }
@@ -172,7 +179,7 @@ sub manage : Local {
 
     if (defined($c->req->params->{cancel})) {
         $c->req->params($c->session->{prev_params});
-        return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
+        return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
     }
 
     $c->stash->{template} = 'account_manage.tt';
@@ -203,7 +210,7 @@ sub manage : Local {
             CJDB::DB::DBI->dbi_commit();
 
             $c->req->params($c->session->{prev_params});
-            return $c->forward('/' . $c->session->{prev_action}, $c->session->{prev_arguments});
+            return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
         }
     } 
 }
