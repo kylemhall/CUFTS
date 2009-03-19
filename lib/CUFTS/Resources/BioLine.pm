@@ -58,6 +58,11 @@ sub can_getTOC {
     return $class->SUPER::can_getTOC($request);
 }
 
+sub can_getJournal {
+    my ( $class, $request ) = @_;
+    return 1;
+}
+
 # --------------------------------------------------------------------------------------------
 
 ## build_link* - Builds a link to a service.  Should return an array reference containing
