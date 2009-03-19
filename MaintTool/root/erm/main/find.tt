@@ -67,15 +67,26 @@ Ext.onReady( function() {
         url: '[% url("$url_base/erm/license/find_json") %]',
         root: 'results',
         fields: [ 'id', 'key' ]
+        // data: [[ '', '' ]]
     });
 
     combo_stores.providers = new Ext.data.JsonStore({
         url: '[% url("$url_base/erm/provider/find_json") %]',
         root: 'results',
         fields: [ 'id', 'key' ]
+        // data: [[ '', '' ]]
     });
     
-    
+    combo_stores.boolean_type = new Ext.data.SimpleStore({
+        fields: [ 'id', 'display' ],
+        data: [ [ null,'&nbsp;' ], [ '1', 'Yes' ], [ '0', 'No' ] ]
+    });
+
+    combo_stores.open_access = new Ext.data.SimpleStore({
+        fields: [ 'id', 'display' ],
+        data: [ [ null,'&nbsp;' ], [ 'yes', 'Yes' ], [ 'no', 'No' ], [ 'partial', 'Partial' ] ]
+    });
+
     var results_grid = new Ext.grid.GridPanel({
         store: results_store,
         columns: [
@@ -249,6 +260,20 @@ Ext.onReady( function() {
                                 listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['resource_medium'],
                                 anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Public List?',
+                                xtype: 'combo',
+                                hiddenName: 'public_list',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['public_list'],
+                                anchor: '95%'
                             }
                         ]
                     },
@@ -333,8 +358,21 @@ Ext.onReady( function() {
                                 listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['provider'],
                                 anchor: '-2'
+                            },
+                            {
+                                fieldLabel: 'Open Access?',
+                                xtype: 'combo',
+                                hiddenName: 'open_access',
+                                store: combo_stores.open_access,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['open_access'],
+                                anchor: '-2'
                             }
-                            
                         ]
                     }
                 ]

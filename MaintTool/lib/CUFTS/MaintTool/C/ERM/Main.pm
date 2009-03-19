@@ -410,6 +410,7 @@ sub _find {
         keyword
         license
         name
+        open_access
         provider
         public
         public_list
