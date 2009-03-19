@@ -38,7 +38,16 @@ sub title_list_fields {
             title
             issn
             e_issn
+            ft_start_date
+            ft_end_date
+            vol_ft_start
+            vol_ft_end
+            iss_ft_start
+            iss_ft_end
+
             db_identifier
+
+            journal_auth
         )
     ];
 }
