@@ -50,6 +50,7 @@ BEGIN {
         Elsevier_CNSLP
         Elsevier
         ElsevierEurope
+        ElsevierLocal
         Emerald
         Erudit
         Extenza
