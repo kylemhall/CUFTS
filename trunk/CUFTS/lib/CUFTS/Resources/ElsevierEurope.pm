@@ -112,7 +112,7 @@ sub clean_data {
 	if (!$month){
 	    delete $record->{ft_start_date};
 	}elsif (!$day){
-	    $record->{ft_start_date} = sprintf( "%04d-%02d-00", $year, $month );
+	    $record->{ft_start_date} = sprintf( "%04d-%02d-01", $year, $month );
 	}else{
 	    $record->{ft_start_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
 	}
@@ -139,7 +139,11 @@ sub clean_data {
         }
         else {
             $month = get_month( $month, 'end' );
-            $record->{ft_end_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
+	    if (!$day){
+        	$record->{ft_end_date} = sprintf( "%04d-%02d", $year, $month );
+	    }else{
+		$record->{ft_end_date} = sprintf( "%04d-%02d-%02d", $year, $month, $day );
+	    }
         }
     }
     elsif ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d+)/xsm ) {
