@@ -71,6 +71,7 @@ sub title_list_field_map {
         'Online ISSN'          => 'e_issn',
         'Short title'          => 'abbreviation',
         'Homepage URL'         => 'journal_url',
+        'ft_end_date'          => 'ft_end_date',
     };
 }
 
