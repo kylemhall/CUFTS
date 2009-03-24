@@ -60,9 +60,10 @@ sub title_list_field_map {
         'Publisher'                     => 'publisher',
         'Start-date of full text'       => 'ft_start_date',
         'End-date of full text'         => 'ft_end_date',
-
         'What is the print ISSN number?'             => 'issn', 
         'What is the online ISSN number?'            => 'e_issn', 
+        'What is print ISSN number?'                 => 'issn', 
+        'What is online ISSN number?'                => 'e_issn', 
         'What is the main URL for the journal site?' => 'journal_url', 
         'Who is the publisher?'                      => 'publisher',
     }
