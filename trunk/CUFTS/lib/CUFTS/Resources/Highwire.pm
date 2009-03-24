@@ -226,7 +226,7 @@ sub build_linkTOC {
     foreach my $record (@$records) {
 
         my $url = $record->journal_url . '/content/vol' . $request->volume;
-        $url .= '/issue' . $request->issue . '/index.shtml';
+        $url .= '/issue' . $request->issue . '/';
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
