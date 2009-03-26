@@ -61,6 +61,7 @@ sub title_list_field_map {
     return {
         'Publication Name'          => 'title',
         'Issn'                      => 'issn',
+        'ISSN'                      => 'issn',
         'Home Page URL'             => 'journal_url',
         'Publisher'                 => 'publisher',
         'Entitlement Begins Volume' => 'vol_ft_start',
