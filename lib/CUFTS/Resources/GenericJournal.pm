@@ -56,9 +56,9 @@ sub title_list_fields {
     ];
 }
 
-sub overridable_resource_details {
-    return undef;
-}
+#sub overridable_resource_details {
+#    return undef;
+#}
 
 sub title_list_field_map {
     return {
