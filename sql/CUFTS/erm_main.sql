@@ -7,6 +7,7 @@ CREATE TABLE erm_main (
     
 -- Resource Information
 
+    internal_name       VARCHAR(1024),
     vendor              VARCHAR(1024),
     publisher           VARCHAR(1024),
     url                 VARCHAR(1024),
