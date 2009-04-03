@@ -65,13 +65,32 @@ sub overridable_resource_details {
         return $details;
 }
 
+sub global_resource_details {
+    my ($class) = @_;
+    return [
+        @{ $class->SUPER::global_resource_details },
+        qw(
+            url_base
+        )
+    ];
+}
+
 sub local_resource_details {
     my ($class) = @_;
+    return [
+        @{ $class->SUPER::local_resource_details },
+        qw(
+            url_base
+            proxy_suffix
+        )
+    ];
+}
 
-    my $details = $class->SUPER::local_resource_details();
-    push @$details, 'url_base';
-
-    return $details;
+sub resource_details_help {
+    return { $_[0]->SUPER::resource_details_help,
+        'url_base' =>
+            "Base URL for faking searches.\nExample:\nhttp://infotrac.galegroup.com/itw/infomark/1/1/1/purl=rc11_CPI_0_",
+    };
 }
 
 sub skip_record {
@@ -80,8 +99,6 @@ sub skip_record {
     return is_empty_string( $record->{title} )
            || $record->{title} =~ /^\s*"?--/;
 }
-
-
 
 sub clean_data {
     my ( $class, $record ) = @_;
@@ -219,37 +236,6 @@ sub clean_data {
 
         return sprintf( "%04i%02i", $year, $month );
     }
-}
-
-sub global_resource_details {
-    my ($class) = @_;
-    return [
-        @{ $class->SUPER::global_resource_details },
-        qw(
-            url_base
-        )
-    ];
-}
-
-sub local_resource_details {
-    my ($class) = @_;
-    return [
-        @{ $class->SUPER::local_resource_details },
-        qw(
-            proxy_suffix
-        )
-    ];
-}
-
-sub resource_details_help {
-    return { $_[0]->SUPER::resource_details_help,
-        'url_base' =>
-            "Base URL for faking searches.\nExample:\nhttp://infotrac.galegroup.com/itw/infomark/1/1/1/purl=rc11_CPI_0_",
-    };
-}
-
-sub overridable_resource_details {
-    return undef;
 }
 
 sub build_linkJournal {
