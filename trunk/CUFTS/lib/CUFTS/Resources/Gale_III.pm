@@ -355,7 +355,8 @@ sub build_linkFulltext {
              && is_empty_string( $request->issue  );
 
         my $url = $resource->url_base;
-
+        next if is_empty_string( $request->url_base );
+        
         if ( is_empty_string($record->issn) ) {
             my $title = $record->title;
             $title =~ tr/ /+/;
