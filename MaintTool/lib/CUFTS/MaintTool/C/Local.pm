@@ -149,10 +149,8 @@ sub menu : Local {
 
 sub find_json : Local {
     my ( $self, $c ) = @_;
-    use Data::Dumper;
     
     my $params = $c->req->params;
-    
     
     my %search = ( active => 'true', site => $c->stash->{current_site}->id );
     if (my $term = $params->{name}) {
