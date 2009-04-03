@@ -87,6 +87,10 @@ sub clean_data {
     $record->{title} =~ s{ \s* \( .+? \) \s* $}{}xsm;
     $record->{title} = utf8( $record->{title} )->latin1;
 
+    if ( is_empty_string($record->{title}) ) {
+        return [ 'UTF8 conversion removed all latin-1 characters from title, skipping record.'];
+    }
+
     $record->{publisher} = ( utf8( $record->{'publisher'} ) )->latin1;
 
     $record->{issn} =~ /d\d+/
