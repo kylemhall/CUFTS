@@ -24,6 +24,7 @@ use base qw(CUFTS::Resources::GenericJournalDOI);
 
 use CUFTS::Util::Simple;
 use HTML::Entities;
+use Unicode::String qw(utf8);
 
 use strict;
 
@@ -55,17 +56,17 @@ sub resource_details_help {
 }
 
 sub title_list_field_map {
-    return {
-        'Publication Name'       => 'title',
-        'ISSN'                   => 'issn',
-        'Publisher'              => 'publisher',
-        'Coverage Begins Volume' => 'vol_ft_start',
-        'Coverage Begins Issue'  => 'iss_ft_start',
-        'Coverage Ends Volume'   => 'vol_ft_end',
-        'Coverage Ends Issue'    => 'iss_ft_end',
-        'Coverage Begins Date'   => 'ft_start_date',
-        'Coverage Ends Date'     => 'ft_end_date',
-	'Home Page URL'          => 'journal_url',
+	return {
+		'Publication Name'       => 'title',
+		'ISSN'                   => 'issn',
+		'Publisher'              => 'publisher',
+		'Coverage Begins Volume' => 'vol_ft_start',
+		'Coverage Begins Issue'  => 'iss_ft_start',
+		'Coverage Ends Volume'   => 'vol_ft_end',
+		'Coverage Ends Issue'    => 'iss_ft_end',
+		'Coverage Begins Date'   => 'ft_start_date',
+		'Coverage Ends Date'     => 'ft_end_date',
+		'Home Page URL'          => 'journal_url',
     };
 }
 
@@ -215,6 +216,9 @@ sub clean_data {
 #            CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
         }
     }
+
+	$record->{title}     = utf8( $record->{title} )->latin1;
+	$record->{publisher} = utf8( $record->{publisher} )->latin1;
 
     return $class->SUPER::clean_data($record);
 }
