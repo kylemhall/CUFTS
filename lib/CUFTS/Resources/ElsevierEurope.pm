@@ -66,7 +66,7 @@ sub title_list_field_map {
 		'Coverage Ends Issue'    => 'iss_ft_end',
 		'Coverage Begins Date'   => 'ft_start_date',
 		'Coverage Ends Date'     => 'ft_end_date',
-		'Home Page URL'          => 'journal_url',
+		'Short Cut URL'          => 'journal_url',
     };
 }
 
