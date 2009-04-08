@@ -30,7 +30,7 @@ form {
 
 #page-header-background {
 	width: 100%;
-	background: url(/static/images/cjdb_header_repeat.gif) repeat-x;
+	background: url(../images/cjdb_header_repeat.gif) repeat-x;
 }
 
 */
@@ -682,7 +682,7 @@ alternate browse tabs
   float:left;
   width:100%;
   font-size:93%;
-  background:#DAE0D2 url("/static/images/tab-bg.gif") repeat-x bottom;
+  background:#DAE0D2 url("../images/tab-bg.gif") repeat-x bottom;
   line-height:normal;
   }
 #browse-tabs ul {
@@ -692,14 +692,14 @@ alternate browse tabs
   }
 #browse-tabs li {
   float:left;
-  background:url("/static/images/tab-left.gif") no-repeat left top;
+  background:url("../images/tab-left.gif") no-repeat left top;
   margin:0;
   padding:0 0 0 9px;
   }
 #browse-tabs a {
   float:left;
   display:block;
-  background:url("/static/images/tab-right.gif") no-repeat right top;
+  background:url("../images/tab-right.gif") no-repeat right top;
   padding:5px 15px 4px 6px;
   text-decoration:none;
   font-weight:bold;
@@ -713,10 +713,10 @@ alternate browse tabs
   color:#222;
   }
 #browse-tabs .current {
-  background-image:url("/static/images/tab-left-current.gif");
+  background-image:url("../images/tab-left-current.gif");
   }
 #browse-tabs .current a {
-  background-image:url("/static/images/tab-right-current.gif");
+  background-image:url("../images/tab-right-current.gif");
   color:#222;
   padding-bottom:5px;
   }
