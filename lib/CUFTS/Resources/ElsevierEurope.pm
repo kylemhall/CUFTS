@@ -64,8 +64,8 @@ sub title_list_field_map {
 		'Coverage Begins Issue'  => 'iss_ft_start',
 		'Coverage Ends Volume'   => 'vol_ft_end',
 		'Coverage Ends Issue'    => 'iss_ft_end',
-		'Coverage Begins Date'   => 'ft_start_date',
-		'Coverage Ends Date'     => 'ft_end_date',
+		'Entitlement Begins Date'=> 'ft_start_date',
+		'Entitlement Ends Date'  => 'ft_end_date',
 		'Short Cut URL'          => 'journal_url',
     };
 }
