@@ -8,7 +8,7 @@
 <tr><td class="label0" align="right">module</td><td class="field0">[% local_resource.module | html %]</td></tr>
 <tr><td class="label1" align="right">rank</td><td class="field1">[% local_resource.rank || 0 | html %]</td></tr>
 <tr><td class="label0" align="right">proxy</td><td class="field0">[% local_resource.proxy ? 'yes' : 'no' %]</td></tr>
-<tr><td class="label1" align="right">dedupe</td><td class="field1">[% local_resource.active ? 'yes' : 'no' %]</td></tr>
+<tr><td class="label1" align="right">dedupe</td><td class="field1">[% local_resource.dedupe ? 'yes' : 'no' %]</td></tr>
 <tr><td class="label0" align="right">auto activate</td><td class="field0">[% local_resource.auto_activate ? 'yes' : 'no' %]</td></tr>
 <tr><td class="label1" align="right">title list scanned</td><td class="field1">[% local_resource.title_list_scanned.substr(0,19) | html %]</td></tr>
 <tr><td class="label0" align="right">modified</td><td class="field0">[% local_resource.modified.substr(0,19) | html %]</td></tr>
