@@ -462,8 +462,8 @@ sub facet_count {
     $sql =~ s/%WHERE%/$where/e;
     $sql =~ s/%JOINS%/join( ' ', values( %{ $config->{joins} } ) )/e;
 
-   warn($sql);
-   warn(Dumper(\@bind));
+   # warn($sql);
+   # warn(Dumper(\@bind));
 
     my $sth = $class->db_Main()->prepare( $sql, {pg_server_prepare => 1} );
     $sth->execute( @bind );
