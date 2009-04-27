@@ -346,22 +346,22 @@ sub build_linkJournal {
 
     foreach my $record (@$records) {
 
-        my $url = 'http://vnweb.hwwilsonweb.com/hww/jumpstart.jhtml?';
+	my $url = 'http://vnweb.hwwilsonweb.com/hww/Journals/searchAction.jhtml?';
 
         # if username provided, use it in the url
         if ( not_empty_string( $resource->auth_name) ) {
             $url .= 'CustID=' . $resource->auth_name . '&';
         }
 
-        $url .= 'genre=journal&sid=HWW:' . $resource->resource_identifier;
-        $url .= not_empty_string( $record->issn )
-                ? '&issn='  . dashed_issn( $record->issn )
-                : '&title=' . uri_escape( $record->title );
+	$url .= 'sid=HWW:' . $resource->resource_identifier;
+	$url .= not_empty_string( $record->issn )
+		? '&issn='  . dashed_issn( $record->issn )
+		: '&title=' . uri_escape( $record->title );
 
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
+	my $result = new CUFTS::Result($url);
+	$result->record($record);
 
-        push @results, $result;
+	push @results, $result;
     }
 
     return \@results;
