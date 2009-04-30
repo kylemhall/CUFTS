@@ -1,9 +1,13 @@
 CREATE TABLE erm_main (
     id          SERIAL PRIMARY KEY,
     key         VARCHAR(1024),
+    
     site        INTEGER NOT NULL,
     license     INTEGER,   -- linked table (erm_license)
     provider    INTEGER,   -- linked table (erm_providers)
+    
+    counter_source    INTEGER,   -- linked table (erm_counter_sources)
+    
     
 -- Resource Information
 
