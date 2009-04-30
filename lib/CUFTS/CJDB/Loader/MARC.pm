@@ -463,6 +463,10 @@ sub strip_subject_periodicals {
     return 1;
 }
 
+sub preserve_print_MARC {
+    return 0;
+}
+
 sub MARC_subject_subfield_order {
     return [ qw( a b c d e z y x v 2 3 4 6 8 ) ];
 }
