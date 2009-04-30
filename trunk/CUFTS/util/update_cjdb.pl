@@ -752,7 +752,7 @@ sub strip_print_MARC {
         245
         246
         260
-        650
+        6..
         710
         780
         785
@@ -801,6 +801,9 @@ sub create_brief_MARC {
 
 sub build_dump {
     my ( $site, $MARC_cache ) = @_;
+    
+    my $loader = load_print_module($site);
+    $loader->site_id( $site->id );
     
     my $cjdb_record_iter = CJDB::DB::Journals->search( site => $site->id );
 
@@ -871,7 +874,12 @@ CJDB_RECORD:
 
         my $MARC_record;
         if ( defined( $MARC_cache->{$journals_auth_id}->{MARC} ) ) {
-            $MARC_record = strip_print_MARC( $site, $MARC_cache->{$journals_auth_id}->{MARC} );
+            if ( !$loader->preserve_print_MARC ) {
+                $MARC_record = strip_print_MARC( $site, $MARC_cache->{$journals_auth_id}->{MARC} );
+            }
+            else {
+                $MARC_record = $MARC_cache->{$journals_auth_id}->{MARC};
+            }
         }
         elsif ( defined($cjdb_record->journals_auth->MARC) ) {
             $MARC_record = $cjdb_record->journals_auth->marc_object;
