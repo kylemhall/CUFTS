@@ -46,20 +46,20 @@ sub title_list_fields {
     ];
 }
 
-sub title_list_extra_requires {
-    require Text::CSV;
-}
-
-sub title_list_split_row {
-    my ( $class, $row ) = @_;
-
-    my $csv = Text::CSV->new();
-    $csv->parse($row)
-        or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
-
-    my @fields = $csv->fields;
-    return \@fields;
-}
+# sub title_list_extra_requires {
+#     require Text::CSV;
+# }
+# 
+# sub title_list_split_row {
+#     my ( $class, $row ) = @_;
+# 
+#     my $csv = Text::CSV->new();
+#     $csv->parse($row)
+#         or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
+# 
+#     my @fields = $csv->fields;
+#     return \@fields;
+# }
 
 ## title_list_field_map - Hash ref mapping fields from the raw title lists to
 ## internal field names
