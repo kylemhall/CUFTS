@@ -186,13 +186,7 @@ sub build_linkFulltext {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->db_identifier );
-
-        my $dir =
-            $record->db_identifier eq 'HTML'
-            ? 'content/full'
-            : 'reprint';
-
+        my $dir = 'content/full';
         my $url = $record->journal_url . '/cgi/' . $dir . '/';
 
         $url .= $request->volume . '/'
