@@ -20,7 +20,7 @@
 
 package CUFTS::Resources::Hein;
 
-use base qw(CUFTS::Resources::Base::DOI CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
@@ -33,7 +33,7 @@ use strict;
 sub title_list_fields {
     return [
         qw(
-        	issn
+            issn
             title
             ft_start_date
             vol_ft_start
@@ -47,20 +47,12 @@ sub title_list_fields {
     ];
 }
 
-sub help_template {
-    return 'help/Hein';
-}
-
-sub resource_details_help {
-    return {};
-}
-
 sub title_list_field_map {
     return {
-        'Title'			=> 'title',
-        'ISSN'			=> 'issn',
-        'URL'			=> 'journal_url',
-        'Publisher'		=> 'publisher'
+        'Title'         => 'title',
+        'ISSN'          => 'issn',
+        'URL'           => 'journal_url',
+        'Publisher'     => 'publisher'
     };
 }
 
@@ -81,23 +73,22 @@ sub title_list_split_row {
 
 sub skip_record {
     my ( $class, $record ) = @_;
-    
-    return 1 if not_empty_string( $record->{'___Entitlement Status'} ) 
+
+    return 1 if not_empty_string( $record->{'___Entitlement Status'} )
              && $record->{'___Entitlement Status'} =~ /not\s+available/i;
     return 0;
 }
-
 
 sub clean_data {
     my ( $class, $record ) = @_;
     
     my $coverage = $record->{'___Coverage'};
     if ($coverage =~ m/^Vols/){
-    	$coverage =~ /Vols\. (\d+)-(\d+) \((\d+)-(\d+)\).*/;
-    	$record->{vol_ft_start} = $1;
-    	$record->{vol_ft_end} = $2;
-    	$record->{ft_start_date} = $3;
-    	$record->{ft_end_date} = $4;
+        $coverage =~ /Vols\. (\d+)-(\d+) \((\d+)-(\d+)\).*/;
+        $record->{vol_ft_start} = $1;
+        $record->{vol_ft_end} = $2;
+        $record->{ft_start_date} = $3;
+        $record->{ft_end_date} = $4;
     }
     
     if ( not_empty_string( $record->{ft_start_date} ) ) {
@@ -155,30 +146,5 @@ sub clean_data {
     return $class->SUPER::clean_data($record);
 }
 
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $result = new CUFTS::Result;
-        $result->url('http://www.sciencedirect.com/science/journal/' . $record->issn );
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
-}
 
 1;
