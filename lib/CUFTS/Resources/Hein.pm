@@ -72,11 +72,11 @@ sub title_list_split_row {
 }
 
 sub skip_record {
-    my ( $class, $record ) = @_;
+	my ( $class, $record ) = @_;
 
-    return 1 if not_empty_string( $record->{'___Entitlement Status'} )
-             && $record->{'___Entitlement Status'} =~ /not\s+available/i;
-    return 0;
+	return 1 if ( $record->{title} =~ m/see:/i );
+
+	return 0;
 }
 
 sub clean_data {
@@ -115,8 +115,6 @@ sub clean_data {
             }
         }
     }
-
-    $record->{title} = HTML::Entities::decode_entities( $record->{title} );
 
     sub get_month {
         my ( $month, $period ) = @_;
