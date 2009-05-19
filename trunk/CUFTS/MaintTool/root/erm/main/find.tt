@@ -90,7 +90,7 @@ Ext.onReady( function() {
     var results_grid = new Ext.grid.GridPanel({
         store: results_store,
         columns: [
-           { header: 'name', dataIndex: 'name', width: 450 },
+           { header: 'title', dataIndex: 'name', width: 450 },
            { header: 'vendor', dataIndex: 'vendor', width: 150 }
         ],
         sm: new Ext.grid.RowSelectionModel({singleSelect:false}),
@@ -192,7 +192,7 @@ Ext.onReady( function() {
                         items: [
                             {
                                 name: 'name',
-                                fieldLabel: 'Name',
+                                fieldLabel: 'Title',
                                 value: hash_state.params['name'],
                                 xtype: 'textfield',
                                 anchor: '95%'

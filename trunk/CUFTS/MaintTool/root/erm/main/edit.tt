@@ -129,12 +129,12 @@ $( function() {
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-main_name">main name</label>
+  <label for="erm-edit-input-main_name">main title</label>
   <input id="erm-edit-input-main_name" name="main_name" value="[% erm.main_name | html %]" style="width: 30em;" />
   <a id="erm-edit-input-names-addbutton" href="[% url("$url_base/erm/edit/add_name/1979") %]"><img src="[% image_dir %]/icons/plus.png" style="width: 20px; height: 20px;" alt="add new alternate name" /></a>
  </div>
  <div class="help">
-  The main name displayed for this resource.
+  The main title displayed for this resource.
  </div>
 </div>
 
@@ -142,32 +142,32 @@ $( function() {
  [% NEXT IF name.main == 1 %]
  <div class="field" style="padding: 5px 0px;">
   <div class="data">
-   <label for="erm-edit-alt_name_[% loop.count %]">alternate name</label>
+   <label for="erm-edit-alt_name_[% loop.count %]">alternate title</label>
    <input id= "erm-edit-alt_name_[% loop.count %]" type="text" class="altname" name="erm-edit-input-names-[% name.id %]" value="[% name.name | html %]"/>
   </div>
   <div class="help">
-   Change an alternate name (alternate title) for the resource here.
+   Change an alternate title for the resource here.
   </div>
  </div>
 [% END %]
 
 <div id="names-add-name-factory" style="padding: 5px 0px; display: none">
  <div class="data">
-  <label>alternate name</label>
+  <label>alternate title</label>
   <input type="text" class="altname" name="erm-edit-input-names-add-name-" value="" />
  </div>
  <div class="help">
-  Add any alternate names (alternate titles) for the resource here.
+  Add any alternate titles for the resource here.
  </div>
 </div>
 
 <div class="field">
  <div class="data">
-  <label for="erm-edit-input-internal_name">internal name</label>
+  <label for="erm-edit-input-internal_name">internal title</label>
   <input id="erm-edit-input-internal_name" name="internal_name" value="[% erm.internal_name | html %]" style="width: 30em;" />
  </div>
  <div class="help">
-  Internal name for this resource, not generally shown publicly.
+  Internal title for this resource, not generally shown publicly.
  </div>
 </div>
 
