@@ -497,7 +497,7 @@ Ext.onReady( function() {
             ]
         }),
         columns: [
-            { header: 'name', dataIndex: 'name', width: 450 },
+            { header: 'title', dataIndex: 'name', width: 450 },
             { header: 'vendor', dataIndex: 'vendor', width: 150 }
         ],
         listeners: {
