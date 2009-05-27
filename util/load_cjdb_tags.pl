@@ -105,6 +105,7 @@ while ( my $row = <TAGFILE> ) {
     
 }
 
-CJDB::DB::DBI->dbi_rollback();
+#CJDB::DB::DBI->dbi_rollback();
+CJDB::DB::DBI->dbi_commit();
 
 close TAGFILE;
