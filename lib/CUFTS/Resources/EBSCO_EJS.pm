@@ -49,6 +49,10 @@ sub title_list_fields {
     ];
 }
 
+sub unique_title_list_identifier {
+    return 'db_identifier';
+}
+
 sub title_list_field_map {
     return {
         'JournalID'         => 'db_identifier',

@@ -53,6 +53,12 @@ sub has_title_list {
     return 1;
 }
 
+# Used to help identify a specific journal line in a title list.  EBSCO, for example may
+# list the same journal multiple times, however each line has a unique identifier.
+sub unique_title_list_identifier {
+    return undef;
+}
+
 sub global_resource_details {
     return [qw(database_url notes_for_local)];
 }
@@ -264,12 +270,14 @@ sub clean_data {
     foreach my $field ( qw( vol_ft_start iss_ft_start vol_cit_start iss_cit_start ) ) {
         if ( not_empty_string($record->{$field}) ) {
             $record->{$field} =~ s/-.*$//;
+            # $record->{$field} =~ tr/\d//cd;
         }
     }
 
     foreach my $field ( qw( vol_ft_end iss_ft_end vol_cit_end iss_cit_end ) ) {
         if ( not_empty_string($record->{$field}) ) {
             $record->{$field} =~ s/^.*-//;
+            # $record->{$field} =~ tr/\d//cd;
         }
     }
     
@@ -398,17 +406,22 @@ sub _find_partial_match {
     my $module = $class->$method
         or CUFTS::Exception::App->throw("resource does not have an associated database module for loading title lists");
 
-    my $search = { 'resource' => $resource_id };
+    my $search = { resource => $resource_id };
 
-    $search->{'issn'} = not_empty_string($record->{'issn'})
-                        ? $record->{'issn'}
+    $search->{issn} = not_empty_string($record->{issn})
+                        ? $record->{issn}
                         : undef;
 
-    $search->{'e_issn'} = not_empty_string($record->{'e_issn'})
-                        ? $record->{'e_issn'}
+    $search->{e_issn} = not_empty_string($record->{e_issn})
+                        ? $record->{e_issn}
                         : undef;
 
-    $search->{'title'} = $record->{'title'};
+    $search->{title} = $record->{title};
+    
+    my $unique_field = $class->unique_title_list_identifier;
+    if ( defined($unique_field) && not_empty_string($record->{$unique_field}) ) {
+        $search->{$unique_field} = $record->{$unique_field};
+    }
  
     my @titles = $module->search($search);
 
