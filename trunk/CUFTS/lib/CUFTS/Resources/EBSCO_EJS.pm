@@ -200,7 +200,7 @@ sub clean_data {
         elsif ( $month =~ /^Sep/i )    { return 9 }
         elsif ( $month =~ /^O[ck]t/i ) { return 10 }
         elsif ( $month =~ /^Nov/i )    { return 11 }
-        elsif ( $month =~ /^Dec/i )    { return 12 }
+        elsif ( $month =~ /^De[cz]/i )    { return 12 }  # Don't ask me why they have a few "Dezember" typos in their list
         elsif ( $month =~ /^Spr/i )    { return $period eq 'start' ? 1 : 6 }
         elsif ( $month =~ /^Sum/i )    { return $period eq 'start' ? 3 : 9 }
         elsif ( $month =~ /^Fal/i )    { return $period eq 'start' ? 6 : 12 }
