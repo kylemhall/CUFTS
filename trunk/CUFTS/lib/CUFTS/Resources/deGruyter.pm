@@ -47,6 +47,10 @@ sub title_list_fields {
     ];
 }
 
+# Last version of the title list had no extra first line like most SFX Lists have.
+
+sub title_list_skip_lines_count { return 0; }
+
 sub clean_data {
     my ( $class, $record ) = @_;
 
