@@ -52,24 +52,26 @@ sub clean_data {
 
     }
     elsif ( $record->{'___First Online Issue'} ne 'Online early issue' ) {
-        warn("Unable to parse holding line: " . $record->{'___First Online Issue'} );
+        warn("Unable to parse First Online Issue: " . $record->{'___First Online Issue'} );
     }
 
-    if ( $record->{'___Last Online Issue'} =~ / Vol\. \s+ ([^,]+), \s+ No\. \s+ ([^,]+), (.+) /xsm ) {
-        my ( $vol, $no, $date ) = ( $1, $2, $3 );
+    if ( not_empty_string($record->{'___Last Online Issue'}) ) {
+        if ( $record->{'___Last Online Issue'} =~ / Vol\. \s+ ([^,]+), \s+ No\. \s+ ([^,]+), (.+) /xsm ) {
+            my ( $vol, $no, $date ) = ( $1, $2, $3 );
 
-        # Parse out vol varients: 1   1-2   1&2   s1
-        $record->{vol_ft_end}  = parse_vol_iss($vol, 1);
-        $record->{iss_ft_end}  = parse_vol_iss($no,  1);
-        $record->{ft_end_date} = parse_date($date, 1);
-        if ( !defined($record->{ft_end_date}) ) {
-            delete $record->{vol_ft_end};
-            delete $record->{iss_ft_end};
+            # Parse out vol varients: 1   1-2   1&2   s1
+            $record->{vol_ft_end}  = parse_vol_iss($vol, 1);
+            $record->{iss_ft_end}  = parse_vol_iss($no,  1);
+            $record->{ft_end_date} = parse_date($date, 1);
+            if ( !defined($record->{ft_end_date}) ) {
+                delete $record->{vol_ft_end};
+                delete $record->{iss_ft_end};
+            }
+
         }
-
-    }
-    elsif ( $record->{'___Last Online Issue'} ne 'Online early issue' ) {
-        warn("Unable to parse holding line: " . $record->{'___Last Online Issue'} );
+        elsif ( $record->{'___Last Online Issue'} ne 'Online early issue' ) {
+            warn("Unable to parse Last Online Issue: " . $record->{'___Last Online Issue'} );
+        }
     }
 
     return $class->SUPER::clean_data($record);
