@@ -23,16 +23,49 @@ my $resource_type_id = 31;
 my @month_names = qw( january february march april may june july august september october november december );
 my $month_names_for_regex = join '|', @month_names;
 
+my %print_included_map = (
+    '-' => 0, # e-journal
+    'j' => 1, # e-journal
+    'o' => 0, # e-journal collection
+    'p' => 1, # e-journal collection
+    'e' => 0, # e-book collection
+    'd' => 0, # datasets
+    'x' => 0, # other
+);
+
+my %resource_type_map = (
+    '-' => 98, # e-journal
+    'j' => 98, # e-journal
+    'o' => 12, # e-journal collection
+    'p' => 12, # e-journal collection
+    'e' => 15, # e-book collection
+    'd' => 101, # datasets
+    'x' => 19,  # other
+);
+
+my %resolver_map = (
+    '-' => 1, # e-journal
+    'j' => 1, # e-journal
+    'o' => 1, # e-journal collection
+    'p' => 1, # e-journal collection
+    'e' => 0, # e-book collection
+    'd' => 0, # datasets
+    'x' => 0, # other
+);
+
+
 my @field_names = qw(
     bib_num
     acq_num
-    fund
     issn
+    journal_auth
     title
     publisher
-    resource_type
     coverage
-    journal_auth
+    erm_main_id
+    resource_type
+    vendor
+    fund
 );
 
 my @remainder_field_names = qw(
@@ -72,12 +105,17 @@ my %currency_map = (
 
 my $load_timestamp = time();
 
-my $schema = CUFTS::Schema->connect( 'dbi:Pg:dbname=CUFTS3', 'tholbroo', '' );
+my $schema = CUFTS::Schema->connect( 'dbi:Pg:dbname=CUFTS3-test', 'tholbroo', '' );
+
+my %records;
+
+print "\n--------\nStarting Parsing\n--------\n";
 
 # Skip first row
 my $row = <>;
 
 while ($row = <>) {
+
     chomp($row);
     my $record = parse_row($row);
     
@@ -87,22 +125,67 @@ while ($row = <>) {
     
     # Pretty print record
     
-    print "\n--------\n";
     print join( '   ', map { $record->{$_} } ( qw( acq_num bib_num other_num ) ) );
     print "\n";
     print $record->{title}, "  ", join( ', ', map { substr($_, 0, 4) . '-' . substr($_, 4, 4) } @{ $record->{issns} } );
     print "\n";
     
+    # Add to hash merged by bib or erm_main number
+    
+    my $num = $record->{erm_main_id} || $record->{bib_num};
+    die("Record found with no ERM number or bib_number: " . $record->{title})
+        if !defined($num);
+    
+
+    # If a match for the record exists, append the acq_num and payment details.
+    # Possibly merge payment info if the voucher number is the same
+    
+    if ( exists($records{$num}) ) {
+        $records{$num}->{acq_num} .= ',' . $record->{acq_num};
+
+        foreach my $npayment ( @{$record->{payments}} ) {
+            my $found_payment = 0;
+            foreach my $payment ( @{$records{$num}->{payments}} ) {
+                if ( $npayment->{voucher} eq $payment->{voucher} ) {
+                    $payment->{amount_paid} += $npayment->{amount_paid};
+                    $found_payment++;
+                    last;
+                }
+            }
+            if ( !$found_payment ) {
+                push @{$records{$num}->{payments}}, @{$record->{payments}};
+            }
+        }
+
+    }
+    else {
+        $records{$num} = $record;
+    }
+
+}
+
+print "\n--------\nStarting Data Load\n--------\n";
+
+
+foreach my $record ( values(%records) ) {
+
+    print "Processing: ", $record->{title}, "\n";
+    # print Dumper($record), "\n";
+    # next;
+    
     # Find or create ERM Main record
     
-    my $erm = $schema->resultset('ERMMain')->search( { site => $site_id, local_bib => $record->{bib_num} } )->first();
+    my $erm;
+    if ( int($record->{erm_main_id}) ) {
+        $erm = $schema->resultset('ERMMain')->find( { site => $site_id, id => $record->{erm_main_id} } );
+    } 
     if ( !defined($erm) ) {
-        $erm = $schema->resultset('ERMMain')->create( {
+        $erm = $schema->resultset('ERMMain')->find_or_create( {
             site  => $site_id,
             key   => $record->{title},
             issn  => join( ', ', map { substr($_, 0, 4) . '-' . substr($_, 4, 4) } @{ $record->{issns} } ),
             publisher => $record->{publisher},
-            journal_auth => int($record->{journal_auth}) || undef,
+#            journal_auth => int($record->{journal_auth}) || undef,
             local_bib => $record->{bib_num},
             local_acquisitions => $record->{acq_num},
             public => 0,
@@ -110,12 +193,11 @@ while ($row = <>) {
             local_fund => $record->{fund},
             coverage => $record->{coverage},
             resource_type => map_resource_type( $record->{resource_type} ),
+            print_included => map_print_included( $record->{resource_type} ),
+            resolver_enabled => map_resolver( $record->{resource_type} ),
             subscription_status => 'Active',
             subscription_type => 'Direct Subscription',
-            subscription_ownership => 'Subscription',
-            vendor => 'EBSCO Canada Ltd.',
-            resolver_enabled => 1,
-            print_included => map_print_included( $record->{resource_type} ),
+            vendor => $record->{vendor} eq 'caneb' ? 'EBSCO Canada Ltd.' : undef,
             pricing_model => 14,
             misc_notes => $load_timestamp,
         } );
@@ -124,21 +206,9 @@ while ($row = <>) {
     }
     else {
         print "* FOUND ERM MAIN: ", $erm->id, "\n";
-        
-        # Check "local_acquisitions" and "fund" to see if we should append data to those
-        
-        my @local_acquisitions = split( ',', $erm->local_acquisitions );
-        if ( !grep { $_ eq $record->{acq_num} } @local_acquisitions ) {
-            push @local_acquisitions, $record->{acq_num};
-            $erm->local_acquisitions( join( ',', @local_acquisitions) );
-        }
-
-        my @local_funds = split( ',', $erm->local_fund );
-        if ( !grep { $_ eq $record->{fund} } @local_funds ) {
-            push @local_funds, $record->{fund};
-            $erm->local_fund( join( ',', @local_funds) );
-        }
-     
+        $erm->local_acquisitions( $record->{acq_num} );
+        $erm->local_bib( $record->{bib_num} );
+        $erm->local_fund( $record->{fund} );
         $erm->update();
     }
         
@@ -190,16 +260,20 @@ sub parse_row {
     # $record{other_num}  = get_comma_field( \$row, 'other_num' );
     $record{bib_num} = get_comma_field( \$row, 'bib_num' );
     $record{acq_num}  = get_comma_field( \$row, 'acq_num' );
-    $record{fund}  = get_comma_field( \$row, 'fund' );
 
     my $issns = get_comma_field( \$row, 'issns' );
     $record{issns} = [ map { $_ =~ s/-//; $_ } split /";"/, $issns ];
 
+    $record{journal_auth}  = get_comma_field( \$row, 'journal_auth' );
     $record{title}         = utf8( get_comma_field( \$row, 'title' ) )->latin1;
     $record{publisher}     = utf8( get_comma_field( \$row, 'publisher' ) )->latin1;
-    $record{resource_type} = get_comma_field( \$row, 'resource_type' );
     $record{coverage}      = get_comma_field( \$row, 'coverage' );
-    $record{journal_auth}  = get_comma_field( \$row, 'journal_auth' );
+    $record{erm_main_id}   = get_comma_field( \$row, 'erm_main_id' );
+    $record{resource_type} = get_comma_field( \$row, 'resource_type' );
+    $record{fund}          = get_comma_field( \$row, 'fund' );
+    $record{vendor}        = get_comma_field( \$row, 'fund' );
+
+
     # $record{currency}      = get_comma_field( \$row, 'currency' );
 
     $record{payments} = [];
@@ -208,6 +282,7 @@ sub parse_row {
         my %references;
         my @payments = split /";/, $row;
         foreach my $payment ( @payments ) {
+            my $payment_orig = $payment;
             my %payment_record;
 
             # print($payment);
@@ -272,7 +347,8 @@ sub parse_row {
             }
             
             # sept 1/98 - oct 31/99
-            elsif ( $payment =~ m# (\w{3,4}) \s* (\d{1,2}) \s* / \s* (\d{2}) [-&] (\w{3,4}) \s* (\d{1,2}) \s* / \s* (\d{2}) #xsm ) {
+            # Oct1/08-Sep30/09
+            elsif ( $payment =~ m# (\w{3,4}?) \s* (\d{1,2}) \s* / \s* (\d{2}) [-&] (\w{3,4}?) \s* (\d{1,2}) \s* / \s* (\d{2}) #xsm ) {
                 my $start_month = format_month( $1 );
                 my $start_day   = $2;
                 my $start_year  = int($3) + ( int($3) > 60 ? 1900 : 2000 );
@@ -327,17 +403,41 @@ sub parse_row {
             else {
                 $DEBUG && print STDERR "Can't parse: $payment\n";
             }
-
+            
+            # Fallback to trying the pre-parsed sub_from/to fields
+            
+            if ( !ParseDate($payment_record{start_date} ) ) {
+                print "* USING SUB_FROM DUE TO BAD START_DATE: $payment_record{start_date}\n";
+                $payment_record{start_date} = $payment_record{sub_from};
+            }
+            if ( !ParseDate($payment_record{end_date}) ) {
+                print "* USING SUB_TO DUE TO BAD END_DATE: $payment_record{end_date}\n";
+                $payment_record{end_date} = $payment_record{sub_to};
+            }
+            
+            
 
             # Validate all dates, or throw the row away.
-            if ( ParseDate($payment_record{start_date}) && ParseDate($payment_record{end_date}) && $payment_record{invoice_date} ) {
-                $references{ $payment_record{voucher} }->{start_date} = $payment_record{start_date};
-                $references{ $payment_record{voucher} }->{end_date}   = $payment_record{end_date};
 
-                push @{ $record{payments} }, \%payment_record;
+            my $date_err = 0;
+            if ( !ParseDate($payment_record{start_date}) ) {
+                $date_err++;
+                print "* COULD NOT PARSE START DATE: $payment_record{start_date}\n";
+            }
+            if ( !ParseDate($payment_record{end_date}) ) {
+                $date_err++;
+                print "* COULD NOT PARSE END DATE: $payment_record{end_date}\n";
+            }
+            if ( !ParseDate($payment_record{invoice_date}) ) {
+                $date_err++;
+                print "* COULD NOT PARSE INVOICE DATE: $payment_record{invoice_date}\n";
+            }
+            
+            if ( $date_err ) {
+                print "* DATE ERROR IN PAYMENT LINE: $payment_orig\n";
             }
             else {
-                print "* ERROR FOUND IN DATES, SKIPPING ROW\n";
+                push @{ $record{payments} }, \%payment_record;
             }
             
         }
@@ -391,14 +491,12 @@ sub format_month {
 sub clean_record {
     my ( $record ) = @_;
     
-    # Journal auth field can have leading "CJDB" which must be stripped.
-    $record->{journal_auth} =~ s/^CJDB//;
-    
     # Remove [electronic resource] and other bits of trailing junk from titles
     # Order is important for these that match on the end of line
 
     $record->{title} =~ s/ \s* order \s+ record \s* $//xsm;
-    $record->{title} =~ s/ \.? \s* \-* \s* \[electronic \s+ resource\] \s* $//xsm;
+    $record->{title} =~ s/ \.? \s* \-* \s* \[electronic \s+ resource\] \s* //xsm;
+    $record->{title} =~ s/ \.? \s* \-* \s* \[digital \s+ maps \s+ collection\] \s* //xsm;
 
     $record->{title} =~ s/^ \[ (.+) \] $/$1/xsm;
     $record->{title} =~ s/^ " (.+) " $/$1/xsm;
@@ -408,6 +506,8 @@ sub clean_record {
 
     # Remove trailing comma from 260b (publisher)
     $record->{publisher} =~ s/ , \s* $//xsm;
+ 
+    $record->{erm_main_id} =~ s/^e//;
     
 }
 
@@ -421,32 +521,35 @@ sub get_end_day {
 
 sub map_resource_type {
     my ( $resource_type ) = @_;
-    
-    if ( $resource_type eq '-' || $resource_type eq 'j' ) {
-        return 98;   # E-journal
+
+    if ( exists($resource_type_map{$resource_type}) ) {
+        return $resource_type_map{$resource_type};
     }
-    elsif ( $resource_type eq 'o' || $resource_type eq 'p' ) {
-        return 12;   # E-journal collection
-    }
-    else {
-        die("Unrecognized resource type code (CODE3): $resource_type");
-    }
+
+    die("Unrecognized resource type code (CODE3): $resource_type");
 }
 
 
 sub map_print_included {
     my ( $resource_type ) = @_;
-    
-    if ( $resource_type eq '-' || $resource_type eq 'o' ) {
-        return 0;   # print not included
+
+    if ( exists($print_included_map{$resource_type}) ) {
+        return $print_included_map{$resource_type};
     }
-    elsif ( $resource_type eq 'j' || $resource_type eq 'p' ) {
-        return 1;   # print included
-    }
-    else {
-        die("Unrecognized resource type code (CODE3): $resource_type");
-    }
+
+    die("Unrecognized resource type code (CODE3): $resource_type");
 }
+
+sub map_resolver {
+    my ( $resource_type ) = @_;
+
+    if ( exists($resolver_map{$resource_type}) ) {
+        return $resolver_map{$resource_type};
+    }
+
+    die("Unrecognized resource type code (CODE3): $resource_type");
+}
+
 
 sub map_currency {
     my ( $currency ) = @_;
