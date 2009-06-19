@@ -31,7 +31,7 @@ my ( $outfile, $path, $site );
 
 if (defined($options{'global'})) {
     print "Creating global subject browse page\n";
-    $path = '${CUFTS::Config::CJDB_TEMPLATE_DIR}/';
+    $path = "${CUFTS::Config::CJDB_TEMPLATE_DIR}/";
 } else {
     $site = get_site();
     my $site_id = $site->id;
