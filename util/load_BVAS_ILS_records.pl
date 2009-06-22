@@ -9,6 +9,7 @@ use CUFTS::Schema;
 use Date::Manip;
 use Unicode::String qw(utf8);
 use CUFTS::CJDB::Util;
+use CUFTS::Util::Simple;
 
 my $DEBUG = 0;
 
@@ -136,27 +137,12 @@ while ($row = <>) {
     die("Record found with no ERM number or bib_number: " . $record->{title})
         if !defined($num);
     
-
     # If a match for the record exists, append the acq_num and payment details.
     # Possibly merge payment info if the voucher number is the same
     
     if ( exists($records{$num}) ) {
         $records{$num}->{acq_num} .= ',' . $record->{acq_num};
-
-        foreach my $npayment ( @{$record->{payments}} ) {
-            my $found_payment = 0;
-            foreach my $payment ( @{$records{$num}->{payments}} ) {
-                if ( $npayment->{voucher} eq $payment->{voucher} ) {
-                    $payment->{amount_paid} += $npayment->{amount_paid};
-                    $found_payment++;
-                    last;
-                }
-            }
-            if ( !$found_payment ) {
-                push @{$records{$num}->{payments}}, @{$record->{payments}};
-            }
-        }
-
+        push @{$records{$num}->{payments}}, @{$record->{payments}};
     }
     else {
         $records{$num} = $record;
@@ -167,7 +153,7 @@ while ($row = <>) {
 print "\n--------\nStarting Data Load\n--------\n";
 
 
-foreach my $record ( values(%records) ) {
+foreach my $record ( values %records ) {
 
     print "Processing: ", $record->{title}, "\n";
     # print Dumper($record), "\n";
@@ -178,7 +164,20 @@ foreach my $record ( values(%records) ) {
     my $erm;
     if ( int($record->{erm_main_id}) ) {
         $erm = $schema->resultset('ERMMain')->find( { site => $site_id, id => $record->{erm_main_id} } );
+        if ( !defined($erm) ) {
+            print "**** ERROR: Record contains an ERM main id, however the ERM record could not be found. Skipping record.\n";
+            next;
+        }
     } 
+
+    # Fall back to trying to match on bib_num
+
+    elsif ( not_empty_string($record->{bib_num}) ) {
+        $erm = $schema->resultset('ERMMain')->find( { site => $site_id, local_bib => $record->{bib_num} } );
+    } 
+
+    # Otherwise, find/create a new record
+
     if ( !defined($erm) ) {
         $erm = $schema->resultset('ERMMain')->find_or_create( {
             site  => $site_id,
@@ -211,7 +210,7 @@ foreach my $record ( values(%records) ) {
         $erm->local_fund( $record->{fund} );
         $erm->update();
     }
-        
+
     foreach my $payment ( sort { $b->{end_date} cmp $a->{end_date} } @{ $record->{payments} } ) {
         print "   ", $payment->{invoice_date};
         print "   ", $payment->{start_date}, ' - ', $payment->{end_date};
@@ -222,7 +221,7 @@ foreach my $record ( values(%records) ) {
             print "   FROM: ", $payment->{sub_from}, ' - TO: ', $payment->{sub_to};
         }
         print "\n";
-        
+
         my $cost = $schema->resultset('ERMCosts')->search( { erm_main => $erm->id, number => $payment->{voucher} } )->first();
         if ( !defined($cost) ) {
             $cost = $schema->resultset('ERMCosts')->create( {
@@ -242,8 +241,8 @@ foreach my $record ( values(%records) ) {
         else {
             print "* FOUND EXISTING COSTS: ", $cost->id, "\n";
         }
-        
-    
+
+
     }
     
 }
@@ -408,11 +407,15 @@ sub parse_row {
             
             if ( !ParseDate($payment_record{start_date} ) ) {
                 print "* USING SUB_FROM DUE TO BAD START_DATE: $payment_record{start_date}\n";
-                $payment_record{start_date} = $payment_record{sub_from};
+                my ( @parts ) = split '-', $payment_record{sub_from};
+                $parts[0] += $parts[0] > 20 ? 1900 : 2000;
+                $payment_record{start_date} = join '-', @parts;
             }
             if ( !ParseDate($payment_record{end_date}) ) {
                 print "* USING SUB_TO DUE TO BAD END_DATE: $payment_record{end_date}\n";
-                $payment_record{end_date} = $payment_record{sub_to};
+                my ( @parts ) = split '-', $payment_record{sub_to};
+                $parts[0] += $parts[0] > 20 ? 1900 : 2000;
+                $payment_record{end_date} = join '-', @parts;
             }
             
             
