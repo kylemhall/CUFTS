@@ -49,6 +49,21 @@ my $marc_fields = {
                size      => [ 40, 40 ],
                repeats   => 1,
              },
+    '310' => {
+                subfields => [ qw(a b) ],
+                size      => [ 40, 40 ],
+                repeats   => 0,
+             },
+    '321' => {
+                subfields => [ qw(a b) ],
+                size      => [ 40, 40 ],
+                repeats   => 1,
+             },
+    '362' => {
+                subfields => [ qw(a z) ],
+                size      => [ 40, 40 ],
+                repeats   => 1,
+             },
     '650' => {
                subfields => [ qw(a b z0 z1 y0 y1 x0 x1 x2 x3 v) ],
                size      => [ 30, 30, 10, 10, 10, 10, 10 ],

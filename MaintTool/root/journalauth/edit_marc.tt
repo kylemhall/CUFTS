@@ -32,6 +32,12 @@
 
 [% PROCESS display_marc_fields field_type='260', field_description='Publication, Distribution, etc.' %]
 
+[% PROCESS display_marc_fields field_type='310', field_description='Current Publication Frequency' %]
+
+[% PROCESS display_marc_fields field_type='321', field_description='Former Publication Frequency' %]
+
+[% PROCESS display_marc_fields field_type='362', field_description='Dates of Publication' %]
+
 [% PROCESS display_marc_fields field_type='110', field_description='Corporate Name' %]
 
 [% PROCESS display_marc_fields field_type='710', field_description='Corporate Name Added Entry' %]
