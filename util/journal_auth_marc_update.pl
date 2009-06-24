@@ -26,6 +26,9 @@ my $field_mappings = {
     '110' => [qw(a b c)],
     '222' => [qw(a b)],
     '260' => [qw(a b)],
+    '310' => [qw(a b)],
+    '321' => [qw(a b)],
+    '362' => [qw(a z)],
     '6..' => [qw(a b x y z v)],
     '710' => [qw(a b c)],
     '780' => [qw(a s t x)],
@@ -116,6 +119,12 @@ sub marc_cache {
         my @issns = $loader->get_clean_issn_list($record);
         foreach my $issn (@issns) {
             $count++;
+            if ( is_too_brief($record) ) {
+                if ( $DEBUG ) {
+                    print 'S';
+                }
+                next;
+            }
             push @{$cache->{$issn}}, $record;
             if ( $DEBUG ) {
                 print '.';
@@ -127,6 +136,18 @@ sub marc_cache {
     print "Cached $count ISSNs from MARC files.\n";
 
     return $cache;
+}
+
+sub is_too_brief {
+    my $record = shift;
+    
+    my $count = 0;
+    foreach my $field ( keys %$field_mappings ) {
+        my @fields = $record->field($field);
+        $count += scalar(@fields);
+    }
+
+    return !$count;
 }
 
 sub marc_cache_lookup {
