@@ -61,7 +61,7 @@ sub local_resource {
 	defined($resource_id) or
 		return undef;
 
-	my @local_resources = CUFTS::DB::LocalResources->search('site' => $site_id, 'resource' => $resource_id);
+	my @local_resources = CUFTS::DB::LocalResources->search('site' => $site_id, 'id' => $resource_id);
 
 	if (scalar(@local_resources) == 1) {
 		return $local_resources[0];
