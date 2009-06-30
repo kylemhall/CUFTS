@@ -8,7 +8,7 @@
 
  
      <div id="erm-delete-linked-list">
-      This ERM license record is linked to [% erm_links.size %] ERM records.  Do you really want to delete it?
+      This ERM main record is linked to [% erm_links_resources.size + erm_links_journals.size %] resources and journals.  Do you really want to delete it?
       <form method="post">
        <input type="hidden" name="erm_license_id" value="[% erm_license.id %]" />
        <input type="submit" name="confirm" value="yes" />
@@ -19,7 +19,7 @@
        <h3>Resources</h3>
        <ul>
        [% FOREACH link IN erm_links_resources.sort('linked_name') %]
-         <li>[% link.linked_name %]</li>
+         <li>[% link.linked_name || 'Already deleted resource' %]</li>
        [% END %]
        </ul>
       [% END %]
@@ -28,7 +28,7 @@
        <h3>Journals</h3>
        <ul>
        [% FOREACH link IN erm_links_journals.sort('linked_name') %]
-         <li>[% link.linked_name %]</li>
+         <li>[% link.linked_name || 'Already deleted journal' %]</li>
        [% END %]
        </ul>
       [% END %]
