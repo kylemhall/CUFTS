@@ -50,10 +50,13 @@ sub linked_name {
         if ( $self->link_type eq 'r' ) {
 
             my $local_resource = CUFTS::DB::LocalResources->retrieve( $self->link_id );
+            return '' if !defined($local_resource);   # Orphan link, these should be cleaned up
+            
             if ( $local_resource->name ) {
                 $self->_linked_name( $local_resource->name );
             }
             else {
+                return '' if !defined($local_resource->resource);   # Orphan link, these should be cleaned up
                 $self->_linked_name( $local_resource->resource->name );
             }
 
@@ -61,10 +64,13 @@ sub linked_name {
         elsif ( $self->link_type eq 'j' ) {
 
             my $local_journal = CUFTS::DB::LocalJournals->retrieve( $self->link_id );
+            return '' if !defined($local_journal);    # Orphan link, these should be cleaned up
+            
             if ( $local_journal->title ) {
                 $self->_linked_name( $local_journal->title );
             }
             else {
+                return '' if !defined($local_journal->journal);   # Orphan link, these should be cleaned up
                 $self->_linked_name( $local_journal->journal->title );
             }
 
