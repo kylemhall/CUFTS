@@ -60,6 +60,7 @@ my @modules = qw(
     Class::DBI::Sweet
     Date::Calc
     DateTime
+    DateTime::Format::ISO8601
     Exception::Class
     Exception::Class::DBI
     Getopt::Long
