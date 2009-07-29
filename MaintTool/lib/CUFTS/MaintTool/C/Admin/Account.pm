@@ -5,11 +5,12 @@ use base 'Catalyst::Base';
 
 my $form_validate_edit = {
 	required => ['name', 'key'],
-	optional => ['email', 'phone', 'active', 'edit_global', 'administrator', 'account_sites', 'submit', 'cancel' ],
+	optional => ['email', 'phone', 'active', 'edit_global', 'journal_auth', 'administrator', 'account_sites', 'submit', 'cancel' ],
 	defaults => { 
 		'active' => 'false', 
 		'edit_global' => 'false',
 		'administrator' => 'false',
+		'journal_auth' => 'false',
 		'account_sites' => []
 	},
 	filters => ['trim'],
