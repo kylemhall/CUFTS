@@ -13,7 +13,8 @@
 <tr><td class="label1" align="right">password (verify)</td><td class="field1"><input type="password" name="verify_password" size="50" maxlength="256" value=""></td></tr>
 <tr><td class="label0" align="right">system administrator</td><td class="field0"><input type="checkbox" name="administrator" value="true" [% 'checked="checked"' IF account.administrator %]></td></tr>
 <tr><td class="label1" align="right">edit global</td><td class="field1"><input type="checkbox" name="edit_global" value="true" [% 'checked="checked"' IF account.edit_global %]></td></tr>
-<tr><td class="label0" align="right">active</td><td class="field0"><input type="checkbox" name="active" value="true" [% 'checked="checked"' IF account.active %]></td></tr>
+<tr><td class="label0" align="right">journal auth</td><td class="field0"><input type="checkbox" name="journal_auth" value="true" [% 'checked="checked"' IF account.journal_auth %]></td></tr>
+<tr><td class="label1" align="right">active</td><td class="field1"><input type="checkbox" name="active" value="true" [% 'checked="checked"' IF account.active %]></td></tr>
 </table>
 </td></tr>
 <tr><td><br /></td></tr>

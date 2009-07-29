@@ -13,6 +13,8 @@
                 [ '/erm/main', 'Main' ],
                 [ '/erm/license', 'License' ],
                 [ '/erm/provider', 'Provider' ],
+                [ '/erm/counter', 'COUNTER' ],
+                [ '/erm/sushi', 'SUSHI' ],
                 [ '/erm/tables/edit', 'Tables' ],
                 [ '/erm/alerts', 'Alerts' ],
             ],
@@ -42,6 +44,9 @@
 
     IF current_account.edit_global OR current_account.administrator;
         menu.push(['/global/menu', 'Global Resources']);
+    END;
+
+    IF current_account.journal_auth OR current_account.administrator;
         menu.push(['/journalauth/search', 'Journal Auth']);
     END;
 

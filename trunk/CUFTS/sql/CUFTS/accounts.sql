@@ -9,6 +9,7 @@ CREATE TABLE accounts (
 
 	administrator	BOOLEAN DEFAULT FALSE,
 	edit_global	BOOLEAN DEFAULT FALSE,
+	journal_auth    BOOLEAN DEFAULT FALSE,
 
 	active		BOOLEAN DEFAULT TRUE,
 	created		TIMESTAMP NOT NULL DEFAULT NOW(),

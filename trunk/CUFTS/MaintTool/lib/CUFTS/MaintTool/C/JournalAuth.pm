@@ -124,7 +124,7 @@ my $form_validate_merge = {
 sub auto : Private {
     my ($self, $c, $resource_id) = @_;
 
-    $c->stash->{current_account}->{edit_global} || $c->stash->{current_account}->{administrator} or
+    $c->stash->{current_account}->{journal_auth} || $c->stash->{current_account}->{administrator} or
         die('User not authorized for journal auth maintenance');
 
     $c->stash->{header_section} = 'Journal Auth';
