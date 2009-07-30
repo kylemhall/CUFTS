@@ -39,6 +39,7 @@ __PACKAGE__->columns(All => qw(
 
 	administrator
 	edit_global
+    journal_auth
 
 	active
 	
