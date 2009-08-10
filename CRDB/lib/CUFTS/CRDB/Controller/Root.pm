@@ -61,7 +61,7 @@ sub set_box : Chained('site') PathPart('set_box') Args(1) {
     
     $c->session->{sandbox} = $box eq 'sandbox' ? 1 : 0;
     
-    $c->redirect( $c->uri_for_site( $c->action_for('app_root') ) );
+    $c->redirect( $c->uri_for_site( $c->controller->action_for('app_root') ) );
 }
 
 sub facet_options : Chained('site') PathPart('') CaptureArgs(0) {

@@ -72,7 +72,7 @@ sub facet_form : Chained('base') PathPart('facet_form') Args(0) {
         }
     }
 
-    return $c->redirect( $c->uri_for_site( $c->action_for($action), @search_facets, {} ) );
+    return $c->redirect( $c->uri_for_site( $c->controller->action_for($action), @search_facets, {} ) );
 }
 
 =head2 _facet_search
@@ -96,7 +96,7 @@ sub _facet_search  {
 
     $c->stash->{facets} = $facets;
 
-    return $c->model('ERMMain')->facet_search( $c->site->id, $search, $empty ? 0 : undef );
+    return $c->model('CUFTS::ERMMain')->facet_search( $c->site->id, $search, $empty ? 0 : undef );
 }
 
 
