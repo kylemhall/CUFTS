@@ -28,7 +28,6 @@ use HTML::Entities qw();
 
 use strict;
 
-my $url_base = 'http://www.bioone.org/perlserv/?request=';
 
 # sub title_list_extra_requires {
 #     require CUFTS::Util::CSVParse;
@@ -113,21 +112,11 @@ sub can_getFulltext {
     my ( $class, $request ) = @_;
 
     return 0
-        if is_empty_string( $request->volume )
-        || is_empty_string( $request->spage  );
+        if is_empty_string( $request->doi );
 
     return $class->SUPER::can_getFulltext($request);
 }
 
-sub can_getTOC {
-    my ( $class, $request ) = @_;
-
-    return 0
-        if is_empty_string( $request->volume )
-        || is_empty_string( $request->issue  );
-
-    return $class->SUPER::can_getTOC($request);
-}
 
 # --------------------------------------------------------------------------------------------
 
@@ -150,15 +139,7 @@ sub build_linkFulltext {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $url = $url_base . 'get-document&issn=';
-        $url .= substr( $record->issn, 0, 4 ) . '-' . substr( $record->issn, 4, 4 );
-        $url .= '&volume=' . sprintf( "%03u", $request->volume );
-        $url .= '&page=' . $request->spage;
-
-        # Note: issue is not required
-
+        my $url = 'http://www.bioone.org/doi/full/' . $request->doi;
         my $result = new CUFTS::Result($url);
         $result->record($record);
 
@@ -168,36 +149,6 @@ sub build_linkFulltext {
     return \@results;
 }
 
-sub build_linkTOC {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkTOC');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkTOC');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkTOC');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $url = $url_base . 'get-toc&issn=';
-        $url .= substr( $record->issn, 0, 4 ) . '-' . substr( $record->issn, 4, 4 );
-        $url .= '&volume=' . sprintf( "%03u", $request->volume );
-        $url .= '&issue=' . sprintf( "%02u",  $request->issue );
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
-}
 
 sub build_linkJournal {
     my ( $class, $records, $resource, $site, $request ) = @_;
@@ -214,13 +165,9 @@ sub build_linkJournal {
     my @results;
 
     foreach my $record (@$records) {
+        next if is_empty_string( $record->journal_url );
 
-        next if is_empty_string( $record->issn );
-
-        my $url = $url_base . 'get-archive&issn=';
-        $url .= substr( $record->issn, 0, 4 ) . '-' . substr( $record->issn, 4, 4 );
-
-        my $result = new CUFTS::Result($url);
+        my $result = new CUFTS::Result( $record->journal_url );
         $result->record($record);
 
         push @results, $result;
@@ -229,31 +176,5 @@ sub build_linkJournal {
     return \@results;
 }
 
-sub build_linkDatabase {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkDatabase');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkDatabase');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkDatabase');
-        
-    my @results;
-
-    foreach my $record (@$records) {
-
-        my $url = $url_base . 'search-simple';
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
-}
 
 1;
