@@ -145,7 +145,7 @@ sub uri_for_facets {
 
     my @facet_array = map { $_, $new_facets{$_} } sort keys(%new_facets);
     
-    return $c->uri_for_site( $c->action_for('html_facets'), @facet_array );
+    return $c->uri_for_site( $c->controller->action_for('html_facets'), @facet_array );
 }
 
 
