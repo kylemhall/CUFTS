@@ -59,7 +59,7 @@ while (my $site = $site_iter->next) {
             my $rn_days = int($resource->renewal_notification);
             my $end     = DateTime::Format::Pg->parse_date( $resource->contract_end );
 
-            my $rn_date = $end->add( days => -$rn_days );
+            my $rn_date = $end->clone->add( days => -$rn_days );
             if ( $rn_date->ymd eq $now->ymd ) {
                 $site_notice .= 'Renewal notification for: ' . $resource->key . '. Contract expires: ' . $end->ymd . "\n";
             }
