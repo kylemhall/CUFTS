@@ -48,10 +48,12 @@ while (my $site = $site_iter->next) {
         if ( $resource->alert_expiry ) {
             my $alert_expiry_date = DateTime::Format::Pg->parse_date( $resource->alert_expiry );
             if ( $alert_expiry_date->ymd le $now_ymd ) {
+            	my $alert = $resource->alert();
                 $resource->alert(undef);
                 $resource->alert_expiry(undef);
                 $resource->update();
-                $site_notice .= 'Expired alert notice for: ' . $resource->key . "\n";
+                $site_notice .= 'Expired alert notice for: ' . $resource->key . ":\n";
+                $site_notice .= $alert . "\n\n";
             }
         }
         
