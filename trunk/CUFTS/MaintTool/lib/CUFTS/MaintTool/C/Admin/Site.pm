@@ -5,7 +5,7 @@ use base 'Catalyst::Base';
 
 my $form_validate = {
 	required => ['name', 'key'],
-	optional => ['proxy_prefix', 'proxy_prefix_alternate', 'email', 'active', 'site_accounts', 'submit', 'cancel'],
+	optional => ['proxy_prefix', 'proxy_prefix_alternate', 'email', 'erm_notification_email', 'active', 'site_accounts', 'submit', 'cancel'],
 	defaults => { 'active' => 'false', 'site_accounts' => [] },
 	filters => ['trim'],
 	missing_optional_valid => 1,

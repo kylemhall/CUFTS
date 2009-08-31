@@ -7,6 +7,7 @@ CREATE TABLE sites (
     proxy_WAM                           VARCHAR(512),
     proxy_prefix_alternate              VARCHAR(512),
     email                               VARCHAR(1024),
+    erm_notification_email              VARCHAR(1024),
 
     cjdb_results_per_page               VARCHAR(1024),
     cjdb_unified_journal_list           VARCHAR(1024),

@@ -41,7 +41,14 @@ while (my $site = $site_iter->next) {
     print "Checking " . $site->name . "\n";
     my $site_notice = undef;
 
+    my $site_email = $site->erm_notification_email || $site->email;
+    if (!defined($site_email)) {
+      warn('A site or ERM notification email must be set for: ' . $site->name . ' to send out ERM notifications. Skipping site.');
+      next;
+    }
+
     my @resources = CUFTS::DB::ERMMain->search( 'site' => $site->id );
+    my %emails;
     foreach my $resource (@resources) {
 
         # Check alert expiries
@@ -52,8 +59,7 @@ while (my $site = $site_iter->next) {
                 $resource->alert(undef);
                 $resource->alert_expiry(undef);
                 $resource->update();
-                $site_notice .= 'Expired alert notice for: ' . $resource->key . ":\n";
-                $site_notice .= $alert . "\n\n";
+                $emails{$site_email} .= 'Expired alert notice for: ' . $resource->key . ":\n$alert\n";
             }
         }
         
@@ -63,40 +69,50 @@ while (my $site = $site_iter->next) {
 
             my $rn_date = $end->clone->add( days => -$rn_days );
             if ( $rn_date->ymd eq $now->ymd ) {
-                $site_notice .= 'Renewal notification for: ' . $resource->key . '. Contract expires: ' . $end->ymd . "\n";
+                my $erm_email = $resource->notification_email || $site_email;
+                $emails{$erm_email} .= 'Renewal notification for: ' . $resource->key . '. Contract expires: ' . $end->ymd . "\n";
             }
         }
 
     }
 
-    next if !defined($site_notice);
+    next if ( !scalar(%emails) );
 
-    if (!defined($site->email)) {
-      warn('Notification scheduled for ' . $site->name . ', but email address is not defined');
-      next;
+
+    foreach my $email_address ( keys(%emails) ) {
+
+        my $message = $emails{$email_address};
+
+        warn(" * Sending notification to: $email_address\n$message\n");
+
+        my $host = defined($CUFTS::Config::CUFTS_SMTP_HOST) ? $CUFTS::Config::CUFTS_SMTP_HOST : 'localhost';
+        my $smtp = Net::SMTP->new($host);
+        
+        if ( !defined($smtp) ) {
+            warn(' * Unable to create SMTP object for mailing');
+            next;
+        }
+
+        $smtp->mail($CUFTS::Config::CUFTS_MAIL_FROM);
+        $smtp->to(split /\s*,\s*/, $email_address);
+        $smtp->data();
+        $smtp->datasend("To: $email_address\n");
+        $smtp->datasend("Subject: CUFTS ERM Notifications\n");
+        defined($CUFTS::Config::CUFTS_MAIL_REPLY_TO) and
+          $smtp->datasend("Reply-To: ${CUFTS::Config::CUFTS_MAIL_REPLY_TO}\n");
+        $smtp->datasend("\n");
+        $smtp->datasend("CUFTS ERM Notifications for " . $now->ymd . "\n");
+        $smtp->datasend($message);
+        $smtp->dataend();
+        $smtp->quit();
+
+        warn(" * Notice sent.\n");
+
     }
-    
-    my $email = $site->email;
 
-    my $host = defined($CUFTS::Config::CUFTS_SMTP_HOST) ? $CUFTS::Config::CUFTS_SMTP_HOST : 'localhost';
-    my $smtp = Net::SMTP->new($host);
-    $smtp->mail($CUFTS::Config::CUFTS_MAIL_FROM);
-    $smtp->to(split /\s*,\s*/, $email);
-    $smtp->data();
-    $smtp->datasend("To: $email\n");
-    $smtp->datasend("Subject: CUFTS ERM Notifications\n");
-    defined($CUFTS::Config::CUFTS_MAIL_REPLY_TO) and
-      $smtp->datasend("Reply-To: ${CUFTS::Config::CUFTS_MAIL_REPLY_TO}\n");
-    $smtp->datasend("\n");
-    $smtp->datasend("CUFTS ERM Notifications for " . $now->ymd . "\n");
-    $smtp->datasend($site_notice);
-    $smtp->dataend();
-    $smtp->quit();
 
     CUFTS::DB::DBI->dbi_commit();
 
-    print 'Email sent to: ', $email, "\n";
-    print $site_notice;
     print "Finished ", $site->name,  "\n";
 }   
 

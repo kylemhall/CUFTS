@@ -41,6 +41,7 @@ __PACKAGE__->columns(
         proxy_prefix_alternate
         proxy_WAM
         email
+        erm_notification_email
 
         active
 
