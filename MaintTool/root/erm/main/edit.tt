@@ -1069,6 +1069,17 @@ $( function() {
 
 <div class="field">
  <div class="data">
+  <label for="erm-edit-input-notification_email">notification email</label>
+  <input id="erm-edit-input-notification_email" name="notification_email" value="[% erm.notification_email | html %]" />
+ </div>
+ <div class="help">
+  An email address that renewal notifications for this ERM record should go to.
+ </div>
+</div>
+
+
+<div class="field">
+ <div class="data">
   <label for="erm-edit-input-notice_to_cancel">notice to cancel</label>
   <select id="erm-edit-input-notice_to_cancel" name="notice_to_cancel" style="width: 10em;">
    <option value="">No notification</option>

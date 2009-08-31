@@ -7,7 +7,7 @@ use CUFTS::Util::Simple;
 
 my $edit_form_validate = {
 	required => ['name'],
-	optional => ['email', 'proxy_prefix', 'proxy_prefix_alternate', 'proxy_WAM', 'show_ERM', 'submit', 'cancel'],
+	optional => ['email', 'erm_notification_email', 'proxy_prefix', 'proxy_prefix_alternate', 'proxy_WAM', 'show_ERM', 'submit', 'cancel'],
 	filters  => ['trim'],
 	missing_optional_valid => 1,
 };

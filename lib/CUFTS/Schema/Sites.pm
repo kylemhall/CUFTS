@@ -69,6 +69,12 @@ __PACKAGE__->add_columns(
       'is_nullable' => 1,
       'size' => '1024'
     },
+    'erm_notification_email' => {
+      'data_type' => 'varchar',
+      'default_value' => undef,
+      'is_nullable' => 1,
+      'size' => '1024'
+    },
     'cjdb_results_per_page' => {
       'data_type' => 'varchar',
       'default_value' => undef,
