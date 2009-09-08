@@ -95,7 +95,7 @@ Ext.onReady( function() {
         ],
         sm: new Ext.grid.RowSelectionModel({singleSelect:false}),
         title: 'Search Results',
-        width: 700,
+        width: 900,
         height: 300,
         tbar: new Ext.Toolbar({
             items: [
@@ -186,7 +186,7 @@ Ext.onReady( function() {
                 items: [
                     {
                         layout: 'form',
-                        columnWidth: .5,
+                        columnWidth: .33,
                         labelWidth: 120,
                         border: false,
                         items: [
@@ -205,6 +205,20 @@ Ext.onReady( function() {
                                 anchor: '95%'
                             },
                             {
+                                name: 'publisher',
+                                fieldLabel: 'Publisher',
+                                value: hash_state.params['publisher'],
+                                xtype: 'textfield',
+                                anchor: '95%'
+                            },
+                            {
+                                name: 'vendor',
+                                fieldLabel: 'Vendor',
+                                value: hash_state.params['vendor'],
+                                xtype: 'textfield',
+                                anchor: '95%'
+                            },
+                            {
                                 fieldLabel: 'Subject',
                                 xtype: 'combo',
                                 hiddenName: 'subject',
@@ -216,6 +230,112 @@ Ext.onReady( function() {
                                 editable: false,
                                 listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['subject'],
+                                anchor: '95%'
+                            }
+                        ]
+                    },
+                    {
+                        layout: 'form',
+                        columnWidth: .33,
+                        labelWidth: 120,
+                        border: false,
+                        items: [
+                            {
+                                fieldLabel: 'Consortia',
+                                xtype: 'combo',
+                                hiddenName: 'consortia',
+                                store: combo_stores.consortias,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['consortia'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Subscription Status',
+                                xtype: 'combo',
+                                hiddenName: 'subscription_status',
+                                store: combo_stores.subscription_statuses,
+                                displayField: 'display',
+                                valueField: 'id',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['subscription_status'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'License',
+                                xtype: 'combo',
+                                hiddenName: 'license',
+                                store: combo_stores.licenses,
+                                displayField: 'key',
+                                valueField: 'id',
+                                mode: 'remote',
+                                queryParam: 'key',
+                                minChars: 1,
+                                forceSelection: true,
+                                queryDelay: 250,
+                                triggerAction: 'all',
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['license'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Provider',
+                                xtype: 'combo',
+                                hiddenName: 'provider',
+                                store: combo_stores.providers,
+                                displayField: 'key',
+                                valueField: 'id',
+                                queryParam: 'key',
+                                minChars: 1,
+                                mode: 'remote',
+                                forceSelection: true,
+                                queryDelay: 250,
+                                triggerAction: 'all',
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['provider'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Print Included?',
+                                xtype: 'combo',
+                                hiddenName: 'print_included',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['print_included'],
+                                anchor: '95%'
+                            }
+                        ]
+                    },
+                    {
+                        layout: 'form',
+                        columnWidth: .33,
+                        labelWidth: 120,
+                        border: false,
+                        items: [
+                            {
+                                fieldLabel: 'Open Access?',
+                                xtype: 'combo',
+                                hiddenName: 'open_access',
+                                store: combo_stores.open_access,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['open_access'],
                                 anchor: '95%'
                             },
                             {
@@ -276,104 +396,6 @@ Ext.onReady( function() {
                                 anchor: '95%'
                             }
                         ]
-                    },
-                    {
-                        layout: 'form',
-                        columnWidth: .5,
-                        labelWidth: 120,
-                        border: false,
-                        items: [
-                            {
-                                name: 'publisher',
-                                fieldLabel: 'Publisher',
-                                value: hash_state.params['publisher'],
-                                xtype: 'textfield',
-                                anchor: '-2'
-                            },
-                            {
-                                name: 'vendor',
-                                fieldLabel: 'Vendor',
-                                value: hash_state.params['vendor'],
-                                xtype: 'textfield',
-                                anchor: '-2'
-                            },
-                            {
-                                fieldLabel: 'Consortia',
-                                xtype: 'combo',
-                                hiddenName: 'consortia',
-                                store: combo_stores.consortias,
-                                valueField: 'id',
-                                displayField: 'display',
-                                mode: 'local',
-                                triggerAction: 'all',
-                                editable: false,
-                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
-                                value: hash_state.params['consortia'],
-                                anchor: '-2'
-                            },
-                            {
-                                fieldLabel: 'Subscription Status',
-                                xtype: 'combo',
-                                hiddenName: 'subscription_status',
-                                store: combo_stores.subscription_statuses,
-                                displayField: 'display',
-                                valueField: 'id',
-                                mode: 'local',
-                                triggerAction: 'all',
-                                editable: false,
-                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
-                                value: hash_state.params['subscription_status'],
-                                anchor: '-2'
-                            },
-                            {
-                                fieldLabel: 'License',
-                                xtype: 'combo',
-                                hiddenName: 'license',
-                                store: combo_stores.licenses,
-                                displayField: 'key',
-                                valueField: 'id',
-                                mode: 'remote',
-                                queryParam: 'key',
-                                minChars: 1,
-                                forceSelection: true,
-                                queryDelay: 250,
-                                triggerAction: 'all',
-                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
-                                value: hash_state.params['license'],
-                                anchor: '-2'
-                            },
-                            {
-                                fieldLabel: 'Provider',
-                                xtype: 'combo',
-                                hiddenName: 'provider',
-                                store: combo_stores.providers,
-                                displayField: 'key',
-                                valueField: 'id',
-                                queryParam: 'key',
-                                minChars: 1,
-                                mode: 'remote',
-                                forceSelection: true,
-                                queryDelay: 250,
-                                triggerAction: 'all',
-                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
-                                value: hash_state.params['provider'],
-                                anchor: '-2'
-                            },
-                            {
-                                fieldLabel: 'Open Access?',
-                                xtype: 'combo',
-                                hiddenName: 'open_access',
-                                store: combo_stores.open_access,
-                                valueField: 'id',
-                                displayField: 'display',
-                                mode: 'local',
-                                triggerAction: 'all',
-                                editable: false,
-                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
-                                value: hash_state.params['open_access'],
-                                anchor: '-2'
-                            }
-                        ]
                     }
                 ]
             }
@@ -420,7 +442,7 @@ Ext.onReady( function() {
             ]
         }),
         items: [ find_form ],
-        width: 700
+        width: 900
     })
     
     
@@ -443,7 +465,7 @@ Ext.onReady( function() {
     
     var selected_grid = new Ext.grid.GridPanel({
         title: 'Currently Selected Records',
-        width: 700,
+        width: 900,
         height: 300,
         frame: false,
         store: selected_store,
