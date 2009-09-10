@@ -2,6 +2,7 @@
 
 [% SET columns = resource.do_module('title_list_fields') %]
 [% IF !columns.in('journal_auth'); columns.push('journal_auth'); END %]
+[% IF !columns.in('id'); columns.unshift('id'); END %]
 [% SET paging_url = url_base _ '/global/titles/' _ resource.id _ '?page=' %]
 [% paging_text = BLOCK %][% PROCESS paging.tt %][% END %]
 <div><span class="heading">[% resource.name %]</span></div>
