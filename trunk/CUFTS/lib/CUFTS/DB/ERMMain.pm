@@ -161,8 +161,6 @@ __PACKAGE__->columns(All => qw(
 
     cancellation_cap
     cancellation_cap_notes
-
-    counter_source
 ));                                                                                                        
 
 __PACKAGE__->columns( Essential => __PACKAGE__->columns );
@@ -179,7 +177,7 @@ __PACKAGE__->has_a( 'license', 'CUFTS::DB::ERMLicense' );
 __PACKAGE__->has_a( 'provider', 'CUFTS::DB::ERMProviders' );
 __PACKAGE__->has_many( 'costs' => 'CUFTS::DB::ERMCosts' );
 __PACKAGE__->has_many( 'uses' => 'CUFTS::DB::ERMUses' );
-__PACKAGE__->has_a( 'counter_source', 'CUFTS::DB::ERMCounterSources' );
+__PACKAGE__->has_many( 'counter_sources', [ 'CUFTS::DB::ERMCounterLinks' => 'counter_source' ], 'erm_main' );
 
 # Enabling both of these causes a weird Class::DBI loop
 # __PACKAGE__->has_many( 'local_journals' => 'CUFTS::DB::LocalJournals' );

@@ -768,9 +768,12 @@ __PACKAGE__->add_columns(
         is_nullable   => 1,
         size          => 64000
     },
-    
-    
-    
+    'counter_source' => {
+        data_type     => 'integer',
+        default_value => undef,
+        is_nullable   => 1,
+        size          => 10,
+    },
 );
 __PACKAGE__->mk_group_accessors( column => qw/ result_name sort_name rank / );
 
@@ -802,6 +805,7 @@ __PACKAGE__->belongs_to( pricing_model   => 'CUFTS::Schema::ERMPricingModels' );
 __PACKAGE__->belongs_to( resource_medium => 'CUFTS::Schema::ERMResourceMediums' );
 __PACKAGE__->belongs_to( resource_type   => 'CUFTS::Schema::ERMResourceTypes' );
 __PACKAGE__->belongs_to( provider        => 'CUFTS::Schema::ERMProviders' );
+__PACKAGE__->belongs_to( counter_source  => 'CUFTS::Schema::ERMCounterSources' );
 
 sub main_name {
     my ( $self, $new_name ) = @_;
