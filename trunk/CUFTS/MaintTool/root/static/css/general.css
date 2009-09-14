@@ -4,6 +4,21 @@ body {
     padding: 0px;
 }
 
+h1 {
+    font-size: 140%;
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 120%;
+    font-weight: bold;
+}
+
+h3 {
+    font-size: 100%;
+    font-weight: bold;
+}
+
 form {
     display: inline;
 }
@@ -54,6 +69,10 @@ table.grid td {
 
 table.grid td.heading {
     background: #001457;
+}
+
+table.grid th {
+    text-align: left;
 }
 
 
@@ -894,6 +913,16 @@ table.erm-selected-export-html {
     padding: 2px 5px;
 }
 
+/* ERM Counter */
+
+#erm-counter-summary td {
+    width: 2em;
+    text-align: right;
+}
+
+#erm-counter-summary td.month-header {
+    background: #eee;
+}
 
 /* ExtJS styling */
 

@@ -1,0 +1,19 @@
+<h1>COUNTER record summary</h1>
+<h2>[% source.name | html %]</h2>
+
+<div id="erm-counter-summary">
+<table class="grid">
+<tr><th>&nbsp;</th>[% FOREACH month IN [ 1 .. 12 ] %]
+<td class="month-header">[% month %]</td>
+[% END %]
+</tr>
+[% FOREACH year IN summaries.keys.sort.reverse %]
+ <tr><th class="year">[% year %]</th>
+ [% FOREACH month IN [ 1 .. 12 ] %]
+  [%- SET reccount = summaries.$year.$month || 0 -%]
+  <td class="month field">[% reccount %]</td>
+ [% END %]
+ </tr>
+[% END %]
+</table>
+</div>
