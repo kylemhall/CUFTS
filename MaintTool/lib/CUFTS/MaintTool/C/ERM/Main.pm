@@ -415,6 +415,7 @@ sub _find {
         public
         public_list
         publisher
+        print_included
         resource_type
         subject
         subscription_status
@@ -793,6 +794,8 @@ sub link_ajax : Local {
 
     my $current_site_id = $c->stash->{current_site}->id;
 
+    
+
     my $erm_main = CUFTS::DB::ERMMain->search( { id => $erm_main_id, site => $current_site_id } )->first;
     if ( !defined($erm_main) ) {
         $c->stash->{json} = {
@@ -806,31 +809,45 @@ sub link_ajax : Local {
     if ( ref($ids) ne 'ARRAY' ) {
         $ids = [$ids];
     }
-    
-    my @records;
-    if ( $link_type eq 'resource' ) {
+
+    if ( $link_type eq 'counter') {
         if ( $action eq 'clear' ) {
-            @records = CUFTS::DB::LocalResources->search( { erm_main => $erm_main_id, site => $current_site_id } );
+            foreach my $record ( CUFTS::DB::ERMCounterLinks->search({ erm_main => $erm_main_id }) ) {
+                $record->delete();
+            }
         }
-        else {
-            @records = CUFTS::DB::LocalResources->search( { id => { '-in' => $ids }, site => $current_site_id } );
+        elsif ( $action eq 'remove' ) {
+            foreach my $record ( CUFTS::DB::ERMCounterLinks->search({ erm_main => $erm_main_id, counter_source => { '-in' => $ids } }) ) {
+                $record->delete();
+            }
         }
+        elsif ( $action eq 'add' ) {
+            foreach my $id ( @$ids ) {
+                my $record = CUFTS::DB::ERMCounterLinks->find_or_create({ erm_main => $erm_main_id, counter_source => $id });
+#                $record->identifier();
+#               $record->update();
+            }
+        }
+        
     }
-    elsif ( $link_type eq 'journal' ) {
-        if ( $action eq 'clear' ) {
-            @records = CUFTS::DB::LocalJournals->search( { erm_main => $erm_main_id, 'resource.site' => $current_site_id } );
+    else {
+        my @records;
+        if ( $link_type eq 'resource' ) {
+            @records = $action eq 'clear'
+                       ? CUFTS::DB::LocalResources->search( { erm_main => $erm_main_id, site => $current_site_id } )
+                       : CUFTS::DB::LocalResources->search( { id => { '-in' => $ids }, site => $current_site_id } );
         }
-        else {
-            @records = CUFTS::DB::LocalJournals->search( { id => { '-in' => $ids }, 'resource.site' => $current_site_id } );
+        elsif ( $link_type eq 'journal' ) {
+            @records = $action eq 'clear'
+                       ? CUFTS::DB::LocalJournals->search( { erm_main => $erm_main_id, 'resource.site' => $current_site_id }, { 'join' => 'resource' } )
+                       : CUFTS::DB::LocalJournals->search( { id => { '-in' => $ids }, 'resource.site' => $current_site_id }, { 'join' => 'resource' } );
+        }
+        foreach my $record ( @records ) {
+            $record->erm_main( $action eq 'add' ? $erm_main_id : undef );
+            $record->update();
         }
     }
     
-    
-    
-    foreach my $record ( @records ) {
-        $record->erm_main( $action eq 'add' ? $erm_main_id : undef );
-        $record->update();
-    }
 
     CUFTS::DB::DBI->dbi_commit();
     
@@ -841,6 +858,9 @@ sub link_ajax : Local {
     }
     elsif ( $link_type eq 'journal' ) {
         $c->forward( '/local/titles/find_json' );
+    }
+    elsif ( $link_type eq 'counter') {
+        $c->forward( '/erm/counter/find_json' );
     }
 }
 

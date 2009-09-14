@@ -27,19 +27,21 @@ Ext.onReady( function() {
     var default_help  = [% default_help.json %];
 
     var s_r_store = new Ext.data.SimpleStore({
-        fields: ['resource'],
+        fields: ['resource', 'counter'],
         data: [ [%- PROCESS selected_resources -%] ]
     });
 
     new Ext.grid.GridPanel({
         applyTo: 'selected-resources',
-        title: 'Selected Resources',
+        title: false,
         store: s_r_store,
-        columns: [ { heading: 'resource', dataIndex: 'resource', width: 575 } ],
+        columns: [
+            { header: 'Resource',       dataIndex: 'resource', width: 280 },
+            { header: 'Counter Source', dataIndex: 'counter',  width: 500 }
+        ],
         height: 200,
-        width: 600,
-        enableColumnResize: false,
-        cls: 'grid-hide-header'
+        width: 800,
+        enableColumnResize: false
     });
     
     var granularity_store = new Ext.data.SimpleStore({
@@ -49,7 +51,7 @@ Ext.onReady( function() {
 
     var format_store = new Ext.data.SimpleStore({
         fields: [ 'format', 'format_name' ],
-        data: [ ['html', 'HTML'], ['tab', 'tab delimited'], ['graph', 'graphed'] ]
+        data: [ ['html', 'HTML'], ['tab', 'tab delimited'], ['graph', 'graphed'] ],
     });
     
     var reports_store = new Ext.data.SimpleStore({
@@ -63,7 +65,7 @@ Ext.onReady( function() {
         border: false,
         items: [
             new Ext.form.ComboBox({
-                width: 150,
+                width: 250,
                 editable: false,
                 mode: 'local',
                 triggerAction: 'all',
@@ -123,6 +125,14 @@ Ext.onReady( function() {
             }
         } );
         
+        format_store.clearFilter();
+        if ( typeof(report_config[report_id].formats) == 'object' ) {
+            format_store.filterBy( function(record) {
+                // console.log(report_config[report_id].formats.indexOf( record.get('format') ) != -1);
+                return report_config[report_id].formats.indexOf( record.get('format') ) != -1;
+            });
+        }
+        
         current_report = report_id;
         
     }
@@ -130,14 +140,14 @@ Ext.onReady( function() {
 
     var help_panel = new Ext.Panel({
         id: 'statistics-help-panel',
-        border: false,
+        border: true,
         html: default_help
     });
     
     var report_setup_form = new Ext.form.FormPanel({
         id: 'report-setup-form',
+        style: 'padding: 5px 0 0 5px;',
         standardSubmit: true,
-        bodyStyle: 'padding: 5px 0 0 5px;',
         border: false,
         items: [
             new Ext.form.DateField({
@@ -220,20 +230,22 @@ Ext.onReady( function() {
     });
     
     
-    new Ext.Panel({
+    var panel = new Ext.Panel({
         title: 'Report Setup',
-        width: 600,
+        width: 800,
         applyTo: 'report-setup',
         autoHeight: true,
         style: 'margin-top: 10px',
-        items: [ select_report_panel, help_panel, report_setup_form ]
+        items: [ select_report_panel, help_panel, report_setup_form ],
+        listeners: {
+            show: function() { activateReport( current_report ); }
+        }
     });
     
-    activateReport( current_report );
+    panel.show();
+    
 
 } );
-
-
 
 </script>
 
@@ -242,6 +254,6 @@ Ext.onReady( function() {
 [% END %]
 
 [% BLOCK selected_resources %]
-[%- FOREACH resource IN resources %]['[% resource.name | js_data %]'][% UNLESS loop.last %],[% END %][% END -%]
+[%- FOREACH resource IN resources %]['[% resource.name | js_data %]', '[% resource.counter_sources.map_join('name', ', ') | js_data %]'][% UNLESS loop.last %],[% END %][% END -%]
 [% END %]
 

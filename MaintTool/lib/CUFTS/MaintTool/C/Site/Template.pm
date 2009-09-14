@@ -228,7 +228,7 @@ sub handle : Private {
     grep { $type eq $_ } @valid_types
         or die("Invalid template type: $type");
 
-    $template_name =~ /[\/\\;:'"]/
+    $template_name =~ /[\/\\;:'"]/   # Fix this, make it only tax a-z_. - Todd, 2009-04-27
         and die("Bad characters in template name: $template_name");
 
     my $base_dir = get_base_dir($type);
