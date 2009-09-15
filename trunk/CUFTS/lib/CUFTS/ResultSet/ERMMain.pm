@@ -39,6 +39,7 @@ sub facet_search {
         main_name_only => defined($override_main_name) ? $override_main_name : 1
     };
 
+
     # Dispatch to handle special setup for certain fields.  Default to normal field 
     # search if there is no matching "_facet_search..." handler.
     
@@ -52,9 +53,15 @@ sub facet_search {
             $self->$handler( $field, $fields->{$field}, $config );
         }
         else {
-            # default
+            # Check that it's a valid column.  This used to skip the check but random
+            # searches from exploit searching scripts would cause weird column names to
+            # get through and an SQL failure.
             
-            $config->{search}->{ "me.${field}" } = $fields->{$field};
+        
+            # if ( $self->result_source->has_column($field) ) {
+                $config->{search}->{ "me.${field}" } = $fields->{$field};
+            # }
+            
         }
         
     }
@@ -124,7 +131,7 @@ sub _facet_search_subject {
     
     $config->{extra_columns}->{rank} = 'subjects_main.rank';
 
-    $config->{replace_columns}->{description_brief} = { 'COALESCE' => 'subjects_main.description, me.description_brief' };
+    $config->{replace_columns}->{description_brief} =  \'COALESCE(subjects_main.description, me.description_brief)';
 
     $config->{search}->{'subjects_main.subject'} = $data;
 }
