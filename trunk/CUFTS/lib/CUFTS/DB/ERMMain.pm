@@ -177,6 +177,7 @@ __PACKAGE__->has_a( 'license', 'CUFTS::DB::ERMLicense' );
 __PACKAGE__->has_a( 'provider', 'CUFTS::DB::ERMProviders' );
 __PACKAGE__->has_many( 'costs' => 'CUFTS::DB::ERMCosts' );
 __PACKAGE__->has_many( 'uses' => 'CUFTS::DB::ERMUses' );
+__PACKAGE__->has_many( 'counter_source_links' => 'CUFTS::DB::ERMCounterLinks' );
 __PACKAGE__->has_many( 'counter_sources', [ 'CUFTS::DB::ERMCounterLinks' => 'counter_source' ], 'erm_main' );
 
 # Enabling both of these causes a weird Class::DBI loop
