@@ -1,5 +1,5 @@
 [% IF error %]
- There was an error while attempting to delete the ERM resource: [% error %].
+ There was an error while attempting to delete the ERM COUNTER source record: [% error %].
 [% ELSE %]
 
     [% IF result %]

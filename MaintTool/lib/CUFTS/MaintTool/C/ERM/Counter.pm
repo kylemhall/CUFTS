@@ -170,22 +170,19 @@ sub delete : Local {
             id   => $c->form->valid->{source_id},
         })->first;
 
-        my @erm_mains = CUFTS::DB::ERMMain->search( { counter_source => $source->id, site => $c->stash->{current_site}->id });
+        my @erm_mains = CUFTS::DB::ERMMain->search( { 'counter_source_links.counter_source' => $source->id }, { join => 'counter_source_links', distinct => 1 } );
 
         $c->stash->{erm_mains} = \@erm_mains;
         $c->stash->{source}    = $source;
+
+        use Data::Dumper;
+        warn(Dumper(\@erm_mains));
 
         if ( defined($source) ) {
 
             if ( $c->form->valid->{confirm} ) {
 
                 eval {
-                
-                    foreach my $source_main ( @erm_mains ) {
-                        $source_main->counter_source( undef );
-                        $source_main->update();
-                    }
-                    
                     $source->delete();
                 };
 
