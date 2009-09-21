@@ -57,15 +57,15 @@ my %resolver_map = (
 
 my @field_names = qw(
     bib_num
-    acq_num
+    erm_main_id
     issn
     journal_auth
     title
     publisher
     coverage
-    erm_main_id
-    resource_type
     vendor
+    acq_num
+    resource_type
     fund
 );
 
@@ -218,7 +218,7 @@ foreach my $record ( values %records ) {
         printf( "   \$ %9.2f  %3s \$ %9.2f", $payment->{amount_paid}, $payment->{currency_billed}, $payment->{amount_billed} );
         print "  ($payment->{references})" if exists $payment->{references};
         if ( $payment->{sub_from} =~ /\d/ || $payment->{sub_to} =~ /\d/ ) {
-            print "   FROM: ", $payment->{sub_from}, ' - TO: ', $payment->{sub_to};
+            print "   FROM: ", $payment->{sub_from}, ' TO: ', $payment->{sub_to};
         }
         print "\n";
 
@@ -258,7 +258,8 @@ sub parse_row {
     
     # $record{other_num}  = get_comma_field( \$row, 'other_num' );
     $record{bib_num} = get_comma_field( \$row, 'bib_num' );
-    $record{acq_num}  = get_comma_field( \$row, 'acq_num' );
+    $record{erm_main_id}   = get_comma_field( \$row, 'erm_main_id' );
+
 
     my $issns = get_comma_field( \$row, 'issns' );
     $record{issns} = [ map { $_ =~ s/-//; $_ } split /";"/, $issns ];
@@ -267,10 +268,10 @@ sub parse_row {
     $record{title}         = utf8( get_comma_field( \$row, 'title' ) )->latin1;
     $record{publisher}     = utf8( get_comma_field( \$row, 'publisher' ) )->latin1;
     $record{coverage}      = get_comma_field( \$row, 'coverage' );
-    $record{erm_main_id}   = get_comma_field( \$row, 'erm_main_id' );
+    $record{vendor}        = get_comma_field( \$row, 'vendor' );
+    $record{acq_num}       = get_comma_field( \$row, 'acq_num' );
     $record{resource_type} = get_comma_field( \$row, 'resource_type' );
     $record{fund}          = get_comma_field( \$row, 'fund' );
-    $record{vendor}        = get_comma_field( \$row, 'fund' );
 
 
     # $record{currency}      = get_comma_field( \$row, 'currency' );
@@ -395,7 +396,7 @@ sub parse_row {
                 
             }
             # 1998
-            elsif ( $payment =~ / ((?:19|20)\d{2}) /xsm ) {  # Last ditch for a single year
+            elsif ( $payment =~ / ((?:19|20)\d{2}) (?!\.) /xsm ) {  # Last ditch for a single year
                 $payment_record{start_date} = sprintf( "%04i-01-01", $1 );
                 $payment_record{end_date}   = sprintf( "%04i-12-31", $1 );
             }
@@ -408,17 +409,19 @@ sub parse_row {
             if ( !ParseDate($payment_record{start_date} ) ) {
                 print "* USING SUB_FROM DUE TO BAD START_DATE: $payment_record{start_date}\n";
                 my ( @parts ) = split '-', $payment_record{sub_from};
-                $parts[0] += $parts[0] > 20 ? 1900 : 2000;
-                $payment_record{start_date} = join '-', @parts;
+                if ( defined($parts[0]) && int($parts[0]) ) {
+                    $parts[0] += $parts[0] > 20 ? 1900 : 2000;
+                    $payment_record{start_date} = join '-', @parts;
+                }
             }
             if ( !ParseDate($payment_record{end_date}) ) {
                 print "* USING SUB_TO DUE TO BAD END_DATE: $payment_record{end_date}\n";
                 my ( @parts ) = split '-', $payment_record{sub_to};
-                $parts[0] += $parts[0] > 20 ? 1900 : 2000;
-                $payment_record{end_date} = join '-', @parts;
+                if ( defined($parts[0]) && int($parts[0]) ) {
+                    $parts[0] += $parts[0] > 20 ? 1900 : 2000;
+                    $payment_record{end_date} = join '-', @parts;
+                }
             }
-            
-            
 
             # Validate all dates, or throw the row away.
 
