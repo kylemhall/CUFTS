@@ -118,30 +118,39 @@ my $row = <>;
 while ($row = <>) {
 
     chomp($row);
-    my $record = parse_row($row);
-    
+    my $results = parse_row($row);
+    if ( !ref($results) eq 'HASH' ) {
+        print "Attempt to parse record failed, debug information was not returned properly.";
+        next;
+    }
+    my ( $record, $debug ) = @$results;
+
     clean_record( $record );
-        
+
     # print Dumper($record);
-    
+
     # Pretty print record
-    
+
+    print "---\n";
     print join( '   ', map { $record->{$_} } ( qw( acq_num bib_num other_num ) ) );
     print "\n";
     print $record->{title}, "  ", join( ', ', map { substr($_, 0, 4) . '-' . substr($_, 4, 4) } @{ $record->{issns} } );
     print "\n";
-    
+    print join "\n", @$debug;
+    print "\n";
+
     # Add to hash merged by bib or erm_main number
-    
+
     my $num = $record->{erm_main_id} || $record->{bib_num};
     die("Record found with no ERM number or bib_number: " . $record->{title})
         if !defined($num);
-    
+
     # If a match for the record exists, append the acq_num and payment details.
     # Possibly merge payment info if the voucher number is the same
-    
+
     if ( exists($records{$num}) ) {
         $records{$num}->{acq_num} .= ',' . $record->{acq_num};
+        print "Adding payments to a previously parsed record.\n";
         push @{$records{$num}->{payments}}, @{$record->{payments}};
     }
     else {
@@ -255,6 +264,7 @@ sub parse_row {
     # print $row;
     
     my %record;
+    my @debug;
     
     # $record{other_num}  = get_comma_field( \$row, 'other_num' );
     $record{bib_num} = get_comma_field( \$row, 'bib_num' );
@@ -304,7 +314,6 @@ sub parse_row {
             
             my $inv_date_year = int( substr( $payment_record{invoice_date}, 0, 2 ) );
             substr( $payment_record{invoice_date}, 0, 2 ) = $inv_date_year + ( $inv_date_year > 60 ? 1900 : 2000 );
-
 
             # Parse the price and currency
             
@@ -386,11 +395,13 @@ sub parse_row {
                 if ( exists $references{ $payment_record{references} } ) {
                     $payment_record{start_date} = $references{ $payment_record{references} }->{start_date};
                     $payment_record{end_date}   = $references{ $payment_record{references} }->{end_date};                 
+                    push @debug, "Found a 're:' reference to: " . $payment_record{references};
                 }
                 else {  # Default to previous record if it exists
                     if ( scalar(@{ $record{payments} }) ) {
                         $payment_record{start_date} = $record{payments}->[ $#{ $record{payments} } ]->{start_date};
                         $payment_record{end_date}   = $record{payments}->[ $#{ $record{payments} } ]->{end_date};
+                        push @debug, "Found a 're:' reference but no match, defaulting to previous record";
                     }
                 }
                 
@@ -401,25 +412,27 @@ sub parse_row {
                 $payment_record{end_date}   = sprintf( "%04i-12-31", $1 );
             }
             else {
-                $DEBUG && print STDERR "Can't parse: $payment\n";
+                push @debug, "* Can't parse: $payment. Attempting to use formatted date fields.";
             }
             
             # Fallback to trying the pre-parsed sub_from/to fields
             
             if ( !ParseDate($payment_record{start_date} ) ) {
-                print "* USING SUB_FROM DUE TO BAD START_DATE: $payment_record{start_date}\n";
+                my $prev_start_date = $payment_record{start_date};
                 my ( @parts ) = split '-', $payment_record{sub_from};
                 if ( defined($parts[0]) && int($parts[0]) ) {
                     $parts[0] += $parts[0] > 20 ? 1900 : 2000;
                     $payment_record{start_date} = join '-', @parts;
+                    push @debug, "* Using sub_from: $payment_record{start_date} due to bad start_date: $prev_start_date";
                 }
             }
             if ( !ParseDate($payment_record{end_date}) ) {
-                print "* USING SUB_TO DUE TO BAD END_DATE: $payment_record{end_date}\n";
+                my $prev_end_date = $payment_record{start_date};
                 my ( @parts ) = split '-', $payment_record{sub_to};
                 if ( defined($parts[0]) && int($parts[0]) ) {
                     $parts[0] += $parts[0] > 20 ? 1900 : 2000;
                     $payment_record{end_date} = join '-', @parts;
+                    push @debug, "* Using sub_to: $payment_record{end_date} due to bad end_date: $prev_end_date";
                 }
             }
 
@@ -428,28 +441,31 @@ sub parse_row {
             my $date_err = 0;
             if ( !ParseDate($payment_record{start_date}) ) {
                 $date_err++;
-                print "* COULD NOT PARSE START DATE: $payment_record{start_date}\n";
+                push @debug, "* Could not parse start date: $payment_record{start_date}";
             }
             if ( !ParseDate($payment_record{end_date}) ) {
                 $date_err++;
-                print "* COULD NOT PARSE END DATE: $payment_record{end_date}\n";
+                push @debug, "* Could not parse end date: $payment_record{end_date}";
             }
             if ( !ParseDate($payment_record{invoice_date}) ) {
                 $date_err++;
-                print "* COULD NOT PARSE INVOICE DATE: $payment_record{invoice_date}\n";
+                push @debug, "* Could not parse invoice date: $payment_record{invoice_date}";
             }
             
             if ( $date_err ) {
-                print "* DATE ERROR IN PAYMENT LINE: $payment_orig\n";
+                push @debug, "* Date error in payment line: $payment_orig";
             }
             else {
                 push @{ $record{payments} }, \%payment_record;
+                push @debug, "* Found usable cost data: " . $payment_record{start_date} . ' - ' . $payment_record{end_date} . ' - ' $payment_record{amount_paid};
             }
             
         }
     }
+    
+    push @debug, "Found " . scalar(@{$record{payments}}) . " usable payment fields";
 
-    return \%record;
+    return [ \%record, \@debug ];
 }
 
 sub get_comma_field {
