@@ -457,7 +457,7 @@ sub parse_row {
             }
             else {
                 push @{ $record{payments} }, \%payment_record;
-                push @debug, "* Found usable cost data: " . $payment_record{start_date} . ' - ' . $payment_record{end_date} . ' - ' $payment_record{amount_paid};
+                push @debug, "* Found usable cost data: " . $payment_record{start_date} . ' - ' . $payment_record{end_date} . ' - ' . $payment_record{amount_paid};
             }
             
         }
