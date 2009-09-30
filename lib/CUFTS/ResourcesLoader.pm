@@ -58,6 +58,7 @@ BEGIN {
         Gale_II
         Gale_III
         Gale
+        Gale10
         GenericJournal
         GenericJournalDOI
         GenericPrintJournal
