@@ -266,11 +266,15 @@ sub build_linkJournal {
     my $resource_identifier = $resource->resource_identifier;
     my $auth_name = $resource->auth_name;
 
-    defined( $resource_identifier )
-        or CUFTS::Exception::App->throw('No resource_identifier defined for resource: ' . $resource->name);
+    if ( !defined( $resource_identifier ) ) {
+        warn('No resource_identifier defined for Gale10 resource: ' . $resource->name);
+        return undef;
+    }
 
-    defined( $auth_name )
-        or CUFTS::Exception::App->throw('No auth_name defined for resource: ' . $resource->name);
+    if ( !defined( $auth_name ) ) {
+        warn('No auth_name defined for Gale10 resource: ' . $resource->name);
+        return undef;
+    }
 
     my @results;
     foreach my $record (@$records) {
@@ -311,11 +315,15 @@ sub build_linkTOC {
     my $resource_identifier = $resource->resource_identifier;
     my $auth_name = $resource->auth_name;
 
-    defined( $resource_identifier )
-        or CUFTS::Exception::App->throw('No resource_identifier defined for resource: ' . $resource->name);
+    if ( !defined( $resource_identifier ) ) {
+        warn('No resource_identifier defined for Gale10 resource: ' . $resource->name);
+        return undef;
+    }
 
-    defined( $auth_name )
-        or CUFTS::Exception::App->throw('No auth_name defined for resource: ' . $resource->name);
+    if ( !defined( $auth_name ) ) {
+        warn('No auth_name defined for Gale10 resource: ' . $resource->name);
+        return undef;
+    }
 
     my @results;
     foreach my $record (@$records) {
@@ -369,11 +377,15 @@ sub build_linkFulltext {
     my $resource_identifier = $resource->resource_identifier;
     my $auth_name = $resource->auth_name;
 
-    defined( $resource_identifier )
-        or CUFTS::Exception::App->throw('No resource_identifier defined for resource: ' . $resource->name);
+    if ( !defined( $resource_identifier ) ) {
+        warn('No resource_identifier defined for Gale10 resource: ' . $resource->name);
+        return undef;
+    }
 
-    defined( $auth_name )
-        or CUFTS::Exception::App->throw('No auth_name defined for resource: ' . $resource->name);
+    if ( !defined( $auth_name ) ) {
+        warn('No auth_name defined for Gale10 resource: ' . $resource->name);
+        return undef;
+    }
 
     my @results;
     foreach my $record (@$records) {
