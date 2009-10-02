@@ -340,9 +340,9 @@ sub build_linkTOC {
             $url .= '&rft.issue=' . $request->issue;
         }
 
-        if ( not_empty_string($request->date) ) {
-            $url .= '&rft.date=' . $request->date;
-        }
+        # if ( not_empty_string($request->date) ) {
+        #     $url .= '&rft.date=' . $request->date;
+        # }
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
@@ -402,9 +402,9 @@ sub build_linkFulltext {
             $url .= '&rft.spage=' . $request->spage;
         }
 
-        if ( not_empty_string($request->date) ) {
-            $url .= '&rft.date=' . $request->date;
-        }
+        # if ( not_empty_string($request->date) ) {
+        #     $url .= '&rft.date=' . $request->date;
+        # }
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
