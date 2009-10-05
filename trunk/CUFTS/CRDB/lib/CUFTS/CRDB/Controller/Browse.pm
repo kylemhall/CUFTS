@@ -68,7 +68,7 @@ sub facet_form : Chained('base') PathPart('facet_form') Args(0) {
             $values = [ $values ];
         }
         foreach my $value ( @$values ) {
-            push @search_facets, $param, $value;
+            push @search_facets, uri_escape($param), uri_escape($value);
         }
     }
 

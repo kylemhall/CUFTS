@@ -8,6 +8,8 @@ use warnings;
 use Catalyst::Runtime '5.70';
 
 use CUFTS::Util::Simple;
+use URI::Escape;
+
 
 # Set flags and add plugins for the application
 #
@@ -143,7 +145,7 @@ sub uri_for_facets {
         delete $new_facets{$remove};
     }
 
-    my @facet_array = map { $_, $new_facets{$_} } sort keys(%new_facets);
+    my @facet_array = map { uri_escape($_), uri_escape($new_facets{$_}) } sort keys(%new_facets);
     
     return $c->uri_for_site( $c->controller->action_for('html_facets'), @facet_array );
 }
