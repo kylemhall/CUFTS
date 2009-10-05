@@ -573,23 +573,25 @@ sub edit : Local {
                 $erm->main_name( $c->form->{valid}->{main_name} );
 
                 # Handle content type changes
-                
+
                 my $content_types_values = $c->form->{valid}->{'erm-edit-input-content_types'};
-                if ( defined($content_types_values) ) {
-                    if ( !ref($content_types_values) ) {
-                        $content_types_values = [ $content_types_values ];
+                if ( !defined($content_types_values) ) {
+                    $content_types_values = [];
+                }
+                elsif ( !ref($content_types_values) ) {
+                    $content_types_values = [ $content_types_values ];
+                }
+
+                foreach my $content_type_id ( @{$content_types_values} ) {
+                    if ( $active_content_types{$content_type_id} ) {
+                        delete $active_content_types{$content_type_id};
                     }
-                    foreach my $content_type_id ( @{$content_types_values} ) {
-                        if ( $active_content_types{$content_type_id} ) {
-                            delete $active_content_types{$content_type_id};
-                        }
-                        else {
-                            $erm->add_to_content_types( { content_type => $content_type_id } );
-                        }
+                    else {
+                        $erm->add_to_content_types( { content_type => $content_type_id } );
                     }
-                    foreach my $content_type_id ( keys %active_content_types ) {
-                        CUFTS::DB::ERMContentTypesMain->search( { erm_main => $erm_id, content_type => $content_type_id } )->delete_all;
-                    }
+                }
+                foreach my $content_type_id ( keys %active_content_types ) {
+                    CUFTS::DB::ERMContentTypesMain->search( { erm_main => $erm_id, content_type => $content_type_id } )->delete_all;
                 }
 
                 # Handle subject changes
