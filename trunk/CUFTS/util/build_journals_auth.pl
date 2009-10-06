@@ -5,6 +5,7 @@ use lib qw(lib);
 $| = 1;
 
 my $PROGRESS = 1;
+my $CHECKPOINT = 1;
 
 use strict;
 
@@ -184,29 +185,29 @@ INPUT:
                 print "[S]kip record, [c]reate new journal_auth, [m]erge all journal_auths, or enter journal_auth ids.\n";
                 my $input = $term->readline('[S/c/m/ids]: ');
 
-        	    if ( $input =~ /^[cC]/ ) {
-        	        $journal_auth = create_ja_record($journal, \@issn_search, $timestamp, $stats);
-        	        last INPUT;
-        	    } elsif ( $input =~ /^[mM]/ ) {
-        	        $journal_auth = CUFTS::JournalsAuth->merge( map {$_->id} @journal_auths );
-        	        last INPUT;
-        	    } elsif ( $input =~ /^[sS]/ || $input eq '' ) {
-        	        return undef;
-        	    } elsif ( $input =~ /^[\d ]+$/ ) {
+                if ( $input =~ /^[cC]/ ) {
+                    $journal_auth = create_ja_record($journal, \@issn_search, $timestamp, $stats);
+                    last INPUT;
+                } elsif ( $input =~ /^[mM]/ ) {
+                    $journal_auth = CUFTS::JournalsAuth->merge( map {$_->id} @journal_auths );
+                    last INPUT;
+                } elsif ( $input =~ /^[sS]/ || $input eq '' ) {
+                    return undef;
+                } elsif ( $input =~ /^[\d ]+$/ ) {
 
-        	        my @merge_ids = split /\s+/, $input;
-        	        foreach my $merge_id (@merge_ids) {
-        	            $merge_id = int($merge_id);
-        	            if ( !grep { $merge_id == $_->id } @journal_auths ) {
-        	                print "id input does not match possible merge targets: $merge_id\n";
-        	                next INPUT;
-        	            }
-        	            $journal_auth = CUFTS::JournalsAuth->merge(@merge_ids);
-        	            last INPUT;
-        	        }
+                    my @merge_ids = split /\s+/, $input;
+                    foreach my $merge_id (@merge_ids) {
+                        $merge_id = int($merge_id);
+                        if ( !grep { $merge_id == $_->id } @journal_auths ) {
+                            print "id input does not match possible merge targets: $merge_id\n";
+                            next INPUT;
+                        }
+                        $journal_auth = CUFTS::JournalsAuth->merge(@merge_ids);
+                        last INPUT;
+                    }
 
-        	    }
-        	}
+                }
+            }
         }
         else {
             push @{$stats->{multiple_matches}}, $journal;
@@ -221,8 +222,13 @@ INPUT:
         $journal_auth = create_ja_record($journal, \@issn_search, $timestamp, $stats);
     }
 
-    if ( $PROGRESS && $stats->{'count'} % 100 == 0 ) {
-        print "\n$stats->{'count'}\n";
+    if ( $stats->{'count'} % 100 == 0 ) {
+        if ( $PROGRESS ) {
+            print "\n$stats->{'count'}\n";
+        }
+        if ( $CHECKPOINT ) {
+            CUFTS::DB::DBI->dbi_commit();
+        }
     }
 
     return $journal_auth;
@@ -336,8 +342,8 @@ sub update_ja_record {
     }
 
     if ($new_issn_count && ( $new_issn_count + scalar(@journal_auth_issns) ) > 2) {
-    	push @{$stats->{ too_many_issns }}, $journal;
-    	return undef;
+        push @{$stats->{ too_many_issns }}, $journal;
+        return undef;
     }
     
     $journal->journal_auth( $journal_auth->id );
@@ -397,15 +403,15 @@ sub show_report {
 }
 
 sub get_site_id {
-	return $options{'site_id'} if defined($options{'site_id'});
+    return $options{'site_id'} if defined($options{'site_id'});
     return undef if !defined($options{'site_key'});
 
-	my @sites = CUFTS::DB::Sites->search('key' => $options{'site_key'});
-	
-	scalar(@sites) == 1 or
-		die('Could not get CUFTS site for key: ' . $options{'site_key'});
-		
-	return $sites[0]->id;
+    my @sites = CUFTS::DB::Sites->search('key' => $options{'site_key'});
+    
+    scalar(@sites) == 1 or
+        die('Could not get CUFTS site for key: ' . $options{'site_key'});
+        
+    return $sites[0]->id;
 }
 
 sub display_stats {
