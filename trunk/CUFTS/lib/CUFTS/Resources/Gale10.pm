@@ -288,7 +288,7 @@ sub build_linkJournal {
         }
         else {
             my $escaped_title = uri_escape($record->title);
-            $url .= "&rft.title=${$escaped_title}";
+            $url .= "&rft.title=${escaped_title}";
         }
 
         my $result = new CUFTS::Result($url);
@@ -337,7 +337,7 @@ sub build_linkTOC {
         }
         else {
             my $escaped_title = uri_escape($record->title);
-            $url .= "&rft.title=${$escaped_title}";
+            $url .= "&rft.title=${escaped_title}";
         }
 
         if ( not_empty_string($request->volume) ) {
@@ -399,7 +399,7 @@ sub build_linkFulltext {
         }
         else {
             my $escaped_title = uri_escape($record->title);
-            $url .= "&rft.title=${$escaped_title}";
+            $url .= "&rft.title=${escaped_title}";
         }
 
         if ( not_empty_string($request->volume) ) {
