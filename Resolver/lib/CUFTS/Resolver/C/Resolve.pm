@@ -1,19 +1,20 @@
 package CUFTS::Resolver::C::Resolve;
 
 use strict;
-use base 'Catalyst::Base';
+use warnings;
+use base 'Catalyst::Controller';
 
 use CUFTS::Util::Simple;
 use CUFTS::ResourcesLoader;
 use CUFTS::Resolve;
 use CUFTS::Request;
 
-sub auto : Private {
+sub base : Chained('/site') PathPart('browse') CaptureArgs(0) {
     my ( $self, $c ) = @_;
 
     # FUTURE: Consider adding load of site specific resolver?
     my $resolver = new CUFTS::Resolve();
-    my $sites = $resolver->get_sites( undef, [ $c->stash->{current_site_key}, defined($c->stash->{other_sites}) ? @{$c->stash->{other_sites}} : () ] );
+    my $sites = $resolver->get_sites( undef, [ $c->site->key, defined($c->stash->{other_sites}) ? @{$c->stash->{other_sites}} : () ] );
 
     $c->stash->{sites}    = $sites;
     $c->stash->{resolver} = $resolver;
@@ -21,12 +22,17 @@ sub auto : Private {
     return 1;  # Continue processing
 }
 
-sub openurl : Local {
+sub openurl : Chained('base') PathPart('openurl') Args() {
     my ( $self, $c, $template ) = @_;
 
     my $params   = $c->req->params;
     my $resolver = $c->stash->{resolver};
     my $sites    = $c->stash->{sites};
+
+    # Strip anything weird from the template name
+    if ( defined($template) ) {
+        $template =~ tr/-a-zA-Z0-9_//cd;
+    }
 
     # parse request as an OpenURL (could be 0.1 or 1.0)
     my $request = CUFTS::Request->parse_openurl($params);
@@ -42,8 +48,6 @@ sub openurl : Local {
     $c->stash->{results}  = $results;
     $c->stash->{request}  = $request;
     $c->stash->{template} = $template ? "${template}.tt" : 'main.tt';
-
-    return;
 }
 
 =back

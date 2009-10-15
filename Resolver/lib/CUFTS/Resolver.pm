@@ -2,124 +2,82 @@ package CUFTS::Resolver;
 
 use strict;
 
-use Catalyst qw/Static::Simple Prototype/;
+use Catalyst::Runtime '5.70';
+
+use Catalyst qw/
+    -Debug
+    ConfigLoader
+    Static::Simple
+/;
+
 use lib '../lib';
 use CUFTS::Config;
 
 our $VERSION = '2.00.00';
 
-CUFTS::Resolver->config(
+__PACKAGE__->config(
     name       => 'CUFTS::Resolver',
-    regex_base => '',
-    strip_base => 'site/',
 );
 
-CUFTS::Resolver->setup;
+__PACKAGE__->setup;
 
-sub prepare_path {
-    my $c = shift;
+__PACKAGE__->mk_accessors( qw( site ) );
 
-    $c->NEXT::prepare_path(@_);
-
-    my $path = $c->req->path;
-
-    # Get site and set site key for loading from database later.
-    # Database load isn't done here because the request might be
-    # for static objects that don't need database setup.
-
-    my $strip_base = $c->config->{strip_base};
-
-    if ( $path =~ s{^ ${strip_base} ([,A-Za-z0-9]+) / }{}oxsm ) {
-        my ( $site_key, @other_sites ) = split ',', $1;
-        $c->stash->{current_site_key}  = $site_key;
-        $c->stash->{other_sites}       = \@other_sites;
-        $c->stash->{site_template_dir} = "root/sites/${site_key}";
-
-        # Stringify c->req->base - otherwise it's a URI object
-        $c->stash->{real_base} = $c->config->{url_base}
-            || q{} . $c->req->base;
-            
-        $c->req->base->path( $c->req->base->path . "${strip_base}${site_key}" );
-        $c->req->path($path);
-
-        $c->stash->{url_base} =
-            $c->config->{url_base}
-            ? ( $c->config->{url_base} . "${strip_base}${site_key}" )
-            : ( q{} . $c->req->base );
-
-    }
-    else {
-        $c->stash->{url_base} =
-            $c->config->{url_base}
-            ? $c->config->{url_base}
-            : q{} . $c->req->base;
-
-        $c->stash->{real_base} = $c->stash->{url_base};
-    }
-
-    $c->stash->{url_base} =~ s{/$}{};  # Remove trailing slash
-
-    return 1;
-}
-
-sub begin : Private {
-    my ( $self, $c ) = @_;
-
-    # Set up basic template vars
-    $c->stash->{image_dir} = $c->stash->{url_base} . '/static/images/';
-    $c->stash->{css_dir}   = $c->stash->{url_base} . '/static/css/';
-    $c->stash->{js_dir}    = $c->stash->{url_base} . '/static/js/';
-
-    return 1;
-}
-
-##
-## end - Forward requests to the TT view for rendering
-##
-
-sub end : Private {
-    my ( $self, $c ) = @_;
-
-    if ( scalar @{ $c->error } ) {
-        warn("Rolling back database changes due to error flag.");
-        CUFTS::DB::DBI->dbi_rollback();
-    }
-
-    return 1 if $c->response->status =~ /^3\d\d$/;
-    return 1 if $c->response->body;
-
-    unless ( $c->response->content_type ) {
-        $c->response->content_type('text/html; charset=iso-8859-1');
-    }
-
-    return $c->forward('CUFTS::Resolver::V::TT');
-}
-
-##
-## redirect - Helper method for redirecting while keeping the URL base correct.
-##
 
 sub redirect {
-    my ( $c, $location ) = @_;
+    my ( $c, $uri ) = @_;
+    
+    $c->res->redirect( $uri );
+    $c->detach();
+}
 
-    if ( $location !~ /^http:/ ) {
-        $location =~ m#^/#
-            or die("Attempting to redirect to relative location: $location");
 
-        if ( $c->stash->{url_base} ) {
-            $location = $c->stash->{url_base} . $location;
+sub uri_for_given_site {
+    my ( $c, $url, $site, $caps, @rest ) = @_;
+
+    my $captures_copy = [];
+
+    # use Data::Dumper;
+    # warn( "\nurl: " . Dumper($url) );
+    # warn( "\ncaps: " . Dumper($caps) );
+    # warn( "\nrest: " . Dumper(\@rest) . "\n" );
+
+    if ( defined($caps) ) {
+        if ( ref($caps) eq 'ARRAY' ) {
+            $captures_copy = [ @$caps ];
+        } else {
+            unshift @rest, $caps;
         }
     }
 
-    return $c->res->redirect($location);
+    unshift @$captures_copy, $site->key;
+
+    # warn( "\nurl: " . Dumper($url) );
+    # warn( "\ncaps: " . Dumper($captures_copy) );
+    # warn( "\nrest: " . Dumper(\@rest) . "\n" );
+    # warn( $c->uri_for( $url, $captures_copy, @rest ) );
+
+    return $c->uri_for( $url, $captures_copy, @rest );
 }
 
-sub default : Private {
-    my ( $self, $c ) = @_;
-    $c->res->output('Congratulations, CUFTS::Resolver is on Catalyst!');
+sub uri_for_site {
+    my ( $c, $url, $caps, @rest ) = @_;
 
-    return;
+    die("Attempting to create URI for site when site is not defined.") if !defined( $c->site );
+
+    $c->uri_for_given_site( $url, $c->site, $caps, @rest );
 }
+
+sub uri_for_static {
+    my ( $c, $path ) = @_;
+
+    $path =~ s{^/}{};
+
+    return $c->uri_for( '/static/' . $path );
+}
+
+
+
 
 =back
 

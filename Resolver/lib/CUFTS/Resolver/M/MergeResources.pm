@@ -44,7 +44,7 @@ package CUFTS::Resolver::M::MergeResources;
 
 use strict;
 
-use base 'Catalyst::Base';
+use base 'Catalyst::Model';
 
 sub merge {
 	my ($class, $local_arr, $global_arr, $active) = @_;

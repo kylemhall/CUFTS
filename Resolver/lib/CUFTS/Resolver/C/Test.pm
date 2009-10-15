@@ -1,15 +1,18 @@
 package CUFTS::Resolver::C::Test;
 
 use strict;
-use base 'Catalyst::Base';
+use warnings;
+use base 'Catalyst::Controller';
 
 use CUFTS::Util::Simple;
 use URI;
 
+sub base : Chained('/base') PathPart('test') CaptureArgs(0) {}
+
 # default - test screen view listing all sites and
 # templates with fields to be sent to the resolver.
 
-sub default : Private {
+sub test : Chained('base') PathPart('') Args(0) {
     my ( $self, $c ) = @_;
 
     my @sites = CUFTS::DB::Sites->retrieve_all();
@@ -22,32 +25,25 @@ sub default : Private {
 # do - process a test request, turn it into a URL to
 # send to the resolver and redirect to that URL
 
-sub do : Local {
+sub do : Chained('base') PathPart('do') Args(0) {
     my ( $self, $c ) = @_;
 
     my $params = $c->req->params;
-    my $url    = $c->stash->{real_base};
     
-    # add site key ("BVAS", "ONN") to the path if in query
-    if ( !is_empty_string( $params->{'_site'} ) ) {
-        $url .= 'site/' . $params->{'_site'};
+    my $psite     = delete $params->{_site};
+    my $ptemplate = delete $params->{_template};
+    delete $params->{_submit};
+    
+    my $uri;
+    if ( not_empty_string($psite) ) {
+        my $site = CUFTS::DB::Sites->search( { key => $psite } )->first;
+        $uri = $c->uri_for_given_site( $c->controller('Resolve')->action_for('openurl'), $site, $ptemplate, $params );
+    }
+    else {
+        $uri = $c->uri_for_site( $c->controller('Resolve')->action_for('openurl'), $ptemplate, $params );
     }
 
-    $url .= '/resolve/openurl';
-
-    # add a template name to the path if in query
-    if ( !is_empty_string( $params->{'_template'} ) ) {
-        $url .= '/' . $params->{'_template'};
-    }
-
-    # remove "internal" params from hash before setting
-    # query for the URI object
-    foreach my $param ( keys %{$params} ) {
-        delete $params->{$param} if $param =~ /^_/;    # _site, _template
-    }
-
-    my $uri = URI->new($url);
-    $uri->query_form($params);
+    warn($uri);
 
     return $c->redirect($uri);
 }
