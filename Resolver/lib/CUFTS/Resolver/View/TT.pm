@@ -1,4 +1,4 @@
-package CUFTS::Resolver::V::TT;
+package CUFTS::Resolver::View::TT;
 
 use strict;
 use base 'Catalyst::View::TT';

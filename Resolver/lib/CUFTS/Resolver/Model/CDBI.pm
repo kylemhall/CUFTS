@@ -1,4 +1,4 @@
-package CUFTS::Resolver::M::CDBI;
+package CUFTS::Resolver::Model::CDBI;
 
 use strict;
 use base 'Catalyst::Model';
