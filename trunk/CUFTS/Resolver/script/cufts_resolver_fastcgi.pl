@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/env perl
 
 BEGIN { $ENV{CATALYST_ENGINE} ||= 'FastCGI' }
 
@@ -11,8 +11,8 @@ use lib "$FindBin::Bin/../lib";
 use CUFTS::Resolver;
 
 my $help = 0;
-my ( $listen, $nproc, $pidfile, $manager, $detach );
- 
+my ( $listen, $nproc, $pidfile, $manager, $detach, $keep_stderr );
+
 GetOptions(
     'help|?'      => \$help,
     'listen|l=s'  => \$listen,
@@ -20,16 +20,18 @@ GetOptions(
     'pidfile|p=s' => \$pidfile,
     'manager|M=s' => \$manager,
     'daemon|d'    => \$detach,
+    'keeperr|e'   => \$keep_stderr,
 );
 
 pod2usage(1) if $help;
 
-CUFTS::Resolver->run( 
-    $listen, 
+CUFTS::Resolver->run(
+    $listen,
     {   nproc   => $nproc,
-        pidfile => $pidfile, 
+        pidfile => $pidfile,
         manager => $manager,
         detach  => $detach,
+        keep_stderr => $keep_stderr,
     }
 );
 
@@ -42,7 +44,7 @@ cufts_resolver_fastcgi.pl - Catalyst FastCGI
 =head1 SYNOPSIS
 
 cufts_resolver_fastcgi.pl [options]
- 
+
  Options:
    -? -help      display this help and exits
    -l -listen    Socket path to listen on
@@ -58,19 +60,20 @@ cufts_resolver_fastcgi.pl [options]
    -M -manager   specify alternate process manager
                  (FCGI::ProcManager sub-class)
                  or empty string to disable
+   -e -keeperr   send error messages to STDOUT, not
+                 to the webserver
 
 =head1 DESCRIPTION
 
 Run a Catalyst application as fastcgi.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Sebastian Riedel, C<sri@oook.de>
-Maintained by the Catalyst Core Team.
+Catalyst Contributors, see Catalyst.pm
 
 =head1 COPYRIGHT
 
-This library is free software, you can redistribute it and/or modify
+This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut

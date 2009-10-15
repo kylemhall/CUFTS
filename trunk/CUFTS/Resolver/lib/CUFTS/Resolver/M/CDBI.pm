@@ -1,7 +1,7 @@
 package CUFTS::Resolver::M::CDBI;
 
 use strict;
-use base 'Catalyst::Base';
+use base 'Catalyst::Model';
 
 use CUFTS::DB::DBI;
 
