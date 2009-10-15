@@ -1,4 +1,4 @@
-package CUFTS::Resolver::C::Test;
+package CUFTS::Resolver::Controller::Test;
 
 use strict;
 use warnings;

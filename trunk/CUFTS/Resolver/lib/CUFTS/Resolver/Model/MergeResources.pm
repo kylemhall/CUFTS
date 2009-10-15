@@ -40,7 +40,7 @@ sub new {
 ## Model code for creating the merged record above
 ## 
 
-package CUFTS::Resolver::M::MergeResources;
+package CUFTS::Resolver::Model::MergeResources;
 
 use strict;
 
