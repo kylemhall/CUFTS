@@ -20,11 +20,11 @@
 
 package CUFTS::Resources::PubMedCentral;
 
-use base
-    qw(CUFTS::Resources::GenericJournalDOI CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::GenericJournalDOI CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use HTML::Entities;
 
 use strict;
 
@@ -74,7 +74,7 @@ sub title_list_field_map {
         'pISSN'           => 'issn',
         'eISSN'           => 'e_issn',
         'Publisher'       => 'publisher',
-        'Delayed release' => 'embargo_months',
+        'Free access'     => 'embargo_months',
         'Journal URL'     => 'journal_url',
 
     };
@@ -82,6 +82,10 @@ sub title_list_field_map {
 
 sub clean_data {
     my ( $class, $record ) = @_;
+
+    $record->{title}                = HTML::Entities::decode_entities( $record->{title} );
+    $record->{'___Earliest volume'} = HTML::Entities::decode_entities( $record->{'___Earliest volume'} );
+    $record->{'___Latest issue'}    = HTML::Entities::decode_entities( $record->{'___Latest issue'} );
 
     if ( defined( $record->{'___Earliest volume'} ) ) {
 
@@ -101,11 +105,13 @@ sub clean_data {
 
     if ( defined( $record->{'___Latest issue'} ) ) {
 
+        my $current_year = (localtime())[5] + 1900;
+
         my ( $vol, $date ) = split /\s*;\s*/, $record->{'___Latest issue'};
         defined($date)
             or $date = $record->{'___Latest issue'};
 
-        if ( $date =~ /(\d{4})/ && $1 ne '2004' ) {
+        if ( $date =~ /(\d{4}) \s* $/xsm && $1 ne $current_year ) {
             $record->{ft_end_date} = $1;
 
             if ( $date =~ /^ ([a-zA-Z]+) \s* (\d{1,2}) , \s* \d+ /xsm ) {
@@ -128,14 +134,15 @@ sub clean_data {
         }
     }
 
-    if ( defined( $record->{embargo_months} ) && $record->{embargo_months} =~ /no\s*delay/i ) {
-        delete $record->{embargo_months};
+    if ( defined( $record->{embargo_months} ) ) {
+        if ( $record->{embargo_months} =~ / (\d+) \s* months /xsmi ) {
+            $record->{embargo_months} = $1;
+        }
+        else {
+            delete $record->{embargo_months};
+        }
     }
-
-    if ( defined( $record->{embargo_months} ) && $record->{embargo_months} =~ / (\d+) \s* months /xsmi ) {
-        $record->{embargo_months} = $1;
-    }
-
+    
     return $class->SUPER::clean_data($record);
 
     sub get_month {
