@@ -7,5 +7,5 @@ CREATE TABLE cjdb_journals_subjects (
     origin          VARCHAR(1024)
 );
 
-CREATE INDEX cjdb_journals_subjects_j_idx ON cjdb_subjects (journal);
-CREATE INDEX cjdb_journals_subjects_ss_idx ON cjdb_subjects (site, subject);
+CREATE INDEX cjdb_journals_subjects_j_idx ON cjdb_journals_subjects (journal);
+CREATE INDEX cjdb_journals_subjects_ss_idx ON cjdb_journals_subjects (site, subject);

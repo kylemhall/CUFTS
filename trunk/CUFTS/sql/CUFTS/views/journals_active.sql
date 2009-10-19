@@ -1,3 +1,4 @@
+DROP VIEW journals_active; /* IF EXISTS */
 CREATE VIEW journals_active AS
     SELECT local_journals.resource as local_resource, 
            journals.id,

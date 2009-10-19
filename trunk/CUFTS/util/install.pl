@@ -282,7 +282,7 @@ if ($no_psql) {
 			##
 		
 			print "Creating CUFTS database tables and seeding database. Ignore the NOTICE: lines.\nYou may be asked for the password again.\n";
-			$result = `cat sql/CUFTS/*.sql sql/CUFTS/views/*.sql sql/CUFTS/init/*.sql sql/CJDB/*.sql | psql -q --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
+			$result = `cat sql/CUFTS/*.sql sql/CUFTS/views/*.sql sql/CJDB/*.sql sql/CUFTS/init/*.sql | psql -q --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
 			if ($result =~ /ERROR/) {
 				die("Error creating/seeding database: $result");
 			}

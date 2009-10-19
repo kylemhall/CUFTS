@@ -1,4 +1,4 @@
-DROP VIEW merged_resources;
+DROP VIEW merged_resources; /* IF EXISTS */
 CREATE VIEW merged_resources AS
     SELECT local_resources.id AS id,
            local_resources.id AS local_resource,
