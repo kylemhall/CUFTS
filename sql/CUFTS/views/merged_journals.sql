@@ -1,4 +1,4 @@
-DROP VIEW merged_journals;
+DROP VIEW merged_journals; /* IF EXISTS */
 CREATE VIEW merged_journals AS
     SELECT local_journals.id AS id,
            local_resources.id AS local_resource,

@@ -5,5 +5,5 @@ CREATE TABLE cjdb_journals_associations (
     site            INTEGER NOT NULL
 );
 
-CREATE INDEX cjdb_journals_associations_j_idx ON cjdb_associations (journal);
-CREATE INDEX cjdb_journals_associations_sa_idx ON cjdb_associations (site, association);
+CREATE INDEX cjdb_journals_associations_j_idx ON cjdb_journals_associations (journal);
+CREATE INDEX cjdb_journals_associations_sa_idx ON cjdb_journals_associations (site, association);
