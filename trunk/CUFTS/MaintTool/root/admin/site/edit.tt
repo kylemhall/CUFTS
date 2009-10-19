@@ -8,7 +8,7 @@
 <tr><td class="label0" align="right">key</td><td class="field0"><input type="text" name="key" size="50" maxlength="256" value="[% site.key | html %]">[% PROCESS form_results.tt frf='key' %]</td></tr>
 <tr><td class="label1" align="right">name</td><td class="field1"><input type="text" name="name" size="50" maxlength="256" value="[% site.name | html %]">[% PROCESS form_results.tt frf='name' %]</td></tr>
 <tr><td class="label0" align="right">email</td><td class="field0"><input type="text" name="email" size="50" maxlength="256" value="[% site.email | html %]"></td></tr>
-<tr><td class="label1" align="right">ERM notification email</td><td class="field1"><input type="text" name="erm_notificaion_email" size="50" maxlength="256" value="[% site.erm_notification_email | html %]"></td></tr>
+<tr><td class="label1" align="right">ERM notification email</td><td class="field1"><input type="text" name="erm_notification_email" size="50" maxlength="256" value="[% site.erm_notification_email | html %]"></td></tr>
 <tr><td class="label0" align="right">proxy prefix</td><td class="field0"><input type="text" name="proxy_prefix" size="50" maxlength="256" value="[% site.proxy_prefix | html %]"></td></tr>
 <tr><td class="label1" align="right">proxy prefix alternate</td><td class="field1"><input type="text" name="proxy_prefix_alternate" size=50 maxlength="256" value="[% site.proxy_prefix_alternate | html %]"></td></tr>
 <tr><td class="label0" align="right">active</td><td class="field0"><input type="checkbox" name="active" value="true" [% 'checked="checked"' IF site.active %]></td></tr>
