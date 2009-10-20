@@ -6,6 +6,7 @@ use base 'Catalyst::Controller';
 
 use CUFTS::Util::Simple;
 use JSON::XS qw(encode_json);
+use Unicode::String qw(utf8);
 
 =head1 NAME
 
@@ -302,10 +303,13 @@ sub edit_field_text : Private {
 
     if ( $c->req->params->{update_value} ) {
 
+
+        # Convert from UTF8 to latin-1, jQuery AJAX only ever seems to send UTF8
         # Add in validation here
 
+
         $c->model('CUFTS')->schema->txn_do( sub {
-            $c->stash->{erm}->$field( $c->req->params->{$field} );
+            $c->stash->{erm}->$field( utf8($c->req->params->{$field})->latin1 );
             $c->stash->{erm}->update();     
         } );
         
@@ -327,7 +331,7 @@ sub edit_field_textarea : Private {
         # Add in validation here
 
         $c->model('CUFTS')->schema->txn_do( sub {
-            $c->stash->{erm}->$field( $c->req->params->{$field} );
+            $c->stash->{erm}->$field( utf8($c->req->params->{$field})->latin1 );
             $c->stash->{erm}->update();     
         } );
         
