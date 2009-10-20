@@ -896,6 +896,29 @@ tr.highlight td {
     width: 20em;
 }
 
+.erm-statistics-report.erm-cost-per-use th {
+    border: 1px solid #666;
+}
+
+.erm-statistics-report.erm-cost-per-use td.left-edge {
+    border-left: 1px solid #666;
+}
+
+.erm-statistics-report.erm-cost-per-use td.right-edge {
+    border-right: 1px solid #666;
+}
+
+.erm-statistics-report.erm-cost-per-use td.label {
+    border-left: 1px solid #666;
+    border-right: 1px solid #666;
+}
+
+table.erm-cost-per-use tr.last td {
+    border-bottom: 1px solid #666;
+}
+
+
+
 
 /* ERM selected records export */
 
