@@ -6,6 +6,7 @@ use base 'Catalyst::Base';
 use JSON::XS qw( encode_json );
 use DateTime;
 use DateTime::Format::ISO8601;
+use Date::Calc;
 use Chart::OFC;
 
 use Data::Dumper;
@@ -68,10 +69,13 @@ sub auto : Private {
         counter_database_usage_from_jr => {
             id     => 'counter_database_usage_from_jr',
             fields => [qw( start_date end_date granularity format )],
-            uri    => $c->stash->{url_base}
-              . '/erm/statistics/counter_database_usage_from_jr',
-          }
-    
+            uri    => $c->stash->{url_base} . '/erm/statistics/counter_database_usage_from_jr',
+        },
+        counter_database_cost_per_use => {
+            id     => 'counter_database_cost_per_use',
+            fields => [qw( start_date end_date format )],
+            uri    => $c->stash->{url_base} . '/erm/statistics/counter_database_cost_per_use',
+        },
      };
 
     $c->stash->{resources}          = \@resources;
@@ -378,8 +382,115 @@ sub counter_database_usage_from_jr : Local {
         $c->stash->{template} = 'erm/statistics/counter_database_usage_from_jr/tab.tt';
     }
     elsif ( $format eq 'graph' ) {
-        $c->forward( 'clickthrough_ofc' );
+#        $c->forward( 'clickthrough_ofc' );
     }
+}
+
+
+# Work out cost per use for journals based on cost data and COUNTER statistics.
+# This assumes you'll be using it against sets of individual journal subscriptions
+
+sub counter_database_cost_per_use : Local {
+    my ( $self, $c ) = @_;   
+
+    $c->form({
+        optional => [ qw( run_report ) ],
+        required => [ qw( selected_resources start_date end_date format ) ],
+        constraints => {
+            start_date  => qr/^\d{4}-\d{1,2}-\d{1,2}/,
+            end_date    => qr/^\d{4}-\d{1,2}-\d{1,2}/,
+        },
+    });
+    
+    if ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
+        return $c->forward('default');
+    }
+
+    my $format      = $c->form->{valid}->{format};
+    my $start_date  = $c->{stash}->{start_date} = $c->form->{valid}->{start_date};
+    my $end_date    = $c->{stash}->{end_date}   = $c->form->{valid}->{end_date};
+
+    my $dates = _build_granulated_dates( $start_date, $end_date, 'year', 1 );
+
+    my @resource_ids = split(',', $c->form->{valid}->{selected_resources} );
+
+    my @erms = CUFTS::DB::ERMMain->search(
+        {
+            id => { '-in' => \@resource_ids },
+        }
+    );
+    
+    my %sources_used;
+    my %counts_by_resource;
+    my %costs;
+    foreach my $erm ( @{$c->stash->{resources}} ) {
+
+        # Calculate costs data
+        
+        my @adv_costs = map { {
+            start => DateTime::Format::ISO8601->parse_datetime($_->period_start),
+            end   => DateTime::Format::ISO8601->parse_datetime($_->period_end),
+            paid  => $_->paid,
+         } } $erm->costs;
+
+        # Cheat for now and just use generic cost field
+        
+        foreach my $date ( @$dates ) {
+            my $cost_total = 0;
+            my $period_end = DateTime->new( year => $date->{dt}->year, month => 12, day => 31 );
+            foreach my $cost ( @adv_costs ) {
+                if (    ( $date->{dt} >= $cost->{start} && $date->{dt} <= $cost->{end} ) 
+                     || ( $period_end >= $cost->{start} && $period_end <= $cost->{end} ) ) {
+                    
+                    # Calculate percentage applied to this period
+                    
+                    my $start = $cost->{start} < $date->{dt} ? $date->{dt} : $cost->{start};
+                    my $end = $cost->{end} < $period_end ? $cost->{end} : $period_end;
+                    my $days = $start->delta_days( $end )->in_units('days') + 1;
+                    my $days_in_year = Date::Calc::Days_in_Year( $date->{dt}->year, 12 );
+                    my $pct = $days / $days_in_year;
+                
+                    warn( "$start\n$end\n$days\n$days_in_year\n$pct\n");
+                    
+                    $cost_total += $cost->{paid} * $pct;
+                }
+            }
+            $costs{$erm->id}->{$date->{date}} = $cost_total ? $cost_total : $erm->cost;
+        }
+
+        # Get counts from JR reports
+
+        foreach my $source ( $erm->counter_sources ) {
+            next if $source->type ne 'j';
+            
+            push @{$sources_used{$erm->id}}, $source->name;
+            my $records = $source->database_usage_from_jr1( $start_date, $end_date );
+            foreach my $record ( @$records ) {
+                my $date = DateTime::Format::ISO8601->parse_datetime($record->{start_date})->truncate( to => 'year' )->ymd;
+                $counts_by_resource{$erm->id}->{$date} += $record->{count};
+            }
+        }
+
+    }
+
+    use Data::Dumper;
+    warn(Dumper(\%costs));
+
+    # TODO: Other report formats
+
+    my $template = 'html.tt'; # default
+    if ( $format eq 'tab' ) {
+        $c->response->content_type('text/plain');
+        $template = 'tab.tt';
+    }
+
+    $c->stash->{template}           = 'erm/statistics/counter_database_cost_per_use/' . $template;
+    $c->stash->{dates}              = $dates;
+    $c->stash->{costs}              = \%costs;
+    $c->stash->{start_date}         = $c->form->valid->{start_date};
+    $c->stash->{end_date}           = $c->form->valid->{end_date};
+    $c->stash->{counts_by_resource} = \%counts_by_resource;
+    $c->stash->{sources_used}       = \%sources_used;
 }
 
 
@@ -403,10 +514,10 @@ sub _build_granulated_dates {
     for (my $dt = $start_dt->clone(); $dt <= $end_dt; $dt->add($add_granularity => 1) ) {
         my $trunc_dt = $dt->clone()->truncate( to => $granularity );
         if ( $date_only ) {
-            push @list, { date => $trunc_dt->ymd, display => _truncate_date($trunc_dt, $granularity) };
+            push @list, { date => $trunc_dt->ymd, display => _truncate_date($trunc_dt, $granularity), dt => $trunc_dt };
         }
         else {
-            push @list, { date => ($trunc_dt->ymd . ' ' . $trunc_dt->hms), display => _truncate_date($trunc_dt, $granularity) };
+            push @list, { date => ($trunc_dt->ymd . ' ' . $trunc_dt->hms), display => _truncate_date($trunc_dt, $granularity), dt => $trunc_dt };
         }
     }
 
