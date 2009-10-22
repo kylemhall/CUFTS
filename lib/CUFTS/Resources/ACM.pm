@@ -83,25 +83,33 @@ sub clean_data {
     my ( $class, $record ) = @_;
     my ( $volume, $issue, $date );
     if ( not_empty_string( $record->{ft_start_date} ) ) {
-        if ( $record->{ft_start_date} =~ /Volume\s*(\d+)\s*Issue\s*(\d+)\s*\(\w+\)/i ) {
+        if ( $record->{ft_start_date} =~ /(Volume\s*\w+)?\s*(Issue\s*\w+)?\s*\(([\w+\s*]+)\)/xsm ) {
 	    ( $volume, $issue, $date ) = ( $1, $2, $3 );
-	}elsif ( $record->{ft_start_date} =~ /Volume\s*(\d+)\s*\(\w+\)/i ) {
-	    ( $volume, $date ) = ( $1, $2 );
+	    $volume =~ s/Volume\s*//;
+	    $issue =~ s/Issue\s*//;
 	}
 
 	$date =~ /(\w+)\s*(\d+)/;
 	my ($month, $year) = ($1, $2);
 	$month = get_month($month);
 	$record->{ft_start_date} = sprintf("%04i-%02i-01", $year, $month);
-	$record->{vol_ft_start} = $volume;
-	$record->{iss_ft_start} = $issue;
+        if (!$volume){
+            delete $record->{vol_ft_start};
+        }else{
+            $record->{vol_ft_start} = $volume;
+        }
+        if (!$issue){
+            delete $record->{iss_ft_start};
+        }else{
+            $record->{iss_ft_start} = $issue;
+        }
     }
 
     if ( not_empty_string( $record->{ft_end_date} ) ) {
-        if ( $record->{ft_end_date} =~ /Volume\s*(\d+)\s*Issue\s*(\d+)\s*\(\w+\)/i ) {
+        if ( $record->{ft_end_date} =~ /(Volume\s*\w+)?\s*(Issue\s*\w+)?\s*\(([\w+\s*]+)\)/xsm ) {
             ( $volume, $issue, $date ) = ( $1, $2, $3 );
-        }elsif ( $record->{ft_end_date} =~ /Volume\s*(\d+)\s*\(\w+\)/i ) {
-            ( $volume, $date ) = ( $1, $2 );
+	    $volume =~ s/Volume\s*//;
+            $issue =~ s/Issue\s*//;
         }
 
 	$date =~ /(\w+)\s*(\d+)/;
@@ -114,8 +122,16 @@ sub clean_data {
         }else{
             $month = get_month($month);
             $record->{ft_end_date} = sprintf("%04i-%02i-01", $year, $month);
-	    $record->{vol_ft_end} = $volume;
-            $record->{iss_ft_end} = $issue;
+	    if (!$volume){
+		delete $record->{vol_ft_end};
+	    }else{
+		$record->{vol_ft_end} = $volume;
+	    }
+	    if (!$issue){
+		delete $record->{iss_ft_end};
+	    }else{
+		$record->{iss_ft_end} = $issue;
+	    }
 	}
     }
 
