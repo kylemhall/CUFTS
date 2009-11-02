@@ -337,15 +337,8 @@ sub parse_row {
                 $payment_record{end_date}   = sprintf( "%04i-%02i-%02i", $end_year,   $end_month, $end_day );
             } 
             
-            # 1YR 010196 FRM 01-96
-            elsif ( $payment =~ m# 1YR \s* \d* \s* FRM \s* (\d{2})-(\d{2}) #xsmi ) {
-                my $month = $1;
-                my $year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
-                $payment_record{start_date} = sprintf( "%04i-%02i-01", $year,     $month );
-                $payment_record{end_date}   = sprintf( "%04i-%02i-01", $year + 1, $month );
-            }
-
             # 74(01/99)-75(12/99)
+            # NOTE: This throws away the end month/year and uses 1 year from the start date.
             elsif ( $payment =~ m# \( (\d{2}) / (\d{2}) \) .* - .*  \( (\d{2}) / (\d{2}) \) #xsmi ) {
                 my $start_month = $1;
                 my $start_year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
@@ -406,6 +399,27 @@ sub parse_row {
                 }
                 
             }
+            
+            #
+            # Fall back to grabbing a single date and assuming a one year purchase period
+            #
+            
+            # 1YR 010196 FRM 01-96
+            elsif ( $payment =~ m# 1YR \s* \d* \s* FRM \s* (\d{2})-(\d{2}) #xsmi ) {
+                my $month = $1;
+                my $year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
+                $payment_record{start_date} = sprintf( "%04i-%02i-01", $year,     $month );
+                $payment_record{end_date}   = sprintf( "%04i-%02i-01", $year + 1, $month );
+            }
+            
+            # 74(01/99)-   ... (truncated due to bad EBSCO data)
+            elsif ( $payment =~ m# \( (\d{2}) / (\d{2}) \) .* - .* #xsmi ) {
+                my $start_month = $1;
+                my $start_year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
+                $payment_record{start_date} = sprintf( "%04i-%02i-01", $start_year,     $start_month );
+                $payment_record{end_date}   = sprintf( "%04i-%02i-01", $start_year + 1, $start_month );
+            }
+            
             # 1998
             elsif ( $payment =~ / ((?:19|20)\d{2}) (?!\.) /xsm ) {  # Last ditch for a single year
                 $payment_record{start_date} = sprintf( "%04i-01-01", $1 );
