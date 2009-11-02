@@ -73,13 +73,13 @@ sub title_list_field_map {
 }
 
 sub title_list_extra_requires {
-    require Text::CSV;
+    require CUFTS::Util::CSVParse;
 }
 
 sub title_list_split_row {
     my ( $class, $row ) = @_;
 
-    my $csv = Text::CSV->new();
+    my $csv = CUFTS::Util::CSVParse->new();
     $csv->parse($row)
         or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
 
