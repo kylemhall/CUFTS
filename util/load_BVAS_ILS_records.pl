@@ -391,11 +391,16 @@ sub parse_row {
                     push @debug, "Found a 're:' reference to: " . $payment_record{references};
                 }
                 else {  # Default to previous record if it exists
-                    if ( scalar(@{ $record{payments} }) ) {
-                        $payment_record{start_date} = $record{payments}->[ $#{ $record{payments} } ]->{start_date};
-                        $payment_record{end_date}   = $record{payments}->[ $#{ $record{payments} } ]->{end_date};
-                        push @debug, "Found a 're:' reference but no match, defaulting to previous record";
-                    }
+                    
+                    # Don't do this anymore, too much of a chance of errors.
+
+                    push @debug, "Found a 're:' reference by no match";
+                    
+                    # if ( scalar(@{ $record{payments} }) ) {
+                    #     $payment_record{start_date} = $record{payments}->[ $#{ $record{payments} } ]->{start_date};
+                    #     $payment_record{end_date}   = $record{payments}->[ $#{ $record{payments} } ]->{end_date};
+                    #     push @debug, "Found a 're:' reference but no match, defaulting to previous record";
+                    # }
                 }
                 
             }
@@ -472,6 +477,7 @@ sub parse_row {
             else {
                 push @{ $record{payments} }, \%payment_record;
                 push @debug, "* Found usable cost data: " . $payment_record{start_date} . ' - ' . $payment_record{end_date} . ' - ' . $payment_record{amount_paid};
+                $references{ $record{invoice_num} } = $record;
             }
             
         }
