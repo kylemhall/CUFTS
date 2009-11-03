@@ -68,6 +68,13 @@ sub overridable_resource_details {
         return $details;
 }
 
+sub skip_record {
+    my ( $class, $record ) = @_;
+
+    return is_empty_string( $record->{title} )
+           || $record->{title} =~ /^\s*"?--/;
+}
+
 
 sub clean_data {
     my ( $class, $record ) = @_;
