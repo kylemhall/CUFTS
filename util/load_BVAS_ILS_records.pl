@@ -477,7 +477,7 @@ sub parse_row {
             else {
                 push @{ $record{payments} }, \%payment_record;
                 push @debug, "* Found usable cost data: " . $payment_record{start_date} . ' - ' . $payment_record{end_date} . ' - ' . $payment_record{amount_paid};
-                $references{ $record{invoice_num} } = $record;
+                $references{ $record{invoice_num} } = $payment_record;
             }
             
         }
