@@ -12,6 +12,7 @@ use CUFTS::CJDB::Util;
 use CUFTS::Util::Simple;
 
 my $DEBUG = 0;
+my $OVERWRITE_COSTS = 1;
 
 # load started at erm main id 7343
 #                 costs id 22
@@ -232,6 +233,12 @@ foreach my $record ( values %records ) {
         print "\n";
 
         my $cost = $schema->resultset('ERMCosts')->search( { erm_main => $erm->id, number => $payment->{voucher} } )->first();
+        
+        if ( defined($cost) && $OVERWRITE_COSTS ) {
+            $cost->delete;
+            undef $cost;
+        }
+        
         if ( !defined($cost) ) {
             $cost = $schema->resultset('ERMCosts')->create( {
                 erm_main         => $erm->id,
