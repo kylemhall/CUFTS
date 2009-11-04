@@ -28,6 +28,7 @@ my @resource_modules;
 BEGIN {
 
     @resource_modules = qw(
+        ACM
         ATLA
         BioLine
         BioMed
