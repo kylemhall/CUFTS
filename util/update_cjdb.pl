@@ -46,26 +46,40 @@ my $PROGRESS = 1;
 my $DEBUG_UPDATE_CJDB = 0;
 
 my %options;
-GetOptions( \%options, 'site_key=s', 'site_id=i', 'append' );
+GetOptions( \%options, 'site_key=s@', 'site_id=i@', 'append' );
 my @files = @ARGV;
 
 load();
 
+
 sub load {
-    my $site_iter;
-    if ( $options{site_id} ) {
-        $site_iter = CUFTS::DB::Sites->search( id => int($options{site_id}) );
+
+    my @site_ids = map { int($_) } @{$options{site_id}};
+
+    my @sites;
+    if ( scalar(@site_ids) ) {
+        @sites = CUFTS::DB::Sites->search( { id => { '-in' => \@site_ids } } );
     }
     elsif ( $options{site_key} ) {
-        $site_iter = CUFTS::DB::Sites->search( key => $options{site_key} );
+        @sites = CUFTS::DB::Sites->search( { key => { '-in' => $options{site_key} } } );
+        my %sites_by_key = map { $_->key => $_ } @sites;
+        @site_ids = map { defined($sites_by_key{$_}) ? $sites_by_key{$_}->id : undef } @{ $options{site_key} };
     }
     else {
-        $site_iter = CUFTS::DB::Sites->retrieve_all;
+        @sites = CUFTS::DB::Sites->retrieve_all;
+        @site_ids = map { $_->id } @sites;
     }
 
+    my %sites_by_id = map { $_->id => $_ } @sites;
+
 SITE:
-    while ( my $site = $site_iter->next ) {
-        my $site_id = $site->id;
+    foreach my $site_id ( @site_ids ) {
+        my $site = $sites_by_id{$site_id};
+
+        if ( !defined($site) ) {
+            print "Site specified on the command line was not found.\n";
+            next SITE;
+        }
 
         print "Checking " . $site->name . "\n";
 
