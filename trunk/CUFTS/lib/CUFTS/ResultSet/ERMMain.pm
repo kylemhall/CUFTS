@@ -168,7 +168,8 @@ sub _facet_search_keyword {
     $config->{joins}->{subjects_main} = 'subject';
 
     my $escaped = $data;
-    $escaped =~ s/([^\w])/'\x' . unpack('H*', $1) /gsemx;
+    # $escaped =~ s/([^\w])/'\x' . unpack('H*', $1) /gsemx;
+    $escaped = quotemeta($escaped);
     $escaped = '[[:<:]]' . $escaped . '[[:>:]]';   # Match only whole words
 
     $config->{search}->{'-nest'} = [
