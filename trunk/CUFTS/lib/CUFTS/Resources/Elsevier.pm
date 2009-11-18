@@ -60,8 +60,8 @@ sub resource_details_help {
 sub title_list_field_map {
     return {
         'Publication Name'  => 'title',
-        'Issn'              => 'issn',
-        'Home Page URL'     => 'journal_url',
+        'ISSN'              => 'issn',
+        'Short Cut URL'      => 'journal_url',
         'Publisher'         => 'publisher',
         'Coverage Begins Volume' => 'vol_ft_start',
         'Coverage Begins Issue'  => 'iss_ft_start',
@@ -146,6 +146,10 @@ sub clean_data {
             $month = get_month($month, 'end');
             $record->{ft_end_date} = sprintf("%04i-%02i", $year, $month);
         }
+    }
+
+    if ( $record->{ft_end_date} =~ /ongoing/i ) {
+        delete $record->{ft_end_date};
     }
 
     $record->{title} = HTML::Entities::decode_entities( $record->{title} );
