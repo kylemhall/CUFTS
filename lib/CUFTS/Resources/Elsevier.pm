@@ -105,6 +105,18 @@ sub clean_data {
             $year += $year > 19 ? 1900 : 2000;
             $month = get_month($month, 'start');
             $record->{ft_start_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
+        }elsif ( $record->{ft_start_date} =~ /(\d+)-([a-zA-Z]+)/ ) {
+            my ( $year, $month ) = ( $1, $2 );
+            $year += $year > 19 ? 1900 : 2000;
+            $month = get_month($month, 'start');
+            $record->{ft_start_date} = sprintf("%04i-%02i-01", $year, $month);
+        }elsif ( $record->{ft_start_date} =~ /([a-zA-Z]+)\s*-?\s*(\d+)$/ ) {
+            my ( $month, $year ) = ( $1, $2 );
+	    if ($year < 100){
+	        $year += $year > 19 ? 1900 : 2000;
+	    }
+            $month = get_month($month, 'start');
+            $record->{ft_start_date} = sprintf("%04i-%02i-01", $year, $month);
         }
     }
 
@@ -121,6 +133,18 @@ sub clean_data {
                 delete $record->{vol_ft_end};
                 delete $record->{iss_ft_end};
             }
+        }elsif ( $record->{ft_end_date} =~ /(\d+)-([a-zA-Z]+)/ ) {
+            my ( $year, $month ) = ( $1, $2 );
+            $year += $year > 19 ? 1900 : 2000;
+            $month = get_month($month, 'end');
+            $record->{ft_end_date} = sprintf("%04i-%02i", $year, $month);
+        }elsif ( $record->{ft_end_date} =~ /([a-zA-Z]+)\s*-?\s*(\d+)$/ ) {
+            my ( $month, $year ) = ( $1, $2 );
+            if ($year < 100){
+                $year += $year > 19 ? 1900 : 2000;
+            }
+            $month = get_month($month, 'end');
+            $record->{ft_end_date} = sprintf("%04i-%02i", $year, $month);
         }
     }
 
@@ -141,6 +165,11 @@ sub clean_data {
         elsif ( $month =~ /^Oct/i ) { return 10 }
         elsif ( $month =~ /^Nov/i ) { return 11 }
         elsif ( $month =~ /^Dec/i ) { return 12 }
+	elsif ( $month =~ /^Spring/i ) { return $period eq 'start' ? 1 : 6 }
+        elsif ( $month =~ /^Summer/i ) { return $period eq 'start' ? 3 : 9 }
+        elsif ( $month =~ /^Fall/i ) { return $period eq 'start' ? 6 : 12 }
+        elsif ( $month =~ /^Autum/i ) { return $period eq 'start' ? 6 : 12 }
+        elsif ( $month =~ /^Winter/i ) { return $period eq 'start' ? 9 : 12 }
         elsif ( $month =~ /^Spr/i ) { return $period eq 'start' ? 1 : 6 }
         elsif ( $month =~ /^Sum/i ) { return $period eq 'start' ? 3 : 9 }
         elsif ( $month =~ /^Fal/i ) { return $period eq 'start' ? 6 : 12 }
