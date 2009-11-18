@@ -117,11 +117,18 @@ sub clean_data {
 	    }
             $month = get_month($month, 'start');
             $record->{ft_start_date} = sprintf("%04i-%02i-01", $year, $month);
+        }elsif ( $record->{ft_start_date} =~ /(\d{4})\s*-?\s*\d{4}$/ ) {
+            my $year = $1;
+            $record->{ft_start_date} = sprintf("%04i-01-01", $year);
         }
     }
 
     if ( not_empty_string( $record->{ft_end_date} ) ) {
-        if ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d{2})/ ) {
+	if ( $record->{ft_end_date} =~ /Ongoing/i ) {
+		delete $record->{ft_end_date};
+                delete $record->{vol_ft_end};
+                delete $record->{iss_ft_end};
+	}elsif ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d{2})/ ) {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
             $year += $year > 19 ? 1900 : 2000;
             $month = get_month($month, 'end');
@@ -145,6 +152,9 @@ sub clean_data {
             }
             $month = get_month($month, 'end');
             $record->{ft_end_date} = sprintf("%04i-%02i", $year, $month);
+        }elsif ( $record->{ft_end_date} =~ /\d{4}\s*-?\s*(\d{4})$/ ) {
+            my $year = $1;
+            $record->{ft_end_date} = sprintf("%04i-12-31", $year);
         }
     }
 
