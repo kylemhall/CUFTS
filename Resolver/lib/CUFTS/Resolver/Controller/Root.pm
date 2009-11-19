@@ -21,7 +21,7 @@ sub base : Chained('/') PathPart('') CaptureArgs(0) {
     $c->stash->{js_dir}    = '/static/js/';
 }
 
-sub site : Chained('base') PathPart('') CaptureArgs(1) {
+sub site : Chained('base') PathPart('site') CaptureArgs(1) {
     my ($self, $c, $site_key) = @_;
     
     my $site = CUFTS::DB::Sites->search( { key => $site_key } )->first;
