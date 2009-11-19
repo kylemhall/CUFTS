@@ -9,7 +9,7 @@ use CUFTS::ResourcesLoader;
 use CUFTS::Resolve;
 use CUFTS::Request;
 
-sub base : Chained('/site') PathPart('browse') CaptureArgs(0) {
+sub base : Chained('/site') PathPart('resolve') CaptureArgs(0) {
     my ( $self, $c ) = @_;
 
     # FUTURE: Consider adding load of site specific resolver?
