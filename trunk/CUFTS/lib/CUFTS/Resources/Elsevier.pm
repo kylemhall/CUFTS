@@ -105,33 +105,41 @@ sub clean_data {
             $year += $year > 19 ? 1900 : 2000;
             $month = get_month($month, 'start');
             $record->{ft_start_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
-        }elsif ( $record->{ft_start_date} =~ /(\d+)\/(\d+)\/(\d{4})/ ) {
+        }
+        elsif ( $record->{ft_start_date} =~ /(\d+)\/(\d+)\/(\d{4})/ ) {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
             $record->{ft_start_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
-        }elsif ( $record->{ft_start_date} =~ /(\d+)-([a-zA-Z]+)/ ) {
+        }
+        elsif ( $record->{ft_start_date} =~ /(\d+)-([a-zA-Z]+)/ ) {
             my ( $year, $month ) = ( $1, $2 );
             $year += $year > 19 ? 1900 : 2000;
             $month = get_month($month, 'start');
             $record->{ft_start_date} = sprintf("%04i-%02i-01", $year, $month);
-        }elsif ( $record->{ft_start_date} =~ /([a-zA-Z]+)\s*-?\s*(\d+)$/ ) {
+        }
+        elsif ( $record->{ft_start_date} =~ /([a-zA-Z]+)\s*-?\s*(\d+)$/ ) {
             my ( $month, $year ) = ( $1, $2 );
             if ($year < 100){
                 $year += $year > 19 ? 1900 : 2000;
             }
             $month = get_month($month, 'start');
             $record->{ft_start_date} = sprintf("%04i-%02i-01", $year, $month);
-        }elsif ( $record->{ft_start_date} =~ /(\d{4})\s*-?\s*\d{4}$/ ) {
+        }
+        elsif ( $record->{ft_start_date} =~ /(\d{4})\s*-?\s*\d{4}$/ ) {
             my $year = $1;
             $record->{ft_start_date} = sprintf("%04i-01-01", $year);
+        }
+        elsif ( $record->{ft_start_date} !~ /^\d{4}-\d{2}-\d{2}$/ ) {
+            delete $record->{ft_start_date};
         }
     }
 
     if ( not_empty_string( $record->{ft_end_date} ) ) {
-        if ( $record->{ft_end_date} =~ /Ongoing/i ) {
+        if ( $record->{ft_end_date} =~ /ongoing/i ) {
             delete $record->{ft_end_date};
             delete $record->{vol_ft_end};
             delete $record->{iss_ft_end};
-        }elsif ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d{2})/ ) {
+        }
+        elsif ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d{2})/ ) {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
             $year += $year > 19 ? 1900 : 2000;
             $month = get_month($month, 'end');
@@ -143,7 +151,8 @@ sub clean_data {
                 delete $record->{vol_ft_end};
                 delete $record->{iss_ft_end};
             }
-        }elsif ( $record->{ft_end_date} =~ /(\d+)\/(\d+)\/(\d{4})/ ) {
+        }
+        elsif ( $record->{ft_end_date} =~ /(\d+)\/(\d+)\/(\d{4})/ ) {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
             if ( Delta_Days( $year, $month, $day, Today() ) > 240 ) {
                 $record->{ft_end_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
@@ -153,26 +162,28 @@ sub clean_data {
                 delete $record->{vol_ft_end};
                 delete $record->{iss_ft_end};
             }
-        }elsif ( $record->{ft_end_date} =~ /(\d+)-([a-zA-Z]+)/ ) {
+        }
+        elsif ( $record->{ft_end_date} =~ /(\d+)-([a-zA-Z]+)/ ) {
             my ( $year, $month ) = ( $1, $2 );
             $year += $year > 19 ? 1900 : 2000;
             $month = get_month($month, 'end');
             $record->{ft_end_date} = sprintf("%04i-%02i", $year, $month);
-        }elsif ( $record->{ft_end_date} =~ /([a-zA-Z]+)\s*-?\s*(\d+)$/ ) {
+        }
+        elsif ( $record->{ft_end_date} =~ /([a-zA-Z]+)\s*-?\s*(\d+)$/ ) {
             my ( $month, $year ) = ( $1, $2 );
             if ($year < 100){
                 $year += $year > 19 ? 1900 : 2000;
             }
             $month = get_month($month, 'end');
             $record->{ft_end_date} = sprintf("%04i-%02i", $year, $month);
-        }elsif ( $record->{ft_end_date} =~ /\d{4}\s*-?\s*(\d{4})$/ ) {
+        }
+        elsif ( $record->{ft_end_date} =~ /\d{4}\s*-?\s*(\d{4})$/ ) {
             my $year = $1;
             $record->{ft_end_date} = sprintf("%04i-12-31", $year);
         }
-    }
-
-    if ( $record->{ft_end_date} =~ /ongoing/i ) {
-        delete $record->{ft_end_date};
+        elsif ( $record->{ft_end_date} !~ /^\d{4}-\d{2}-\d{2}$/ ) {
+            delete $record->{ft_end_date};
+        }
     }
 
     $record->{title} = HTML::Entities::decode_entities( $record->{title} );
@@ -192,7 +203,7 @@ sub clean_data {
         elsif ( $month =~ /^Oct/i ) { return 10 }
         elsif ( $month =~ /^Nov/i ) { return 11 }
         elsif ( $month =~ /^Dec/i ) { return 12 }
-    elsif ( $month =~ /^Spring/i ) { return $period eq 'start' ? 1 : 6 }
+        elsif ( $month =~ /^Spring/i ) { return $period eq 'start' ? 1 : 6 }
         elsif ( $month =~ /^Summer/i ) { return $period eq 'start' ? 3 : 9 }
         elsif ( $month =~ /^Fall/i ) { return $period eq 'start' ? 6 : 12 }
         elsif ( $month =~ /^Autum/i ) { return $period eq 'start' ? 6 : 12 }
