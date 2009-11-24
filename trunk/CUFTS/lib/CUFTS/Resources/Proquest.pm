@@ -65,12 +65,12 @@ sub title_list_get_field_headings {
         elsif ( $heading =~ /^ISSN/i )                 { $heading = 'issn'                }
         elsif ( $heading =~ /^Full\s+Text\s+First/i )  { $heading = 'ft_start_date'       }
         elsif ( $heading =~ /^Full\s+Text\s+Last/i )   { $heading = 'ft_end_date'         }
-        elsif ( $heading =~ /^Page\s+Image\s+First/i ) { $heading = '___image_start_date' }
-        elsif ( $heading =~ /^Page\s+Image\s+Last/i )  { $heading = '___image_end_date'   }
+        elsif ( $heading =~ /^Page\s*Image\s+First/i ) { $heading = '___image_start_date' }
+        elsif ( $heading =~ /^Page\s*Image\s+Last/i )  { $heading = '___image_end_date'   }
         elsif ( $heading =~ /^Citation\s+First/i )     { $heading = 'cit_start_date'      }
         elsif ( $heading =~ /^Citation\s+Last/i )      { $heading = 'cit_end_date'        }
         elsif ( $heading =~ /^Embargo\s+Days/i )       { $heading = 'embargo_days'        }
-        elsif ( $heading =~ /PM\s*ID/ )                { $heading = 'db_identifier'       }
+        elsif ( $heading =~ /PM-ID/i )                { $heading = 'db_identifier'       }
         else { $heading = "___$heading" }
 
         push @real_headings, $heading;
