@@ -5,8 +5,9 @@
     [% IF local_title %]<a href="[% url("$url_base/local/titles/delete_local/l$local_resource.id?local_id=$local_title.id") %]" onClick="return confirmDelete()">delete record</a>[% END %]
 </div>
 
-<form method="post">
-<input type="hidden" name="page" value="[% paging_page %]" />
+<form method="post" action="[% url("$url_base/local/titles/edit_local/l$local_resource.id") %]">
+<input type="hidden" name="paging_page" value="[% paging_page %]" />
+<input type="hidden" name="local_id" value="[% local_title.id %]" />
 <table class="grid" style="margin-top: 1em;">
 <tr>
  <td class="heading">field</td>
@@ -25,6 +26,6 @@
 </form>
 <form method="post" action="[% url("$url_base/local/titles/view/l$local_resource.id") %]">
 <input type="submit" name="cancel" value="cancel" />
-<input type="hidden" name="page" value="[% paging_page %]" />
+<input type="hidden" name="paging_page" value="[% paging_page %]" />
 </form>
 </div>

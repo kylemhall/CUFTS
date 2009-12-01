@@ -57,6 +57,39 @@ sub dashed_issn :Export( :DEFAULT ) {
     return $string;
 }
 
+sub set_default_dates :Export( :DEFAULT ) {
+    my ( $date, $period ) = @_;
+
+    return undef if !defined($date);
+
+    my @end = ( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
+
+    # Set incomplete start date fields to -01 or -01-01
+
+    if ( $period eq 'start' ) {
+        if ( $date =~ /^\d{4}-\d{2}$/ ) {
+            $date .= '-01';
+        }
+        elsif ( $date =~ /^\d{4}$/ ) {
+            $date .= '-01-01';
+        }
+    }
+
+    if ( $period eq 'end' ) {
+
+        if ( $date =~ /^\d{4}-(\d{2})$/ ) {
+            $date .= '-' . $end[ $1 - 1 ];
+        }
+        elsif ( $date =~ /^(\d{4})$/ ) {
+            $date .= '-12-31';
+        }
+    }
+
+    return $date;
+}
+
+
+
 ##
 ## Converts latin-1 characters with diacritics to their base character.  When we switch to UTF-8, this should
 ## be replaced with something that uses character decomposition and normalization.
