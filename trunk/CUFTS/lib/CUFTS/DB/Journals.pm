@@ -27,6 +27,7 @@ use strict;
 use base 'CUFTS::DB::DBI';
 use SQL::Abstract;
 
+use CUFTS::Util::Simple;
 
 __PACKAGE__->table('journals');
 __PACKAGE__->columns(Primary => 'id');
@@ -97,6 +98,14 @@ sub normalize_column_values {
         $values->{'e_issn'} =~ s/(\d{4})\-?(\d{3}[\dxX])/$1$2/ or
             $self->_croak('e_issn is not valid: ' . $values->{'e_issn'});
     }
+
+    # Set default dates if they're just years or years/months
+    
+    $values->{ft_start_date}  = set_default_dates($values->{ft_start_date}, 'start')  if exists($values->{ft_start_date});
+    $values->{cit_start_date} = set_default_dates($values->{cit_start_date}, 'start') if exists($values->{cit_start_date});
+
+    $values->{ft_end_date}  = set_default_dates($values->{ft_end_date}, 'end')  if exists($values->{ft_end_date});
+    $values->{cit_end_date} = set_default_dates($values->{cit_end_date}, 'end') if exists($values->{cit_end_date});
 
     return 1;   # ???
 }

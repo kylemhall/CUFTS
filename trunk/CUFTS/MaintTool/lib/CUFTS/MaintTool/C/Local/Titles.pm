@@ -20,14 +20,14 @@ my $form_validate_hidden_fields = {
 
 my $form_validate_single = {
     required => ['global_id'],
-    optional => ['paging_page', 'apply'],
+    optional => ['paging_page', 'apply' ],
     filters => ['trim'],
     missing_optional_valid => 1,
 };
 
 my $form_validate_edit_local = {
     required => ['local_id'],
-    optional => ['paging_page', 'apply'],
+    optional => ['paging_page', 'apply' ],
     filters => ['trim'],
     missing_optional_valid => 1,
 };
