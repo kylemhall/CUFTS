@@ -1,4 +1,4 @@
-## CUFTS::DB::Sites
+## CUFTS::Schema::Sites
 ##
 ## Copyright Todd Holbrook, Simon Fraser University (2003)
 ##
@@ -31,7 +31,6 @@ __PACKAGE__->add_columns(
       'is_auto_increment' => 1,
       'default_value' => undef,
       'is_nullable' => 0,
-      'size' => '11'
     },
     'key' => {
       'data_type' => 'varchar',
