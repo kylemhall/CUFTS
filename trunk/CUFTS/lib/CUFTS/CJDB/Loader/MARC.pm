@@ -467,6 +467,10 @@ sub preserve_print_MARC {
     return 0;
 }
 
+sub export_print_holdings {
+    return 0;
+}
+
 sub MARC_subject_subfield_order {
     return [ qw( a b c d e z y x v 2 3 4 6 8 ) ];
 }

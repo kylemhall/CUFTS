@@ -98,8 +98,8 @@ SITE:
             print " * Loading LCC subjects.\n";
 
             eval {
-                `util/load_lcc_subjects.pl --site_id=${site_id}  ${CUFTS::Config::CJDB_SITE_DATA_DIR}/${site_id}/lccn_subjects`;
-                `util/create_subject_browse.pl --site_id=${site_id}`;
+                `perl util/load_lcc_subjects.pl --site_id=${site_id}  ${CUFTS::Config::CJDB_SITE_DATA_DIR}/${site_id}/lccn_subjects`;
+                `perl util/create_subject_browse.pl --site_id=${site_id}`;
             };
         }
 
@@ -107,7 +107,7 @@ SITE:
 
         # eval this, since it shouldn't be fatal if this fails.
 
-        eval { `util/build_journals_auth.pl --site_id=${site_id} --local`; };
+        eval { `perl util/build_journals_auth.pl --site_id=${site_id} --local`; };
 
         print " * Done with journal auth records.\n";
 
@@ -911,20 +911,31 @@ CJDB_RECORD:
         my $has_holdings = 0;
         if ( not_empty_string($site->marc_dump_holdings_field) && not_empty_string($site->marc_dump_holdings_subfield) ) {
             foreach my $link ( $cjdb_record->links ) {
-                next if is_empty_string( $link->fulltext_coverage )
-                     && is_empty_string( $link->embargo )
-                     && is_empty_string( $link->current );
 
-                my $holdings = "Available full text from " . ( $resources_display{$link->resource}->{name} || 'Unknown resource' ) . ':';
+                my $holdings;
 
-                if ( not_empty_string( $link->fulltext_coverage ) ) {
-                    $holdings .= ' ' . $link->fulltext_coverage;
+                if ( not_empty_string($link->print_coverage) && $loader->export_print_holdings ) {
+                    $holdings = "Available in print: " . $link->print_coverage;
                 }
-                if ( not_empty_string( $link->embargo ) ) {
-                    $holdings .= ' '. $link->embargo . ' embargo';
+                elsif ( not_empty_string( $link->fulltext_coverage )
+                     || not_empty_string( $link->embargo )
+                     || not_empty_string( $link->current ) ) {
+
+                    $holdings = "Available full text from " . ( $resources_display{$link->resource}->{name} || 'Unknown resource' ) . ':';
+
+                    if ( not_empty_string( $link->fulltext_coverage ) ) {
+                        $holdings .= ' ' . $link->fulltext_coverage;
+                    }
+                    if ( not_empty_string( $link->embargo ) ) {
+                        $holdings .= ' '. $link->embargo . ' embargo';
+                    }
+                    if ( not_empty_string( $link->current ) ) {
+                        $holdings .= ' most recent '. $link->current;
+                    }
                 }
-                if ( not_empty_string( $link->current ) ) {
-                    $holdings .= ' most recent '. $link->current;
+                else {
+#                    if ( $DEBUG_UPDATE_CJDB ) { print "Skipping MARC link due to no fulltext holdings or print only with export_print turned off.\n"; }
+                    next;
                 }
                 
                 my $holdings_field = MARC::Field->new(
@@ -939,6 +950,12 @@ CJDB_RECORD:
 
             }
         }
+        
+        if ( !$has_holdings ) {
+            if ( $DEBUG_UPDATE_CJDB ) { print "Skipping MARC dump of record due to missing holdings.\n"; }
+            next;
+        }
+        
         next CJDB_RECORD if !$has_holdings;
 
 
