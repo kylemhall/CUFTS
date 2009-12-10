@@ -146,6 +146,10 @@ sub clean_data {
 
     }
 
+    if ( $record->{issn} =~ /none/xsmi ) {
+        delete $record->{issn};
+    }
+
     $record->{title}     = HTML::Entities::decode_entities( $record->{title} );
     $record->{publisher} = HTML::Entities::decode_entities( $record->{publisher} );
 
