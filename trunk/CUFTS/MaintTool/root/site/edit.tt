@@ -5,9 +5,9 @@
 <table style="width: 100%;" class="outlined">
 <tr><td class="heading-bar" colspan="2">general settings</td></tr>
 <tr><td class="label0">key</td><td class="field0">[% current_site.key | html %]</td></tr>
-<tr><td class="label1">name</td><td class="field1"><input type="text" name="name" size="50" maxlength="256" value="[% current_site.name | html %]" /></td></tr>
-<tr><td class="label0">email</td><td class="field0"><input type="text" name="email" size="50" maxlength="256" value="[% current_site.email | html %]" /></td></tr>
-<tr><td class="label1">ERM notification email</td><td class="field1"><input type="text" name="erm_notification_email" size="50" maxlength="256" value="[% current_site.erm_notification_email | html %]" /></td></tr>
+<tr><td class="label1">name</td><td class="field1"><input type="text" name="name" size="50" maxlength="256" value="[% current_site.name | html %]" />[% PROCESS form_results.tt frf='name' %]</td></tr>
+<tr><td class="label0">email</td><td class="field0"><input type="text" name="email" size="50" maxlength="256" value="[% current_site.email | html %]" />[% PROCESS form_results.tt frf='email' %]</td></tr>
+<tr><td class="label1">ERM notification email</td><td class="field1"><input type="text" name="erm_notification_email" size="50" maxlength="256" value="[% current_site.erm_notification_email | html %]" />[% PROCESS form_results.tt frf='erm_notification_email' %]</td></tr>
 <tr><td class="label0">proxy prefix</td><td class="field0"><input type="text" name="proxy_prefix" size="50" maxlength="256" value="[% current_site.proxy_prefix | html %]" /></td></tr>
 <tr><td class="label1">proxy prefix alternate</td><td class="field1"><input type="text" name="proxy_prefix_alternate" size="50" maxlength="256" value="[% current_site.proxy_prefix_alternate | html %]" /></td></tr>
 <tr><td class="label0">WAM proxy server</td><td class="field0"><input type="text" name="proxy_WAM" size="50" maxlength="256" value="[% current_site.proxy_WAM | html %]" /></td></tr>
