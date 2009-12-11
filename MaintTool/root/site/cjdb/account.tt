@@ -26,6 +26,7 @@
   <div class="data">
    <label for="cjdb-account-edit-input-key">key</label>
    <input id="cjdb-account-edit-input-key" type="text" value="[% account.key %]" name="key" />
+   [% PROCESS form_results.tt frf='key' %]
   </div>
   <div class="help">
    Login key, used in the "login" field.
@@ -36,6 +37,7 @@
   <div class="data">
    <label for="cjdb-account-edit-input-name">name</label>
    <input id="cjdb-account-edit-input-name" type="text" value="[% account.name %]" name="name" />
+   [% PROCESS form_results.tt frf='name' %]
   </div>
   <div class="help">
    User name.
@@ -46,6 +48,7 @@
   <div class="data">
    <label for="cjdb-account-edit-input-email">email</label>
    <input id="cjdb-account-edit-input-email" type="text" value="[% account.email %]" name="email" />
+   [% PROCESS form_results.tt frf='email' %]
   </div>
   <div class="help">
    Email to contact user if necessary.
