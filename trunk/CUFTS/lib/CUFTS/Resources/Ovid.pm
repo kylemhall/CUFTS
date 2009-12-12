@@ -26,6 +26,7 @@ use base qw(CUFTS::Resources::OvidLinking);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use Date::Calc qw(Delta_Days Today);
 
 use strict;
 
@@ -36,6 +37,12 @@ sub title_list_field_map {
         'eISSN'          => 'issn',
         'Publisher'      => 'publisher',
         'Jumpstart'      => 'journal_url',
+        'Beginning Volume' => 'vol_ft_start',
+        'Beginning Issue'  => 'iss_ft_start',
+        'Beginning Year Coverage'   => 'ft_start_date',
+        'Latest Volume'   => 'vol_ft_end',
+        'Latest Issue'    => 'iss_ft_end',
+        'Ending Year Coverage'     => 'ft_end_date',
     };
 }
 
@@ -63,12 +70,26 @@ sub clean_data {
 
     # Parse coverage
 
-    if ( $record->{'___Start Coverage'} =~ /(\w+) \s* (\d{4})/xsm ) {
-        $record->{ft_start_date} = format_date($2, $1, 'start');
+    if ( $record->{ft_start_date} =~ /(\w+)\s*(\d{1,2}),\s*(\d{4})/xsm ) {
+        $record->{ft_start_date} = format_date($3, $1, 'start', $2);
+    }elsif ( $record->{ft_start_date} =~ /([\w+\s*]+)\s*(\d{4})/xsm ) {
+        $record->{ft_start_date} = format_date($2, trim_string($1), 'start');
     }
 
-    if ( $record->{'___End Coverage'} =~ /(\w+) \s* (\d{4})/xsm ) {
-        $record->{ft_start_date} = format_date($2, $1, 'end');
+    if ( $record->{ft_end_date} =~ /(\w+)\s*(\d{1,2}),\s*(\d{4})/xsm ) {
+        $record->{ft_end_date} = format_date($3, $1, 'end', $2);
+    }elsif ( $record->{ft_end_date} =~ /([\w+\s*]+)\s*(\d{4})/xsm ) {
+        $record->{ft_end_date} = format_date($2, trim_string($1), 'end');
+    }
+
+    # Remove end date, volume and issue if they looks recent
+
+    if( $record->{ft_end_date} =~ /(\d{4})-(\d{2})[-(\d{2})]?/xsm ){
+        if ( Delta_Days( $1, $2, 01, Today() ) < 240 ) {
+            delete $record->{ft_end_date};
+            delete $record->{vol_ft_end};
+            delete $record->{iss_ft_end};
+        }
     }
 
     return $class->SUPER::clean_data($record);
@@ -76,20 +97,18 @@ sub clean_data {
 
 
 sub format_date {
-    my ( $year, $month, $day, $period ) = @_;
+    my ( $year, $month, $period, $day ) = @_;
 
     my $date;
 
     $year = format_year( $year, $period );
     defined($year) or return undef;
-    $date = $year;
 
     $month = format_month( $month, $period );
-    if ( defined($month) ) {
-        $date .= sprintf( "-%02i", $month );
-    }
+    defined($month) or return undef;
 
-    return $date;
+    if (defined($day)){ return sprintf( "%04i-%02i-%02i", $year, $month, $day ); }
+    else { return sprintf( "%04i-%02i", $year, $month ); }
 }
 
 sub format_year {
@@ -115,8 +134,8 @@ sub format_month {
     defined($month) && $month ne ''
         or return undef;
 
-    $month =~ /^\d+$/
-        and return $month;
+    if ( $month =~ /^\d+$/ && $month <= 12 && $month >=1 ) { return $month; }
+    if ( $month =~ /^\d+$/ && ($month < 1 || $month > 12) ) { return undef; }
 
     if    ( $month =~ /^Jan/i ) { return 1 }
     elsif ( $month =~ /^Feb/i ) { return 2 }
@@ -135,6 +154,11 @@ sub format_month {
     elsif ( $month =~ /^Fal/i ) { return $period eq 'start' ? 6 : 12 }
     elsif ( $month =~ /^Aut/i ) { return $period eq 'start' ? 6 : 12 }
     elsif ( $month =~ /^Win/i ) { return $period eq 'start' ? 9 : 12 }
+    elsif ( $month =~ /^First Quarter/i ) { return $period eq 'start' ? 1 : 3 }
+    elsif ( $month =~ /^Second Quarter/i ) { return $period eq 'start' ? 3 : 6 }
+    elsif ( $month =~ /^Third Quarter/i ) { return $period eq 'start' ? 6 : 9 }
+    elsif ( $month =~ /^Fourth Quarter/i ) { return $period eq 'start' ? 9 : 12 }
+    elsif ( $month =~ /^Annual/i ) { return $period eq 'start' ? 1 : 12 }
     else {
         CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
     }
