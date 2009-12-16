@@ -19,6 +19,7 @@ sub base : Chained('/') PathPart('') CaptureArgs(0) {
     $c->stash->{image_dir} = '/static/images/';
     $c->stash->{css_dir}   = '/static/css/';
     $c->stash->{js_dir}    = '/static/js/';
+    $c->stash->{extra_js}  = [];
 }
 
 sub site : Chained('base') PathPart('site') CaptureArgs(1) {
@@ -30,7 +31,6 @@ sub site : Chained('base') PathPart('site') CaptureArgs(1) {
     }
     $c->site( $site );
     
-    $c->stash->{extra_js} = [];
     
     return 1;
 }
