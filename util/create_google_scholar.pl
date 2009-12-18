@@ -153,6 +153,7 @@ sub load_site {
 
     foreach my $ja_id ( keys %jas ) {
         my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($ja_id);
+        next if !defined($journal_auth);
         $output .=  "<item type=\"electronic\">\n";
         my $title = latin1($journal_auth->title)->utf8;
 
