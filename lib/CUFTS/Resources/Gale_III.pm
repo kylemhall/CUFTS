@@ -203,7 +203,8 @@ sub clean_data {
         $record->{ft_end_date} = substr( $ft_end_date, 0, 4 ) . '-' . substr( $ft_end_date, 4, 2 );
     }
 
-    $record->{title} =~ s/\s*\(.+?\)\s*$//g;
+    # NOTE: do not enable this.  Gale_III does exact title searching and Gale's interface chokes if you don't include the end parts like "(US)"
+#    $record->{title} =~ s/\s*\(.+?\)\s*$//g;
 
     return $class->SUPER::clean_data($record);
 
