@@ -91,8 +91,6 @@ $( function() {
 
 <div id="erm-edit-key">[% erm.key | html %] <a style="margin-left: 15px;" href="[% url("$url_base/erm/main/delete/?erm_main_id=$erm.id") %]">delete</a></div>
 
-<form method="post" name="main-form" id="main-form">
-
 <div id="pages-container" class="tabs-nav" style="width: 100%;">
 
 <ul>
@@ -102,9 +100,11 @@ $( function() {
  <li><a href="#page-admin"><span>Admin</span></a></li>
  <li><a href="#page-subjects"><span>Subjects</span></a></li>
  <li><a href="#page-links"><span>Links</span></a></li>
+ <li><a href="#page-files"><span>Files</span></a></li>
  <li><a href="#page-marc"><span>MARC</span></a></li>
 </ul>
 
+<form method="post" name="main-form" id="main-form">
 
 <div id="page-general">
 
@@ -1768,7 +1768,51 @@ $( function() {
     
 </div>
 
+</form>
 
-</div> <!-- tab-container -->
+<div id="page-files">
+
+
+<table class="wide-outlined">
+ <tr><td class="heading-bar">&nbsp;</td><td class="heading-bar">description</td><td class="heading-bar">created</td><td class="heading-bar">extension</td></tr>
+ [% FOREACH main_file IN main_files %]
+ [%- SET filename = main_file.UUID _ '.' _ main_file.ext -%]
+ [%- SET file_id = main_file.id -%]
+ [%- SET class = 'field' _ loop.count % 2 -%]
+ <tr>
+  <td class="[% class %]"><a href="[% url("$url_base/static/erm_files/m/$filename") %]">view</a> | <a href="[% url("$url_base/erm/main/delete_file/$erm_id/$file_id") %]" onClick="return confirmDelete()">delete</td>
+  <td class="[% class %]">[% main_file.description %]</td>
+  <td class="[% class %]">[% main_file.created.substr(0,10) %]</td>
+  <td class="[% class %]">[% main_file.ext %]</td>
+ </tr>
+ [% END %]
+</table>
+
+<form method="post" enctype="multipart/form-data" name="main-form" id="main-form" action="[% url("$url_base/erm/main/edit/$erm_id") %]">
+<fieldset style="margin-top: 10px">
+<legend>Attach New File</legend>
+<div style="padding: 1em 0px;">
+ <div class="field">
+  <div class="data">
+   <label for="erm-main-file-description">Description</label>
+   <input id="erm-main-file-description" type="textfield" name="file_description" value="" />
+  </div>
+ </div>
+ <div class="field">
+  <div class="data">
+   <label for="erm-main-file-description">File</label>
+   <input type="file" name="file" value="" />
+  </div>
+ </div>
+</div>
+</fieldset>
+
+<div style="padding: 1em 0px;">
+ <input type="submit" name="upload" value="upload">
+</div>
 
 </form>
+
+</div>
+</div> <!-- tab-container -->
+

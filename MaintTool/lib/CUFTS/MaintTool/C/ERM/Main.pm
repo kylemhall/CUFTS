@@ -178,6 +178,19 @@ my $form_validate_new = {
     missing_optional_valid => 1,
 };
 
+my $form_validate_new_file = {
+    required => [
+        qw(
+            upload
+            file_description
+            file
+        )
+    ],
+    optional => [],
+    filters => ['trim'],
+    missing_optional_valid => 1,
+};
+
 
 sub auto : Private {
     my ( $self, $c ) = @_;
@@ -695,9 +708,40 @@ sub edit : Local {
             # push @{ $c->stash->{results} }, 'ERM data updated.';
         }
     }
+    elsif ( $c->req->params->{upload} ) {
+        
+        $c->form( $form_validate_new_file );
+
+        unless ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
+        
+            my $upload = $c->req->upload('file');
+            if ( $upload->filename !~ /\.([A-Za-z0-9]+)$/ ) {
+                die("Could not determine file name extension.  Please upload files with a proper extension such as .jpg, .pdf, etc.");
+            };
+            my $ext = $1;
+
+            my $file_rec = CUFTS::DB::ERMFiles->create({
+                linked_id   => $erm_id,
+                link_type   => 'm',
+                description => $c->form->{valid}->{file_description},
+                ext         => $ext,
+            });
+
+            my $filename = $c->path_to( 'root', 'static', 'erm_files', 'm', $file_rec->UUID . '.' . $ext );
+
+            if ( defined($filename) ) {
+                $upload->copy_to( $filename ) or
+                    die("Error copying file: $!");
+            }
+
+            CUFTS::DB::DBI->commit();
+            
+        }
+    }
 
     $c->stash->{license_record} = $erm->license;
     $c->stash->{provider_record} = $erm->provider;
+    $c->stash->{main_files} = [ CUFTS::DB::ERMFiles->search({ linked_id => $erm_id, link_type => 'm' }) ];
 
     $c->stash->{active_content_types} = { map { $_->id, 1 } $erm->content_types() };
     $c->stash->{erm}       = $erm;
@@ -758,6 +802,8 @@ sub delete : Local {
                     }
                     $erm_main->delete();
                 };
+                
+                # TODO: Delete linked files
 
                 if ($@) {
                     my $err = $@;
@@ -1014,5 +1060,38 @@ sub _verify_linking {
 
     return 1;
 }
+
+sub delete_file : Local {
+    my ( $self, $c, $erm_id, $file_id  ) = @_;
+
+    my $erm = CUFTS::DB::ERMMain->search({
+        id   => $erm_id,
+        site => $c->stash->{current_site}->id,
+    })->first;
+
+    if ( !defined($erm) ) {
+        die("Unable to find ERMMain record: $erm_id for site " . $c->stash->{current_site}->id);
+    }
+
+    my $file = CUFTS::DB::ERMFiles->search({
+        linked_id   => $erm_id,
+        id          => $file_id,
+        link_type   => 'm'
+    })->first;
+
+    if ( !defined($file) ) {
+        die("Unable to find ERMFile record: $file_id for site " . $c->stash->{current_site}->id);
+    }
+    
+    my $filename = $c->path_to( 'root', 'static', 'erm_files', 'm', $file->UUID . '.' . $file->ext );
+    unlink($filename) or
+        die("Error removing file: $!");
+    
+    $file->delete();
+    CUFTS::DB::ERMMain->dbi_commit();
+    
+    $c->redirect("/erm/main/edit/$erm_id");
+}
+
 
 1;

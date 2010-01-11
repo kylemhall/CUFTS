@@ -283,6 +283,8 @@ sub delete : Local {
                         $erm_main->update();
                     }
                     
+                    # TODO: Delete attached files!
+                    
                     $erm_license->delete();
                 };
 
