@@ -70,13 +70,13 @@ sub clean_data {
 
     # Parse coverage
 
-    if ( $record->{ft_start_date} =~ /(\w+)\s*(\d{1,2}),\s*(\d{4})/xsm ) {
+    if ( $record->{ft_start_date} =~ /(\w+)\s*(\d{1,2})(?:\/\d{1,2})?,\s*(\d{4})/xsm ) {
         $record->{ft_start_date} = format_date($3, $1, 'start', $2);
     }elsif ( $record->{ft_start_date} =~ /([\w+\s*]+)\s*(\d{4})/xsm ) {
         $record->{ft_start_date} = format_date($2, trim_string($1), 'start');
     }
 
-    if ( $record->{ft_end_date} =~ /(\w+)\s*(\d{1,2}),\s*(\d{4})/xsm ) {
+    if ( $record->{ft_end_date} =~ /(\w+)\s*(\d{1,2})(?:\/\d{1,2})?,\s*(\d{4})/xsm ) {
         $record->{ft_end_date} = format_date($3, $1, 'end', $2);
     }elsif ( $record->{ft_end_date} =~ /([\w+\s*]+)\s*(\d{4})/xsm ) {
         $record->{ft_end_date} = format_date($2, trim_string($1), 'end');
