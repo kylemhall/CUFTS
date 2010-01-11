@@ -1757,7 +1757,9 @@ $( function() {
     
 </div>
 
-<div id="page-marc">
+</form>
+
+<div id="page-marc" class="tabs-nav-page">
 
 <div style="margin-bottom: 1em; border: 1px solid #aaa; background: #f6f6f6; padding: 3px; margin: 2px 2px 1em 2px;">
  <pre><code>[% erm.as_marc.as_formatted %]</code></pre>
@@ -1768,7 +1770,6 @@ $( function() {
     
 </div>
 
-</form>
 
 <div id="page-files" class="tabs-nav-page">
 
@@ -1814,5 +1815,6 @@ $( function() {
 </form>
 
 </div>
+
 </div> <!-- tab-container -->
 
