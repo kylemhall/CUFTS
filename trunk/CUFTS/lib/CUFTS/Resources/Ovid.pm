@@ -93,10 +93,10 @@ sub clean_data {
     }
 
     # Ovid has some horrible data in their title list.. just skip the record if we don't seem to have a valid date.
-    if ( not_empty_string($record->{ft_start_date}) && $record->{ft_start_date} !~ /^\d{4}-\d{2}-\d{2}$/ ) {
+    if ( not_empty_string($record->{ft_start_date}) && $record->{ft_start_date} !~ /^\d{4}/ ) {
         return [ 'Skipping record, could not parse a valid start date: ' . $record->{ft_start_date} ];
     }
-    if ( not_empty_string($record->{ft_end_date}) && $record->{ft_end_date} !~ /^\d{4}-\d{2}-\d{2}$/ ) {
+    if ( not_empty_string($record->{ft_end_date}) && $record->{ft_end_date} !~ /^\d{4}/ ) {
         return [ 'Skipping record, could not parse a valid end date: ' . $record->{ft_end_date} ];
     }
 
