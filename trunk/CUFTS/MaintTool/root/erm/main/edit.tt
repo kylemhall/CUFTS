@@ -1202,7 +1202,7 @@ $( function() {
 
 </div> <!-- page-datescosts -->
 
-<div id="page-stats" style="width: 98%">
+<div id="page-stats" class="tabs-nav-page" style="width: 98%">
 
 <div style="padding: 1em 0px;">
  <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
