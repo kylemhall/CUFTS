@@ -49,9 +49,9 @@ sub title_list_field_map {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    $record->{title}  =~ trim_string( $record->{title}, '"' );
-    $record->{issn}   =~ trim_string( $record->{issn} );
-    $record->{e_issn} =~ trim_string( $record->{e_issn} );
+    $record->{title}  = trim_string( $record->{title}, '"' );
+    $record->{issn}   = trim_string( $record->{issn} );
+    $record->{e_issn} = trim_string( $record->{e_issn} );
 
     # Remove "®" character from title ends
     $record->{title} =~ s/\xAE$//xsm;
