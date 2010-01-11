@@ -106,7 +106,7 @@ $( function() {
 
 <form method="post" name="main-form" id="main-form">
 
-<div id="page-general">
+<div id="page-general" class="tabs-nav-page">
 
 <div style="padding: 1em 0px;">
  <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
@@ -742,7 +742,7 @@ $( function() {
 
 </div> <!-- page-general -->
 
-<div id="page-datescosts" style="width: 98%">
+<div id="page-datescosts" class="tabs-nav-page" style="width: 98%">
 
 <div style="padding: 1em 0px;">
  <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
@@ -1329,7 +1329,7 @@ $( function() {
 
 </div> <!-- page-stats -->
 
-<div id="page-admin" style="width: 98%">
+<div id="page-admin" class="tabs-nav-page" style="width: 98%">
 
 <div style="padding: 1em 0px;">
  <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
@@ -1657,7 +1657,7 @@ $( function() {
 
 </div> <!-- page-admin -->
 
-<div id="page-subjects">
+<div id="page-subjects" class="tabs-nav-page">
 
     <div style="padding: 1em 0px;">
      <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
@@ -1715,7 +1715,7 @@ $( function() {
     
 </div>
 
-<div id="page-links">
+<div id="page-links" class="tabs-nav-page">
 
     <div style="padding: 1em 0px;">
      <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
@@ -1770,7 +1770,7 @@ $( function() {
 
 </form>
 
-<div id="page-files">
+<div id="page-files" class="tabs-nav-page">
 
 
 <table class="wide-outlined">
