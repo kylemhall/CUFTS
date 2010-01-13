@@ -300,6 +300,16 @@ sub build_linkJournal {
 }
 
 
+sub can_getTOC {
+    my ( $class, $request ) = @_;
+
+    return 0
+        if is_empty_string( $request->volume ) && is_empty_string( $request->issue );
+
+    return $class->SUPER::can_getFulltext($request);
+}
+
+
 sub build_linkTOC {
     my ( $class, $records, $resource, $site, $request ) = @_;
 
@@ -358,6 +368,18 @@ sub build_linkTOC {
     }
 
     return \@results;
+}
+
+sub can_getFulltext {
+    my ( $class, $request ) = @_;
+
+    return 0
+        if is_empty_string( $request->volume ) && is_empty_string( $request->issue );
+
+    return 0
+        if is_empty_string( $request->spage );
+
+    return $class->SUPER::can_getFulltext($request);
 }
 
 # Creates an OpenURL 1.0 request for gale.
