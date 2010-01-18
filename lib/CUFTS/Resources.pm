@@ -317,7 +317,7 @@ sub _deactivate_old_records {
 
     ## MAYBE CREATE A BASE CLASS FOR Title lists and move the SQL into there...
     
-    my @old = $module->retrieve_from_sql("resource = $resource_id AND active = 'true' AND scanned < '$timestamp'");
+    my @old = $module->retrieve_from_sql("resource = $resource_id AND active = 'true' AND ( scanned IS NULL OR scanned < '$timestamp' )");
     
     my $deactivated_count = 0;
     foreach my $title (@old) {
