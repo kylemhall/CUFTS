@@ -1137,11 +1137,11 @@ sub email_changes {
                     Disposition => 'attachment'
                 ) or CUFTS::Exception::App->throw("Unable to attach deleted titles file to MIME::Lite object: $!");
             }
-        
+
             eval {
                 print "Sending update mail to: ", $site->name, "\n";
-#               MIME::Lite->send('smtp', $host);
-#               $msg->send;
+                MIME::Lite->send('smtp', $host);
+                $msg->send;
             };
             if ($@) {
                 warn("Unable to send message using MIME::Lite: $@");
