@@ -796,14 +796,27 @@ sub _match_on {
     defined($data) && ref($data) eq 'HASH' or
         CUFTS::Exception::App->throw('No data hash reference passed into _match_on');
         
-    my $search = { 'resource' => $resource_id };
+    my $search = { resource => $resource_id };
+    my $can_search = 0;
     foreach my $field (@$fields) {
+        next if is_empty_string($data->{$field});
+
+        # Special case ISSN to search both issn and e_issn fields
         if ($field eq 'issn') {
-            $search->{-nest} = [{'issn' => $data->{$field}}, {'e_issn' => $data->{$field}}];
+            my $issn_search = [ {issn => $data->{issn}}, {e_issn => $data->{issn}} ];
+            # Also search e_issn if it's included in the data.
+            if ( not_empty_string($data->{e_issn}) ) {
+                push @$issn_search, {issn => $data->{e_issn}}, {e_issn => $data->{e_issn}};
+            }
+            $search->{-nest} = $issn_search;
         } else {
             $search->{$field} = $data->{$field};
         }
+
+        $can_search++;
     }
+
+    return [] if !$can_search;  # Don't search if we have no data fields.
 
     my @matches = $module->search_where($search);
 
