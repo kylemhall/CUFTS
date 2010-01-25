@@ -93,6 +93,7 @@ BEGIN {
         PubMed
         PubMedCentral
         SageCSA
+        SageHighwire
         SIRSI
         Springer
         Taylor
