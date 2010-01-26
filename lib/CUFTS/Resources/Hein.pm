@@ -33,14 +33,12 @@ use strict;
 sub title_list_fields {
     return [
         qw(
-            issn
             title
+            issn
             ft_start_date
             vol_ft_start
-            iss_ft_start
             ft_end_date
             vol_ft_end
-            iss_ft_end
             journal_url
             publisher
         )
@@ -82,9 +80,7 @@ sub skip_record {
 sub clean_data {
     my ( $class, $record ) = @_;
     
-    my $coverage = $record->{'___Coverage'};
-    if ($coverage =~ m/^Vols/){
-        $coverage =~ /Vols\. (\d+)-(\d+) \((\d+)-(\d+)\).*/;
+    if ( $record->{'___Coverage'} =~ /^ (?:Vols|Nos)\. \s+ (\d+)-(\d+) (?:\#\d+)? \s+ \( (\d+)-(\d+) \) /xsm ) {
         $record->{vol_ft_start} = $1;
         $record->{vol_ft_end} = $2;
         $record->{ft_start_date} = $3;
@@ -105,14 +101,6 @@ sub clean_data {
             my ( $day, $month, $year ) = ( $1, $2, $3 );
             $year += $year > 19 ? 1900 : 2000;
             $month = get_month($month, 'end');
-            if ( Delta_Days( $year, $month, $day, Today() ) > 240 ) {
-                $record->{ft_end_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
-            }
-            else {
-                delete $record->{ft_end_date};
-                delete $record->{vol_ft_end};
-                delete $record->{iss_ft_end};
-            }
         }
     }
 
@@ -141,7 +129,17 @@ sub clean_data {
         }
     }
 
-    return $class->SUPER::clean_data($record);
+    my $errs = $class->SUPER::clean_data($record);
+
+    if ( !scalar(@$errs) && defined($record->{ft_end_date}) ) {
+        my ( $year, $month, $day ) = split( '-', $record->{ft_end_date} );
+        if ( Delta_Days( $year, $month, $day, Today() ) < 180 ) {
+            delete $record->{ft_end_date};
+            delete $record->{vol_ft_end};
+        }
+    }
+    
+    return $errs;
 }
 
 
