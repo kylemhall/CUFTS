@@ -24,6 +24,7 @@ use base qw(CUFTS::Resources::Base::Journals);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use Date::Calc qw(Delta_Days Today);
 
 use strict;
 
@@ -70,7 +71,17 @@ sub clean_data {
     $record->{ft_start_date} = sprintf( '%4i-%02i', $record->{'___First Year'}, $record->{'___First Month'} );
     $record->{ft_end_date}   = sprintf( '%4i-%02i', $record->{'___Latest Year'}, $record->{'___Latest Month'} );
 
-    return $class->SUPER::clean_data($record);
+    my $errs = $class->SUPER::clean_data($record);
+
+    
+    if ( !scalar(@$errs) && defined($record->{ft_end_date}) ) {
+        my ( $year, $month, $day ) = split( '-', $record->{ft_end_date} );
+        if ( Delta_Days( $year, $month, $day, Today() ) < 180 ) {
+            delete $record->{ft_end_date};
+        }
+    }
+    
+    return $errs;
 }
 
 
