@@ -64,6 +64,7 @@ BEGIN {
         GenericJournalDOI
         GenericPrintJournal
         Google::GoogleSearch
+        Hein
         Highwire
         HighwireFree
         History_Coop
