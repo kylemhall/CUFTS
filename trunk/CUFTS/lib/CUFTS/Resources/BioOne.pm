@@ -60,6 +60,7 @@ sub title_list_field_map {
         'ISSN'  => 'issn',
         'TITLE' => 'title',
         'URL'   => 'journal_url',
+        'BIOONE_LANDING_URL' => 'journal_url',
     };
 }
 
@@ -77,7 +78,7 @@ sub title_list_field_map {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    my $availability = $record->{'___Availability'} || $record->{'___AVAILABILITY'};
+    my $availability = $record->{'___Availability'} || $record->{'___AVAILABILITY'} || $record->{'___AVAILABILITY ON BIOONE'};
     my ($start, $end) = split(" \- ", $availability, 2);
     $start =~ /(.*)\((.*)\)/;
     my $start_vol = $1;
