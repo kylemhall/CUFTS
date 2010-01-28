@@ -18,5 +18,5 @@
    <option value="[% subject.id %]">[% subject.subject %]</option>
   [% END %]
  </select> <input type="submit" value="add" name="add" onClick="return add_subject();" />
- <form><input id="edit-subjects-delete-field" type="hidden" name="delete_subjects" value="" /><input id="edit-subjects-add-field" type="hidden" name="add_subjects" value="" />
+ <form><input id="edit-subjects-delete-field" type="hidden" name="delete_subjects" value="" /><input id="edit-subjects-add-field" type="hidden" name="add_subjects" value="" /></form>
 </div>
