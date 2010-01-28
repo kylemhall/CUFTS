@@ -47,11 +47,31 @@ Default is to view the resource.
 sub default_view : Chained('load_resource') PathPart('') Args(0) {
     my ( $self, $c ) = @_;
 
+    warn( $c->stash->{erm}->public );
+    warn( $c->check_user_roles('staff') );
+
+    if ( defined($c->stash->{erm}->public) && $c->stash->{erm}->public == 0 && !$c->check_user_roles('staff') ) {
+        return $c->forward('not_public');
+    }
+
     $c->save_current_action();
-    
+
     $c->stash->{display_fields} = [ $c->model('CUFTS::ERMDisplayFields')->search( { site => $c->site->id }, { order_by => 'display_order' } )->all ];
-    
+
     $c->stash->{template} = 'resource.tt';
+}
+
+
+=head2 not_public
+
+Display a message that this resource is not public
+
+=cut
+
+sub not_public : Private {
+    my ( $self, $c ) = @_;
+    
+    $c->stash->{template} = 'resource_not_public.tt';
 }
 
 =head2 json
