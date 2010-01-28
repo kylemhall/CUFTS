@@ -1109,7 +1109,7 @@ sub email_changes {
 
             $msg->attach(
                 Type => 'TEXT',
-                Data => 'You have received this message because one of your CUFTS local resources has been updated. Please read the attached list to see if any of the titles you have enabled in CUFTS have changed. This may require re-enabling individual titles to ensure continued linking for your users. If you have any questions, please contact researcher-support@sfu.ca.' . "\n\n" .
+                Data => 'You have received this message because one of your CUFTS local resources has been updated.  If any of your active titles were modified or deleted, then files will be attached to this email containing the previous values.  Please check these files to see if any of the titles you have enabled in CUFTS have changed. This may require re-enabling individual titles to ensure continued linking for your users. If you have any questions, please contact researcher-support@sfu.ca.' . "\n\n" .
                     'Resource: ' . $resource->name . "\n" .
                     'Processed: ' . $results->{'processed_count'} . "\n" .
                     'New: ' . $results->{'new_count'} . "\n" .
