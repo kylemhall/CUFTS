@@ -493,6 +493,9 @@ sub merge : Local {
             return $c->redirect("/journalauth/search?search=search&field=ids&string=" . $merged_ja->id);
         }
     }
+    else {
+        push @{$c->stash->{errors}},'You must select at least one record to merge and specify a record to merge to.';
+    }
 
     return $c->forward('/journalauth/done_edits');
 }
