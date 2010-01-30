@@ -21,6 +21,7 @@ in
 <form name="merge_form" method="post" action="[% url("$url_base/journalauth/merge") %]">
 [% FOREACH journal_auth IN journal_auths %]
  <div class="journal-auth-record">
+  <input type="radio" name="merge_to" value="[% journal_auth.id %]" />
   <input type="checkbox" name="merge" value="[% journal_auth.id %]" />
   <span class="heading">[% journal_auth.title | html %]</span>
   <span style="font-size: 80%">[% journal_auth.id %]</span>
