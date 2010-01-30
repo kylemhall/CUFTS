@@ -117,7 +117,7 @@ my $form_validate_marc_upload = {
 };
 
 my $form_validate_merge = {
-    required => [ 'merge_records', 'merge'],
+    required => [ 'merge_records', 'merge', 'merge_to' ],
 };
 
 
@@ -465,19 +465,33 @@ sub merge : Local {
     $c->form($form_validate_merge);
     
     if ( !($c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown) ) {     
-        my $ids = $c->form->valid->{merge};
-        my $merged_ja;
-        eval {
-            $merged_ja = CUFTS::JournalsAuth->merge(@$ids);
-        };
-        if ($@) {
-            CUFTS::DB::DBI->dbi_rollback();
-            push @{$c->stash->{errors}}, "Error merging records: $@";
-        } else {
-            CUFTS::DB::DBI->dbi_commit();
-        }
 
-        return $c->redirect("/journalauth/search?search=search&field=ids&string=" . $merged_ja->id);
+        my $ids = $c->form->valid->{merge};
+        my $merge_to = $c->form->valid->{merge_to};
+
+        $ids = ref($ids) eq 'ARRAY' ? $ids : [ $ids ];
+        
+        $ids = [ grep { $_ != $merge_to } @$ids ];
+        unshift( @$ids, $merge_to );
+
+
+        if ( scalar(@$ids) < 2 ) {
+            push @{$c->stash->{errors}}, "You must select multiple records to merge.";
+        }
+        else {
+            my $merged_ja;
+            eval {
+                $merged_ja = CUFTS::JournalsAuth->merge(@$ids);
+            };
+            if ($@) {
+                CUFTS::DB::DBI->dbi_rollback();
+                push @{$c->stash->{errors}}, "Error merging records: $@";
+            } else {
+                CUFTS::DB::DBI->dbi_commit();
+            }
+
+            return $c->redirect("/journalauth/search?search=search&field=ids&string=" . $merged_ja->id);
+        }
     }
 
     return $c->forward('/journalauth/done_edits');
