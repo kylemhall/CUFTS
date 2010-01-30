@@ -62,7 +62,7 @@ sub merge_ja_issns {
     foreach my $issn ( $old_journal_auth->issns ) {
         my $record = { journal_auth => $journal_auth->id, };
         foreach my $column ( $issn->columns ) {
-            next if grep { $_ eq $column } qw{ id journal_auth };
+            next if grep { $_ eq $column } qw{ id journal_auth info };
             $record->{$column} = $issn->$column();
         }
         $issn->delete();
