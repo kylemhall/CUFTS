@@ -60,13 +60,11 @@ sub merge_ja_issns {
     my ( $class, $journal_auth, $old_journal_auth ) = @_;
 
     foreach my $issn ( $old_journal_auth->issns ) {
-        my $record = { journal_auth => $journal_auth->id, };
-        foreach my $column ( $issn->columns ) {
-            next if grep { $_ eq $column } qw{ id journal_auth info };
-            $record->{$column} = $issn->$column();
-        }
+        my $record = { journal_auth => $journal_auth->id, issn => $issn->issn };
         $issn->delete();
-        CUFTS::DB::JournalsAuthISSNs->find_or_create($record);
+        if ( !CUFTS::DB::JournalsAuthISSNs->search($record)->first ) {
+            CUFTS::DB::JournalsAuthISSNs->create($record);
+        }
     }
 
     return 1;
