@@ -60,7 +60,7 @@ sub title_list_field_map {
         'ISSN'  => 'issn',
         'TITLE' => 'title',
         'URL'   => 'journal_url',
-        'BIOONE_LANDING_URL' => 'journal_url',
+        'BIOONE LANDING URL' => 'journal_url',
     };
 }
 
