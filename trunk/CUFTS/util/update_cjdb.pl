@@ -396,6 +396,9 @@ sub load_cufts {
             if ( not_empty_string($local_journal->current_months) && $local_journal->current_months ne '0' ) {
                 $new_link->{current} = $local_journal->current_months . ' months';
             }
+            elsif ( not_empty_string($local_journal->current_years) && $local_journal->current_years ne '0' ) {
+                $new_link->{current} = $local_journal->current_years . ' years';
+            }
 
             # Skip if citations are turned off and we have no fulltext coverage data
 
@@ -953,11 +956,8 @@ CJDB_RECORD:
         
         if ( !$has_holdings ) {
             if ( $DEBUG_UPDATE_CJDB ) { print "Skipping MARC dump of record due to missing holdings.\n"; }
-            next;
+            next CJDB_RECORD;
         }
-        
-        next CJDB_RECORD if !$has_holdings;
-
 
         if ( !defined($MARC_record) ) {
             print "  * Error - unable to create MARC record for dump\n";
@@ -1037,6 +1037,8 @@ CJDB_RECORD:
             );
             $MARC_record->append_fields( $identifier_field );
         }
+        
+        print "writing data!\n";
         
         print MARC_OUTPUT  $MARC_record->as_usmarc();
         print ASCII_OUTPUT $MARC_record->as_formatted(), "\n\n";
