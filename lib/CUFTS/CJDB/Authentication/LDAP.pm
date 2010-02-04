@@ -12,14 +12,21 @@ sub authenticate {
     my $ldap = Net::LDAPS->new($auth_server)
         or die("Unable to connect to LDAP server");
 
-    # Get bind string and replace user variables if necessary
-    my $bind_string = $site->cjdb_authentication_string1
-        or die("No bind string set in LDAP authentication");
-    $bind_string =~ s/\$user/$user/g;
+    # Get bind strings and replace user variable if necessary
+    my @bind_strings = split( '|', $site->cjdb_authentication_string1 );
+        or die("No bind string set in LDAP authentication (cjdb_authentication_string1)");
 
-    my $mesg = $ldap->bind( $bind_string, password => $password );
+    my $bound = 0;
+    foreach my $bind_string (@bind_strings) {
+        $bind_string =~ s/\$user/$user/g;
+        my $mesg = $ldap->bind( $bind_string, password => $password );
+        if ( $mesg->code == $Net::LDAP::Constants::LDAP_SUCCESS ) {
+            $bound = 1;
+            last;
+        }
+    }
 
-    if ( $mesg->code != $Net::LDAP::Constants::LDAP_SUCCESS ) {
+    if ( !$bound ) {
         die("Unable to bind user '$user', probably bad password");
     }
 
