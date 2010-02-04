@@ -112,7 +112,7 @@ sub clean_data {
 
         my %dates;
 
-        if ( $string =~ /^\d{4}-\d{2}-\d{2})$/ ) {
+        if ( $string =~ /^\d{4}-\d{2}-\d{2}$/ ) {
             return $string;
         }
 
