@@ -14,7 +14,11 @@ sub authenticate {
 
     # Get bind strings and replace user variable if necessary
     my @bind_strings = split( '|', $site->cjdb_authentication_string1 );
-        or die("No bind string set in LDAP authentication (cjdb_authentication_string1)");
+    
+    if ( !scalar(@bind_strings) ) {
+        die("No bind string set in LDAP authentication (cjdb_authentication_string1)");
+    }
+        
 
     my $bound = 0;
     foreach my $bind_string (@bind_strings) {
