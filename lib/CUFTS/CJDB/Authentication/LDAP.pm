@@ -1,5 +1,6 @@
 package CUFTS::CJDB::Authentication::LDAP;
-use Net::LDAPS;
+
+use Net::LDAPS qw(LDAP_SUCCESS);
 
 use strict;
 
@@ -13,7 +14,7 @@ sub authenticate {
         or die("Unable to connect to LDAP server");
 
     # Get bind strings and replace user variable if necessary
-    my @bind_strings = split( '|', $site->cjdb_authentication_string1 );
+    my @bind_strings = split( /\|/, $site->cjdb_authentication_string1 );
     
     if ( !scalar(@bind_strings) ) {
         die("No bind string set in LDAP authentication (cjdb_authentication_string1)");
@@ -24,7 +25,7 @@ sub authenticate {
     foreach my $bind_string (@bind_strings) {
         $bind_string =~ s/\$user/$user/g;
         my $mesg = $ldap->bind( $bind_string, password => $password );
-        if ( $mesg->code == $Net::LDAP::Constants::LDAP_SUCCESS ) {
+        if ( $mesg->code == LDAP_SUCCESS ) {
             $bound = 1;
             last;
         }
@@ -51,7 +52,7 @@ sub authenticate {
     );
     $ldap->unbind;
 
-    if (    $result->code  != $Net::LDAP::Constants::LDAP_SUCCESS
+    if (    $result->code  != LDAP_SUCCESS
          || $result->count != 1 )
     {
         die("Unable to retrieve user record.");
