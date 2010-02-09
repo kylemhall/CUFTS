@@ -224,9 +224,9 @@ sub load_title_list {
             if ($@) {
                 $module->dbi_rollback;
                 if (ref($@) && $@->can('error')) {
-                    CUFTS::Exception::App->throw("Database error while loading title list, row $count.\n" . $@->error);
+                    CUFTS::Exception::App->throw("Database error while loading title list, row " . ($count - 1) . "\n" . $@->error);
                 } else {
-                    die("Database error while loading title list, row $count.\n" . $@);
+                    die("Database error while loading title list, row " . ($count - 1) . "\n" . $@);
                 }
             }
         }
