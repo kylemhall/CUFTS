@@ -128,7 +128,7 @@ sub clean_data {
             my $year = $1;
             $record->{ft_start_date} = sprintf("%04i-01-01", $year);
         }
-        elsif ( $record->{ft_start_date} !~ /^\d{4}-\d{2}-\d{2}$/ ) {
+        elsif ( $record->{ft_start_date} !~ /^\d{4}-\d{2}-\d{2}$/ && $record->{ft_start_date} !~ /^\d{4}$ /) {
             delete $record->{ft_start_date};
         }
     }
@@ -181,7 +181,7 @@ sub clean_data {
             my $year = $1;
             $record->{ft_end_date} = sprintf("%04i-12-31", $year);
         }
-        elsif ( $record->{ft_end_date} !~ /^\d{4}-\d{2}-\d{2}$/ ) {
+        elsif ( $record->{ft_end_date} !~ /^\d{4}-\d{2}-\d{2}$/ && $record->{ft_end_date} !~ /^\d{4}$ /) {
             delete $record->{ft_end_date};
         }
     }
