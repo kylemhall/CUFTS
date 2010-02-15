@@ -26,7 +26,7 @@ use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
 use HTML::Entities;
 use Date::Calc qw(Delta_Days Today);
-
+use Unicode::String qw(utf8);
 
 use strict;
 
@@ -59,10 +59,12 @@ sub resource_details_help {
 
 sub title_list_field_map {
     return {
-        'Publication Name'  => 'title',
-        'ISSN'              => 'issn',
-        'Short Cut URL'      => 'journal_url',
-        'Publisher'         => 'publisher',
+        'Publication Name'       => 'title',
+        'Issn'                   => 'issn',
+        'ISSN'                   => 'issn',
+        'Short Cut URL'          => 'journal_url',
+        'Home Page URL'          => 'journal_url',
+        'Publisher'              => 'publisher',
         'Coverage Begins Volume' => 'vol_ft_start',
         'Coverage Begins Issue'  => 'iss_ft_start',
         'Coverage Begins Date'   => 'ft_start_date',
@@ -87,6 +89,8 @@ sub title_list_split_row {
     return \@fields;
 }
 
+sub title_list_skip_lines_count { return 3; }
+
 sub skip_record {
     my ( $class, $record ) = @_;
     
@@ -100,93 +104,90 @@ sub clean_data {
     my ( $class, $record ) = @_;
     
     if ( not_empty_string( $record->{ft_start_date} ) ) {
+        my ( $day, $month, $year );
+        
+        # 01-Sep-08
         if ( $record->{ft_start_date} =~ /(\d+)-(\w+)-(\d{2})/ ) {
-            my ( $day, $month, $year ) = ( $1, $2, $3 );
-            $year += $year > 19 ? 1900 : 2000;
+            ( $day, $month, $year ) = ( $1, $2, $3 );
             $month = get_month($month, 'start');
-            $record->{ft_start_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
         }
+        # Jan-68 | January - February 1995 | Winter 1993
+        elsif ( $record->{ft_start_date} =~ /^ ([A-Za-z]+) [^\d]* (\d{2,4}) $/xsm ) {
+            ( $day, $month, $year ) = ( 1, $1, $2 );
+            $month = get_month($month, 'start');
+        }
+        # 01/05/2005
         elsif ( $record->{ft_start_date} =~ /(\d+)\/(\d+)\/(\d{4})/ ) {
-            my ( $day, $month, $year ) = ( $1, $2, $3 );
-            $record->{ft_start_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
+            ( $day, $month, $year ) = ( $1, $2, $3 );
         }
-        elsif ( $record->{ft_start_date} =~ /(\d+)-([a-zA-Z]+)/ ) {
-            my ( $year, $month ) = ( $1, $2 );
-            $year += $year > 19 ? 1900 : 2000;
-            $month = get_month($month, 'start');
-            $record->{ft_start_date} = sprintf("%04i-%02i-01", $year, $month);
+        # 1993
+        elsif ( $record->{ft_start_date} =~ / (\d{4}) $/xsm ) {
+            ( $day, $month, $year ) = ( 1, 1, $1 );
         }
-        elsif ( $record->{ft_start_date} =~ /([a-zA-Z]+)\s*-?\s*(\d+)$/ ) {
-            my ( $month, $year ) = ( $1, $2 );
-            if ($year < 100){
+
+        if ( defined($year) && defined($month) && defined($day) ) {
+            if ( $year < 1000 ) {
                 $year += $year > 19 ? 1900 : 2000;
             }
-            $month = get_month($month, 'start');
-            $record->{ft_start_date} = sprintf("%04i-%02i-01", $year, $month);
+            $record->{ft_start_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
         }
-        elsif ( $record->{ft_start_date} =~ /(\d{4})\s*-?\s*\d{4}$/ ) {
-            my $year = $1;
-            $record->{ft_start_date} = sprintf("%04i-01-01", $year);
-        }
-        elsif ( $record->{ft_start_date} !~ /^\d{4}-\d{2}-\d{2}$/ && $record->{ft_start_date} !~ /^\d{4}$/ ) {
+        else {
             delete $record->{ft_start_date};
         }
+        
     }
 
     if ( not_empty_string( $record->{ft_end_date} ) ) {
-        if ( $record->{ft_end_date} =~ /ongoing/i ) {
-            delete $record->{ft_end_date};
-            delete $record->{vol_ft_end};
-            delete $record->{iss_ft_end};
-        }
-        elsif ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d{2})/ ) {
-            my ( $day, $month, $year ) = ( $1, $2, $3 );
-            $year += $year > 19 ? 1900 : 2000;
+        my ( $day, $month, $year );
+        
+        # 31-Jan-90
+        if ( $record->{ft_end_date} =~ /(\d+)-(\w+)-(\d{2})/ ) {
+            ( $day, $month, $year ) = ( $1, $2, $3 );
             $month = get_month($month, 'end');
-            if ( Delta_Days( $year, $month, $day, Today() ) > 240 ) {
-                $record->{ft_end_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
-            }
-            else {
-                delete $record->{ft_end_date};
-                delete $record->{vol_ft_end};
-                delete $record->{iss_ft_end};
-            }
         }
+        # May-90 | January-February 2000
+        elsif ( $record->{ft_end_date} =~ / ([a-zA-Z]+) \s* -? \s* (\d{2,4}) $/xsm ) {
+            ( $month, $year ) = ( $1, $2 );
+            $month = get_month($month, 'end');
+            $day = ( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 )[$month-1];
+        }
+        # 01/05/2005
         elsif ( $record->{ft_end_date} =~ /(\d+)\/(\d+)\/(\d{4})/ ) {
-            my ( $day, $month, $year ) = ( $1, $2, $3 );
-            if ( Delta_Days( $year, $month, $day, Today() ) > 240 ) {
-                $record->{ft_end_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
-            }
-            else {
-                delete $record->{ft_end_date};
-                delete $record->{vol_ft_end};
-                delete $record->{iss_ft_end};
-            }
+            ( $day, $month, $year ) = ( $1, $2, $3 );
         }
-        elsif ( $record->{ft_end_date} =~ /(\d+)-([a-zA-Z]+)/ ) {
-            my ( $year, $month ) = ( $1, $2 );
-            $year += $year > 19 ? 1900 : 2000;
-            $month = get_month($month, 'end');
-            $record->{ft_end_date} = sprintf("%04i-%02i", $year, $month);
+        elsif ( $record->{ft_end_date} =~ / (\d{4}) $/xsm ) {
+            my ( $day, $month, $year ) = ( 12, 31, $1 );
         }
-        elsif ( $record->{ft_end_date} =~ /([a-zA-Z]+)\s*-?\s*(\d+)$/ ) {
-            my ( $month, $year ) = ( $1, $2 );
-            if ($year < 100){
+
+        if ( defined($year) && defined($month) && defined($day) ) {
+            if ( $year < 1000 ) {
                 $year += $year > 19 ? 1900 : 2000;
             }
-            $month = get_month($month, 'end');
-            $record->{ft_end_date} = sprintf("%04i-%02i", $year, $month);
+
+            if ( Delta_Days( $year, $month, $day, Today() ) > 240 ) {
+                $record->{ft_end_date} = sprintf("%04i-%02i-%02i", $year, $month, $day);
+            }
+            else {
+                delete $record->{ft_end_date};
+                delete $record->{vol_ft_end};
+                delete $record->{iss_ft_end};
+            }
         }
-        elsif ( $record->{ft_end_date} =~ /\d{4}\s*-?\s*(\d{4})$/ ) {
-            my $year = $1;
-            $record->{ft_end_date} = sprintf("%04i-12-31", $year);
-        }
-        elsif ( $record->{ft_end_date} !~ /^\d{4}-\d{2}-\d{2}$/ && $record->{ft_end_date} !~ /^\d{4}$/ ) {
+        else {
             delete $record->{ft_end_date};
+        }
+
+    }
+
+    foreach my $field ( qw( vol_ft_start vol_ft_end iss_ft_start iss_ft_end ) ) {
+        if ( $record->{$field} =~ /\D/ ) {
+            delete $record->{$field};
         }
     }
 
-    $record->{title} = HTML::Entities::decode_entities( $record->{title} );
+    $record->{title}     = HTML::Entities::decode_entities( $record->{title} );
+    $record->{title}     = utf8( $record->{title} )->latin1;
+    $record->{publisher} = utf8( $record->{publisher} )->latin1;
 
     sub get_month {
         my ( $month, $period ) = @_;
@@ -219,32 +220,6 @@ sub clean_data {
     }
 
     return $class->SUPER::clean_data($record);
-}
-
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
-
-        my $result = new CUFTS::Result;
-        $result->url('http://www.sciencedirect.com/science/journal/' . $record->issn );
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
 }
 
 1;
