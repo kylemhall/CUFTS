@@ -156,7 +156,7 @@ sub clean_data {
             ( $day, $month, $year ) = ( $1, $2, $3 );
         }
         elsif ( $record->{ft_end_date} =~ / (\d{4}) $/xsm ) {
-            ( $day, $month, $year ) = ( 12, 31, $1 );
+            ( $day, $month, $year ) = ( 31, 12, $1 );
         }
 
         if ( defined($year) && defined($month) && defined($day) ) {
