@@ -214,6 +214,7 @@ sub clean_data {
         elsif ( $month =~ /^Fal/i ) { return $period eq 'start' ? 6 : 12 }
         elsif ( $month =~ /^Aut/i ) { return $period eq 'start' ? 6 : 12 }
         elsif ( $month =~ /^Win/i ) { return $period eq 'start' ? 9 : 12 }
+        elsif ( $month =~ /^Quarter/i ) { return $period eq 'start' ? 1 : 12 }  # Ignore "xx Quarter"
         else {
             CUFTS::Exception::App->throw("Unable to find month match in fulltext date: $month");
         }
