@@ -180,7 +180,7 @@ sub clean_data {
     }
 
     foreach my $field ( qw( vol_ft_start vol_ft_end iss_ft_start iss_ft_end ) ) {
-        if ( $record->{$field} =~ /\D/ ) {
+        if ( not_empty_string($record->{$field}) && $record->{$field} =~ /\D/ ) {
             delete $record->{$field};
         }
     }
