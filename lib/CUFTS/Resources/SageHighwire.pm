@@ -68,16 +68,19 @@ sub title_list_field_map {
 sub clean_data {
     my ( $class, $record ) = @_;
     
+    $record->{title} =~ s/ \xAE $//xsm;  # Remove trailing (r)
+
     $record->{ft_start_date} = sprintf( '%4i-%02i', $record->{'___First Year'}, $record->{'___First Month'} );
     $record->{ft_end_date}   = sprintf( '%4i-%02i', $record->{'___Latest Year'}, $record->{'___Latest Month'} );
 
     my $errs = $class->SUPER::clean_data($record);
 
-    
     if ( !scalar(@$errs) && defined($record->{ft_end_date}) ) {
         my ( $year, $month, $day ) = split( '-', $record->{ft_end_date} );
         if ( Delta_Days( $year, $month, $day, Today() ) < 180 ) {
             delete $record->{ft_end_date};
+            delete $record->{vol_ft_end};
+            delete $record->{iss_ft_end};
         }
     }
     
