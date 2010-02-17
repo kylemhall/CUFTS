@@ -270,7 +270,7 @@ sub produce_ebsco_xml {
     }
         
     if ( is_empty_string( $resource->auth_name ) ) {
-        warn('No auth_name defined for EBSCO linking.');
+        warn('No auth_name defined for EBSCO linking for site: ' . $site->key);
         return undef;
 #        CUFTS::Exception::App->throw('No auth_name defined for EBSCO linking.');
     }
@@ -426,3 +426,4 @@ sub fulltext_ebsco {
 }
 
 1;
+@
