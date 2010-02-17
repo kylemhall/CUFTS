@@ -223,4 +223,36 @@ sub clean_data {
     return $class->SUPER::clean_data($record);
 }
 
+
+sub build_linkJournal {
+    my ( $class, $records, $resource, $site, $request ) = @_;
+
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
+
+    my @results;
+    foreach my $record (@$records) {
+        my $url = $record->journal_url;
+        if ( is_empty_string($url) ) {
+            next if is_empty_string( $record->issn );
+            $url = 'http://www.sciencedirect.com/science/journal/' . $record->issn;
+        }
+
+        my $result = new CUFTS::Result;
+        $result->url($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
+}
+
+
 1;
