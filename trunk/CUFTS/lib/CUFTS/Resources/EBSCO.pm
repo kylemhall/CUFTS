@@ -426,4 +426,3 @@ sub fulltext_ebsco {
 }
 
 1;
-@
