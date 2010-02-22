@@ -24,7 +24,7 @@
 [% SET dupe_count = 0 %]
 [% FOREACH record IN order %]
  [% SET id = record.1 %]
- [% IF data.$id.resource_count < 2 %]
+ [% IF data.$id.resources.keys.size < 2 %]
   [% NEXT %]
  [% END %]
  [% SET dupe_count = dupe_count + 1 %]
@@ -64,6 +64,7 @@
 [% IF resources.size == 2 %]
 
 [% FOREACH resource IN resources %]
+ [% SET resource_id = resource.id %]
  <h2>Resources unique to [% resource.name %] - [% resource.provider %]</h2>
  
 <table id="public-compare-duplicates" class="public-compare">
@@ -79,7 +80,7 @@
 [% SET record_count = 0 %]
 [% FOREACH record IN order %]
  [% SET id = record.1 %]
- [% IF data.$id.resource_count > 1 || !data.$id.resources.$resource_id.defined %]
+ [% IF data.$id.resources.keys.size > 1 || !data.$id.resources.$resource_id.defined %]
   [% NEXT %]
  [% END %]
  [% SET record_count = record_count + 1 %]
