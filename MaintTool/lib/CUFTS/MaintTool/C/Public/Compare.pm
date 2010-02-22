@@ -55,7 +55,7 @@ sub results : Local {
 
 JOURNAL:
         while ( my $journal = $journal_iter->next ) {
-            
+
             if ( $c->form->valid->{fulltext} ) {
                 if (    !defined($journal->ft_start_date  )
                      && !defined($journal->ft_end_date    )
@@ -72,11 +72,13 @@ JOURNAL:
                 $journal_auth_id = $journal->journal_auth->id;
 
                 if ( !exists( $data{ $journal_auth_id } ) ) {
-                    $data{ $journal_auth_id }->{ journal_auth } = $journal->journal_auth;
+                    $data{ $journal_auth_id } = {
+                        journal_auth => $journal->journal_auth,
+                        resources => {},
+                    };
                 }
 
-                $data{ $journal_auth_id }->{ resources }->{ $journal->resource->id } = $journal;
-                $data{ $journal_auth_id }->{ resource_count }++;
+                $data{ $journal_auth_id }->{ resources }->{ $resource->id } = $journal;
 
                 if ( !exists( $titles{$journal_auth_id} ) ) {
                     $titles{ $journal_auth_id } = $journal->journal_auth->title;   
