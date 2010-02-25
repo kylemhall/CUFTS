@@ -128,6 +128,9 @@ sub clean_data {
         elsif ( $record->{embargo_days} =~ /tg=(\d+)/ ) {
             $record->{embargo_days} = $1;
         }
+        elsif ( $record->{embargo_days} =~ /\b(\d+)\b/ ) {
+            $record->{embargo_days} = $1;
+        }
         else {
             delete( $record->{embargo_days} );
         }
