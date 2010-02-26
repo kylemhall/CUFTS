@@ -63,22 +63,22 @@ sub view : Private {
     if ( $c->stash->{current_account} ) {
         my $role = CJDB::DB::Roles->search({ role => 'staff' })->first;
         if ( CJDB::DB::AccountsRoles->count_search({ role => $role->id, account => $c->stash->{current_account}->id }) > 0 ) {
-            foreach my $link ( $journal->links ) {
-                next if $link->link_type == 0;  # Print, no further links
-                my $resource = $link->local_resource;
-                my $local_journal = CUFTS::DB::LocalJournals->retrieve($link->local_journal);
-                my $erm;
-                if ( defined($resource) && $resource->erm_main ) {
-                    $c->stash->{erm}->{$link->id} = $resource->erm_main;
-                }
-                elsif ( defined($local_journal) && $local_journal->erm_main ) {
-                    $c->stash->{erm}->{$link->id} = $local_journal->erm_main;
-                }
-                
-            }
+            $c->stash->{staff} = 1;
         }
     }
 
+    foreach my $link ( $journal->links ) {
+        next if $link->link_type == 0;  # Print, no further links
+        my $resource = $link->local_resource;
+        my $local_journal = CUFTS::DB::LocalJournals->retrieve($link->local_journal);
+        my $erm;
+        if ( defined($resource) && $resource->erm_main ) {
+            $c->stash->{erm}->{$link->id} = $resource->erm_main;
+        }
+        elsif ( defined($local_journal) && $local_journal->erm_main ) {
+            $c->stash->{erm}->{$link->id} = $local_journal->erm_main;
+        }
+    }
 
     $c->stash->{tags} = CJDB::DB::Tags->get_tag_summary($journals_auth_id, $c->stash->{current_site}->id, (defined($c->stash->{current_account}) ? $c->stash->{current_account}->id : undef));
     $c->stash->{journal} = $journal;    
