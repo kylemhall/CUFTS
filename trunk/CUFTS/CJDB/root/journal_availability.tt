@@ -61,7 +61,7 @@
    </div>
   [% END %]
 
-  [% IF erm AND erm.$link_id %]
+  [% IF staff AND erm AND erm.$link_id %]
    [% SET erm_main = erm.$link_id %]
    [% SET erm_license = erm_main.license %]
    [% IF erm_license %]
