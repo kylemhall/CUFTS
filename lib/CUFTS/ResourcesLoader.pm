@@ -95,6 +95,7 @@ BEGIN {
         PubMedCentral
         SageCSA
         SageHighwire
+        SFXDOI
         SIRSI
         Springer
         Taylor
