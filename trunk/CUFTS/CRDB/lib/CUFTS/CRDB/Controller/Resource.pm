@@ -47,9 +47,6 @@ Default is to view the resource.
 sub default_view : Chained('load_resource') PathPart('') Args(0) {
     my ( $self, $c ) = @_;
 
-    warn( $c->stash->{erm}->public );
-    warn( $c->check_user_roles('staff') );
-
     if ( defined($c->stash->{erm}->public) && $c->stash->{erm}->public == 0 && !$c->check_user_roles('staff') ) {
         return $c->forward('not_public');
     }
