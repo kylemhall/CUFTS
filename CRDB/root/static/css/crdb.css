@@ -797,3 +797,6 @@ td.resource-edit-control {
     display: none;
 }
 
+span.validate-message {
+    color: red;
+}

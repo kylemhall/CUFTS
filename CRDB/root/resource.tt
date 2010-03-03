@@ -49,6 +49,14 @@ function ajax_cancel_edit( field ) {
 }
 
 function ajax_save_edit( field, url ) {
+
+    var editfield = $('#resource-definition-' + field + ' .validate');
+    if ( editfield.length == 1 ) {
+        if ( !validate_field(editfield) ) {
+            return;
+        }
+    }
+
     $.ajax({
        type: 'POST',
        url: url,
@@ -62,6 +70,23 @@ function ajax_save_edit( field, url ) {
            nodata_fields();
        }
     });
+}
+
+function validate_field( field ) {
+    var message_field = field.parent().find('.validate-message');
+    
+    if ( field.hasClass('validate-date') ) {
+        var val = field.val();
+        if ( val == '' || val.search( /^\d{4}-\d{2}-\d{2}$/ ) != -1 ) {
+            message_field.html('');
+            return true;
+        }
+        else {
+            message_field.html('Date fields must be blank or YYYY-MM-DD');
+            return false;
+        }
+    }
+    
 }
 
 function delete_subject( subject_id ) {
