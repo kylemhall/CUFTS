@@ -35,7 +35,16 @@
             ],
             'Site Settings'
         ]);
+
         menu.push(['/statistics/menu', 'Statistics']);
+
+        menu.push([
+            [
+                [ '/tools/compare', 'Resource Comparison' ],
+            ],
+            'Tools'
+        ]);
+        
     END;
 
     IF current_account.sites.size > 1 OR current_account.administrator;
@@ -60,7 +69,7 @@
 -%]
 <ul>
 [% FOREACH item IN menu %]
- [% IF item.0.size > 1 %]
+ [% IF !item.0.length %]
   <li><a class="navigation-submenu-trigger" href="">[% item.1 %]</a>
   <ul style="display: none">
   [% FOREACH subitem IN item.0 %]
