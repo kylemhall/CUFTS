@@ -86,6 +86,17 @@ function validate_field( field ) {
             return false;
         }
     }
+    else if ( field.hasClass('validate-integer') ) {
+        var val = field.val();
+        if ( val == '' || val.search( /^-?\d+$/ ) != -1 ) {
+            message_field.html('');
+            return true;
+        }
+        else {
+            message_field.html('Integer fields must be blank or contain a valid integer.');
+            return false;
+        }
+    }
     
 }
 
