@@ -33,6 +33,7 @@ my %data_type_handler_map = (
     text    => 'textarea',
     boolean => 'boolean',
     date    => 'date',
+    integer => 'integer',
 );
 
 sub base : Chained('/resource/load_resource') PathPart('field') CaptureArgs(0) {
@@ -72,6 +73,8 @@ sub get_handler {
 
     if ( !defined($handler) ) {
         my $data_type = $c->model('CUFTS::ERMMain')->result_source->column_info($field)->{data_type};
+    
+        warn($data_type);
         
         # Special cases
         
@@ -396,6 +399,29 @@ sub edit_field_date : Private {
     }
 }
 
+sub edit_field_integer : Private {
+    my ( $self, $c, $field ) = @_;
+
+    if ( $c->req->params->{update_value} ) {
+
+        # Add in validation here
+
+        $c->model('CUFTS')->schema->txn_do( sub {
+            my $val = $c->req->params->{$field};
+            $val = not_empty_string($val) ? int($val) : undef;
+            $c->stash->{erm}->$field( $val );
+            $c->stash->{erm}->update();     
+        } );
+        
+        $c->stash->{display_field_name} = $field;
+        $c->stash->{template} = 'display_field.tt'
+    }
+    else {
+        $c->stash->{field} = $field;
+        $c->stash->{value} = $c->stash->{erm}->$field();
+        $c->stash->{template} = 'fields/integer.tt'
+    }
+}
 
 
 sub edit_field_text_field : Private {
