@@ -51,7 +51,7 @@ Ext.onReady( function() {
 
     var format_store = new Ext.data.SimpleStore({
         fields: [ 'format', 'format_name' ],
-        data: [ ['html', 'HTML'], ['tab', 'tab delimited'], ['graph', 'graphed'] ],
+        data: [ ['html', 'HTML'], ['tab', 'tab delimited'], ['graph', 'graphed'] ]
     });
     
     var reports_store = new Ext.data.SimpleStore({
