@@ -75,7 +75,7 @@ sub clean_data {
 
     my $errs = $class->SUPER::clean_data($record);
 
-    if ( !scalar(@$errs) && defined($record->{ft_end_date}) ) {
+    if ( !scalar(@$errs) && not_empty_string($record->{ft_end_date}) ) {
         my ( $year, $month, $day ) = split( '-', $record->{ft_end_date} );
         if ( Delta_Days( $year, $month, $day, Today() ) < 180 ) {
             delete $record->{ft_end_date};
