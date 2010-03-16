@@ -301,9 +301,14 @@ sub build_linkJournal {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
+        
+        my $url = $record->journal_url;
+        if ( is_empty_string($url) ) {
+            next if is_empty_string( $record->issn );
+            $url = 'http://www.jstor.org/journals/' . $record->issn . '.html';
+        }
 
-        my $result = new CUFTS::Result('http://www.jstor.org/journals/' . $record->issn . '.html' );
+        my $result = new CUFTS::Result($url);
         $result->record($record);
 
         push @results, $result;
