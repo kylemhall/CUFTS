@@ -216,7 +216,9 @@ sub edit : Local {
             $new_record->{resource} = $global_resource->id;
         }
         else {
-            $new_record->{module} = 'blank';
+            $new_record->{module}     = 'blank';
+            $new_record->{name}       = 'New Local Resource';
+            $new_record->{provider}   = 'New Provider';
         }
 
         eval {
