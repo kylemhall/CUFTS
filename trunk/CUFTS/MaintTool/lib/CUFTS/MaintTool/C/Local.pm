@@ -209,31 +209,6 @@ sub edit : Local {
     my $global_resource = $c->stash->{global_resource};
     my $local_resource  = $c->stash->{local_resource};
 
-    if ( !defined($local_resource) ) {
-        my $new_record = { site => $c->stash->{current_site}->id };
-
-        if ( defined($global_resource) ) {
-            $new_record->{resource} = $global_resource->id;
-        }
-        else {
-            $new_record->{module}     = 'blank';
-            $new_record->{name}       = 'New Local Resource';
-            $new_record->{provider}   = 'New Provider';
-        }
-
-        eval {
-            $local_resource = CUFTS::DB::LocalResources->create($new_record);
-            $c->stash->{local_resource} = $local_resource;
-        };
-            
-        if ($@) {
-            my $err = $@;
-            CUFTS::DB::DBI->dbi_rollback;
-            die($err);
-        }
-            
-        CUFTS::DB::DBI->dbi_commit;
-    }
 
     $c->form->valid->{site} = $c->stash->{current_site}->id;
 
@@ -246,6 +221,24 @@ sub edit : Local {
             # Remove services and recreate links, then update and save the resource
             
             eval {
+                
+                if ( !defined($local_resource) ) {
+                    my $new_record = { site => $c->stash->{current_site}->id };
+
+                    if ( defined($global_resource) ) {
+                        $new_record->{resource} = $global_resource->id;
+                    }
+                    else {
+                        $new_record->{module}     = 'blank';
+                        $new_record->{name}       = 'New Local Resource';
+                        $new_record->{provider}   = 'New Provider';
+                    }
+
+                    $local_resource = CUFTS::DB::LocalResources->create($new_record);
+                    $c->stash->{local_resource} = $local_resource;
+
+                }
+                
                 $local_resource->update_from_form($c->form);
                 CUFTS::DB::LocalResources_Services->search({local_resource => $local_resource->id})->delete_all;
                 
