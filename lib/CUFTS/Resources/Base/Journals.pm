@@ -665,6 +665,9 @@ sub _search_active {
         my @issn_search = ('-or');
         push @issn_search, { issn  => { '-in' => \@issns } };
         push @issn_search, { e_issn => { '-in' => \@issns } };
+        if ( scalar($request->journal_auths) ) {
+            push @issn_search, { 'journal_auth' => { '-in' => $request->journal_auths } };
+        }
         $search_terms{'-nest'} = \@issn_search;
     }
     elsif ( assert_ne( $request->title ) ) {
