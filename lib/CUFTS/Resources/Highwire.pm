@@ -65,6 +65,8 @@ sub title_list_field_map {
         'End-date of full text'         => 'ft_end_date',
         'End- date of full text'        => 'ft_end_date',
         'End-date of full-text'         => 'ft_end_date',
+        'Print ISSN number'             => 'issn', 
+        'Online ISSN number'            => 'e_issn',
         'What is the print ISSN number?'             => 'issn', 
         'What is the online ISSN number?'            => 'e_issn', 
         'What is print ISSN number?'                 => 'issn', 
@@ -79,7 +81,7 @@ sub clean_data {
 
     # Try to guess a title field if a clean one wasn't found
     if ( !defined($record->{title}) ) {
-        my @headers = grep { $_ =~ /Journal\s+Name/ } keys %$record;
+        my @headers = grep { $_ =~ /Journal\s+Name/i } keys %$record;
         if ( scalar(@headers) == 1 ) {
             $record->{title} = $record->{$headers[0]};
         }
