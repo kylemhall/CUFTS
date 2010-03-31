@@ -49,32 +49,6 @@ sub title_list_fields {
     ];
 }
 
-## title_list_field_map - Hash ref mapping fields from the raw title lists to
-## internal field names
-##
-
-sub title_list_field_map {
-    return {
-        'TITLE'			=> 'title',
-        'ISSN PRINT'	=> 'issn',
-        'ISSN DIGITAL'	=> 'e_issn',
-        'JOURNAL URL'	=> 'journal_url',
-        'YEAR FIRST'	=> 'ft_start_date',
-        'YEAR LAST'		=> 'ft_end_date',
-        'VOLUME FIRST'	=> 'vol_ft_start',
-        'VOLUME LAST'	=> 'vol_ft_end',
-        'ISSUE FIRST'	=> 'iss_ft_start',
-        'ISSUE LAST'	=> 'iss_ft_end'
-    };
-}
-
-sub title_list_split_row {
-    my ( $class, $row ) = @_;
-
-    my @fields = split /\|/, $row;
-
-    return \@fields;
-}
 
 sub can_getTOC {
     my ( $class, $request ) = @_;
@@ -109,32 +83,6 @@ sub build_linkTOC {
         $url .= '/index.html';
 
         my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
-}
-
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->journal_url );
-
-        my $result = new CUFTS::Result( $record->journal_url );
         $result->record($record);
 
         push @results, $result;
