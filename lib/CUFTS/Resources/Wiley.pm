@@ -24,6 +24,7 @@ use base qw(CUFTS::Resources::GenericJournalDOI);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
+use Data::Dumper;
 
 use strict;
 
@@ -53,13 +54,15 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'TITLE'       => 'title',
-        'TITLE '      => 'title',
-        'PRINT ISSN'  => 'issn',
-        'ONLINE ISSN' => 'e_issn',
-        'URL ON WIS'  => 'journal_url',
-        'CEASED JOURNALS -- LAST VOL/ISS/YEAR PUBLISHED' => '___end',
-        'PDF ON WIS STARTS WITH VOL/ISS/YEAR'            => '___start',
+        'title'         => 'title',
+        'issn'          => 'issn',
+        'e_issn'        => 'e_issn',
+        'journal_url'   => 'journal_url',
+        'Backfile Start Year'   => 'ft_start_date',
+        'Backfile Start Volume' => 'vol_ft_start',
+        'Backfile Start Issue'  => 'iss_ft_start',
+        'Collection Start year / Start year for Current Sub'    => '___start',
+        'Collection Start Volume / Start Vol for current Sub'   => '___vol_start',
     };
 }
 
@@ -68,7 +71,6 @@ sub skip_record {
 
     return 1 if !defined( $record->{issn} );
     return 1 if $record->{issn} =~ /:99/;
-    return 1 if !defined( $record->{ft_start_date} );
 
     return 0;
 }
@@ -85,39 +87,15 @@ sub clean_data {
     }
 
     $record->{title} = trim_string( $record->{title}, '"' );
+    $record->{title} =~ s/\(.*\)$//; 
 
     if ( defined($record->{e_issn}) && $record->{e_issn} !~ / \d{4} - \d{3}[\dxX] /xsm ) {
         delete $record->{e_issn};
     }
 
-    my ( $start_vol, $start_iss, $start_year ) = split /\s*\/\s*/, $record->{'___start'};
-
-    if ( defined($start_vol) && $start_vol =~ / (\d+) \s* -? /xsm ) {
-        $record->{vol_ft_start} = $1;
-    }
-
-    if ( defined($start_iss) && $start_iss =~ / (\d+) \s* -? /xs, ) {
-        $record->{iss_ft_start} = $1;
-    }
-
-    if ( defined($start_year) && $start_year =~ / (\d{4}) /xsm ) {
-        $record->{ft_start_date} = $1;
-    }
-
-    if ( defined( $record->{'___end'} ) ) {
-        my ( $end_vol, $end_iss, $end_year ) = split /\s*\/\s*/, $record->{'___end'};
-        
-        if ( defined($end_vol) && $end_vol =~ / -? \s* (\d+) /xsm ) {
-            $record->{vol_ft_end} = $1;
-        }
-    
-        if ( defined($end_iss) && $end_iss =~ / -? \s* (\d+) /xsm ) {
-            $record->{iss_ft_end} = $1;
-        }
-    
-        if ( defined($end_year) && $end_year =~ / (\d{4}) /xsm ) {
-            $record->{ft_end_date} = $1;
-        }
+    if ( !defined($record->{ft_start_date}) && !defined($record->{vol_ft_start}) ) {
+        $record->{ft_start_date} = $record->{'___start'};
+        $record->{vol_ft_start} = $record->{'___vol_start'};
     }
 
     return $class->SUPER::clean_data($record);
