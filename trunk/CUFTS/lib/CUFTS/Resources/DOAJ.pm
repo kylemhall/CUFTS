@@ -71,6 +71,7 @@ sub title_list_split_row {
     $csv->parse($row)
         or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
 
+
     my @fields = $csv->fields;
     return \@fields;
 }
