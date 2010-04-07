@@ -54,15 +54,15 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'title'			=> 'title',
-        'issn'			=> 'issn',
-        'e_issn'		=> 'e_issn',
-        'journal_url'	=> 'journal_url',
-        'Backfile Start Year'	=> 'ft_start_date',
-        'Backfile Start Volume'	=> 'vol_ft_start',
-        'Backfile Start Issue'	=> 'iss_ft_start',
-        'Collection Start year / Start year for Current Sub'	=> '___start',
-        'Collection Start Volume / Start Vol for current Sub'	=> '___vol_start',
+        'title'         => 'title',
+        'issn'          => 'issn',
+        'e_issn'        => 'e_issn',
+        'journal_url'   => 'journal_url',
+        'Backfile Start Year'   => 'ft_start_date',
+        'Backfile Start Volume' => 'vol_ft_start',
+        'Backfile Start Issue'  => 'iss_ft_start',
+        'Collection Start year / Start year for Current Sub'    => '___start',
+        'Collection Start Volume / Start Vol for current Sub'   => '___vol_start',
     };
 }
 
@@ -87,20 +87,15 @@ sub clean_data {
     }
 
     $record->{title} = trim_string( $record->{title}, '"' );
-    $record->{title} =~ s/^(.*)\(.*\)$/$1/; 
+    $record->{title} =~ s/\(.*\)$//; 
 
     if ( defined($record->{e_issn}) && $record->{e_issn} !~ / \d{4} - \d{3}[\dxX] /xsm ) {
         delete $record->{e_issn};
     }
 
-    if ( defined($record->{ft_start_date}) && defined($record->{vol_ft_start}) ){
-    	delete $record->{'___start'};
-    	delete $record->{'___vol_start'};
-    }else{
-    	$record->{ft_start_date} = $record->{'___start'};
-    	$record->{vol_ft_start} = $record->{'___vol_start'};
-    	delete $record->{'___start'};
-    	delete $record->{'___vol_start'};
+    if ( !defined($record->{ft_start_date}) && !defined($record->{vol_ft_start}) ) {
+        $record->{ft_start_date} = $record->{'___start'};
+        $record->{vol_ft_start} = $record->{'___vol_start'};
     }
 
     return $class->SUPER::clean_data($record);
