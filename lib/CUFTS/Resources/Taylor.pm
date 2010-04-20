@@ -64,6 +64,7 @@ sub title_list_field_map {
         'Earliest Issue'      => 'iss_ft_start',
         'Latest Volume'       => 'vol_ft_end',
         'Latest Issue'        => 'iss_ft_end',
+        'URL'                 => 'journal_url',
     };
 }
 
@@ -175,35 +176,6 @@ sub build_linkTOC {
         if ( not_empty_string( $request->issue ) ) {
             $url .= '&issue=' . $request->issue;
         }
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
-}
-
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-
-    foreach my $record (@$records) {
-
-        my $url = 'http://www.informaworld.com/openurl?genre=journal';
-
-        $url .= '&issn=' . dashed_issn( $record->issn );
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
