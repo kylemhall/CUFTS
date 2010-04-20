@@ -758,7 +758,7 @@ sub strip_print_MARC {
     my ( $site, $MARC_record ) = @_;
     
     my $new_MARC_record = MARC::Record->new();
-    $new_MARC_record->leader('00000nms  22001577a 4500');
+    $new_MARC_record->leader('00000nas  22001577a 4500');
     
     my @keep_fields = qw(
         022
@@ -793,7 +793,7 @@ sub create_brief_MARC {
     my %seen;
     my $MARC_record = MARC::Record->new();
 
-    $MARC_record->leader('00000nms  22001577a 4500');
+    $MARC_record->leader('00000nas  22001577a 4500');
 
     # ISSNs
 
@@ -903,7 +903,7 @@ CJDB_RECORD:
         }
         elsif ( defined($cjdb_record->journals_auth->MARC) ) {
             $MARC_record = $cjdb_record->journals_auth->marc_object;
-            $MARC_record->leader('00000nms  22001577a 4500');
+            $MARC_record->leader('00000nas  22001577a 4500');
         }
         else {
             $MARC_record = create_brief_MARC( $site, $cjdb_record->journals_auth );
