@@ -94,4 +94,51 @@ sub can_getTOC {
     return 0;
 }
 
+sub can_getFulltext {
+    my ( $class, $request ) = @_;
+
+    return 0 if is_empty_string( $request->spage );
+    return 0 if is_empty_string( $request->volume ) && is_empty_string( $request->issue );
+
+    return $class->SUPER::can_getFulltext($request);
+}
+
+
+sub build_linkFulltext {
+    my ( $class, $records, $resource, $site, $request ) = @_;
+
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
+
+    my @results;
+
+    foreach my $record (@$records) {
+
+        my $url = 'http://openurl.jlc.jst.go.jp/servlet/resolver01?genre=article';
+
+        $url .= '&issn=' . dashed_issn( $record->issn );
+        $url .= '&spage=' . $request->spage;
+
+        if ( not_empty_string( $request->volume ) ) {
+            $url .= '&volume=' . $request->volume;
+        }
+        if ( not_empty_string( $request->issue ) ) {
+            $url .= '&issue=' . $request->issue;
+        }
+
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
+    }
+
+    return \@results;
+}
+
 1;
