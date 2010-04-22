@@ -41,6 +41,7 @@ my @write_to_directories = qw(
 );
 
 my @modules = qw(
+    Biblio::COUNTER
     Business::ISSN
     Catalyst
     Catalyst::Plugin::FillInForm
@@ -54,6 +55,7 @@ my @modules = qw(
     Class::Accessor
     Class::DBI
     Class::DBI::AbstractSearch
+    Class::DBI::Plugin::FastDelete
     Class::DBI::Plugin::CountSearch
     Class::DBI::Plugin::FastDelete
     Class::DBI::Plugin::Type
@@ -69,15 +71,19 @@ my @modules = qw(
     JSON::XS
     List::Compare
     LWP::UserAgent
+    MARC::Charset
     MARC::Record
     MIME::Lite
+    Net::LDAPS
     Net::SMTP
+    Perl6::Export::Attrs
     SQL::Abstract
     String::Approx
     Template
     Template::Plugin::JSON
     Term::ReadLine
     Text::CSV
+    Unicode::String
     URI::Escape
     URI::OpenURL
     XML::DOM
