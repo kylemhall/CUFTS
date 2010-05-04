@@ -53,21 +53,21 @@ while ( my $journal_auth = $journal_auths->next ) {
                     $count++;
                 }
                 else {
-                    warn "record", $i+1, ": error #", $rs->errcode(),   " (", $rs->errmsg(), "): ", $rs->addinfo(), "\n";
-                    warn "search was: " . $search . "\n";
+                    warn "Record ", $i+1, ": error #", $rs->errcode(), " (", $rs->errmsg(), "): ", $rs->addinfo(), "\n";
+                    warn "Search was: " . $search . "\n";
                 }
             }
         };
         
         if ($@) {
             print "Closing the connection due to $@ \n";
-            reopen($conn);
+            $conn = reopen($conn);
         }
     }
 
     $j++;
     print "Processed $j journal_auth records\n" if $j % 100 == 0;
-    reopen($conn) if $j % 500 == 0;
+    $conn = reopen($conn) if $j % 500 == 0;
 
 }   
 close($fh);
@@ -80,9 +80,10 @@ $conn->destroy();
 sub reopen {
     my $conn = shift;
     $conn->destroy();
-    print "Sleeping for 2 minutes \n";
+    print "Sleeping for 2 minutes.\n";
     sleep(120);
-    $conn = new ZOOM::Connection($HOST, $PORT, databaseName => $DATABASE) 
-        or die "can't connect: $!";
-    print "Connection reopened \n";
+    my $new_conn = new ZOOM::Connection($HOST, $PORT, databaseName => $DATABASE) 
+        or die "Can't connect: $!";
+    print "Connection reopened.\n";
+    return $new_conn;
 }
