@@ -259,6 +259,7 @@ sub store_journal_record {
     my $journal_id = $journal->id;
     $journal_auth->{cjdb_id} = $journal_id;
     $journal_auth->{processed_titles} = { $stripped_sort_title => $sort_title };
+    $journal_auth->{main_title} = $stripped_sort_title;
 
     return $journal_id;
 }
@@ -273,6 +274,7 @@ sub store_titles {
 
         # Dedupe on stripped_sort_title.  This is extra work here, but it saves storing a bunch of similar titles.
 
+        my $main_title = $journal_auth->{main_title};
         my $titles = $journal_auth->{processed_titles};
         foreach my $title ( @{ $journal_auth->{titles} } ) {
             my $processed = get_processed_titles($title);  # [ $stripped, $sort ]
@@ -290,11 +292,12 @@ sub store_titles {
                 title   => $title_id,
                 journal => $journal_auth->{cjdb_id},
                 site    => $site_id,
-                main    => 1,
+                main    => $stripped eq $main_title ? 1 : 0,
             });
         }
         
         delete $journal_auth->{processed_titles};  # Done with these
+        delete $journal_auth->{main_title};
     }
 
     $logger->info('Done attaching titles.');
