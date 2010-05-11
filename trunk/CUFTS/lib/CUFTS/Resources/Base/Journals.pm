@@ -1104,6 +1104,38 @@ sub overlay_global_title_data {
 }
 
 
+# FAST BUT DANGEROUS. This messes with the internals of a Class::DBI object.  It cuts a big chunk of CJDB rebuild time, but is
+# a bad hack thing to do.  Local/Global overlays should be converted into materialized views for the next version of CUFTS.  There's
+# a few rarely used columns left out here, just to help speed things up.
+sub fast_overlay_global_title_data {
+    my ( $class, $local, $global ) = @_;
+
+    return undef if !defined($local);
+
+    if ( !defined($global) ) {
+        $global = $local->journal
+    }
+    
+    return $local if !defined($global);
+
+    # Force a load of "global" by accessing a column since it may just be cached as a blessed id
+    $global->title;
+    
+    foreach my $column (
+        qw(title issn e_issn vol_cit_start vol_cit_end iss_cit_start iss_cit_end vol_ft_start vol_ft_end iss_ft_start iss_ft_end cit_start_date cit_end_date ft_start_date ft_end_date embargo_months embargo_days urlbase db_identifier journal_url current_months coverage journal_auth)
+    )
+    {
+        if ( !defined($local->{$column}) && defined($global->{$column}) ) {
+            $local->{$column} = $global->{$column};
+        }
+    }
+
+    $local->ignore_changes;
+    return $local;
+}
+
+
+
 ##
 ## CJDB specific code
 ##
