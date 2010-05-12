@@ -60,11 +60,8 @@ sub get_records {
     elsif ( not_empty_string($request->title) ) {
         # No ISSN found, try a title lookup to grab some JA records and attach their ids to the request
         
-        my %ja_titles = map { $_->journal_auth => 1 } CUFTS::DB::JournalsAuthTitles->search({
-            title => $request->title
-        });
+        my @ja_ids = map { $_->id } CUFTS::DB::JournalsAuth->search_by_title($request->title);
         
-        my @ja_ids = keys(%ja_titles);
         if ( scalar(@ja_ids) && scalar(@ja_ids) < 10 ) {
             $request->journal_auths( \@ja_ids );
         }
