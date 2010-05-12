@@ -105,7 +105,7 @@ sub load_cufts_data {
 sub load_cufts_links {
     my ( $logger, $site, $links, $resource_names ) = @_;
     
-    
+    my $start_time = time;
     my $site_id = $site->id;
     my $show_citations = $site->cjdb_show_citations;
     
@@ -164,18 +164,21 @@ JOURNAL:
         }
         
         $logger->info("Finished resource, found: $resource_journals_count journals.");
-        
     }
+
+    $logger->info('Link loading complete: ', format_duration(time-$start_time));
 }
 
 
 sub load_journal_auths {
     my ( $logger, $site, $links, $journal_auths ) = @_;
     
+    my $start_time = time;
     $logger->info('Loading journal authority records for ', scalar(keys(%$links)), ' journals with links.');
     my $loader = CUFTS::CJDB::Loader::MARC::JournalsAuth->new()
         or die("Unable to create JournalsAuth loader");
-    $loader->site_id( $site->id );
+        my $site_id = $site->id;
+    $loader->site_id( $site_id );
     
     foreach my $ja_id ( keys %$links ) {
         my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($ja_id);
@@ -186,21 +189,29 @@ sub load_journal_auths {
             titles => [ map { $_->title } $journal_auth->titles ],
         };
         
-        ja_augment_with_marc( $loader, $journal_auths->{$ja_id}, $journal_auth );
+        ja_augment_with_marc( $loader, $logger, $journal_auths->{$ja_id}, $journal_auth, $site_id );
         
     }
 
-    $logger->info('Completed journal authority loading.');
+    $logger->info('Completed journal authority loading: ', format_duration(time-$start_time));
 }
 
 sub ja_augment_with_marc {
-    my ( $loader, $journal, $journal_auth ) = @_;
+    my ( $loader, $logger, $journal, $journal_auth, $site_id ) = @_;
     my $marc = $journal_auth->marc_object;
     return undef if !defined($marc);
 
     $journal->{subjects}     = [ $loader->get_MARC_subjects( $marc ) ];
     $journal->{associations} = [ $loader->get_associations( $marc ) ];
     $journal->{relations}    = [ $loader->get_relations( $marc ) ];
+
+    my $lcc_subjects = $loader->get_LCC_subjects( $marc, $site_id );
+    foreach my $subject ( @$lcc_subjects ) {
+        push( @{ $journal->{subjects} }, $subject->subject1 ) if hascontent($subject->subject1);
+        push( @{ $journal->{subjects} }, $subject->subject2 ) if hascontent($subject->subject2);
+        push( @{ $journal->{subjects} }, $subject->subject3 ) if hascontent($subject->subject3);
+    }
+
 }
 
 
@@ -217,11 +228,12 @@ sub update_records {
     
     clear_site($logger, $site_id);     # Transaction starts here
     
+    my $start_time = time;
     $logger->info('Creating CJDB journal records.');
     foreach my $journal_auth_id ( keys(%$journal_auths) ) {
         store_journal_record( $logger, $journal_auth_id, $journal_auths->{$journal_auth_id}, $site_id );
     }
-    $logger->info('Done creating CJDB journal records.');
+    $logger->info('Done creating CJDB journal records: ', format_duration(time-$start_time));
 
     store_titles(           $logger, $journal_auths, $site_id );
     store_issns(            $logger, $journal_auths, $site_id );
@@ -268,6 +280,7 @@ sub store_journal_record {
 sub store_titles {
     my ( $logger, $journal_auths, $site_id ) = @_;
 
+    my $start_time = time;
     $logger->info('Attaching titles.');
 
     foreach my $journal_auth ( values %$journal_auths ) {
@@ -300,13 +313,14 @@ sub store_titles {
         delete $journal_auth->{main_title};
     }
 
-    $logger->info('Done attaching titles.');
+    $logger->info('Done attaching titles: ', format_duration(time-$start_time));
 }
 
 # Dedupe ISSNs and store. These should probably be changed to an ISSN and link table.
 sub store_issns {
     my ( $logger, $journal_auths, $site_id ) = @_;
 
+    my $start_time = time;
     $logger->info('Attaching ISSNs.');
 
     foreach my $journal_auth ( values %$journal_auths ) {
@@ -319,7 +333,7 @@ sub store_issns {
         }
     }
 
-    $logger->info('Done attaching ISSNs.');
+    $logger->info('Done attaching ISSNs: ', format_duration(time-$start_time));
 }
 
 
@@ -327,6 +341,7 @@ sub store_issns {
 sub store_associations {
     my ( $logger, $journal_auths, $site_id ) = @_;
 
+    my $start_time = time;
     $logger->info('Attaching associations.');
 
     foreach my $journal_auth ( values %$journal_auths ) {
@@ -345,7 +360,7 @@ sub store_associations {
         }
     }
 
-    $logger->info('Done attaching associations.');
+    $logger->info('Done attaching associations: ', format_duration(time-$start_time));
 }
 
 
@@ -353,11 +368,12 @@ sub store_associations {
 sub store_subjects {
     my ( $logger, $journal_auths, $site_id ) = @_;
 
+    my $start_time = time;
     $logger->info('Attaching subjects.');
 
     foreach my $journal_auth ( values %$journal_auths ) {
         next if !defined($journal_auth->{subjects});
-        foreach my $subject ( @{ $journal_auth->{subjects} } ) {
+        foreach my $subject ( uniq @{ $journal_auth->{subjects} } ) {
             my $subject_id = CJDB::DB::Subjects->find_or_create({
                subject        => $subject,
                search_subject => CUFTS::CJDB::Util::strip_title($subject),
@@ -371,13 +387,14 @@ sub store_subjects {
         }
     }
 
-    $logger->info('Done attaching subjects.');
+    $logger->info('Done attaching subjects: ', format_duration(time-$start_time));
 }
 
 # Store relations.
 sub store_relations {
     my ( $logger, $journal_auths, $site_id ) = @_;
 
+    my $start_time = time;
     $logger->info('Attaching relations.');
 
     JOURNALAUTH:
@@ -396,7 +413,7 @@ sub store_relations {
         }
     }
 
-    $logger->info('Done attaching relations.');
+    $logger->info('Done attaching relations: ', format_duration(time-$start_time));
 }
 
 
@@ -404,6 +421,7 @@ sub store_relations {
 sub store_resource_names {
     my ( $logger, $journal_auths, $links, $resource_names, $site_id ) = @_;
 
+    my $start_time = time;
     $logger->info('Attaching resource names.');
 
     my %resource_map;
@@ -427,13 +445,14 @@ sub store_resource_names {
         }
     }
     
-    $logger->info('Done attaching resource names.');
+    $logger->info('Done attaching resource names:', format_duration(time-$start_time));
     
 }
 
 sub store_links {
     my ( $logger, $journal_auths, $links, $resource_names, $site_id ) = @_;
 
+    my $start_time = time;
     $logger->info('Attaching links.');
 
     while ( my ($journal_auth_id, $links) = each %$links ) {
@@ -462,7 +481,7 @@ sub store_links {
         }
     }
     
-    $logger->info('Done attaching links.');
+    $logger->info('Done attaching links: ', format_duration(time-$start_time));
 }
 
 
