@@ -40,7 +40,8 @@
 
         menu.push([
             [
-                [ '/tools/compare', 'Resource Comparison' ],
+                [ '/tools/compare',     'Resource Comparison' ],
+                [ '/tools/newresource', 'New Resource' ],
             ],
             'Tools'
         ]);
