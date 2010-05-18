@@ -26,4 +26,6 @@ __PACKAGE__->table('journals_active');
 
 __PACKAGE__->columns(__PACKAGE__->columns, 'local_resource');
 
+__PACKAGE__->has_a('local_resource', 'CUFTS::DB::LocalResources');
+
 1;
