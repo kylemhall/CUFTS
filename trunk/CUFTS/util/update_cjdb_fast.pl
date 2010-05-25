@@ -33,7 +33,7 @@ sub load {
     my $logger = Log::Log4perl->get_logger();
 
     my %options;
-    GetOptions( \%options, 'site_key=s@', 'site_id=i@', 'force' );
+    GetOptions( \%options, 'site_key=s@', 'site_id=i@', 'print_file=s', 'force' );
 
     $logger->info('Starting CJDB rebuild script.');
 
@@ -54,8 +54,9 @@ SITE:
 
         # TODO: Rebuild print records goes here.
 
+        my $MARC_cache = {};
         eval {
-            load_cufts_data($logger, $site);
+            load_cufts_data( $logger, $site, \%options, $MARC_cache );
         };
         if ($@) {
             $logger->error('Error loading CUFTS data: ', $@);
@@ -65,6 +66,7 @@ SITE:
             next SITE;
         }
 
+
         $site->rebuild_cjdb(undef);
         $site->rebuild_ejournals_only(undef);
         $site->update;
@@ -72,7 +74,7 @@ SITE:
         CUFTS::DB::DBI->dbi_commit;
         CJDB::DB::DBI->dbi_commit;
 
-        build_dump( $logger, $site, undef );
+        build_dump( $logger, $site, $MARC_cache );
 
         $logger->info('Rebuild complete for site: ', $site->name, ' (', $site->key, '): ', format_duration(time-$start_time));
     }
@@ -80,26 +82,152 @@ SITE:
     $logger->info('Finished CJDB rebuilds.');
 }
 
+##
+## Print record loading code - reads journal records and builds a set of large hashrefs representing the whole update.
+## No transaction is started during this part
+##
+
+sub load_print_data {
+    my ( $logger, $site, $links, $journal_auths, $options, $MARC_cache ) = @_;
+
+    my $site_id = $site->id;
+
+    return if !hascontent($site->rebuild_cjdb) && !hascontent($options->{print_file});
+    
+    my @files =   $options->{print_file} ? ( $options->{print_file} )
+                : map { $CUFTS::Config::CJDB_SITE_DATA_DIR . '/' . $site->id . '/' . $_ }
+                    split /\|/, $site->rebuild_cjdb;
+
+    my $start_time = time;
+    $logger->info('Starting to process print data.');
+
+    my $loader = load_print_module( $logger, $site );
+    $loader->site_id( $site->id );
+    @files = $loader->pre_process(@files);
+
+    my $batch = $loader->get_batch(@files);
+    $batch->strict_off;
+
+    my $count = 0;
+    while ( my $record = $batch->next() ) {
+        $count++;
+
+        next if !defined($record) || $loader->skip_record($record);
+
+        my $journal_auth_id = $loader->match_journals_auth($record);
+
+        # Create a new journal auth record based on the print data if necessary.
+        # This is done in its own transaction to keep it from locking tables for the whole CJDB update.
+        if ( !defined($journal_auth_id) ) {
+            $journal_auth_id = create_basic_ja( $logger, $loader, $record );
+        }
+
+        if ( !defined($journal_auth_id) ) {
+            $logger->warn('Unable to find or create a journal auth record for print title: ' . $loader->get_title($record) );
+            next;
+        }
+
+        $MARC_cache->{$journal_auth_id}->{MARC} = $record;
+        
+        # Print records are used to populate both links and "journal auth" data
+        
+        load_print_link( $logger, $site, $loader, $links, $journal_auth_id, $record ); 
+
+        next if exists $journal_auths->{$journal_auth_id};
+        
+        $journal_auths->{$journal_auth_id} = {
+            title  => $loader->get_title($record),
+            issns  => [ $loader->get_issns($record) ],
+            titles => [ $loader->get_alt_titles($record) ],
+        };
+
+        ja_augment_with_marc( $loader, $logger, $journal_auths->{$journal_auth_id}, $record, $site_id );
+
+    }
+
+    $logger->info('Finished processing print data: ', format_duration(time-$start_time));
+}
+
+# Gets the print module for a site, requires it, and creates a loader object
+
+sub load_print_module {
+    my ( $logger, $site ) = @_;
+    my $site_key = $site->key;
+
+    my $module_name = 'CUFTS::CJDB::Loader::MARC::' . $site_key;
+    $logger->trace( 'Loading print module: ', $module_name );
+
+    eval { require $module_name };
+    if ($@) {
+        die("Unable to require $module_name: $@");
+    }
+
+    my $module = $module_name->new();
+    defined($module)
+        or die("Failed to create new loading object from module: $module_name");
+
+    return $module;
+}
+
+# Gets a set of print links for a MARC record and adds it to the links hash
+
+sub load_print_link {
+    my ( $logger, $site, $loader, $links, $journal_auth_id, $record ) = @_;
+    
+    my $new_link = {
+        print_coverage  => $loader->get_coverage($record),
+        urls            => [ [ 0, $loader->get_link($record) ] ],
+        rank            => $loader->get_rank(),
+    };
+    
+    return if !hascontent($new_link->{print_coverage}) || !defined($new_link->{urls});
+
+    $links->{$journal_auth_id} = [] if !exists $links->{$journal_auth_id};
+    push @{ $links->{$journal_auth_id} }, $new_link;
+}
+
+sub create_basic_ja{
+    my ( $logger, $loader, $record ) = @_;
+    
+    my $title = $loader->get_title($record);
+    my @issns = $loader->get_clean_issn_list($record);
+    
+    my $journals_auth = CUFTS::DB::JournalsAuth->create({ title => $title });
+    return undef if !defined($journals_auth);
+
+    $journals_auth->add_to_titles({ title => $title, title_count => 1 });
+
+    foreach my $issn ( uniq @issns ) {
+        $journals_auth->add_to_issns({ issn => $issn });
+    }
+
+    CUFTS::DB::DBI->dbi_commit();
+    
+    $logger->info( 'Created JA (', $journals_auth->id, '): ', $title );
+    
+    return $journals_auth->id;
+}
+
+##
+## CUFTS Loading code - reads journal records and builds a set of large hashrefs representing the whole update.
+## No transaction is started during this part
+##
+
 
 sub load_cufts_data {
-    my ( $logger, $site ) = @_;
+    my ( $logger, $site, $options, $MARC_cache ) = @_;
 
     $logger->info('Starting to process CUFTS data.');
     
     my ( %links, %journal_auths, %resource_names );
 
     load_cufts_links(   $logger, $site, \%links, \%resource_names );
+    load_print_data(    $logger, $site, \%links, \%journal_auths, $options, $MARC_cache );
     load_journal_auths( $logger, $site, \%links, \%journal_auths );
     update_records(     $logger, $site, \%journal_auths, \%links, \%resource_names );
 
     $logger->info('Completed CUFTS data processing.');
 }
-
-
-##
-## Loading code - reads journal records and builds a set of large hashrefs representing the whole update.
-## No transaction is started during this part
-## 
 
 # Loop through active local resources, gathering holdings information and URLs.
 sub load_cufts_links {
@@ -181,6 +309,8 @@ sub load_journal_auths {
     $loader->site_id( $site_id );
     
     foreach my $ja_id ( keys %$links ) {
+        next if exists $journal_auths->{$ja_id};  # We may already have a record from print
+
         my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($ja_id);
         
         $journal_auths->{$ja_id} = {
@@ -189,7 +319,7 @@ sub load_journal_auths {
             titles => [ map { $_->title } $journal_auth->titles ],
         };
         
-        ja_augment_with_marc( $loader, $logger, $journal_auths->{$ja_id}, $journal_auth, $site_id );
+        ja_augment_with_marc( $loader, $logger, $journal_auths->{$ja_id}, $journal_auth->marc_object, $site_id );
         
     }
 
@@ -197,8 +327,8 @@ sub load_journal_auths {
 }
 
 sub ja_augment_with_marc {
-    my ( $loader, $logger, $journal, $journal_auth, $site_id ) = @_;
-    my $marc = $journal_auth->marc_object;
+    my ( $loader, $logger, $journal, $marc, $site_id ) = @_;
+    
     return undef if !defined($marc);
 
     $journal->{subjects}     = [ $loader->get_MARC_subjects( $marc ) ];
@@ -290,7 +420,7 @@ sub store_titles {
         my $main_title = $journal_auth->{main_title};
         my $titles = $journal_auth->{processed_titles};
         foreach my $title ( @{ $journal_auth->{titles} } ) {
-            my $processed = get_processed_titles($title);  # [ $stripped, $sort ]
+            my $processed = ref($title) eq 'ARRAY' ? $title : get_processed_titles($title);  # [ $stripped, $sort ]
             next if !defined($processed) || exists $titles->{$processed->[0]};
             $titles->{$processed->[0]} = $processed->[1];
         }
@@ -437,6 +567,7 @@ sub store_resource_names {
         my @resource_ids = map { $resource_map{ $_->{resource_id} } } @{ $links->{$journal_auth_id} };
 
         foreach my $resource_id (uniq @resource_ids) {
+            next if !$resource_id;
             CJDB::DB::JournalsAssociations->find_or_create({
                 association  => $resource_id,
                 site         => $site_id,
@@ -446,7 +577,6 @@ sub store_resource_names {
     }
     
     $logger->info('Done attaching resource names:', format_duration(time-$start_time));
-    
 }
 
 sub store_links {
@@ -455,13 +585,13 @@ sub store_links {
     my $start_time = time;
     $logger->info('Attaching links.');
 
-    while ( my ($journal_auth_id, $links) = each %$links ) {
+    while ( my ($journal_auth_id, $ja_links) = each %$links ) {
         my $journal_auth = $journal_auths->{$journal_auth_id};
         my $cjdb_id = $journal_auth->{cjdb_id};
 
         # This has more copying of data than is really necessary, but it
         # makes the temporary hashes that are built more sane - "resource_id" instead of "resource"
-        foreach my $link (@$links) {
+        foreach my $link (@$ja_links) {
             foreach my $url ( @{$link->{urls}} ) {
                 my $new_link = {
                     resource            => $link->{resource_id},
@@ -473,6 +603,7 @@ sub store_links {
                     local_journal       => $link->{local_journal_id},
                     fulltext_coverage   => $link->{fulltext_coverage},
                     citation_coverage   => $link->{citation_coverage},
+                    print_coverage      => $link->{print_coverage},
                     embargo             => $link->{embargo},
                     current             => $link->{current},
                 };
@@ -755,6 +886,7 @@ sub build_dump {
     my ( $logger, $site, $MARC_cache ) = @_;
 
     $logger->info('Starting MARC dump.');
+    my $start_time = time;
 
     my $site_id = $site->id;
     
@@ -832,6 +964,7 @@ sub build_dump {
 CJDB_RECORD:
     while ( my $cjdb_record = $cjdb_record_iter->next ) {
         my $journals_auth_id = $cjdb_record->journals_auth->id;
+
 
         my $MARC_record;
         if ( defined( $MARC_cache->{$journals_auth_id}->{MARC} ) ) {
@@ -984,7 +1117,7 @@ CJDB_RECORD:
     close(MARC_OUTPUT );
     close(ASCII_OUTPUT);
 
-    $logger->info('Finished MARC dump.');
+    $logger->info('Finished MARC dump: ', format_duration(time-$start_time));
 
     return 1;
 }
