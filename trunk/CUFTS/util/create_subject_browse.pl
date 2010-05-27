@@ -38,7 +38,7 @@ if (defined($options{'global'})) {
     $path = "${CUFTS::Config::CJDB_SITE_TEMPLATE_DIR}/${site_id}/active/";
     print "Creating subject browse page for site: ", $site->key, "\n";
 }
-$outfile = $path . 'lcc_browse_content';
+$outfile = $path . 'lcc_browse_content.tt';
 
 if ( ! -e $path ) {
     print "Path to template does not exist, attempting to create: $path\n";
@@ -97,7 +97,7 @@ foreach my $subject1 (sort keys %subject_hierarchy) {
         print OUTFILE "<img name=\"lcc-browse-group${count1}-buttonimage\" src=\"[% image_dir %]plus.gif\" />";
         print OUTFILE "</a> ";
     } else {
-        print OUTFILE "<img src=\"[% image_dir %]blank-square11.gif\" />";
+        print OUTFILE "<img src=\"[% image_dir %]spacer.gif\" style=\"width: 16px; height: 11px\" />";
     }
 
     print OUTFILE "<a href=\"[% url(\"\$url_base/browse/journals?search_terms=${subject1_uri}&browse_field=subject\") %]\">${subject1}</a>";
