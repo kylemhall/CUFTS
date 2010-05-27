@@ -39,6 +39,7 @@ sub title_list_fields {
             id
             title
             issn
+            e_issn
             ft_start_date
             ft_end_date
             vol_ft_start
