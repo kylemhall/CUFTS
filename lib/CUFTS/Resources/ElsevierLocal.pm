@@ -51,7 +51,7 @@ sub skip_record {
     
     return 1 if $record->{'___Entitlement Status'} ne 'Subscribed';
 
-    return 1 if $record->{'___Publication Type'} ne 'Journal';
+    return 0 if $record->{'___Publication Type'} =~ /handbook/i;
     
     return 0;
 }
