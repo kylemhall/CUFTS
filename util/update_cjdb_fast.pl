@@ -331,6 +331,8 @@ sub ja_augment_with_marc {
     
     return undef if !defined($marc);
 
+    push @{$journal->{issns}}, $loader->get_issns( $marc );  # Blindly add, these should be deduped before storing
+
     $journal->{subjects}     = [ $loader->get_MARC_subjects( $marc ) ];
     $journal->{associations} = [ $loader->get_associations( $marc ) ];
     $journal->{relations}    = [ $loader->get_relations( $marc ) ];
