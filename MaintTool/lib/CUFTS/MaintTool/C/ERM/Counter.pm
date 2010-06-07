@@ -23,7 +23,7 @@ my $form_validate = {
 
             next_run_date
             run_start_date
-            run_end_date
+            interval_months
             
             upload
             file
