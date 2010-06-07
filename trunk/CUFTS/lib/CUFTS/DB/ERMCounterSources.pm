@@ -36,7 +36,7 @@ __PACKAGE__->columns(All => qw(
     last_run_timestamp
     next_run_date
     run_start_date
-    run_end_date
+    interval_months
 ));                                                                                                        
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 __PACKAGE__->sequence('erm_counter_sources_id_seq');

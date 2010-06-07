@@ -84,29 +84,7 @@
   [% PROCESS form_results.tt frf='reference' %]
  </div>
  <div class="help">
-  SUSHI reference field to send.  e.g. SS00034-sful@wil
- </div>
-</div>
-
-<div class="field">
- <div class="data">
-  <label for="counter-edit-input-service_url">service URL</label>
-  <input id="counter-edit-input-service_url" name="service_url" value="[% source.service_url | html %]" style="width: 30em;" />
-  [% PROCESS form_results.tt frf='service_url' %]
- </div>
- <div class="help">
-  SUSHI service URL.  e.g. http://170.224.101.201/sushi_01/services/SushiServicePort
- </div>
-</div>
-
-<div class="field">
- <div class="data">
-  <label for="counter-edit-input-interval_months">interval_months</label>
-  <input id="counter-edit-input-interval_months" name="interval_months" value="[% source.interval_months | html %]" style="width: 5em;" />
-  [% PROCESS form_results.tt frf='interval_months' %]
- </div>
- <div class="help">
-  Number of months before COUNTER data is available from this source.
+  SUSHI customer reference field to send.
  </div>
 </div>
 
@@ -134,21 +112,20 @@
   [% PROCESS form_results.tt frf='run_start_date' %]
  </div>
  <div class="help">
-  Start date for the statistics range for the next SUSHI run.  YYYY-MM-DD.
+  Start date for the statistics range for the next SUSHI run.  YYYY-MM-DD.  Total requested period will be start date plus interval months.
  </div>
 </div>
 
 <div class="field">
  <div class="data">
-  <label for="counter-edit-input-run_end_date">end date</label>
-  <input id="counter-edit-input-run_end_date" name="run_end_date" value="[% source.run_end_date | html %]" style="width: 10em;" />
-  [% PROCESS form_results.tt frf='run_end_date' %]
+  <label for="counter-edit-input-interval_months">interval_months</label>
+  <input id="counter-edit-input-interval_months" name="interval_months" value="[% source.interval_months | html %]" style="width: 5em;" />
+  [% PROCESS form_results.tt frf='interval_months' %]
  </div>
  <div class="help">
-  End date for the statistics range for the next SUSHI run.  YYYY-MM-DD.
+  Number of months before COUNTER data is available from this source.
  </div>
 </div>
-
 
 </fieldset>
 

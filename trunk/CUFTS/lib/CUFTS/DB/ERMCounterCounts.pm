@@ -48,7 +48,7 @@ __PACKAGE__->set_sql('stats_by_counter_source' => qq{
 });
 
 __PACKAGE__->set_sql('sum_counts_by_counter_source' => qq{
-    SELECT start_date, SUM(count) AS count FROM __TABLE__ WHERE counter_source = ? AND start_date >= ? and start_date <= ? GROUP BY start_date ORDER BY start_date;
+    SELECT start_date, SUM(count) AS count FROM __TABLE__ WHERE counter_source = ? AND start_date >= ? AND start_date <= ? GROUP BY start_date ORDER BY start_date;
 });
 
 sub normalize_column_values {

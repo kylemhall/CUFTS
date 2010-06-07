@@ -37,7 +37,6 @@ __PACKAGE__->columns(All => qw(
 
 	title
 	MARC
-	
 	RSS
 
 	created
@@ -46,8 +45,8 @@ __PACKAGE__->columns(All => qw(
 __PACKAGE__->columns(Essential => qw(
 	id
 	title
-	RSS
 	MARC
+	RSS
 ));
 
 __PACKAGE__->sequence('journals_auth_id_seq');
@@ -152,10 +151,10 @@ __PACKAGE__->set_sql('by_title' => qq{
 sub marc_object {
 	my ($self) = @_;
 	
-	defined($self->marc) or
+	defined($self->MARC) or
 		return undef;
 
-	my $obj = MARC::File::USMARC->decode($self->marc);
+	my $obj = MARC::File::USMARC->decode($self->MARC);
 	return $obj;
 }
 

@@ -23,7 +23,7 @@ package CUFTS::Schema::ERMCounterSources;
 use strict;
 use base qw/DBIx::Class/;
 
-__PACKAGE__->load_components(qw/Core/);
+__PACKAGE__->load_components(qw/ InflateColumn::DateTime Core/);
 
 __PACKAGE__->table('erm_counter_sources');
 __PACKAGE__->add_columns(
@@ -71,8 +71,9 @@ __PACKAGE__->add_columns(
         data_type => 'date',
         is_nullable => 1,
     },
-    run_end_date => {
-        data_type => 'date',
+    interval_months => {
+        data_type => 'int',
+        size => 4,
         is_nullable => 1,
     },
 );                                                                                               
