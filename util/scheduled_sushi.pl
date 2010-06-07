@@ -35,30 +35,38 @@ while ( my $site = $sites_rs->next ) {
         $logger->info( "Found $count COUNTER sources for site: ", $site->name );
 
         while ( my $source = $sources_rs->next() ) {
-            my ( $start, $end ) = ( $source->run_start_date, $source->run_end_date );
-            if ( !defined($start) || !defined($end) ) {
+            my ( $run_start_date, $interval_months ) = ( $source->run_start_date, $source->interval_months );
+
+            if ( !defined($run_start_date) || !defined($interval_months) ) {
                 $logger->error('SUSHI download scheduled without start/end dates. ' . 'Site: ' . $source->site->key . ' CounterSource: ' . $source->name );
                 next;
             }
 
+            my $start = $run_start_date->clone->set_day(1);
+            my $end = $start->clone->add( months => $interval_months )->subtract( days => 1 );
+
             $logger->info( "Attempting to download report for ", $source->name );
-            SUSHI::Client::get_jr1_report( $logger, $schema, $site, $source, $start, $end );
+            $logger->info( "Coverage period: ", $start->ymd, " to ", $end->ymd );
+
+            my $result = SUSHI::Client::get_jr1_report( $logger, $schema, $site, $source, $start->ymd, $end->ymd );
+
+            if ( $result ) {
+                $source->run_start_date( $run_start_date->add( months => $interval_months ) );
+                $source->next_run_date( $source->next_run_date->add( months => $interval_months ) );
+                $source->update;
+                $logger->info( 'Updated next run date to: ', $source->next_run_date->ymd );
+            }
+            else {
+                $logger->info( 'Error processing SUSHI request, run date was not updated.' );
+            }
+            
             $logger->info( "Done processing ", $source->name );
 
-            # TODO: Update source with new dates here
-
         }
-    
+
         $logger->info( 'Done with site: ', $site->name );
 
     }
 
 }
-
-
-
-
-
-
-
 

@@ -33,7 +33,7 @@ sub get_jr1_report {
         $logger->error( 'No service URL defined for SUSHI source: ', $sushi->name );
         return undef;
     }
-    
+
     my $service = SUSHI::SUSHIInterfaces::SushiService::SushiServicePort->new({
         proxy => $url,
         deserializer_args => { strict => 0 },
@@ -80,6 +80,11 @@ sub get_jr1_report {
 
     my $report = $result->get_Report;
     my $journal_report = $report->get_Report;
+
+    if ( !$journal_report || !defined($journal_report->attr ) ) {
+        $logger->error("Unable to retrieve report details through get_Report.");
+        return undef;
+    }
 
     # print "Vendor: ", $journal_report->get_Vendor->attr->get_Name, "\n";
     $logger->info( 'Retrieved report: ', $journal_report->attr->get_Title );
@@ -142,15 +147,15 @@ sub get_jr1_report {
                     last;
                 }
             }
-            
+
             my $start = $period->get_Begin->as_string;
             my $end   = $period->get_End->as_string;
-            
+
             $start =~ s/^(\d{4}-\d{2}-\d{2}).*$/$1/;  # Fix dates that look like "1999-01-01-08:00"
             $end   =~ s/^(\d{4}-\d{2}-\d{2}).*$/$1/;
-            
+
             next if !defined($count);
-            
+
             # Verify dates and make sure it's not a multiple month summary record
             if ( $start =~ /^\d{4}-(\d{2})-\d{2}$/ ) {
                 my $start_month = $1;
@@ -192,9 +197,10 @@ sub get_jr1_report {
             # print join(' -- ', $requests_data->{start_date}, $requests_data->{end_date}, $requests_data->{count} ), "\n";
         }
     }
-    
+
     $logger->info( "Loaded records for $journal_count journals." );
-    
+
+    return 1;
 }
 
 1;
