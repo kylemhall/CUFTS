@@ -30,7 +30,6 @@ __PACKAGE__->add_columns(
     id => {
       data_type => 'integer',
       is_auto_increment => 1,
-      default_value => undef,
       is_nullable => 0,
       size => 8,
     },
