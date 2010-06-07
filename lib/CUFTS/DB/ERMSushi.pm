@@ -31,7 +31,6 @@ __PACKAGE__->columns(All => qw(
     name
     requestor
     service_url
-    interval_months
 ));                                                                                                        
 
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);

@@ -54,11 +54,6 @@ __PACKAGE__->add_columns(
         size => 255,
         is_nullable => 1,
     },
-    interval_months => {
-        data_type => 'int',
-        size => 4,
-        is_nullable => 1,
-    },
 );                                                                                               
 
 __PACKAGE__->set_primary_key( 'id' );
