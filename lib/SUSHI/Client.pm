@@ -74,6 +74,11 @@ sub get_jr1_report {
 
     my $result = $service->GetReport($request);
     if ( !$result ) {
+        # Try to get a useful error...
+        
+        if ( $result =~ / Message\s+was:[\s\n]+ (.+?) <\/fault /xsm ) {
+            $result = $1;
+        }
         $logger->error( "Unable to process 'GetReport': " . substr($result, 0, 1024 ) );
         return [ 'Could not process GetReport, possibly a failure at the remote service.' ];
     }
