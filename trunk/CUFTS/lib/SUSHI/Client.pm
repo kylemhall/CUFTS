@@ -25,13 +25,13 @@ sub get_jr1_report {
     my $sushi = $source->erm_sushi;
     if ( !defined($sushi) ) {
         $logger->error( 'No SUSHI resource configured for this COUNTER Source: ', $source->name );
-        return undef;
+        return [ 'No SUSHI resource configured.' ];
     }
 
     my $url = $sushi->service_url;
     if ( !defined($url) ) {
         $logger->error( 'No service URL defined for SUSHI source: ', $sushi->name );
-        return undef;
+        return [ 'No SUSHI service URL set.' ];
     }
 
     my $service = SUSHI::SUSHIInterfaces::SushiService::SushiServicePort->new({
@@ -42,7 +42,7 @@ sub get_jr1_report {
 
     if ( !$service ) {
         $logger->error( 'Failed to create SushiServicePort for SUSHI source: ', $sushi->name );
-        return undef;
+        return [ 'Could not create SushiServicePort' ];
     }
 
     my $request_data = {
@@ -75,7 +75,7 @@ sub get_jr1_report {
     my $result = $service->GetReport($request);
     if ( !$result ) {
         $logger->error( "Unable to process 'GetReport': " . substr($result, 0, 1024 ) );
-        return undef;
+        return [ 'Could not process GetReport, possibly a failure at the remote service.' ];
     }
 
     my $report = $result->get_Report;
@@ -83,7 +83,7 @@ sub get_jr1_report {
 
     if ( !$journal_report || !defined($journal_report->attr ) ) {
         $logger->error("Unable to retrieve report details through get_Report.");
-        return undef;
+        return [ 'Could not get report details from SUSHI response.' ];
     }
 
     # print "Vendor: ", $journal_report->get_Vendor->attr->get_Name, "\n";

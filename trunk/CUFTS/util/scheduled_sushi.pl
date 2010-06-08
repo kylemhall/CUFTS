@@ -7,6 +7,8 @@ use SUSHI::Client;
 use CUFTS::Schema;
 use CUFTS::Config;
 use Getopt::Long;
+use String::Util qw(hascontent);
+use Net::SMTP;
 
 use Log::Log4perl qw(:easy);
 Log::Log4perl->easy_init($INFO);
@@ -26,6 +28,7 @@ my $sites_rs = $schema->resultset('Sites')->search($site_search);
 
 while ( my $site = $sites_rs->next ) {
 
+    my $site_message;
     my $sources_search = $options{cs_id} ? { id => $options{cs_id} } : { site => $site->id, next_run_date => \'<= CURRENT_DATE' };
 
     my $sources_rs = $schema->resultset('ERMCounterSources')->search($sources_search);
@@ -50,14 +53,18 @@ while ( my $site = $sites_rs->next ) {
 
             my $result = SUSHI::Client::get_jr1_report( $logger, $schema, $site, $source, $start->ymd, $end->ymd );
 
-            if ( $result ) {
+            if ( $result == 1 ) {
                 $source->run_start_date( $run_start_date->add( months => $interval_months ) );
                 $source->next_run_date( $source->next_run_date->add( months => $interval_months ) );
                 $source->update;
                 $logger->info( 'Updated next run date to: ', $source->next_run_date->ymd );
+                $site_message .= 'Sucessfully downloaded COUNTER report from ' . $source->name . ' covering ' . $start->ymd . ' to ' . $end->ymd . "\n";
             }
             else {
                 $logger->info( 'Error processing SUSHI request, run date was not updated.' );
+                if ( ref($result) eq 'ARRAY' ) {
+                    $site_message .= 'Failed to download COUNTER report from ' . $source->name . ': ' . @$result;
+                }
             }
             
             $logger->info( "Done processing ", $source->name );
@@ -66,7 +73,40 @@ while ( my $site = $sites_rs->next ) {
 
         $logger->info( 'Done with site: ', $site->name );
 
+        if ( hascontent($site_message) ) {
+            eval { email_site( $site, $site_message ) }
+        }
+
+    }
+}
+
+$logger->info( 'Done processing SUSHI updates.' );
+
+
+sub email_site {
+    my ( $site, $message ) = @_;
+
+    my $email = $site->email;
+    if ( hascontent($email) ) {
+        my $host = defined($CUFTS::Config::CUFTS_SMTP_HOST) ? $CUFTS::Config::CUFTS_SMTP_HOST : 'localhost';
+        my $smtp = Net::SMTP->new($host);
+        if (defined($smtp)) {
+            $smtp->mail($CUFTS::Config::CUFTS_MAIL_FROM);
+            $smtp->to(split /\s*,\s*/, $email);
+            $smtp->data();
+            $smtp->datasend("To: $email\n");
+            $smtp->datasend("Subject: COUNTER stats updated through SUSHI\n");
+            if ( defined($CUFTS::Config::CUFTS_MAIL_REPLY_TO) ) {
+                $smtp->datasend("Reply-To: ${CUFTS::Config::CUFTS_MAIL_REPLY_TO}\n");
+            }
+            $smtp->datasend("\n");
+            $smtp->datasend($message);
+            $smtp->dataend();
+            $smtp->quit();
+        }
+        else {
+            warn('Unable to create Net::SMTP object.');
+        }
     }
 
 }
-
