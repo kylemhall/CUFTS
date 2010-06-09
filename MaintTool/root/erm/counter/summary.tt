@@ -17,3 +17,18 @@
 [% END %]
 </table>
 </div>
+
+<h2>View Report</h2>
+[% IF source.type == 'j' %]
+<form action="[% c.uri_for( c.controller('ERM::Statistics').action_for('counter_journal_usage') ) %]">
+[% ELSIF source.type == 'd' %]
+<form action="[% c.uri_for( c.controller('ERM::Statistics').action_for('counter_database_usage') ) %]">
+[% END %]
+<table>
+<tr><td>Start:</td><td><input type="text" name="start_date" size="10" maxlength="10" /> (YYYY-MM-DD)</td></tr>
+<tr><td>End:</td><td><input type="text" name="end_date" size="10" maxlength="10" /> (YYYY-MM-DD)</td></tr>
+</table>
+<input type="hidden" name="counter_sources" value="[% source.id %]" />
+<input type="hidden" name="format" value="html" />
+<input type="submit" name="run_report" value="show report" />
+</form>

@@ -51,7 +51,9 @@ while ( my $site = $sites_rs->next ) {
             $logger->info( "Attempting to download report for ", $source->name );
             $logger->info( "Coverage period: ", $start->ymd, " to ", $end->ymd );
 
-            my $result = SUSHI::Client::get_jr1_report( $logger, $schema, $site, $source, $start->ymd, $end->ymd );
+            my $result =   $source->type eq 'j' ? SUSHI::Client::get_jr1_report( $logger, $schema, $site, $source, $start->ymd, $end->ymd )
+                         : $source->type eq 'd' ? SUSHI::Client::get_db1_report( $logger, $schema, $site, $source, $start->ymd, $end->ymd )
+                         : [ 'Unrecognized COUNTER source type: ' . $source->type ];
 
             if ( $result == 1 ) {
                 $source->run_start_date( $run_start_date->add( months => $interval_months ) );
@@ -74,7 +76,7 @@ while ( my $site = $sites_rs->next ) {
         $logger->info( 'Done with site: ', $site->name );
 
         if ( hascontent($site_message) ) {
-            eval { email_site( $site, $site_message ) }
+            eval { email_site( $logger, $site, $site_message ) }
         }
 
     }
@@ -84,7 +86,7 @@ $logger->info( 'Done processing SUSHI updates.' );
 
 
 sub email_site {
-    my ( $site, $message ) = @_;
+    my ( $logger, $site, $message ) = @_;
 
     my $email = $site->email;
     if ( hascontent($email) ) {
@@ -103,9 +105,10 @@ sub email_site {
             $smtp->datasend($message);
             $smtp->dataend();
             $smtp->quit();
+            $logger->info('Update email sent to site.');
         }
         else {
-            warn('Unable to create Net::SMTP object.');
+            $logger->info('Unable to create Net::SMTP object.');
         }
     }
 

@@ -211,8 +211,8 @@ sub _counter_usage_generic {
     my ( $self, $c, $types, $report_dir ) = @_;   
 
     $c->form({
-        optional => [ qw( run_report ) ],
-        required => [ qw( selected_resources start_date end_date format ) ],
+        optional => [ qw( run_report selected_resources counter_sources ) ],
+        required => [ qw( start_date end_date format ) ],
         constraints => {
             start_date  => qr/^\d{4}-\d{1,2}-\d{1,2}/,
             end_date    => qr/^\d{4}-\d{1,2}-\d{1,2}/,
@@ -229,23 +229,25 @@ sub _counter_usage_generic {
 
     my $dates = _build_granulated_dates( $start_date, $end_date, 'month', 1 );
 
-    my @resource_ids = split(',', $c->form->{valid}->{selected_resources} );
+    my @counter_sources = $c->form->{valid}->{counter_sources};
+    if ( !scalar(@counter_sources) ) {
+        my @resource_ids = split(',', $c->form->{valid}->{selected_resources} );
+        my @erms = CUFTS::DB::ERMMain->search(
+            {
+                id => { '-in' => \@resource_ids },
+            }
+        );
 
-    my @erms = CUFTS::DB::ERMMain->search(
-        {
-            id => { '-in' => \@resource_ids },
+        # TODO: Check that we have some records in @erm here.
+
+        my %counter_sources;
+        foreach my $erm (@erms) {
+            foreach my $source ( $erm->counter_sources ) {
+                $counter_sources{$source->id}++;
+            }
         }
-    );
-
-    # TODO: Check that we have some records in @erm here.
-
-    my %counter_sources;
-    foreach my $erm (@erms) {
-        foreach my $source ( $erm->counter_sources ) {
-            $counter_sources{$source->id}++;
-        }
+        @counter_sources = keys %counter_sources;
     }
-    my @counter_sources = keys %counter_sources;
 
 
     # TODO: This stuff can be rewritten to be hopefully much faster under DBIC by
@@ -305,7 +307,7 @@ sub _counter_usage_generic {
         $template = 'tab.tt';
     }
 
-    $c->stash->{counter_sources} = \%counter_sources;
+    $c->stash->{counter_sources} = \@counter_sources;
     $c->stash->{template}        = 'erm/statistics/' . $report_dir . '/' . $template;
     $c->stash->{titles}          = \%titles;
     $c->stash->{sorted_titles}   = \@sorted_titles;
