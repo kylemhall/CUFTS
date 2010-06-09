@@ -13,13 +13,12 @@ my $form_validate = {
     ],
     optional => [
         qw(
-            submit 
+            submit
             cancel
-            
+
             requestor
             service_url
             interval_months
-            
         )
     ],
     constraints => {
@@ -34,7 +33,7 @@ sub default : Private {
 
     if ( $c->req->params->{submit} ) {
         my $id = $c->req->params->{source_id};
-        
+
         if ( $id eq 'new' ) {
             $c->redirect('/erm/sushi/edit/new');
         }
@@ -55,7 +54,7 @@ sub default : Private {
 
 sub find_json : Local {
     my ( $self, $c ) = @_;
-    
+
     my @records;
     my $search = { site => $c->stash->{current_site}->id };
 
@@ -93,7 +92,7 @@ sub edit : Local {
     }
 
     if ( $c->req->params->{submit} ) {
-        
+
         $c->form( $form_validate );
 
         unless ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
@@ -108,7 +107,7 @@ sub edit : Local {
                     $sushi_id = $sushi->id;
                 }
             };
-        
+
             if ($@) {
                 my $err = $@;
                 CUFTS::DB::DBI->dbi_rollback;
@@ -116,21 +115,18 @@ sub edit : Local {
             }
 
             CUFTS::DB::DBI->dbi_commit;
-            push @{ $c->stash->{results} }, 'ERM COUNTER Source updated.';
+            push @{ $c->stash->{results} }, 'ERM SUSHI Source updated.';
         }
     }
-    
-#    _get_stats_summary($c,$sushi);
 
     $c->stash->{sushi}     = $sushi;
     $c->stash->{sushi_id}  = $sushi_id;
     $c->stash->{template}   = 'erm/sushi/edit.tt';
-
 }
 
 sub delete : Local {
     my ( $self, $c ) = @_;
-    
+
     $c->form({
         required => [ qw( sushi_id ) ],
         optional => [ qw( confirm cancel delete ) ],
@@ -141,7 +137,7 @@ sub delete : Local {
         if ( $c->form->valid->{cancel} ) {
             return $c->redirect('/erm/sushi/edit/' . $c->form->valid->{sushi_id} );
         }
-    
+
         my $sushi = CUFTS::DB::ERMSushi->search({
             site => $c->stash->{current_site}->id,
             id   => $c->form->valid->{sushi_id},
@@ -157,12 +153,12 @@ sub delete : Local {
             if ( $c->form->valid->{confirm} ) {
 
                 eval {
-                
+
                     foreach my $source ( @counter_sources ) {
                         $source->erm_sushi( undef );
                         $source->update();
                     }
-                    
+
                     $sushi->delete();
                 };
 
@@ -171,7 +167,7 @@ sub delete : Local {
                     CUFTS::DB::DBI->dbi_rollback;
                     die($err);
                 }
-            
+
                 CUFTS::DB::ERMMain->dbi_commit();
                 $c->stash->{result} = "ERM SUSHI record deleted.";
             }
