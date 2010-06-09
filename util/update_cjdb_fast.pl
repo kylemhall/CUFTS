@@ -37,9 +37,16 @@ sub load {
 
     $logger->info('Starting CJDB rebuild script.');
 
-    my @sites = scalar(@{$options{site_id}})    ? CUFTS::DB::Sites->search( { id =>  { '-in' => [ grep { $_ } map { int($_) } @{$options{site_id}} ] } } )
-              : scalar(@{$options{site_key}})   ? CUFTS::DB::Sites->search( { key => { '-in' => $options{site_key} } } )
-              : CUFTS::DB::Sites->search({ '-or' => { rebuild_cjdb => { '!=' => undef }, rebuild_ejournals_only => '1' } });
+    my @sites;
+    if ( defined($options{site_id}) && scalar(@{$options{site_id}}) ) {
+        @sites = CUFTS::DB::Sites->search( { id =>  { '-in' => [ grep { $_ } map { int($_) } @{$options{site_id}} ] } } );
+    }
+    elsif ( defined($options{site_key}) && scalar(@{$options{site_key}}) ) {
+        @sites = CUFTS::DB::Sites->search( { key => { '-in' => $options{site_key} } } );
+    }
+    else {
+        @sites = CUFTS::DB::Sites->search({ '-or' => { rebuild_cjdb => { '!=' => undef }, rebuild_ejournals_only => '1' } });
+    }
 
 SITE:
     foreach my $site (@sites) {
