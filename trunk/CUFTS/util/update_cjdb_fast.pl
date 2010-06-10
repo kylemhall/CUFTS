@@ -319,6 +319,10 @@ sub load_journal_auths {
         next if exists $journal_auths->{$ja_id};  # We may already have a record from print
 
         my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($ja_id);
+        if ( !defined($journal_auth) ) {
+            $logger->debug( 'Failed to load journal_auth ID: ', $ja_id, '. Skipping record.' );
+            next;
+        }
         
         $journal_auths->{$ja_id} = {
             title  => $journal_auth->title,
