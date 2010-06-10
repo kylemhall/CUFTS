@@ -2,6 +2,7 @@
 use strict;
 use lib qw(lib);
 
+use CUFTS::Config;
 use CUFTS::DB::LocalJournals;
 use CUFTS::DB::Journals;
 use CUFTS::DB::LocalResources;
@@ -17,6 +18,7 @@ use CUFTS::CJDB::Loader::MARC::JournalsAuth;
 use CUFTS::CJDB::Util;
 use CUFTS::Resolve;
 
+use Net::SMTP;
 use Getopt::Long;
 use String::Util qw(hascontent trim);
 use List::MoreUtils qw(any uniq);
@@ -62,14 +64,16 @@ SITE:
         # TODO: Rebuild print records goes here.
 
         my $MARC_cache = {};
+        my $count;
         eval {
-            load_cufts_data( $logger, $site, \%options, $MARC_cache );
+            $count = load_cufts_data( $logger, $site, \%options, $MARC_cache );
         };
         if ($@) {
             $logger->error('Error loading CUFTS data: ', $@);
             $logger->info('Skipping site due to error, no data was saved.');
             CUFTS::DB::DBI->dbi_rollback;
             CJDB::DB::DBI->dbi_rollback;
+            email_site( $logger, $site, 'CJDB update failed for ' . $site->name . '.  Have your CUFTS administrator check the logs for errors.' );
             next SITE;
         }
 
@@ -84,6 +88,8 @@ SITE:
         build_dump( $logger, $site, $MARC_cache );
 
         $logger->info('Rebuild complete for site: ', $site->name, ' (', $site->key, '): ', format_duration(time-$start_time));
+
+        email_site( $logger, $site, 'CJDB update completed for ' . $site->name . '. ' . $count . ' CJDB journals were loaded.' );
     }
 
     $logger->info('Finished CJDB rebuilds.');
@@ -231,9 +237,12 @@ sub load_cufts_data {
     load_cufts_links(   $logger, $site, \%links, \%resource_names );
     load_print_data(    $logger, $site, \%links, \%journal_auths, $options, $MARC_cache );
     load_journal_auths( $logger, $site, \%links, \%journal_auths );
-    update_records(     $logger, $site, \%journal_auths, \%links, \%resource_names );
+    
+    my $count = update_records( $logger, $site, \%journal_auths, \%links, \%resource_names );
 
     $logger->info('Completed CUFTS data processing.');
+    
+    return $count;
 }
 
 # Loop through active local resources, gathering holdings information and URLs.
@@ -373,8 +382,10 @@ sub update_records {
     
     my $start_time = time;
     $logger->info('Creating CJDB journal records.');
+    my $count = 0;
     foreach my $journal_auth_id ( keys(%$journal_auths) ) {
         store_journal_record( $logger, $journal_auth_id, $journal_auths->{$journal_auth_id}, $site_id );
+        $count++;
     }
     $logger->info('Done creating CJDB journal records: ', format_duration(time-$start_time));
 
@@ -389,9 +400,9 @@ sub update_records {
     # We should be done with the journal_auth hash now, so delete it.
     $journal_auths = undef;
     
-    $logger->info('Database updates completed, transaction closed.');
+    $logger->info( 'Database updates completed.  Loaded ', $count, ' CJDB journal records.' );
 
-    return 1;
+    return $count;
 }
 
 # Creates a CJDB record and adds the cjdb_id to the journal_auth hash.
@@ -1239,4 +1250,32 @@ sub create_dump_dir {
             or die("Unable to create directory $dir: $!");
 
     return $dir;
+}
+
+sub email_site {
+    my ( $logger, $site, $message ) = @_;
+
+    my $email = $site->email;
+    if ( hascontent($email) ) {
+        my $host = defined($CUFTS::Config::CUFTS_SMTP_HOST) ? $CUFTS::Config::CUFTS_SMTP_HOST : 'localhost';
+        my $smtp = Net::SMTP->new($host);
+        if (defined($smtp)) {
+            $smtp->mail($CUFTS::Config::CUFTS_MAIL_FROM);
+            $smtp->to(split /\s*,\s*/, $email);
+            $smtp->data();
+            $smtp->datasend("To: $email\n");
+            $smtp->datasend("Subject: CJDB rebuild\n");
+            if ( defined($CUFTS::Config::CUFTS_MAIL_REPLY_TO) ) {
+                $smtp->datasend("Reply-To: ${CUFTS::Config::CUFTS_MAIL_REPLY_TO}\n");
+            }
+            $smtp->datasend("\n");
+            $smtp->datasend($message);
+            $smtp->dataend();
+            $smtp->quit();
+            $logger->info('Update email sent to site.');
+        }
+        else {
+            $logger->info('Unable to create Net::SMTP object.');
+        }
+    }
 }
