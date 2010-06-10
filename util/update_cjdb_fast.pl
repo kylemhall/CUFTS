@@ -73,7 +73,9 @@ SITE:
             $logger->info('Skipping site due to error, no data was saved.');
             CUFTS::DB::DBI->dbi_rollback;
             CJDB::DB::DBI->dbi_rollback;
-            email_site( $logger, $site, 'CJDB update failed for ' . $site->name . '.  Have your CUFTS administrator check the logs for errors.' );
+            eval {
+                email_site( $logger, $site, 'CJDB update failed for ' . $site->name . '.  Have your CUFTS administrator check the logs for errors.' );
+            };
             next SITE;
         }
 
@@ -89,7 +91,9 @@ SITE:
 
         $logger->info('Rebuild complete for site: ', $site->name, ' (', $site->key, '): ', format_duration(time-$start_time));
 
-        email_site( $logger, $site, 'CJDB update completed for ' . $site->name . '. ' . $count . ' CJDB journals were loaded.' );
+        eval {
+            email_site( $logger, $site, 'CJDB update completed for ' . $site->name . '. ' . $count . ' CJDB journals were loaded.' );
+        };
     }
 
     $logger->info('Finished CJDB rebuilds.');
