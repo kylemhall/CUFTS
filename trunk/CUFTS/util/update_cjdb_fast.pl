@@ -334,6 +334,7 @@ sub load_journal_auths {
         my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($ja_id);
         if ( !defined($journal_auth) ) {
             $logger->debug( 'Failed to load journal_auth ID: ', $ja_id, '. Skipping record.' );
+            delete $links->{$ja_id};  # Delete this so we don't try to load it later using a record that doesn't exist.
             next;
         }
         
