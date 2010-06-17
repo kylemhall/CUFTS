@@ -1206,13 +1206,13 @@ sub create_brief_MARC {
     my $title = $journals_auth->title;
     $seen{title}{ lc($title) }++;
     my $article_count = CUFTS::CJDB::Util::count_articles($title);
-    $MARC_record->append_fields( MARC::Field->new( '245', '0', $article_count, 'a' => latin1_to_marc8($title) ) );
+    $MARC_record->append_fields( MARC::Field->new( '245', '0', $article_count, 'a' => latin1_to_marc8($logger, $title) ) );
 
     # Alternate titles
 
     foreach my $title_field ($journals_auth->titles) {
         next if $seen{title}{ lc($title_field->title) }++;
-        $MARC_record->append_fields( MARC::Field->new( '246', '0', '#', 'a' => latin1_to_marc8($title_field->title) ) );
+        $MARC_record->append_fields( MARC::Field->new( '246', '0', '#', 'a' => latin1_to_marc8($logger, $title_field->title) ) );
     }
     
     return $MARC_record;
