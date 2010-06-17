@@ -69,7 +69,9 @@ my @modules = qw(
     HTML::Entities
     HTML::FillInForm
     JSON::XS
+    Log::Log4perl
     List::Compare
+    List::MoreUtils
     LWP::UserAgent
     MARC::Charset
     MARC::Record
@@ -79,6 +81,7 @@ my @modules = qw(
     Perl6::Export::Attrs
     SQL::Abstract
     String::Approx
+    String::Util
     Template
     Template::Plugin::JSON
     Term::ReadLine
