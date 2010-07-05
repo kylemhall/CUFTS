@@ -140,8 +140,19 @@ sub modify_cjdb_link_hash {
 
     # Convert fulltext to print
     
-    $hash->{link_type} = 0;
-    $hash->{print_coverage} = delete $hash->{fulltext_coverage};
+    if ( exists $hash->{urls} ) {
+        # New style update_cjdb_fast hash
+        foreach my $url ( @{$hash->{urls}} ) {
+            $url->[0] = 0;
+        }
+
+        $hash->{print_coverage} = delete $hash->{fulltext_coverage};
+    }
+    else {
+        # Old update_cjdb hash
+        $hash->{link_type} = 0;
+        $hash->{print_coverage} = delete $hash->{fulltext_coverage};
+    }
 
     return 1;
 }
