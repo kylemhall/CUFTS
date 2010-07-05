@@ -132,13 +132,7 @@ sub load_print_data {
 
         next if !defined($record) || $loader->skip_record($record);
 
-        my $journal_auth_id = $loader->match_journals_auth($record);
-
-        # Create a new journal auth record based on the print data if necessary.
-        # This is done in its own transaction to keep it from locking tables for the whole CJDB update.
-        if ( !defined($journal_auth_id) ) {
-            $journal_auth_id = create_basic_ja( $logger, $loader, $record );
-        }
+        my $journal_auth_id = $loader->match_journals_auth($record, 0);
 
         if ( !defined($journal_auth_id) ) {
             $logger->warn('Unable to find or create a journal auth record for print title: ' . $loader->get_title($record) );
@@ -204,29 +198,6 @@ sub load_print_link {
     push @{ $links->{$journal_auth_id} }, $new_link;
 }
 
-sub create_basic_ja{
-    my ( $logger, $loader, $record ) = @_;
-    
-    my $title = $loader->get_title($record);
-    my @issns = $loader->get_clean_issn_list($record);
-
-    $title = substr( $title, 0, 1024 );
-    
-    my $journals_auth = CUFTS::DB::JournalsAuth->create({ title => $title });
-    return undef if !defined($journals_auth);
-
-    $journals_auth->add_to_titles({ title => $title, title_count => 1 });
-
-    foreach my $issn ( uniq @issns ) {
-        $journals_auth->add_to_issns({ issn => $issn });
-    }
-
-    CUFTS::DB::DBI->dbi_commit();
-    
-    $logger->info( 'Created JA (', $journals_auth->id, '): ', $title );
-    
-    return $journals_auth->id;
-}
 
 ##
 ## CUFTS Loading code - reads journal records and builds a set of large hashrefs representing the whole update.
