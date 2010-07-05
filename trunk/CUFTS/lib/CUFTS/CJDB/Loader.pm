@@ -11,6 +11,8 @@ use CJDB::DB::LCCSubjects;
 use CUFTS::CJDB::Util;
 use CUFTS::Util::Simple;
 
+use List::MoreUtils qw(uniq);
+
 use Data::Dumper;
 use strict;
 
@@ -56,8 +58,10 @@ sub get_clean_issn_list {
     return @issns;
 }
 
+# journals_auth may be a journals_auth object, or a journals_auth id that requires retrieving
+
 sub load_journal {
-    my ( $self, $record, $journals_auth_id, $no_save ) = @_;
+    my ( $self, $record, $journals_auth, $no_save ) = @_;
 
     my $site_id = $self->site_id
         or die("No site id set for loader.");
@@ -91,12 +95,24 @@ sub load_journal {
 
     # Find or create a journals_auth record to associate with
 
-    unless ($journals_auth_id) {
+    
+    my $journals_auth_id;
+
+    if ( ref($journals_auth) ) {
+        # Already have a passed in journals_auth object
+        $journals_auth_id = $journals_auth->id;
+    }
+    elsif ( defined($journals_auth) ) {
+        # Passed in journals_auth_id, get it from the database
+        $journals_auth_id = $journals_auth;
+        $journals_auth = CUFTS::DB::JournalsAuth->retrieve( $journals_auth_id );
+    }
+    else {
+        # Try to find a journals_auth record based on ISSNs and title
         $journals_auth_id = $self->get_journals_auth( \@issns, $title, $record )
             or return undef;
+        $journals_auth = CUFTS::DB::JournalsAuth->retrieve( $journals_auth_id );
     }
-
-    my $journals_auth = CUFTS::DB::JournalsAuth->retrieve( $journals_auth_id );
 
     $__CJDB_LOADER_DEBUG and print "ja found\n";
 
@@ -113,12 +129,12 @@ sub load_journal {
     # Create the journal record
 
     my $new_journal_record = {
-            'title'               => $title,
-            'sort_title'          => $sort_title,
-            'stripped_sort_title' => $stripped_sort_title,
-            'site'                => $site_id,
-            'journals_auth'       => $journals_auth_id,
-            'call_number'         => shift @$call_numbers,
+            title               => $title,
+            sort_title          => $sort_title,
+            stripped_sort_title => $stripped_sort_title,
+            site                => $site_id,
+            journals_auth       => $journals_auth_id,
+            call_number         => shift @$call_numbers,
     };
 
     if ( not_empty_string( $journals_auth->rss) ) {
@@ -130,13 +146,12 @@ sub load_journal {
     CJDB::Exception::App->throw('Unable to create new journal record.') 
         if !defined($journal);
 
-    foreach my $issn (@issns) {
-        CJDB::DB::ISSNs->find_or_create(
-            {   'journal' => $journal->id,
-                'site'    => $site_id,
-                'issn'    => $issn,
-            }
-        );
+    foreach my $issn ( uniq(@issns) ) {
+        CJDB::DB::ISSNs->find_or_create({
+               journal => $journal->id,
+               site    => $site_id,
+               issn    => $issn,
+        });
     }
 
     return $journal;
@@ -144,11 +159,13 @@ sub load_journal {
 
 
 sub match_journals_auth {
-    my ( $self, $record ) = @_;
+    my ( $self, $record, $no_save ) = @_;
 
     my $site_id = $self->site_id
         or die("No site id set for loader.");
 
+    $no_save = 1 if !defined($no_save);
+    
     my $title = $self->get_title($record);
     if ( is_empty_string($title) || $title eq '0' ) {
         print "Empty title, skipping record.\n";
@@ -175,7 +192,7 @@ sub match_journals_auth {
 
     # Find a journals_auth record to associate with
 
-    return $self->get_journals_auth( \@issns, $title, $record, 1 );
+    return $self->get_journals_auth( \@issns, $title, $record, $no_save );
 }
 
 sub fix_bad_titles {
@@ -626,17 +643,14 @@ sub get_journals_auth {
     
     # Build basic record
 
-    my $journals_auth = CUFTS::DB::JournalsAuth->create( { 'title' => $title } );
-    $journals_auth->add_to_titles( { 'title' => $title, 'title_count' => 1 } );
+    my $journals_auth = CUFTS::DB::JournalsAuth->create( { title => $title } );
+    $journals_auth->add_to_titles( { title => $title, title_count => 1 } );
 
-    my %seen;
-    foreach my $issn (@$issns) {
-        next if $seen{$issn}++; # Sometimes the same ISSN shows up twice in a MARC record. Dumb.
-        $journals_auth->add_to_issns( { 'issn' => $issn } );
+    foreach my $issn ( uniq(@$issns) ) {
+        $journals_auth->add_to_issns( { issn => $issn } );
     }
 
     return $journals_auth->id;
-    
 }
 
 sub rank_titles {
