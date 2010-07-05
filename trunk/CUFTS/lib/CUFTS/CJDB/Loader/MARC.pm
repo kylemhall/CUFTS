@@ -48,6 +48,8 @@ sub get_title {
         return undef;
     }
     
+    $title = substr( $title, 0, 1024 );
+    
     return $title;
 }
 
@@ -155,6 +157,10 @@ ALT_TITLE:
             warn("Skipping alt title \"$title\" due to MARC8->latin1 translation error.");
             next ALT_TITLE;
         }
+
+        # Trim title to 1024 characters
+        
+        $title = substr( $title, 0, 1024 );
 
         my $stripped_title = $self->strip_title($title);
 
