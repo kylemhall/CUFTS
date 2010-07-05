@@ -310,6 +310,9 @@ JOURNAL:
                 $link->{urls} = $urls;
 
                 $links->{$journal_auth_id} = [] if !exists $links->{$journal_auth_id};
+
+                $module->modify_cjdb_link_hash( 'notused', $link );
+                
                 push @{ $links->{$journal_auth_id} }, $link;
             }
         }
