@@ -462,8 +462,8 @@ sub store_titles {
 
         while ( my ( $stripped, $sort ) = each %$titles ) {
             my $title_id = CJDB::DB::Titles->find_or_create({
-                search_title => $stripped,
-                title        => $sort,
+                search_title => substr( $stripped, 0, 1024 ),
+                title        => substr( $sort, 0, 1024),
             })->id;
 
             CJDB::DB::JournalsTitles->create({
