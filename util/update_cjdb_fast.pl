@@ -1,3 +1,4 @@
+#!/usr/local/bin/perl
 
 use strict;
 use lib qw(lib);
@@ -208,6 +209,8 @@ sub create_basic_ja{
     
     my $title = $loader->get_title($record);
     my @issns = $loader->get_clean_issn_list($record);
+
+    $title = substr( $title, 0, 1024 );
     
     my $journals_auth = CUFTS::DB::JournalsAuth->create({ title => $title });
     return undef if !defined($journals_auth);
