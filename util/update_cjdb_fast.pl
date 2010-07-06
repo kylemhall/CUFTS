@@ -1190,7 +1190,10 @@ sub create_brief_MARC {
     $seen{title}{ lc($title) }++;
     my $article_count = CUFTS::CJDB::Util::count_articles($title);
     $title = latin1_to_marc8($logger, $title);
-    return undef if !defined($title);
+    if ( !defined($title) ) {
+        $logger->info("Skipping record due to title which cannot be MARC8 encoded.");
+        return undef;
+    }
     $MARC_record->append_fields( MARC::Field->new( '245', '0', $article_count, 'a' => $title ) );
 
     # Alternate titles
