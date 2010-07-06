@@ -157,6 +157,10 @@ sub load_print_data {
 
     }
 
+
+    # Transaction commit here to save any new journal auth records that were created from print data
+    CUFTS::DB::DBI->dbi_commit;
+
     $logger->info('Finished processing print data: ', format_duration(time-$start_time));
 }
 
@@ -989,6 +993,8 @@ CJDB_RECORD:
             $MARC_record = create_brief_MARC( $logger, $site, $cjdb_record->journals_auth );
         }
 
+        next if !defined($MARC_record);
+
         # Add holdings statements, skip if no electronic so we don't duplicate print only journals uselessly
 
         my $has_holdings = 0;
@@ -1183,13 +1189,17 @@ sub create_brief_MARC {
     my $title = $journals_auth->title;
     $seen{title}{ lc($title) }++;
     my $article_count = CUFTS::CJDB::Util::count_articles($title);
-    $MARC_record->append_fields( MARC::Field->new( '245', '0', $article_count, 'a' => latin1_to_marc8($logger, $title) ) );
+    $title = latin1_to_marc8($logger, $title);
+    return undef if !defined($title);
+    $MARC_record->append_fields( MARC::Field->new( '245', '0', $article_count, 'a' => $title ) );
 
     # Alternate titles
 
     foreach my $title_field ($journals_auth->titles) {
         next if $seen{title}{ lc($title_field->title) }++;
-        $MARC_record->append_fields( MARC::Field->new( '246', '0', '#', 'a' => latin1_to_marc8($logger, $title_field->title) ) );
+        my $title8 = latin1_to_marc8($logger, $title_field->title);
+        next if !defined($title8);
+        $MARC_record->append_fields( MARC::Field->new( '246', '0', '#', 'a' => $title8 ) );
     }
     
     return $MARC_record;
