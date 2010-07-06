@@ -14,9 +14,12 @@ use CUFTS::DB::JournalsAuth;
 use CJDB::DB::Journals;
 use CJDB::DB::Tags;
 
+use Getopt::Long;
 use Log::Log4perl qw(:easy);
 
 
+my %options;
+GetOptions( \%options, 'save' );
 
 
 Log::Log4perl->easy_init($INFO);
@@ -43,8 +46,22 @@ while ( my $ja = $ja_iter->next ) {
     $count = CJDB::DB::Tags->count_search({ journals_auth => $ja_id });
     next if $count;
 
-    $logger->info('Found: ', $ja->title, ' (', $ja_id, ')' );
+    if ( $options{save} ) {
+        $logger->info('Deleting: ', $ja->title, ' (', $ja_id, ')' );
+        CUFTS::DB::JournalsAuthTitles->search({ journal_auth => $ja_id })->delete_all;
+        CUFTS::DB::JournalsAuthISSNs->search({ journal_auth => $ja_id })->delete_all;
+        $ja->delete;
+    }
+    else {
+        $logger->info('Found: ', $ja->title, ' (', $ja_id, ')' );
+    }
+
     $remove_count++;
 }
 
-$logger->info('Total of ', $remove_count, ' unused journal authority records would be removed.');
+$logger->info('Total of ', $remove_count, ' unused journal authority records found.');
+
+if ( $options{save} ) {
+    CUFTS::DB::DBI->dbi_commit();
+}
+
