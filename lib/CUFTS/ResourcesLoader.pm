@@ -76,6 +76,7 @@ BEGIN {
         JStage
         JSTOR
         Karger
+        KBARTDOI
         Kluwer
         Lexis_Nexis_AC
         LexisNexisAcademic
