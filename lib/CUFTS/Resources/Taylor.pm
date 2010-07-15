@@ -45,6 +45,7 @@ sub title_list_fields {
             vol_ft_end
             iss_ft_start
             iss_ft_end
+            journal_url
         )
     ];
 }
