@@ -44,26 +44,10 @@ sub title_list_fields {
             ft_end_date
             vol_ft_end
             iss_ft_end
-            db_identifier
+            journal_url
         )
     ];
 }
-
-## title_list_field_map - Hash ref mapping fields from the raw title lists to
-## internal field names
-##
-
-# sub title_list_field_map {
-#     return {
-#         'title'         => 'title',
-#         'issn'          => 'issn',
-#         'e_issn'        => 'e_issn',
-#         'ft_start_date' => 'ft_start_date',
-#         'vol_ft_start'  => 'vol_ft_start',
-#         'iss_ft_start'  => 'iss_ft_start',
-#         'db_identifier' => 'db_identifier'
-#     };
-# }
 
 ## -------------------------------------------------------------------------------------------
 
@@ -83,12 +67,7 @@ sub can_getFulltext {
 sub can_getTOC {
     my ( $class, $request ) = @_;
 
-    return 0
-        if is_empty_string( $request->volume )
-        || is_empty_string( $request->issue  )
-        || is_empty_string( $request->year   );
-
-    return $class->SUPER::can_getTOC($request);
+    return 0;
 }
 
 # --------------------------------------------------------------------------------------------
@@ -125,68 +104,6 @@ sub build_linkFulltext {
 
         push @results, $result;
     }
-    return \@results;
-}
-
-sub build_linkTOC {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkTOC');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkTOC');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkTOC');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->db_identifier );
-
-        my $url = 'http://pubs.nrc-cnrc.gc.ca/cgi-bin/rp/rp2_tocs_e?' . $record->db_identifier;
-        $url .= '_' . $record->db_identifier . $request->issue;
-        $url .= '-' . substr( $request->year, 2, 3 ) . '_' . $request->volume;
-
-        my $result = new CUFTS::Result($url);
-        $result->record($record);
-
-        push @results, $result;
-    }
-
-    return \@results;
-}
-
-## build_link* - Builds a link to a service.  Should return an array reference containing
-## Result objects with urls and title list records (if applicable).
-##
-
-sub build_linkJournal {
-    my ( $class, $records, $resource, $site, $request ) = @_;
-
-    defined($records) && scalar(@$records) > 0
-        or return [];
-    defined($resource)
-        or CUFTS::Exception::App->throw('No resource defined in build_linkJournal');
-    defined($site)
-        or CUFTS::Exception::App->throw('No site defined in build_linkJournal');
-    defined($request)
-        or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
-
-    my @results;
-
-    foreach my $record (@$records) {
-        next if is_empty_string( $record->db_identifier );
-
-        my $result = new CUFTS::Result('http://pubs.nrc-cnrc.gc.ca/cgi-bin/rp/rp2_vols_e?' . $record->db_identifier );
-        $result->record($record);
-
-        push @results, $result;
-    }
-
     return \@results;
 }
 
