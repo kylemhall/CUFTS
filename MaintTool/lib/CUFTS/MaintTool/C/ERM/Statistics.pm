@@ -325,7 +325,7 @@ sub counter_journal_usage : Local {
 
 sub counter_database_usage : Local {
     my ( $self, $c ) = @_;   
-    return $self->_counter_usage_generic( $c, [ 'sessions', 'searches' ], 'counter_database_usage' )
+    return $self->_counter_usage_generic( $c, [ 'sessions', 'searches', 'sessions federated', 'searches federated' ], 'counter_database_usage' )
 }
 
 
