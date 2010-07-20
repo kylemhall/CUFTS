@@ -38,7 +38,7 @@ sub get_jr1_report {
         proxy => $url,
         deserializer_args => { strict => 0 },
     });
-    # $service->outputxml(1);
+    $service->outputxml(1);
 
     if ( !$service ) {
         $logger->error( 'Failed to create SushiServicePort for SUSHI source: ', $sushi->name );
@@ -65,7 +65,7 @@ sub get_jr1_report {
         },
     };
 
-    # warn(Dumper($request_data));
+    #warn(Dumper($request_data));
 
     my $request = SUSHI::SUSHIElements::ReportRequest->new( $request_data );
     $request->attr->set_Created( DateTime->now->iso8601 );
@@ -79,11 +79,18 @@ sub get_jr1_report {
         if ( $result =~ / Message\s+was:[\s\n]+ (.+?) <\/fault /xsm ) {
             $result = $1;
         }
-        $logger->error( "Unable to process 'GetReport': " . substr($result, 0, 1024 ) );
+        $logger->error( "Unable to process 'GetReport': " . substr($result, 0, 2048 ) );
         return [ 'Could not process GetReport, possibly a failure at the remote service.' ];
     }
 
+   die($result);
+
     my $report = $result->get_Report;
+    if ( !defined($report) ) {
+        $logger->error( 'get_Report on $result was not defined. Result was: ' . Dumper($result) );        
+        return [ 'Could not process get_Report, possibly a failure at the remote service.' ];
+    }    
+
     my $journal_report = $report->get_Report;
 
     if ( !$journal_report || !defined($journal_report->attr ) ) {
@@ -393,7 +400,7 @@ sub get_db1_report {
         }
     }
 
-    $logger->info( "Loaded records for $journal_count journals." );
+    $logger->info( "Loaded records for $journal_count databases." );
 
     return 1;
 }
