@@ -276,9 +276,11 @@ sub get_db1_report {
         if ( $result =~ / Message\s+was:[\s\n]+ (.+?) <\/fault /xsm ) {
             $result = $1;
         }
-        $logger->error( "Unable to process 'GetReport': " . substr($result, 0, 1024 ) );
+        $logger->error( "Unable to process 'GetReport': " . substr($result, 0, 2048 ) );
         return [ 'Could not process GetReport, possibly a failure at the remote service.' ];
     }
+
+    # warn(Dumper($result));
 
     my $report = $result->get_Report;
     my $journal_report = $report->get_Report;
@@ -302,29 +304,6 @@ sub get_db1_report {
 
         my $journal_data = { title => $title };
 
-        my $identifiers = $report_item->get_ItemIdentifier;
-        if ( ref($identifiers) ne 'ARRAY' ) {
-            $identifiers = [ $identifiers ];
-        }
-        foreach my $identifier (@$identifiers) {
-            next if !defined($identifier);
-            next if !$identifier->can('get_Value');
-            next if !$identifier->can('get_Type');
-
-            my $type  = $identifier->get_Type . '';
-            my $value = $identifier->get_Value . '';
-
-            # Stringify, and remove dashes
-            $value =~ s/^ (\d{4}) -? (\d{3}[\dxX]) $/$1$2/xsm;
-
-            if ( $type eq 'Online_ISSN' ) {
-                $journal_data->{e_issn} = $value;
-            }
-            elsif ( $type eq 'Print_ISSN' ) {
-                $journal_data->{issn} = $value;
-            }
-        }
-
         # print(Dumper($journal_data));
 
         my $journal_rec = $schema->resultset('ERMCounterTitles')->find($journal_data);
@@ -339,24 +318,16 @@ sub get_db1_report {
 
         my $item_performances = $report_item->get_ItemPerformance;
         foreach my $performance ( @{ $item_performances } ) {
+
             my $period = $performance->get_Period;
 
             my $instances = $performance->get_Instance;
-            my $count;
-            foreach my $instance (@$instances) {
-                if ( $instance->get_MetricType eq 'ft_total' ) {
-                    $count = $instance->get_Count->as_num;
-                    last;
-                }
-            }
 
             my $start = $period->get_Begin->as_string;
             my $end   = $period->get_End->as_string;
 
             $start =~ s/^(\d{4}-\d{2}-\d{2}).*$/$1/;  # Fix dates that look like "1999-01-01-08:00"
             $end   =~ s/^(\d{4}-\d{2}-\d{2}).*$/$1/;
-
-            next if !defined($count);
 
             # Verify dates and make sure it's not a multiple month summary record
             if ( $start =~ /^\d{4}-(\d{2})-\d{2}$/ ) {
@@ -378,25 +349,35 @@ sub get_db1_report {
                 next;
             }
 
-            my $requests_data = {
-                start_date     => $start,
-                end_date       => $end,
-                type           => lc($performance->get_Category->get_value),
-                counter_title  => $journal_rec->id,
-                counter_source => $source->id,
-            };
+            
+            my $count;
+            foreach my $instance (@$instances) {
+                my $count = $instance->get_Count->as_num;
+                
+                my $type = lc($performance->get_Category->get_value);
+                
+                my $metric = $instance->get_MetricType;
+                if ( $metric =~ /_fed$/ ) {
+                    $type .= ' federated';
+                }
 
-            # Clear any existing data for this date range if it exists.
-            $schema->resultset('ERMCounterCounts')->search($requests_data)->delete();
+                my $requests_data = {
+                    start_date     => $start,
+                    end_date       => $end,
+                    type           => $type,
+                    counter_title  => $journal_rec->id,
+                    counter_source => $source->id,
+                };
+                
+                # Clear any existing data for this date range if it exists.
+                $schema->resultset('ERMCounterCounts')->search($requests_data)->delete();
 
-            $requests_data->{count} = int($count);
+                $requests_data->{count} = int($count);
 
-            # print Dumper($requests_data);
+                # Add data to the statistics table.
+                my $count_rec = $schema->resultset('ERMCounterCounts')->create($requests_data);
+            }
 
-            # Add data to the statistics table.
-            my $count_rec = $schema->resultset('ERMCounterCounts')->create($requests_data);
-
-            # print join(' -- ', $requests_data->{start_date}, $requests_data->{end_date}, $requests_data->{count} ), "\n";
         }
     }
 
