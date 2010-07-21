@@ -119,6 +119,18 @@ sub view : Local {
     defined($c->stash->{resource}) or
         return die('No resource loaded to view');
 
+    # Find sites with this resource activated
+    
+    my @activated;
+    foreach my $local_resource ( $c->stash->{resource}->local_resources ) {
+        next if !$local_resource->active;
+        my $site = $local_resource->site;
+        push @activated, [ $site->name, $local_resource->auto_activate ];
+    }
+
+    @activated = sort { lc($a->[0]) cmp lc($b->[0]) } @activated;
+
+    $c->stash->{activated} = \@activated;
     $c->stash->{template} = 'global/view.tt';
 }   
 

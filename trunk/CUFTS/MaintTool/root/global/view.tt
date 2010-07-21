@@ -31,6 +31,7 @@
 
 </table>
 </td></tr>
+
 <tr><td><br /></td></tr>
 
 <tr><td>
@@ -43,5 +44,17 @@
 [% END %]
 </table>
 </td></tr>
+
+<tr><td><br /></td></tr>
+
+<tr><td>
+<table class="wide-outlined">
+<tr><td class="heading">site</td><td class="heading">auto activated</td></tr>
+[% FOREACH active IN activated %]
+ <tr><td class="field[% loop.count % 2 %]">[% active.0 | html %]</td><td class="field[% loop.count % 2 %]">[% active.1 ? 'yes' : 'no' %]</td></tr>
+[% END %]
+</table>
+</td></tr>
+
 
 </table>
