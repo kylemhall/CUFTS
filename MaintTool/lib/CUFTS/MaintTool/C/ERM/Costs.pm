@@ -11,7 +11,7 @@ my $view_form_validate = {
 };
 
 my $main_form_validate = {
-    optional => [ qw( add save invoice invoice_currency paid paid_currency ) ],
+    optional => [ qw( add save invoice invoice_currency paid paid_currency number reference ) ],
     required => [ qw( date period_start period_end ) ],
     filters => ['trim'],
     constraints => {
@@ -134,6 +134,7 @@ sub edit : Local {
         }
     }
 
+    $c->stash->{erm} = $cost->erm_main;
     $c->stash->{cost} = $cost;
     $c->stash->{template} = 'erm/costs/edit.tt';
 }

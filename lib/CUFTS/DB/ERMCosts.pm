@@ -31,6 +31,9 @@ __PACKAGE__->columns(All => qw(
 
     erm_main
 
+    number
+    reference
+
     date
     
     invoice
