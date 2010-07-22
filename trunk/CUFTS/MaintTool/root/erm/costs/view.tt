@@ -1,7 +1,9 @@
 [% USE url %]
 
+<div style="padding-bottom: 0.5em"><span class="heading">[% erm.key | html %]</span></div>
+    
 <table class="erm-costs outlined">
- <tr class="heading"><td class="heading"></td><td class="heading">date</td><td class="heading currency">invoice</td><td class="heading">currency</td><td class="heading currency">paid</td><td class="heading">currency</td><td class="heading">period start</td><td class="heading">period end</td></tr> 
+ <tr class="heading"><td class="heading"></td><td class="heading">date</td><td class="heading currency">invoice</td><td class="heading">currency</td><td class="heading currency">paid</td><td class="heading">currency</td><td class="heading">period start</td><td class="heading">period end</td><td class="heading">number</td><td class="heading">reference</td></tr> 
  [% FOREACH cost IN costs %]
   [% SET class = "field" _ (loop.count % 2) %]
   <tr [% IF new_id AND cost.id == new_id %]class="highlight"[% END %]>
@@ -16,18 +18,20 @@
    <td class="[% class %]">[% cost.paid_currency %]</td>
    <td class="[% class %]">[% cost.period_start %]</td>
    <td class="[% class %]">[% cost.period_end %]</td>
+   <td class="[% class %]">[% cost.number %]</td>
+   <td class="[% class %]">[% cost.reference %]</td>
   </tr>
  [% END %]
  [% IF !costs.size %]
   <tr><td colspan="8" class="field0">No cost records found.</td></tr>
  [% END %]
- <tr><form method="post" action="[% url("$url_base/erm/costs/add/$erm.id") %]"]"><td class="heading">Add Cost</td><td class="heading">date</td><td class="heading currency">invoice</td><td class="heading">currency</td><td class="heading currency">paid</td><td class="heading">currency</td><td class="heading">period start</td><td class="heading">period end</td></tr> 
+ <tr><form method="post" action="[% url("$url_base/erm/costs/add/$erm.id") %]"]"><td class="heading">Add Cost</td><td class="heading">date</td><td class="heading currency">invoice</td><td class="heading">currency</td><td class="heading currency">paid</td><td class="heading">currency</td><td class="heading">period start</td><td class="heading">period end</td><td class="heading">number</td><td class="heading">reference</td></tr> 
  <tr>
   <td class="field0"><input type="submit" name="add" value="add" /></td>
   <td class="field0"><input type="text" name="date" size="10" maxlength="10" />[% PROCESS form_results.tt frf='date' %]</td>
   <td class="field0 currency">$ <input type="text" name="invoice" size="8" maxlength="12" />[% PROCESS form_results.tt frf='invoice' %]</td>
   <td class="field0">
-   <select name="invoice_currency" style="width: 4em;">
+   <select name="invoice_currency" style="width: 5em;">
    [% FOREACH currency IN currency_list %]
     <option value="[% currency %]" [% 'selected="selected"' IF currency == 'CAD' %]>[% currency %]</option>
    [% END %]
@@ -35,7 +39,7 @@
   </td>
   <td class="field0 currency">$ <input type="text" name="paid" size="8" maxlength="12" />[% PROCESS form_results.tt frf='paid' %]</td>
   <td class="field0">
-   <select name="paid_currency" style="width: 4em;">
+   <select name="paid_currency" style="width: 5em;">
    [% FOREACH currency IN currency_list %]
     <option value="[% currency %]" [% 'selected="selected"' IF currency == 'CAD' %]>[% currency %]</option>
    [% END %]
@@ -43,6 +47,9 @@
   </td>
   <td class="field0"><input type="text" name="period_start" size="10" maxlength="10" />[% PROCESS form_results.tt frf='period_start' %]</td>
   <td class="field0"><input type="text" name="period_end" size="10" maxlength="10" />[% PROCESS form_results.tt frf='period_end' %]</td>
+  <td class="field0"><input type="text" name="number" size="10" maxlength="256" />[% PROCESS form_results.tt frf='number' %]</td>
+  <td class="field0"><input type="text" name="reference" size="10" maxlength="256" />[% PROCESS form_results.tt frf='reference' %]</td>
+
  </tr>
  
 </table>

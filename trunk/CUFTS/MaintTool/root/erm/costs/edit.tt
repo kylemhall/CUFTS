@@ -1,4 +1,6 @@
 [% USE url %]
+<div style="padding-bottom: 0.5em"><span class="heading">[% erm.key | html %]</span></div>
+
 <form method="post" action="[% url("$url_base/erm/costs/edit/$cost.id") %]">
 <table class="outlined erm-costs-edit">
   <tr>
@@ -9,7 +11,7 @@
    <td class="label1">invoice</td>
    <td class="field1">
     $ <input type="text" name="invoice" size="8" maxlength="12" value="[% cost.invoice %]" />
-    <select name="invoice_currency" style="width: 4em;">
+    <select name="invoice_currency" style="width: 5em;">
     [% FOREACH currency IN currency_list %]
      <option value="[% currency %]" [% 'selected="selected"' IF cost.invoice_currency == currency %]>[% currency %]</option>
     [% END %]
@@ -21,7 +23,7 @@
    <td class="label0">paid</td>
    <td class="field0">
     $ <input type="text" name="paid" size="8" maxlength="12" value="[% cost.paid %]" />
-    <select name="paid_currency" style="width: 4em;">
+    <select name="paid_currency" style="width: 5em;">
      [% FOREACH currency IN currency_list %]
       <option value="[% currency %]" [% 'selected="selected"' IF cost.paid_currency == currency %]>[% currency %]</option>
      [% END %]
@@ -36,6 +38,14 @@
   <tr>
    <td class="label0">period end</td>
    <td class="field0"><input type="text" name="period_end" size="10" maxlength="10" value="[% cost.period_end %]" />[% PROCESS form_results.tt frf='period_end' %]</td>
+  </tr>
+  <tr>
+   <td class="label1">number</td>
+   <td class="field1"><input type="text" name="number" size="10" maxlength="256" value="[% cost.number %]" />[% PROCESS form_results.tt frf='number' %]</td>
+  </tr>
+  <tr>
+   <td class="label0">reference</td>
+   <td class="field0"><input type="text" name="reference" size="10" maxlength="256" value="[% cost.reference %]" />[% PROCESS form_results.tt frf='reference' %]</td>
   </tr>
 </table>
 <br />
