@@ -67,7 +67,7 @@ sub default : Private {
         }
     }
 
-    my @records = CUFTS::DB::ERMProviders->search( site => $c->stash->{current_site}->id );
+    my @records = CUFTS::DB::ERMProviders->search( { site => $c->stash->{current_site}->id }, { order_by => 'LOWER(key)' } );
     $c->stash->{records} = \@records;
     $c->stash->{template} = "erm/provider/find.tt";
 
