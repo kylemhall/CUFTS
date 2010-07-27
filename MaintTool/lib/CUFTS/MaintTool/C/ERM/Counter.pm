@@ -39,6 +39,16 @@ my $form_validate = {
     missing_optional_valid => 1,
 };
 
+my $form_delete_counts_validate = {
+    required => [
+        qw(
+            counter_source
+            delete
+            delete_counts
+        )
+    ],
+};
+
 sub default : Private {
     my ( $self, $c ) = @_;
 
@@ -175,9 +185,6 @@ sub delete : Local {
         $c->stash->{erm_mains} = \@erm_mains;
         $c->stash->{source}    = $source;
 
-        use Data::Dumper;
-        warn(Dumper(\@erm_mains));
-
         if ( defined($source) ) {
 
             if ( $c->form->valid->{confirm} ) {
@@ -276,6 +283,50 @@ sub _get_stats_summary {
     }
     
     $c->stash->{summaries} = \%summary_split;
+}
+
+sub delete_counts : Local {
+    my ( $self, $c ) = @_;
+    
+    if ( $c->req->params->{delete} ) {
+        
+        $c->form( $form_delete_counts_validate );
+    
+        my $source_id = $c->form->valid->{counter_source};
+    
+        my $source = CUFTS::DB::ERMCounterSources->search({
+            id   => int($source_id),
+            site => $c->stash->{current_site}->id,
+        })->first;
+        if ( !defined($source) ) {
+            die("Unable to find Counter Sources record: $source_id for site " . $c->stash->{current_site}->id);
+        }
+
+        my $years = $c->form->valid->{delete_counts};
+        if ( ref($years) ne 'ARRAY' ) {
+            $years = [ $years ];
+        }
+    
+        foreach my $year ( @$years ) {
+            CUFTS::DB::ERMCounterCounts->search({
+                counter_source => $source->id,
+                start_date => { '-between' => [ $year . '-01-01', $year . '-12-31' ] },
+            })->delete_all;
+        }
+
+        if ($@) {
+            my $err = $@;
+            CUFTS::DB::DBI->dbi_rollback;
+            die($err);
+        }
+    
+        CUFTS::DB::DBI->dbi_commit();
+        $c->stash->{results} = ["ERM Counter count records deleted."];
+
+        $c->forward('stats_summary', [$source->id] );
+
+    }
+    
 }
 
 1;
