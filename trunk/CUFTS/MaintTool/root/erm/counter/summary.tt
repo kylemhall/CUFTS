@@ -2,13 +2,14 @@
 <h2>[% source.name | html %]</h2>
 
 <div id="erm-counter-summary">
+<form action="[% c.uri_for( c.controller('ERM::Counter').action_for('delete_counts') ) %]" method="POST">
 <table class="grid">
-<tr><th>&nbsp;</th>[% FOREACH month IN [ 1 .. 12 ] %]
+<tr><th>&nbsp;</th><th>delete</th>[% FOREACH month IN [ 1 .. 12 ] %]
 <td class="month-header">[% month %]</td>
 [% END %]
 </tr>
 [% FOREACH year IN summaries.keys.sort.reverse %]
- <tr><th class="year">[% year %]</th>
+ <tr><th class="year">[% year %]</th><td style="text-align: center;"><input type="checkbox" name="delete_counts" value="[% year %]" /></td>
  [% FOREACH month IN [ 1 .. 12 ] %]
   [%- SET reccount = summaries.$year.$month || 0 -%]
   <td class="month field">[% reccount %]</td>
@@ -16,7 +17,13 @@
  </tr>
 [% END %]
 </table>
+<br />
+<input type="hidden" name="counter_source" value="[% source.id %]" />
+<input type="submit" name="delete" value="delete selected years" />
+</form>
 </div>
+
+
 
 <h2>View Report</h2>
 [% IF source.type == 'j' %]
