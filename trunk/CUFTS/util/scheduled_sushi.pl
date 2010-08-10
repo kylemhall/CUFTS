@@ -19,7 +19,7 @@ my $logger = Log::Log4perl->get_logger();
 $logger->info('Starting scheduled SUSHI downloads.');
 
 my %options;
-GetOptions( \%options, 'site_key=s', 'site_id=i', 'cs_id=i' );
+GetOptions( \%options, 'site_key=s', 'site_id=i', 'cs_id=i', 'debug' );
 
 my $site_search =   $options{site_id}   ? { id => int($options{site_id}) }
                   : $options{site_key}  ? { key => $options{site_key} }
@@ -51,8 +51,8 @@ while ( my $site = $sites_rs->next ) {
             $logger->info( "Attempting to download report for ", $source->name );
             $logger->info( "Coverage period: ", $start->ymd, " to ", $end->ymd );
 
-            my $result =   $source->type eq 'j' ? SUSHI::Client::get_jr1_report( $logger, $schema, $site, $source, $start->ymd, $end->ymd )
-                         : $source->type eq 'd' ? SUSHI::Client::get_db1_report( $logger, $schema, $site, $source, $start->ymd, $end->ymd )
+            my $result =   $source->type eq 'j' ? SUSHI::Client::get_jr1_report( $logger, $schema, $site, $source, $start->ymd, $end->ymd, $options{debug} )
+                         : $source->type eq 'd' ? SUSHI::Client::get_db1_report( $logger, $schema, $site, $source, $start->ymd, $end->ymd, $options{debug} )
                          : [ 'Unrecognized COUNTER source type: ' . $source->type ];
 
             if ( $result == 1 ) {
