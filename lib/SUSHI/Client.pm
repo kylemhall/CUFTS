@@ -20,7 +20,7 @@ use Encode;
 # $report: 'JR1' string
 
 sub get_jr1_report {
-    my ( $logger, $schema, $site, $source, $start, $end ) = @_;
+    my ( $logger, $schema, $site, $source, $start, $end, $debug ) = @_;
 
     my $sushi = $source->erm_sushi;
     if ( !defined($sushi) ) {
@@ -38,7 +38,10 @@ sub get_jr1_report {
         proxy => $url,
         deserializer_args => { strict => 0 },
     });
-    $service->outputxml(1);
+    
+    if ( $debug ) {
+        $service->outputxml(1);
+    }
 
     if ( !$service ) {
         $logger->error( 'Failed to create SushiServicePort for SUSHI source: ', $sushi->name );
@@ -65,7 +68,10 @@ sub get_jr1_report {
         },
     };
 
-    #warn(Dumper($request_data));
+    if ( $debug ) {
+        warn(Dumper($request_data));
+    }
+
 
     my $request = SUSHI::SUSHIElements::ReportRequest->new( $request_data );
     $request->attr->set_Created( DateTime->now->iso8601 );
@@ -82,8 +88,11 @@ sub get_jr1_report {
         $logger->error( "Unable to process 'GetReport': " . substr($result, 0, 2048 ) );
         return [ 'Could not process GetReport, possibly a failure at the remote service.' ];
     }
+    
+    if ( $debug ) {
+        die(Dumper($result));
+    }
 
-   die($result);
 
     my $report = $result->get_Report;
     if ( !defined($report) ) {
@@ -217,7 +226,7 @@ sub get_jr1_report {
 
 
 sub get_db1_report {
-    my ( $logger, $schema, $site, $source, $start, $end ) = @_;
+    my ( $logger, $schema, $site, $source, $start, $end, $debug ) = @_;
 
     my $sushi = $source->erm_sushi;
     if ( !defined($sushi) ) {
@@ -235,7 +244,9 @@ sub get_db1_report {
         proxy => $url,
         deserializer_args => { strict => 0 },
     });
-    # $service->outputxml(1);
+    if ( $debug ) {
+        $service->outputxml(1);
+    }
 
     if ( !$service ) {
         $logger->error( 'Failed to create SushiServicePort for SUSHI source: ', $sushi->name );
@@ -262,7 +273,9 @@ sub get_db1_report {
         },
     };
 
-    # warn(Dumper($request_data));
+    if ( $debug ) {
+        warn(Dumper($request_data));
+    }
 
     my $request = SUSHI::SUSHIElements::ReportRequest->new( $request_data );
     $request->attr->set_Created( DateTime->now->iso8601 );
@@ -280,7 +293,9 @@ sub get_db1_report {
         return [ 'Could not process GetReport, possibly a failure at the remote service.' ];
     }
 
-    # warn(Dumper($result));
+    if ( $debug ) {
+        die(Dumper($result));
+    }
 
     my $report = $result->get_Report;
     my $journal_report = $report->get_Report;
