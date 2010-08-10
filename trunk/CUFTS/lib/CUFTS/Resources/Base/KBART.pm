@@ -44,4 +44,51 @@ sub title_list_field_map {
     };
 }
 
+
+sub clean_data {
+    my ( $class, $record ) = @_;
+
+    my $embargo = $record->{___embargo_info};
+    if ( not_empty_string($embargo) && $embargo =~ /^(\w)(\d+)(\w)$/ ) {
+        my ( $type, $amount, $period ) = ( $1, $2, $3 );
+        
+        if ( $type eq 'P' ) {
+            if ( $period eq 'Y' ) {
+                $record->{embargo_months} = $amount * 12;
+            }
+            elsif ( $period eq 'M' ) {
+                $record->{embargo_months} = $amount;
+            }
+            elsif ( $period eq 'D' ) {
+                $record->{embargo_days} = $amount;
+            }
+            else {
+                return [ "Unrecognized embargo period: $period" ];
+            }
+        }
+        elsif ( $type eq 'R' ) {
+            if ( $period eq 'Y' ) {
+                $record->{current_years} = $amount;
+            }
+            elsif ( $period eq 'M' ) {
+                $record->{current_months} = $amount;
+            }
+            elsif ( $period eq 'D' ) {
+                $record->{current_months} = int($amount / 30);
+            }
+            else {
+                return [ "Unrecognized embargo period: $period" ];
+            }
+        }
+        else {
+            return [ "Unrecognized embargo type: $type" ];
+        }
+        
+    }
+    
+
+    return $class->SUPER::clean_data($record);
+}
+
+
 1;
