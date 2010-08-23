@@ -112,7 +112,7 @@ sub edit : Local {
         }
     }
     
-    my @erm_sushi_options = CUFTS::DB::ERMSushi->search({ site => $c->stash->{current_site}->id });
+    my @erm_sushi_options = CUFTS::DB::ERMSushi->search({ site => $c->stash->{current_site}->id }, { order_by => 'LOWER(name)' });
     
 
     if ( $c->req->params->{submit} ) {
