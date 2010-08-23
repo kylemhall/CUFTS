@@ -43,8 +43,8 @@ sub begin : Private {
     $c->stash->{load_css}  = [];
 
     # Don't force login on static content
-    return 1 if ( $c->req->{path} =~ /^static/ );
-    return 1 if ( $c->req->{path} =~ /^public/ );
+    my $path = $c->req->path;
+    return 1 if $path =~ /^static/ || $path =~ /^public/;
 
     # Set up current user and site info in the stash
 
