@@ -218,6 +218,7 @@ sub build_linkFulltext {
                  
         if ( not_empty_string( $request->atitle ) ) {
             my $search_title = lc( $request->atitle );
+            $search_title =~ s/\(.+?\)$//;                 # remove trailing (...)
             $search_title =~ s/[^a-z0-9\s]/ /g;            # remove punctuation
             $search_title =~ s/\b\s*(and|or|not)\s*\b//g;  # remove stop words
             $search_title =~ s/\s\s+/ /g;                  # compress spaces
