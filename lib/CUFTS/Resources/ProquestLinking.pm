@@ -96,7 +96,9 @@ sub build_linkFulltext {
         $params{spage} = $request->spage;
 
         if ( not_empty_string( $request->atitle ) ) {
-            $params{atitle} = uri_escape( $request->atitle );
+            my $atitle = $request->atitle;
+            $atitle =~ s/\(.+?\)$//;
+            $params{atitle} = uri_escape( $atitle );
         }
 
         my $url = $base_url;
