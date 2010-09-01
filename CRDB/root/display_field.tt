@@ -16,7 +16,7 @@
  [% CASE 'subjects' %]
   [% SET subject_list = [] %]
   [% FOREACH subject IN subject_links %]
-   [% subject_list.push( '<a href="' _ subject.1 _'">' _ subject.0 _ '</a>' ) %]
+   [% subject_list.push( '<a href="' _ subject.1 _'">' _ HTML.escape(subject.0) _ '</a>' ) %]
   [% END %]
   [% INCLUDE render_field field_name="subjects", field_data=subject_list.join(', ') %]
  [% CASE 'resource_medium' %]
