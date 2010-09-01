@@ -53,6 +53,10 @@ sub default_view : Chained('load_resource') PathPart('') Args(0) {
 
     $c->save_current_action();
 
+    # Create links to subject searches
+    $c->stash->{subject_links} = [ map { [ $_->subject, $c->uri_for_site( $c->controller('Browse')->action_for('html_facets'), 'subject', $_->id, {} ) ] }  
+                                    sort { $a->subject cmp $b->subject } $c->stash->{erm}->subjects ];
+
     $c->stash->{display_fields} = [ $c->model('CUFTS::ERMDisplayFields')->search( { site => $c->site->id }, { order_by => 'display_order' } )->all ];
 
     $c->stash->{template} = 'resource.tt';
