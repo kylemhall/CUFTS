@@ -46,7 +46,7 @@ sub get_records {
             # No matches, or multiple matches that we can't disambiguate yet.
             return undef;
         }
-    
+
         my @ja_issns = CUFTS::DB::JournalsAuthISSNs->search( journal_auth => $ja_match[0]->journal_auth, issn => { '!=' => $issn } );
         if ( scalar(@ja_issns) ) {
             my $existing_issns = $request->other_issns;
@@ -56,17 +56,26 @@ sub get_records {
             push @$existing_issns, map { $_->issn } @ja_issns;
             $request->other_issns( $existing_issns );
         }
+
+        # Add the title to the original request if it's missing
+        if ( is_empty_string($request->title) ) {
+            my $ja = $ja_match[0]->journal_auth;
+            if ( defined($ja) && not_empty_string($ja->title) ) {
+                $request->title( $ja->title );
+            }
+        }
+
     }
     elsif ( not_empty_string($request->title) ) {
         # No ISSN found, try a title lookup to grab some JA records and attach their ids to the request
-        
+
         my @ja_ids = map { $_->id } CUFTS::DB::JournalsAuth->search_by_title($request->title);
-        
+
         if ( scalar(@ja_ids) && scalar(@ja_ids) < 10 ) {
             $request->journal_auths( \@ja_ids );
         }
-    }    
-    
+    }
+
 
     return undef;
 }
@@ -74,7 +83,7 @@ sub get_records {
 sub can_getMetadata {
     my ( $class, $request ) = @_;
 
-    if (    not_empty_string( $request->issn ) 
+    if (    not_empty_string( $request->issn )
          || not_empty_string( $request->eissn )
          || not_empty_string( $request->title )
     ) {
