@@ -18,9 +18,13 @@ CUFTS::CJDB->config(
     regex_base           => '',
     default_max_columns  => 20,
     default_min_per_page => 50,
+    default_view         => 'TT',
     'V::TT' => {
         WRAPPER       => 'layout.tt',
         COMPILE_DIR   => '/tmp/CUFTS_CJDB_template_cache',
+    },
+    'V::JSON' => {
+        expose_stash => 'json',
     },
     cache => {
         backend => {
