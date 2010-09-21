@@ -133,12 +133,12 @@ sub titles : Local {
     my $search_type = $c->stash->{search_type} = $c->req->params->{search_type};
 
     my $start_record = 0;
-    my $per_page;
+    my $per_page = $c->req->params->{per_page};
 
     my $search_details = $c->session->{search_details}->{$c->stash->{current_site}->id}->{title}->{$search_type}->{$search_term};
     if (defined($search_details)) {
         $start_record = $c->req->params->{start_record} || 0;
-        $per_page = $search_details->{per_page};
+        $per_page ||= $search_details->{per_page};
     }
 
     my $titles;
@@ -207,6 +207,22 @@ sub titles : Local {
     $c->stash->{show_unified}   = $c->stash->{current_site}->cjdb_unified_journal_list eq 'unified' ? 1 : 0;
 
     $c->stash->{template} = 'browse_journals.tt';
+
+    if ( $c->req->params->{format} eq 'json' ) {
+        $c->stash->{json} = [ map { $self->journal_object_to_hash($c, $_) } @$titles ];
+        $c->forward('V::JSON');
+    }
+
+}
+
+sub journal_object_to_hash {
+    my ( $self, $c, $journal ) = @_;
+    return {
+        title        => $journal->result_title || $journal->title,
+        url          => $c->stash->{url_base} . '/journal/' . $journal->journals_auth->id,
+        journal_auth => $journal->journals_auth->id,
+        issns        => defined($journal->issns) ? [ map { $_->issn } $journal->issns ] : undef,
+    };
 }
 
 
@@ -321,6 +337,7 @@ sub ajax_title : Local {
     $c->response->body("<ul>$response</ul>\n");
     $c->response->content_type('text/html; charset=iso-8859-1');
 }
+
 
 sub ajax_issn : Local {
     my ( $self, $c ) = @_;
