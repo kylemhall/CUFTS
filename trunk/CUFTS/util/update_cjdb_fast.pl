@@ -152,6 +152,11 @@ sub load_print_data {
             issns  => [ $loader->get_issns($record) ],
             titles => [ $loader->get_alt_titles($record) ],
         };
+        
+        # Add titles and ISSNs from journal auth record. These both get deduped later, so add them blindly
+        my $journal_auth = CUFTS::DB::JournalsAuth->find( $journal_auth_id );
+        push @{ $journal_auths->{$journal_auth_id}->{titles} }, map { $_->title } $journal_auth->titles;
+        push @{ $journal_auths->{$journal_auth_id}->{issns}  }, map { $_->issn }  $journal_auth->issns;
 
         ja_augment_with_marc( $loader, $logger, $journal_auths->{$journal_auth_id}, $record, $site_id );
 
