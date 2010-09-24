@@ -154,7 +154,7 @@ sub load_print_data {
         };
 
         # Add titles and ISSNs from journal auth record. These both get deduped later, so add them blindly
-        my $journal_auth = CUFTS::DB::JournalsAuth->find( $journal_auth_id );
+        my $journal_auth = CUFTS::DB::JournalsAuth->retrieve( $journal_auth_id );
         push @{ $journal_auths->{$journal_auth_id}->{titles} }, map { $_->title } $journal_auth->titles;
         push @{ $journal_auths->{$journal_auth_id}->{issns}  }, map { $_->issn }  $journal_auth->issns;
 
