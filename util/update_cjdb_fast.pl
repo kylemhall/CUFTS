@@ -111,7 +111,7 @@ sub load_print_data {
     my $site_id = $site->id;
 
     return if !hascontent($site->rebuild_cjdb) && !hascontent($options->{print_file});
-    
+
     my @files =   $options->{print_file} ? ( $options->{print_file} )
                 : map { $CUFTS::Config::CJDB_SITE_DATA_DIR . '/' . $site->id . '/' . $_ }
                     split /\|/, $site->rebuild_cjdb;
@@ -140,19 +140,19 @@ sub load_print_data {
         }
 
         $MARC_cache->{$journal_auth_id}->{MARC} = $record;
-        
+
         # Print records are used to populate both links and "journal auth" data
-        
-        load_print_link( $logger, $site, $loader, $links, $journal_auth_id, $record ); 
+
+        load_print_link( $logger, $site, $loader, $links, $journal_auth_id, $record );
 
         next if exists $journal_auths->{$journal_auth_id};
-        
+
         $journal_auths->{$journal_auth_id} = {
             title  => $loader->get_title($record),
             issns  => [ $loader->get_issns($record) ],
             titles => [ $loader->get_alt_titles($record) ],
         };
-        
+
         # Add titles and ISSNs from journal auth record. These both get deduped later, so add them blindly
         my $journal_auth = CUFTS::DB::JournalsAuth->find( $journal_auth_id );
         push @{ $journal_auths->{$journal_auth_id}->{titles} }, map { $_->title } $journal_auth->titles;
@@ -194,13 +194,13 @@ sub load_print_module {
 
 sub load_print_link {
     my ( $logger, $site, $loader, $links, $journal_auth_id, $record ) = @_;
-    
+
     my $new_link = {
         print_coverage  => $loader->get_coverage($record),
         urls            => [ [ 0, $loader->get_link($record) ] ],
         rank            => $loader->get_rank(),
     };
-    
+
     return if !hascontent($new_link->{print_coverage}) || !defined($new_link->{urls});
 
     $links->{$journal_auth_id} = [] if !exists $links->{$journal_auth_id};
@@ -218,28 +218,28 @@ sub load_cufts_data {
     my ( $logger, $site, $options, $MARC_cache ) = @_;
 
     $logger->info('Starting to process CUFTS data.');
-    
+
     my ( %links, %journal_auths, %resource_names );
 
     load_cufts_links(   $logger, $site, \%links, \%resource_names );
     load_print_data(    $logger, $site, \%links, \%journal_auths, $options, $MARC_cache );
     load_journal_auths( $logger, $site, \%links, \%journal_auths );
-    
+
     my $count = update_records( $logger, $site, \%journal_auths, \%links, \%resource_names );
 
     $logger->info('Completed CUFTS data processing.');
-    
+
     return $count;
 }
 
 # Loop through active local resources, gathering holdings information and URLs.
 sub load_cufts_links {
     my ( $logger, $site, $links, $resource_names ) = @_;
-    
+
     my $start_time = time;
     my $site_id = $site->id;
     my $show_citations = $site->cjdb_show_citations;
-    
+
     my @local_resources = CUFTS::DB::LocalResources->search({ site => $site_id, active => 't' });
     my $resource_count = 0;
 
@@ -292,11 +292,11 @@ JOURNAL:
                 $links->{$journal_auth_id} = [] if !exists $links->{$journal_auth_id};
 
                 $module->modify_cjdb_link_hash( 'notused', $link );
-                
+
                 push @{ $links->{$journal_auth_id} }, $link;
             }
         }
-        
+
         $logger->info("Finished resource, found: $resource_journals_count journals.");
     }
 
@@ -306,14 +306,14 @@ JOURNAL:
 
 sub load_journal_auths {
     my ( $logger, $site, $links, $journal_auths ) = @_;
-    
+
     my $start_time = time;
     $logger->info('Loading journal authority records for ', scalar(keys(%$links)), ' journals with links.');
     my $loader = CUFTS::CJDB::Loader::MARC::JournalsAuth->new()
         or die("Unable to create JournalsAuth loader");
         my $site_id = $site->id;
     $loader->site_id( $site_id );
-    
+
     foreach my $ja_id ( keys %$links ) {
         next if exists $journal_auths->{$ja_id};  # We may already have a record from print
 
@@ -323,15 +323,15 @@ sub load_journal_auths {
             delete $links->{$ja_id};  # Delete this so we don't try to load it later using a record that doesn't exist.
             next;
         }
-        
+
         $journal_auths->{$ja_id} = {
             title  => $journal_auth->title,
             issns  => [ map { $_->issn }  $journal_auth->issns ],
             titles => [ map { $_->title } $journal_auth->titles ],
         };
-        
+
         ja_augment_with_marc( $loader, $logger, $journal_auths->{$ja_id}, $journal_auth->marc_object, $site_id );
-        
+
     }
 
     $logger->info('Completed journal authority loading: ', format_duration(time-$start_time));
@@ -339,7 +339,7 @@ sub load_journal_auths {
 
 sub ja_augment_with_marc {
     my ( $loader, $logger, $journal, $marc, $site_id ) = @_;
-    
+
     return undef if !defined($marc);
 
     push @{$journal->{issns}}, $loader->get_issns( $marc );  # Blindly add, these should be deduped before storing
@@ -366,11 +366,11 @@ sub update_records {
     my ( $logger, $site, $journal_auths, $links, $resource_names ) = @_;
 
     my $site_id = $site->id;
-    
+
     $logger->info('Starting database updates.');
-    
+
     clear_site($logger, $site_id);     # Transaction starts here
-    
+
     my $start_time = time;
     $logger->info('Creating CJDB journal records.');
     my $count = 0;
@@ -387,10 +387,10 @@ sub update_records {
     store_associations(     $logger, $journal_auths, $site_id );
     store_subjects(         $logger, $journal_auths, $site_id );
     store_relations(        $logger, $journal_auths, $site_id );
-        
+
     # We should be done with the journal_auth hash now, so delete it.
     $journal_auths = undef;
-    
+
     $logger->info( 'Database updates completed.  Loaded ', $count, ' CJDB journal records.' );
 
     return $count;
@@ -453,7 +453,7 @@ sub store_titles {
                 main    => $stripped eq $main_title ? 1 : 0,
             });
         }
-        
+
         delete $journal_auth->{processed_titles};  # Done with these
         delete $journal_auth->{main_title};
     }
@@ -590,7 +590,7 @@ sub store_resource_names {
             });
         }
     }
-    
+
     $logger->info('Done attaching resource names:', format_duration(time-$start_time));
 }
 
@@ -626,7 +626,7 @@ sub store_links {
             }
         }
     }
-    
+
     $logger->info('Done attaching links: ', format_duration(time-$start_time));
 }
 
@@ -695,7 +695,7 @@ sub get_cufts_ft_coverage {
 
         my $end_date = $local_journal->ft_end_date;
         $end_date =~ s/\-//g;
-    
+
         if ( $end_date <= get_current_date() ) {
             $ft_coverage .= format_date_vol_iss( $local_journal->ft_end_date, $local_journal->vol_ft_end, $local_journal->iss_ft_end );
         }
@@ -715,7 +715,7 @@ sub get_cufts_cit_coverage {
 
         my $end_date = $local_journal->cit_end_date;
         $end_date =~ s/\-//g;
-    
+
         if ( $end_date <= get_current_date() ) {
             $cit_coverage .= format_date_vol_iss( $local_journal->cit_end_date, $local_journal->vol_cit_end, $local_journal->iss_cit_end );
         }
@@ -753,7 +753,7 @@ sub get_ft_urls {
             push @urls, [ 2, $result->url ];
         }
     }
-    
+
     return \@urls;
 }
 
@@ -775,7 +775,7 @@ sub get_current_date {
 # Format a date, volume, and issue into a consistent format for a holdings statement: YYYY-MM-DD (v.1 i.2)
 sub format_date_vol_iss {
     my ( $date, $vol, $iss ) = @_;
-    
+
     my $string = $date;
 
     if ( hascontent($vol) || hascontent($iss) ) {
@@ -828,7 +828,7 @@ sub build_local_journal_auths {
 # saving as a CJDBTitles record.
 sub get_processed_titles {
     my ( $title ) = @_;
-    
+
     $title = CUFTS::CJDB::Util::strip_articles( trim($title) );
 
     # Remove trailing (...)  eg. (Toronto, ON) and [...] eg. [electronic resource]
@@ -855,12 +855,12 @@ sub get_processed_titles {
 # Format the rebuild time into a readable string
 sub format_duration {
     my ( $seconds ) = @_;
-    
+
     my $hours = int($seconds / 3600);
     $seconds -= $hours * 3600;
     my $minutes = int($seconds / 60);
     $seconds = $seconds % 60;
-    
+
     return sprintf( "%i:%02i:%02i", $hours, $minutes, $seconds );
 }
 
@@ -904,7 +904,7 @@ sub build_dump {
     my $start_time = time;
 
     my $site_id = $site->id;
-    
+
     my $loader = load_print_module( $logger, $site );
     $loader->site_id( $site_id );
 
@@ -923,11 +923,11 @@ sub build_dump {
     my $site_marc_dump_cjdb_id_subfield         = $site->marc_dump_cjdb_id_subfield;
     my $site_marc_dump_cjdb_id_indicator1       = $site->marc_dump_cjdb_id_indicator1;
     my $site_marc_dump_cjdb_id_indicator2       = $site->marc_dump_cjdb_id_indicator2;
-    
-    
+
+
     # Make sure the site is set up correctly for dumping MARC data.
     # If not, we can exit out early.
-    
+
     if ( !hascontent($site_marc_dump_holdings_field) || !hascontent($site_marc_dump_holdings_subfield) ) {
         $logger->info('Site does not have MARC dump holdings fields configured.');
         return undef;
@@ -943,7 +943,7 @@ sub build_dump {
     $base_url .= $site->key . '/journal/';
 
     # Cache resource information
-    
+
     my %resources_display;
     my $resources_iter = CUFTS::DB::LocalResources->search({ site => $site_id });
 
@@ -954,7 +954,7 @@ sub build_dump {
         $resources_display{$resource_id}->{name} =   hascontent($resource->name)  ? $resource->name
                                                    : defined($global_resource)    ? $global_resource->name
                                                    : '';
-                                                   
+
         if ( !$site_cjdb_display_db_name_only ) {
             my $provider =   hascontent($resource->provider) ? $resource->provider
                            : defined($global_resource)       ? $global_resource->provider
@@ -969,7 +969,7 @@ sub build_dump {
 
     open MARC_OUTPUT,  ">$dir/marc_dump.mrc" or
         die("Unable to open MARC dump file for MARC: $!");
-        
+
     open ASCII_OUTPUT, ">$dir/marc_dump.txt" or
         die("Unable to open MARC dump file for text: $!");
 
@@ -1030,7 +1030,7 @@ CJDB_RECORD:
             else {
                 next HOLDINGS;
             }
-            
+
             my $holdings_field = MARC::Field->new(
                 $site_marc_dump_holdings_field,
                 $site_marc_dump_holdings_indicator1,
@@ -1042,7 +1042,7 @@ CJDB_RECORD:
             $has_holdings = 1;
 
         }
-        
+
         if ( !$has_holdings ) {
             $logger->debug("Skipping MARC dump of record due to missing holdings.");
             next CJDB_RECORD;
@@ -1052,7 +1052,7 @@ CJDB_RECORD:
             $logger->debug("Unable to create MARC record.");
             next CJDB_RECORD;
         }
-        
+
         # Add 005 field
 
         my $existing_005 = $MARC_record->field('005');
@@ -1062,9 +1062,9 @@ CJDB_RECORD:
         $MARC_record->append_fields(
                 MARC::Field->new( '005', $datestamp )
         );
-        
+
         # Add 856 link(s)
-        
+
         if ( $site_marc_dump_direct_links ) {
             foreach my $link ( $cjdb_record->links ) {
                 next if !hascontent( $link->fulltext_coverage )
@@ -1077,7 +1077,7 @@ CJDB_RECORD:
 
                 my $field_856 = MARC::Field->new( '856', '4', '0', 'u' => $link->URL, 'z' => latin1_to_marc8($logger, $resource_name) );
                 $MARC_record->append_fields( $field_856 );
-            
+
             }
         }
         else {
@@ -1103,7 +1103,7 @@ CJDB_RECORD:
 
 
         # Clone the title fields if necessary (for journal title indexing)
-        
+
         if ( hascontent($site_marc_dump_duplicate_title_field) ) {
             foreach my $field_num ( '245', '246', '210' ) {
                 my @title_fields = $MARC_record->field( $field_num );
@@ -1114,11 +1114,11 @@ CJDB_RECORD:
                 }
             }
         }
-        
+
         # Add CJDB identifier if defined
-        
+
         if ( hascontent($site_marc_dump_cjdb_id_field) && hascontent($site_marc_dump_cjdb_id_subfield) ) {
-            my $identifier_field = MARC::Field->new( 
+            my $identifier_field = MARC::Field->new(
                 $site_marc_dump_cjdb_id_field,
                 $site_marc_dump_cjdb_id_indicator1,
                 $site_marc_dump_cjdb_id_indicator2,
@@ -1126,11 +1126,11 @@ CJDB_RECORD:
             );
             $MARC_record->append_fields( $identifier_field );
         }
-        
+
         print MARC_OUTPUT  $MARC_record->as_usmarc();
         print ASCII_OUTPUT $MARC_record->as_formatted(), "\n\n";
     }
-    
+
     close(MARC_OUTPUT );
     close(ASCII_OUTPUT);
 
@@ -1143,10 +1143,10 @@ CJDB_RECORD:
 
 sub strip_print_MARC {
     my ( $logger, $site, $MARC_record ) = @_;
-    
+
     my $new_MARC_record = MARC::Record->new();
     $new_MARC_record->leader('00000nas  22001577a 4500');
-    
+
     my @keep_fields = qw(
         022
         050
@@ -1170,7 +1170,7 @@ sub strip_print_MARC {
         next if !scalar(@fields);
         $new_MARC_record->append_fields(@fields);
     }
-    
+
     return $new_MARC_record;
 }
 
@@ -1209,15 +1209,15 @@ sub create_brief_MARC {
         next if !defined($title8);
         $MARC_record->append_fields( MARC::Field->new( '246', '0', '#', 'a' => $title8 ) );
     }
-    
+
     return $MARC_record;
 }
 
 sub latin1_to_marc8 {
     my ( $logger, $string ) = @_;
-    
+
     return '' if !hascontent($string);
-    
+
     my $output;
     eval {
         $output = CUFTS::CJDB::Util::latin1_to_marc8($string);
