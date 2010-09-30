@@ -102,7 +102,7 @@ sub clean_data {
 
     foreach my $field ( qw( ft_start_date ft_end_date cit_start_date cit_end_date ) ) {
         next if is_empty_string($record->{$field});
-        if ( $record->{$field} =~ m{^ (\d{2}) / (\d{2}) / (\d{4}) /xsm ) {
+        if ( $record->{$field} =~ m{^ (\d{2}) / (\d{2}) / (\d{4}) }xsm ) {
             $record->{$field} = "$3-$1-$2";
         }
     }
