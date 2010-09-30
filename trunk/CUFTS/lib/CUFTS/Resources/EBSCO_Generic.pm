@@ -73,15 +73,19 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'Publication Name'            => 'title',
-        'ISSN'                        => 'issn',
-        'ISSN/ISBN'                   => 'issn',
-        'ISSN / ISBN'                 => 'issn',
-        'Publisher'                   => 'publisher',
-        'Full Text Delay (in months)' => 'embargo_months',
-        'Full Text Delay (Months)'    => 'embargo_months',
-        'Full Text*'                  => '___Full Text',
-        'Full Text**'                 => '___Full Text',
+        'Publication Name'                  => 'title',
+        'ISSN'                              => 'issn',
+        'ISSN/ISBN'                         => 'issn',
+        'ISSN / ISBN'                       => 'issn',
+        'Publisher'                         => 'publisher',
+        'Full Text Delay (in months)'       => 'embargo_months',
+        'Full Text Delay (Months)'          => 'embargo_months',
+        'Full Text*'                        => '___Full Text',
+        'Full Text**'                       => '___Full Text',
+        'Full Text Start'                   => 'ft_start_date',
+        'Full Text Stop'                    => 'ft_end_date',
+        'Indexing and Abstracting Start'    => 'cit_start_date',
+        'Indexing and Abstracting Stop'     => 'cit_end_date',
     };
 }
 
@@ -96,8 +100,14 @@ sub skip_record {
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    my $fulltext = $record->{'___Full Text'};
+    foreach my $field ( qw( ft_start_date ft_end_date cit_start_date cit_end_date ) ) {
+        next if is_empty_string($record->{$field});
+        if ( $record->{$field} =~ m{^ (\d{2}) / (\d{2}) / (\d{4}) /xsm ) {
+            $record->{$field} = "$3-$1-$2";
+        }
+    }
 
+    my $fulltext = $record->{'___Full Text'};
     if ( not_empty_string( $fulltext ) ) {
 
         if ( $fulltext =~ m{^ \s* (\d{1,2}) / (\d{1,2}) / (\d{4}) }xsm ) {
@@ -138,7 +148,6 @@ sub clean_data {
         }
 
     }
-    
 
     if ( defined( $record->{embargo_months} ) ) {
         $record->{embargo_months} = int( $record->{embargo_months} + 0.99 );
