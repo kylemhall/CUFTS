@@ -100,6 +100,13 @@ sub clean_data {
         return [ 'Skipping record, could not parse a valid end date: ' . $record->{ft_end_date} ];
     }
 
+    # Take out any vol/iss fields that don't look like plain numbers or are 0
+    foreach my $field ( qw( iss_ft_start vol_ft_start iss_ft_end vol_ft_end ) ) {
+        if ( $record->{$field} !~ /^\d+$/ || $record->{$field} == 0 ) {
+            delete $record->{$field};
+        }
+    }
+
     return $class->SUPER::clean_data($record);
 }
 
