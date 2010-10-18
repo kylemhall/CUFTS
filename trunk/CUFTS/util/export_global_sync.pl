@@ -176,8 +176,14 @@ RESOURCE:
         
         open OUTPUT, ">$output_dir/$key" or
             die "Unable to create output file: $!";
-            
-        @$columns = grep { $_ ne 'id' } @$columns;
+
+        my %ignore_columns = (
+            id => 1,
+            journal_auth => 1,
+            cjdb_note => 1,
+            local_note => 1,
+        );
+        @$columns = grep { !$ignore_columns{$_} } @$columns;
 
         print OUTPUT join "\t", @$columns;
         print OUTPUT "\n";
