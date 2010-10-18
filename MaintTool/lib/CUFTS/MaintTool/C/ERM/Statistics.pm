@@ -229,8 +229,11 @@ sub _counter_usage_generic {
 
     my $dates = _build_granulated_dates( $start_date, $end_date, 'month', 1 );
 
-    my @counter_sources = $c->form->{valid}->{counter_sources};
-    if ( !scalar(@counter_sources) ) {
+    my @counter_sources;
+    if ( defined($c->form->{valid}->{counter_sources}) ) {
+        my @counter_sources = $c->form->{valid}->{counter_sources};
+    }
+    else {
         my @resource_ids = split(',', $c->form->{valid}->{selected_resources} );
         my @erms = CUFTS::DB::ERMMain->search(
             {
@@ -248,7 +251,6 @@ sub _counter_usage_generic {
         }
         @counter_sources = keys %counter_sources;
     }
-
 
     # TODO: This stuff can be rewritten to be hopefully much faster under DBIC by
     #       not going through all the object generation stuff when really we're just after
