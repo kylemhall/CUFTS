@@ -231,7 +231,7 @@ sub _counter_usage_generic {
 
     my @counter_sources;
     if ( defined($c->form->{valid}->{counter_sources}) ) {
-        my @counter_sources = $c->form->{valid}->{counter_sources};
+        @counter_sources = $c->form->{valid}->{counter_sources};
     }
     else {
         my @resource_ids = split(',', $c->form->{valid}->{selected_resources} );
