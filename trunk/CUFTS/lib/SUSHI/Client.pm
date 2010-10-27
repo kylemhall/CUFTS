@@ -317,6 +317,8 @@ sub get_db1_report {
         $title = decode_entities(decode_entities($title)); # Necessary for Scholarly Stats, at least - decode &amp; in XML, then decode the result to real characters
         next if !hascontent($title);
 
+        next if $title =~ /^total\s+for/i;  # Skip "Total" lines
+
         my $journal_data = { title => $title };
 
         # print(Dumper($journal_data));
