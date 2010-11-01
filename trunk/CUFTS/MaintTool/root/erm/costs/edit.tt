@@ -40,6 +40,10 @@
    <td class="field0"><input type="text" name="period_end" size="10" maxlength="10" value="[% cost.period_end %]" />[% PROCESS form_results.tt frf='period_end' %]</td>
   </tr>
   <tr>
+   <td class="label1">order</td>
+   <td class="field1"><input type="text" name="order_number" size="10" maxlength="256" value="[% cost.order_number %]" />[% PROCESS form_results.tt frf='order_number' %]</td>
+  </tr>
+  <tr>
    <td class="label1">number</td>
    <td class="field1"><input type="text" name="number" size="10" maxlength="256" value="[% cost.number %]" />[% PROCESS form_results.tt frf='number' %]</td>
   </tr>

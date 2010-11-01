@@ -33,6 +33,7 @@ __PACKAGE__->columns(All => qw(
 
     number
     reference
+    order_number
 
     date
     
