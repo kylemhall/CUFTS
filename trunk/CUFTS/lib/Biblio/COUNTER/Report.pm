@@ -47,6 +47,8 @@ use constant YTD_PDF      => 'ytd_pdf';
 use constant YTD_TOTAL    => 'ytd';
 
 # Metrics
+use constant F_SEARCHES  => 'searches federated';
+use constant F_SESSIONS  => 'sessions federated';
 use constant REQUESTS  => 'requests';
 use constant SEARCHES  => 'searches';
 use constant SESSIONS  => 'sessions';

@@ -56,7 +56,7 @@ sub process_record {
     $self->check_title(NOT_BLANK)
          ->check_publisher(MAY_BE_BLANK)
          ->check_platform(NOT_BLANK)
-         ->check_label('Searches run')
+         ->check_label('Total searches run')
          ->check_count_by_periods(SEARCHES)
          ->check_ytd_total
          ->end_row;
@@ -70,10 +70,39 @@ sub process_record {
          ->check_title(EXACT_MATCH, $title)
          ->check_publisher(EXACT_MATCH, $publisher)
          ->check_platform(EXACT_MATCH, $platform)
-         ->check_label('Sessions')
-         ->check_count_by_periods(SESSIONS)
+         ->check_label('Searches-federated and automated')
+         ->check_count_by_periods('searches federated')
          ->check_ytd_total
          ->end_row;
+
+     # Fields that must be the same in the second row as in the first
+     my $record = $self->{'record'};
+     my ($title, $publisher, $platform) = @$record{qw(title publisher platform)};
+
+     # Second row -- sessions
+     $self->begin_row
+          ->check_title(EXACT_MATCH, $title)
+          ->check_publisher(EXACT_MATCH, $publisher)
+          ->check_platform(EXACT_MATCH, $platform)
+          ->check_label('Total Sessions')
+          ->check_count_by_periods(SESSIONS)
+          ->check_ytd_total
+          ->end_row;
+
+      # Fields that must be the same in the second row as in the first
+      my $record = $self->{'record'};
+      my ($title, $publisher, $platform) = @$record{qw(title publisher platform)};
+
+      # Second row -- sessions
+      $self->begin_row
+           ->check_title(EXACT_MATCH, $title)
+           ->check_publisher(EXACT_MATCH, $publisher)
+           ->check_platform(EXACT_MATCH, $platform)
+           ->check_label('Sessions-federated and automated')
+           ->check_count_by_periods('sessions federated')
+           ->check_ytd_total
+           ->end_row;
+
     
     $self->blank_row unless $self->_eof;
 }
