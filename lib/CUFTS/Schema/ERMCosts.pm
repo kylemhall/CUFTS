@@ -45,6 +45,11 @@ __PACKAGE__->add_columns(
         size => 256,
         is_nullable => 1,
     },
+    order_number => {
+        data_type => 'varchar',
+        size => 256,
+        is_nullable => 1,
+    },
     reference => {
         data_type => 'varchar',
         size => 256,

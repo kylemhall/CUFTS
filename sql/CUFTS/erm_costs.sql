@@ -9,7 +9,8 @@ CREATE TABLE erm_costs (
     period_start       DATE,
     period_end         DATE,
     number             VARCHAR(256),
-    reference          VARCHAR(256)
+    reference          VARCHAR(256),
+    order_number       VARCHAR(256)
 );
 
 CREATE INDEX erm_costs_main_idx ON erm_costs (erm_main);

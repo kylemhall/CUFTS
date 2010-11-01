@@ -11,7 +11,7 @@ my $view_form_validate = {
 };
 
 my $main_form_validate = {
-    optional => [ qw( add save invoice invoice_currency paid paid_currency number reference ) ],
+    optional => [ qw( add save invoice invoice_currency paid paid_currency order_number number reference ) ],
     required => [ qw( date period_start period_end ) ],
     filters => ['trim'],
     constraints => {
