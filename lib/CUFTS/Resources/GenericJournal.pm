@@ -83,6 +83,7 @@ sub title_list_field_map {
         'current_years'  => 'current_years',
         'coverage'       => 'coverage',
         'journal_url'    => 'journal_url',
+        'publisher'      => 'publisher',
         'cjdb_note'      => 'cjdb_note',
     };
 }
