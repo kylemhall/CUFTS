@@ -83,6 +83,7 @@ sub title_list_field_map {
         vol_cit_end    => 'vol_cit_end',
         iss_cit_start  => 'iss_cit_start',
         iss_cit_end    => 'iss_cit_end',
+        publisher      => 'publisher',
     };
 }
 
