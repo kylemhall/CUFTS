@@ -123,6 +123,17 @@ sub journals : Local {
     $c->stash->{show_unified} = $c->stash->{current_site}->cjdb_unified_journal_list eq 'unified' ? 1 : 0;
 
     $c->stash->{template} = 'browse_journals.tt';
+    
+    if ( $c->req->params->{format} eq 'json' ) {
+        $c->stash->{json} = {
+            total_count     => int($search_details->{count}),
+            start_record    => int($start_record),
+            page_count      => int($search_details->{per_page}),
+            journals        => [ map { $self->journal_object_to_hash($c, $_) } @$journals ],
+        };
+        $c->forward('V::JSON');
+    }
+    
 }
 
 sub titles : Local {
@@ -209,10 +220,49 @@ sub titles : Local {
     $c->stash->{template} = 'browse_journals.tt';
 
     if ( $c->req->params->{format} eq 'json' ) {
-        $c->stash->{json} = [ map { $self->journal_object_to_hash($c, $_) } @$titles ];
+        $c->stash->{json} = {
+            total_count     => int($search_details->{count}),
+            start_record    => int($start_record),
+            page_count      => int($search_details->{per_page}),
+            journals        => [ map { $self->journal_object_to_hash($c, $_) } @$titles ],
+        };
         $c->forward('V::JSON');
     }
 
+}
+
+sub titles_new : Local {
+    my ($self, $c) = @_;
+
+    my $site_id = $c->stash->{current_site}->id;
+    my $search_term = $c->req->params->{search_terms};  # Only one term when searching titles
+    my $search_type = $c->stash->{search_type} = $c->req->params->{search_type};
+    
+    my $start_page   = $c->req->params->{page} || 1;
+    my $per_page     = 50;    # TODO: Customize this per site 
+    
+    my ( $titles, $count );
+    if ($search_type eq 'startswith') {
+        my $tmp_search_term = CUFTS::CJDB::Util::strip_articles($search_term);
+        $tmp_search_term = CUFTS::CJDB::Util::strip_title($tmp_search_term);
+        $tmp_search_term .= '%';
+        $count  = CJDB::DB::Journals->count_distinct_title_by_journal_main($site_id, $tmp_search_term); 
+        $titles = CJDB::DB::Journals->search_distinct_title_by_journal_main($site_id, $tmp_search_term, (($start_page-1)*$per_page), $per_page);
+    }
+    
+    my $pager = Data::Page->new();
+    $pager->total_entries( $count );
+    $pager->entries_per_page( $per_page );
+    $pager->current_page( $start_page );
+    
+    $c->stash->{records}        = $titles;
+    $c->stash->{pager}          = $pager;
+    $c->stash->{browse_type}    = 'titles';
+    $c->stash->{browse_field}   = 'title';
+    $c->stash->{search_terms}   = [ $c->req->params->{search_terms} ];
+    $c->stash->{show_unified}   = $c->stash->{current_site}->cjdb_unified_journal_list eq 'unified' ? 1 : 0;
+    
+    $c->stash->{template} = 'browse_journals_new.tt';
 }
 
 sub journal_object_to_hash {
@@ -307,6 +357,8 @@ sub show : Local {
 
     if ($browse_field eq 'title') {
         return $c->forward('/browse/titles');
+    } elsif ($browse_field eq 'title_new') {
+        return $c->forward('/browse/titles_new');
     } elsif ($browse_field eq 'subject') {
         return $c->forward('/browse/subjects');
     } elsif ($browse_field eq 'association') {
