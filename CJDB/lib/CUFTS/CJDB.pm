@@ -25,6 +25,8 @@ CUFTS::CJDB->config(
     },
     'V::JSON' => {
         expose_stash => 'json',
+        allow_callback  => 1,
+        callback_param  => 'json_callback',
     },
     cache => {
         backend => {
