@@ -92,6 +92,7 @@ BEGIN {
         Oxford
         Proquest
         ProquestMicromedia
+        ProquestNew
         PubMed
         PubMedCentral
         SageCSA
