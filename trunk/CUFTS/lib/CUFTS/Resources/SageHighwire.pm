@@ -59,10 +59,12 @@ sub title_list_field_map {
         'EISSN'                 => 'e_issn',
         'URL'                   => 'journal_url',
         'First Volume'          => 'vol_ft_start',
+        'FirstVolume'           => 'vol_ft_start',
         'First Issue Number'    => 'iss_ft_start',
+        'FirstIssue'            => 'iss_ft_start',
         'Latest Volume'         => 'vol_ft_end',
-        'Latest Issue Number'   => 'iss_ft_end',
         'LastVolume'            => 'vol_ft_end',
+        'Latest Issue Number'   => 'iss_ft_end',
         'LastIssue'             => 'iss_ft_end',
         'SAGE Pub Code'         => 'db_identifier',
         'SAGEPubCode'           => 'db_identifier',
@@ -74,7 +76,7 @@ sub clean_data {
     
     $record->{title} =~ s/ \xAE $//xsm;  # Remove trailing (r)
 
-    $record->{ft_start_date} = sprintf( '%4i-%02i', $record->{'___First Year'}, $record->{'___First Month'} );
+    $record->{ft_start_date} = sprintf( '%4i-%02i', ($record->{'___First Year'} || $record->{'___FirstYear'} ), ( $record->{'___First Month'} || $record->{'___FirstMonth'} ) );
     $record->{ft_end_date}   = sprintf( '%4i-%02i', ( $record->{'___Latest Year'} || $record->{'___LastYear'} ), ( $record->{'___Latest Month'} || $record->{'___LastMonth'} )  );
 
     my $errs = $class->SUPER::clean_data($record);
