@@ -184,6 +184,8 @@ sub can_getFulltext {
 sub build_linkFulltext {
     my ( $class, $records, $resource, $site, $request ) = @_;
 
+    my @skip_issue_in_sici = qw( 00664162 1543592X );
+
     defined($records) && scalar(@$records) > 0
         or return [];
     defined($resource)
@@ -210,7 +212,7 @@ sub build_linkFulltext {
         
         $sici .= '(' . $request->year . $request->month . ')';
         $sici .= $request->volume;
-        if ( defined( $request->issue ) ) {
+        if ( defined( $request->issue ) && !grep { $_ eq $record->issn } @skip_issue_in_sici ) {
             $sici .= ':' . $request->issue;
         }
         $sici .= '<' . $request->spage . '>';
