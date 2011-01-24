@@ -89,7 +89,13 @@ sub _facet_search  {
 
     my $facets = {};
     while ( my ( $type, $data ) = splice( @$facet_list, 0, 2 ) ) {
-        $facets->{$type} = $data;
+        if ( $type eq 'id' ) {
+            my @values = split ',', $data;
+            $facets->{$type} = [ @values ];
+        }
+        else {
+            $facets->{$type} = $data;
+        }
     }
     
     my $search = { %{$facets} };
