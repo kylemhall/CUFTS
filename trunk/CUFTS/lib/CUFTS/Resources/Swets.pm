@@ -177,9 +177,10 @@ sub build_linkFulltext {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
+        my $issn = $record->issn || $record->e_issn;
+        next if is_empty_string( $issn );
 
-        my $url = $url_base . 'issn=' . $record->issn;
+        my $url = $url_base . "issn=$issn";
         $url .= '&vol=' . $request->volume . '&iss=' . $request->issue;
         $url .= '&page=' . $request->spage . '&FT=1';
 
@@ -207,9 +208,10 @@ sub build_linkTOC {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
+        my $issn = $record->issn || $record->e_issn;
+        next if is_empty_string( $issn );
 
-        my $url = $url_base . 'issn=' . $record->issn;
+        my $url = $url_base . "issn=$issn";
         $url .= '&vol=' . $request->volume . '&iss=' . $request->issue;
 
         my $result = new CUFTS::Result($url);
@@ -236,9 +238,10 @@ sub build_linkJournal {
     my @results;
 
     foreach my $record (@$records) {
-        next if is_empty_string( $record->issn );
+        my $issn = $record->issn || $record->e_issn;
+        next if is_empty_string( $issn );
 
-        my $result = new CUFTS::Result( $url_base . 'issn=' . $record->issn );
+        my $result = new CUFTS::Result( $url_base . "issn=$issn" );
         $result->record($record);
 
         push @results, $result;
