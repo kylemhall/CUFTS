@@ -59,11 +59,11 @@ sub title_list_fields {
 sub title_list_field_map {
 
     return {
-        'Title'             => 'title',
-        'ISSN-paper'        => 'issn',
-        'ISSN-electronic'   => 'e_issn',
-        'MML'               => 'journal_url',
-        'Publisher'         => 'publisher',
+        'TitleName'             => 'title',
+        'ISSN-paper'            => 'issn',
+        'ISSN-electronic'       => 'e_issn',
+        # 'MML'                   => 'journal_url',
+        'Title Publisher'       => 'publisher',
     };
 }
 
