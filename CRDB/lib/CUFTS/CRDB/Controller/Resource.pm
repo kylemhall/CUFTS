@@ -86,6 +86,8 @@ used for things like the pop-up resource details.
 sub json : Chained('load_resource') PathPart('json') Args(0) {
     my ( $self, $c ) = @_;
 
+    die('Disabled JSON view of resources until some control of what data is dumped can be added for security reasons.');
+
     my $erm_obj = $c->stash->{erm};
     my $erm_hash = {
         subjects => [],
@@ -114,6 +116,10 @@ sub json : Chained('load_resource') PathPart('json') Args(0) {
         foreach my $column ( $license->columns() ) {
             $erm_hash->{license}->{$column} = $license->$column();
         }
+    }
+
+    if ( defined($erm_hash->{provider}) ) {
+        $erm_hash->{provider} = $erm_hash->{provider}->provider_name;
     }
 
     $c->stash->{json} = $erm_hash;
