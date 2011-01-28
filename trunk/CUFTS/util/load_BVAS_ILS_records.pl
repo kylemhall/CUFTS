@@ -107,7 +107,7 @@ my %currency_map = (
 
 my $load_timestamp = time();
 
-my $schema = CUFTS::Schema->connect( 'dbi:Pg:dbname=CUFTS3-test', 'tholbroo', '' );
+my $schema = CUFTS::Schema->connect( 'dbi:Pg:dbname=CUFTS3', 'tholbroo', '' );
 
 my %records;
 
@@ -119,7 +119,7 @@ my $row = <>;
 while ($row = <>) {
 
     chomp($row);
-    my $results = parse_row($row);
+    my $results = parse_row($row, $schema);
     if ( !ref($results) eq 'HASH' ) {
         print "Attempt to parse record failed, debug information was not returned properly.";
         next;
@@ -150,11 +150,12 @@ while ($row = <>) {
     # Possibly merge payment info if the voucher number is the same
 
     if ( exists($records{$num}) ) {
-        $records{$num}->{acq_num} .= ',' . $record->{acq_num};
+        $records{$num}->{acq_num}->{ $record->{acq_num} }++;
         print "Adding payments to a previously parsed record.\n";
         push @{$records{$num}->{payments}}, @{$record->{payments}};
     }
     else {
+        $record->{acq_num} = { $record->{acq_num} => 1 };
         $records{$num} = $record;
     }
 
@@ -180,44 +181,51 @@ foreach my $record ( values %records ) {
         }
     } 
 
+    if ( !defined($erm) ) {
+        print "* Unable to find matching ERM number, skipping record.\n";
+        next;
+    }
+
     # Fall back to trying to match on bib_num
 
-    elsif ( not_empty_string($record->{bib_num}) ) {
-        $erm = $schema->resultset('ERMMain')->find( { site => $site_id, local_bib => $record->{bib_num} } );
-    } 
+    # elsif ( not_empty_string($record->{bib_num}) ) {
+    #     $erm = $schema->resultset('ERMMain')->find( { site => $site_id, local_bib => $record->{bib_num} } );
+    # }
+    
 
     # Otherwise, find/create a new record
 
     if ( !defined($erm) ) {
-        $erm = $schema->resultset('ERMMain')->find_or_create( {
-            site  => $site_id,
-            key   => $record->{title},
-            issn  => join( ', ', map { substr($_, 0, 4) . '-' . substr($_, 4, 4) } @{ $record->{issns} } ),
-            publisher => $record->{publisher},
-#            journal_auth => int($record->{journal_auth}) || undef,
-            local_bib => $record->{bib_num},
-            local_acquisitions => $record->{acq_num},
-            public => 0,
-            public_list => 0,
-            local_fund => $record->{fund},
-            coverage => $record->{coverage},
-            resource_type => map_resource_type( $record->{resource_type} ),
-            print_included => map_print_included( $record->{resource_type} ),
-            resolver_enabled => map_resolver( $record->{resource_type} ),
-            subscription_status => 'Active',
-            subscription_type => 'Direct Subscription',
-            vendor => $record->{vendor} eq 'caneb' ? 'EBSCO Canada Ltd.' : undef,
-            pricing_model => 14,
-            misc_notes => $load_timestamp,
-        } );
-        $erm->main_name( $record->{title} );
+#         $erm = $schema->resultset('ERMMain')->find_or_create( {
+#             site  => $site_id,
+#             key   => $record->{title},
+#             issn  => join( ', ', map { substr($_, 0, 4) . '-' . substr($_, 4, 4) } @{ $record->{issns} } ),
+#             publisher => $record->{publisher},
+# #            journal_auth => int($record->{journal_auth}) || undef,
+#             local_bib => $record->{bib_num},
+#             local_acquisitions => $record->{acq_num},
+#             public => 0,
+#             public_list => 0,
+#             local_fund => $record->{fund},
+#             coverage => $record->{coverage},
+#             resource_type => map_resource_type( $record->{resource_type} ),
+#             print_included => map_print_included( $record->{resource_type} ),
+#             resolver_enabled => map_resolver( $record->{resource_type} ),
+#             subscription_status => 'Active',
+#             subscription_type => 'Direct Subscription',
+#             vendor => $record->{vendor} eq 'caneb' ? 'EBSCO Canada Ltd.' : undef,
+#             pricing_model => 14,
+#             misc_notes => $load_timestamp,
+#         } );
+#         $erm->main_name( $record->{title} );
         print "* CREATED ERM MAIN: ", $erm->id, "\n";
     }
     else {
         print "* FOUND ERM MAIN: ", $erm->id, "\n";
-        $erm->local_acquisitions( $record->{acq_num} );
+        $erm->local_acquisitions( join( ', ', keys(%{$record->{acq_num}}) ) );
         $erm->local_bib( $record->{bib_num} );
         $erm->local_fund( $record->{fund} );
+        # $erm->vendor($record->{vendor}),
         $erm->update();
     }
 
@@ -225,6 +233,7 @@ foreach my $record ( values %records ) {
         print "   ", $payment->{invoice_date};
         print "   ", $payment->{start_date}, ' - ', $payment->{end_date};
         printf( "%8i", $payment->{voucher} );
+        print "   ", $payment->{acq_num};
         printf( "   \$ %9.2f  %3s \$ %9.2f", $payment->{amount_paid}, $payment->{currency_billed}, $payment->{amount_billed} );
         print "  ($payment->{references})" if exists $payment->{references};
         if ( $payment->{sub_from} =~ /\d/ || $payment->{sub_to} =~ /\d/ ) {
@@ -232,7 +241,7 @@ foreach my $record ( values %records ) {
         }
         print "\n";
 
-        my $cost = $schema->resultset('ERMCosts')->search( { erm_main => $erm->id, number => $payment->{voucher} } )->first();
+        my $cost = $schema->resultset('ERMCosts')->search( { erm_main => $erm->id, number => $payment->{voucher}, order_number => $payment->{acq_num} } )->first();
         
         if ( defined($cost) && $OVERWRITE_COSTS ) {
             $cost->delete;
@@ -242,6 +251,7 @@ foreach my $record ( values %records ) {
         if ( !defined($cost) ) {
             $cost = $schema->resultset('ERMCosts')->create( {
                 erm_main         => $erm->id,
+                order_number     => $payment->{acq_num},
                 number           => $payment->{voucher},
                 reference        => $payment->{references},
                 date             => $payment->{invoice_date},
@@ -267,7 +277,7 @@ foreach my $record ( values %records ) {
 
 # Returns a record.  Yes, this is very ugly because of the bizarre III format.  See the END section for examples
 sub parse_row {
-    my ($row) = @_;
+    my ($row, $schema) = @_;
     # print $row;
     
     my %record;
@@ -312,10 +322,12 @@ sub parse_row {
             $payment_record{copies}        = get_comma_field( \$payment, 'copies' );
             $payment_record{sub_from}      = get_comma_field( \$payment, 'sub_from' );
             $payment_record{sub_to}        = get_comma_field( \$payment, 'sub_to' );
-
+            
             $payment =~ s/^[",]\s*//;
             $payment =~ s/\s*[",]$//;
             $payment_record{note} = $payment;
+
+            $payment_record{acq_num}       = $record{acq_num};
 
             # Cleanup the invoice date
             
@@ -397,11 +409,23 @@ sub parse_row {
                     $payment_record{end_date}   = $references{ $payment_record{references} }->{end_date};                 
                     push @debug, "Found a 're:' reference to: " . $payment_record{references};
                 }
-                else {  # Default to previous record if it exists
-                    
-                    # Don't do this anymore, too much of a chance of errors.
-
-                    push @debug, "Found a 're:' reference by no match";
+                else {
+                    if ( my $erm_id = $record{erm_main_id} ) {
+                        # Try to find an existing record with a matching reference number
+                        $erm_id =~ s/^e//;
+                        my $cost = $schema->resultset('ERMCosts')->search( { erm_main => $erm_id, number => $payment_record{references} } )->first;
+                        if ( defined($cost) ) {
+                            $payment_record{start_date} = $cost->period_start;
+                            $payment_record{end_date}   = $cost->period_end;
+                            push @debug, "Found a 're:' reference and matching cost record: " . $payment_record{references} . " ERM id: $erm_id";
+                        }
+                        else {
+                            push @debug, "Found a 're:' reference but no matching cost record: " . $payment_record{references} . " ERM id: $erm_id";
+                        }
+                    }
+                    else {
+                        push @debug, "Found a 're:' reference but no erm_main_id: " . $payment_record{references};
+                    }
                     
                     # if ( scalar(@{ $record{payments} }) ) {
                     #     $payment_record{start_date} = $record{payments}->[ $#{ $record{payments} } ]->{start_date};
@@ -443,7 +467,8 @@ sub parse_row {
             
             # Fallback to trying the pre-parsed sub_from/to fields
             
-            if ( !ParseDate($payment_record{start_date} ) ) {
+            if ( !defined($payment_record{start_date}) || (defined($payment_record{start_date}) && !ParseDate($payment_record{start_date})) ) {
+                push @debug, "* Formatted start date: " . $payment_record{sub_from};
                 my $prev_start_date = $payment_record{start_date};
                 my ( @parts ) = split '-', $payment_record{sub_from};
                 if ( defined($parts[0]) && int($parts[0]) ) {
@@ -452,8 +477,9 @@ sub parse_row {
                     push @debug, "* Using sub_from: $payment_record{start_date} due to bad start_date: $prev_start_date";
                 }
             }
-            if ( !ParseDate($payment_record{end_date}) ) {
-                my $prev_end_date = $payment_record{start_date};
+            if ( !defined($payment_record{end_date}) || (defined($payment_record{end_date}) && !ParseDate($payment_record{end_date})) ) {
+                push @debug, "* Formatted end date: " . $payment_record{sub_to};
+                my $prev_end_date = $payment_record{end_date};
                 my ( @parts ) = split '-', $payment_record{sub_to};
                 if ( defined($parts[0]) && int($parts[0]) ) {
                     $parts[0] += $parts[0] > 20 ? 1900 : 2000;
@@ -465,15 +491,15 @@ sub parse_row {
             # Validate all dates, or throw the row away.
 
             my $date_err = 0;
-            if ( !ParseDate($payment_record{start_date}) ) {
+            if ( !defined($payment_record{start_date}) || !ParseDate($payment_record{start_date}) ) {
                 $date_err++;
                 push @debug, "* Could not parse start date: $payment_record{start_date}";
             }
-            if ( !ParseDate($payment_record{end_date}) ) {
+            if ( !defined($payment_record{end_date}) || !ParseDate($payment_record{end_date}) ) {
                 $date_err++;
                 push @debug, "* Could not parse end date: $payment_record{end_date}";
             }
-            if ( !ParseDate($payment_record{invoice_date}) ) {
+            if ( !defined($payment_record{invoice_date}) || !ParseDate($payment_record{invoice_date}) ) {
                 $date_err++;
                 push @debug, "* Could not parse invoice date: $payment_record{invoice_date}";
             }
@@ -531,6 +557,7 @@ sub format_month {
     elsif ( $month =~ /^Aut/i )  { return $period eq 'start' ? 6 : 12 }
     elsif ( $month =~ /^Win/i )  { return $period eq 'start' ? 9 : 12 }
     else {
+        return 99;
         CUFTS::Exception::App->throw("Unable to find month match: $month");
     }
 
