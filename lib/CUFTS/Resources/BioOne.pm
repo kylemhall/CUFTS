@@ -29,9 +29,9 @@ use HTML::Entities qw();
 use strict;
 
 
-# sub title_list_extra_requires {
-#     require CUFTS::Util::CSVParse;
-# }
+sub title_list_extra_requires {
+    require CUFTS::Util::CSVParse;
+}
 
 ## title_list_fields - Controls what fields get displayed and loaded from
 ## title lists.
@@ -46,6 +46,7 @@ sub title_list_fields {
             vol_ft_start
             vol_ft_end
             journal_url
+            publisher
         )
     ];
 }
@@ -56,29 +57,31 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'Title' => 'title',
-        'ISSN'  => 'issn',
-        'TITLE' => 'title',
-        'URL'   => 'journal_url',
-        'BIOONE LANDING URL' => 'journal_url',
+        'Title'                 => 'title',
+        'ISSN'                  => 'issn',
+        'ISSN/ISBN'             => 'issn',
+        'TITLE'                 => 'title',
+        'URL'                   => 'journal_url',
+        'BIOONE LANDING URL'    => 'journal_url',
+        'Publisher'             => 'publisher',
     };
 }
 
-# sub title_list_split_row {
-#     my ( $class, $row ) = @_;
-# 
-#     my $csv = CUFTS::Util::CSVParse->new();
-#     $csv->parse($row)
-#         or CUFTS::Exception::App->throw(
-#                 'Error parsing CSV line: ' . $csv->error_input() );
-#     my @fields = $csv->fields;
-#     return \@fields;
-# }
+sub title_list_split_row {
+    my ( $class, $row ) = @_;
+
+    my $csv = CUFTS::Util::CSVParse->new();
+    $csv->parse($row)
+        or CUFTS::Exception::App->throw(
+                'Error parsing CSV line: ' . $csv->error_input() );
+    my @fields = $csv->fields;
+    return \@fields;
+}
 
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    my $availability = $record->{'___Availability'} || $record->{'___AVAILABILITY'} || $record->{'___AVAILABILITY ON BIOONE'};
+    my $availability = $record->{'___Availability'} || $record->{'___AVAILABILITY'} || $record->{'___AVAILABILITY ON BIOONE'} || $record->{'___Available on BioOne'};
     my ($start, $end) = split(" \- ", $availability, 2);
     $start =~ /(.*)\((.*)\)/;
     my $start_vol = $1;
