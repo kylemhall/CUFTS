@@ -132,7 +132,7 @@ sub clean_data {
 
     }
 
-    if ( $record->{___has_current_available} =~ /yes/ixsm ) {
+    if ( not_empty_string($record->{___has_current_available}) && $record->{___has_current_available} =~ /yes/ixsm ) {
         if ( $record->{___moving_wall} =~ / moving\s+wall: \s* (\d+) /ixsm ) {
             my $year = (localtime)[5] + 1900;
             $record->{ft_end_date} = $year - 1 - int($1);
