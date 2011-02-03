@@ -36,7 +36,7 @@ Ext.onReady( function() {
     function exportMARC() {
         Ext.MessageBox.confirm(
             'Update Records?',
-            'Would you like to change the subscription status to ordered if currently "On order" for these records?',
+            'Would you like to change the subscription status to "On order" for these records?',
             function(btn) {
                 var params = { file: 1 };
                 if ( btn == 'yes' ) {
