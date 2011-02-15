@@ -145,20 +145,28 @@ sub load_print_data {
 
         load_print_link( $logger, $site, $loader, $links, $journal_auth_id, $record );
 
-        next if exists $journal_auths->{$journal_auth_id};
+        if ( !exists $journal_auths->{$journal_auth_id} ) {
+            $journal_auths->{$journal_auth_id} = {
+                title  => $loader->get_title($record),
+                issns  => [ $loader->get_issns($record) ],
+                titles => [ $loader->get_alt_titles($record) ],
+            };
 
-        $journal_auths->{$journal_auth_id} = {
-            title  => $loader->get_title($record),
-            issns  => [ $loader->get_issns($record) ],
-            titles => [ $loader->get_alt_titles($record) ],
-        };
-
-        # Add titles and ISSNs from journal auth record. These both get deduped later, so add them blindly
-        my $journal_auth = CUFTS::DB::JournalsAuth->retrieve( $journal_auth_id );
-        push @{ $journal_auths->{$journal_auth_id}->{titles} }, map { $_->title } $journal_auth->titles;
-        push @{ $journal_auths->{$journal_auth_id}->{issns}  }, map { $_->issn }  $journal_auth->issns;
+            # Add titles and ISSNs from journal auth record. These both get deduped later, so add them blindly
+            my $journal_auth = CUFTS::DB::JournalsAuth->retrieve( $journal_auth_id );
+            push @{ $journal_auths->{$journal_auth_id}->{titles} }, map { $_->title } $journal_auth->titles;
+            push @{ $journal_auths->{$journal_auth_id}->{issns}  }, map { $_->issn }  $journal_auth->issns;
+        }
+        else {
+            # Add titles and ISSNs from the print record - which is likely a second record at this point.
+            # These both get deduped later, so add them blindly.
+            push @{ $journal_auths->{$journal_auth_id}->{titles} }, $loader->get_title($record);
+            push @{ $journal_auths->{$journal_auth_id}->{titles} }, $loader->get_alt_titles($record);
+            push @{ $journal_auths->{$journal_auth_id}->{issns}  }, $loader->get_issns($record);
+        }
 
         ja_augment_with_marc( $loader, $logger, $journal_auths->{$journal_auth_id}, $record, $site_id );
+
 
     }
 
