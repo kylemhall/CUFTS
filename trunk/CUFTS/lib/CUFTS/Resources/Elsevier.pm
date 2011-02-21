@@ -42,6 +42,8 @@ sub title_list_fields {
             ft_end_date
             vol_ft_end
             iss_ft_end
+            embargo_days
+            embargo_months
             journal_url
             publisher
             current_months
