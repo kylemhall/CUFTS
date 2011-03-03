@@ -131,6 +131,12 @@ sub exit : Global {
     exit();
 }
 
+sub favicon : Path('/favicon.ico') {
+    my ( $self, $c ) = @_;
+    $c->response->body('');
+    $c->response->status(404);
+    $c->detach();
+}
 
 =head2 end
 

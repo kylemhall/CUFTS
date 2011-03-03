@@ -58,4 +58,38 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key( 'id' );
 
+# This is pretty hacky... try to determine the field type by checking for the column data in various ERM Main
+# associated tables.
+
+sub field_type {
+    my ( $self ) = shift;
+
+    my $schema = $self->result_source->schema;
+    my $erm_main     = $schema->resultset('ERMMain')->result_source;
+    my $erm_license  = $schema->resultset('ERMLicense')->result_source;
+    my $erm_provider = $schema->resultset('ERMProviders')->result_source;
+    
+    my $field = $self->field;
+    
+    my $type;
+    if ( $erm_main->has_column($field) ) {
+        $type = $erm_main->column_info($field)->{data_type};
+    }
+    elsif ( $erm_license->has_column($field) ) {
+        $type = $erm_license->column_info($field)->{data_type};
+    }
+    elsif ( $erm_provider->has_column($field) ) {
+        $type = $erm_provider->column_info($field)->{data_type};
+    }
+    
+    if ( $type =~ /^varc/i || $type =~ /^char/ ) {
+        $type = 'text';
+    }
+    if ( !defined($type) ) {
+        $type = 'text';
+    }
+    
+    return lc($type);
+}
+
 1;

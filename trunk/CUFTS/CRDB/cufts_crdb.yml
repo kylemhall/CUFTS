@@ -32,6 +32,10 @@ View::TT:
     TEMPLATE_EXTENSION: .tt
     COMPILE_DIR: '/tmp/CUFTS_CRDB_template_cache'
 
+View::TTMobile:
+    TEMPLATE_EXTENSION: .tt
+    COMPILE_DIR: '/tmp/CUFTS_CRDB_template_cache'
+
 authentication:
     default_realm: internal
     realms:
