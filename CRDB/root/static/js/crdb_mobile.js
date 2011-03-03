@@ -7,8 +7,12 @@ var CRDB_mobile = {
     field_map: {
         access: 'Access',
         alert: 'Alert',
+        allows_coursepacks: 'Allows Coursepacks',
+        allows_ereserves: 'Allows Electronic Reserves',
+        allows_ill: 'Allows Interlibrary Loans',
         coverage: 'Coverage',
         description_full: 'Description',
+        ill_notes: 'Interlibrary Loan Notes',
         name: 'Name',
         open_access: 'Open Access',
         print_equivalents: 'Print Equivalents',
