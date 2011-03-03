@@ -232,7 +232,7 @@ var CRDB_mobile = {
 
     fullDisplayFieldURL: function(content, field_name, value, resource) {
         if ( typeof(value) != 'undefined' && value != null ) {
-            content.append( app.getGotoURL(resource.id).attr('data-role', 'button').text('Connect') );
+            content.append( this.getGotoURL(resource.id).attr('data-role', 'button').text('Connect') );
         }
     },
 
