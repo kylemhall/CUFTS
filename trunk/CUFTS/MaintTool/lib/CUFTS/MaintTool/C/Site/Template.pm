@@ -143,6 +143,9 @@ sub menu_crdb : Local {
         login.tt
         main.tt
         menu.tt
+        mobile_app_header.tt
+        mobile_app_js_setup.tt
+        mobile_app.tt
         nav_line.tt
         page_footer.tt
         page_header.tt
@@ -167,7 +170,7 @@ sub menu_crdb : Local {
     ## Get CSS files, active and sandbox lists
     ##
 
-    my @crdb_css_list        = qw( crdb.css );
+    my @crdb_css_list        = qw( crdb.css crdb_mobile.css );
     my $crdb_active_css_dir  = get_site_base_dir( 'crdb_css', $site, 'active'  );
     my $crdb_sandbox_css_dir = get_site_base_dir( 'crdb_css', $site, 'sandbox' );
 
