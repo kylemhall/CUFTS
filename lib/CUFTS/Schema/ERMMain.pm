@@ -800,6 +800,78 @@ __PACKAGE__->belongs_to( resource_medium => 'CUFTS::Schema::ERMResourceMediums' 
 __PACKAGE__->belongs_to( resource_type   => 'CUFTS::Schema::ERMResourceTypes' );
 __PACKAGE__->belongs_to( provider        => 'CUFTS::Schema::ERMProviders' );
 
+
+# Flatten to a hash, concatenating strings, etc. Will take an array of ERMDisplayFields to limit to, otherwise it does everything.
+sub to_hash {
+    my ( $self, $fields ) = @_;
+    
+    my @fields;
+    if ( defined($fields) ) {
+        @fields = map { $_->field } @$fields;
+    }
+    else {
+        @fields = $self->columns();
+        push @fields, qw( content_types subjects consortia pricing_model resource_medium resource_type provider );
+        # TODO: Also add license fields?
+    }
+
+    # At the minimum we want the id and name (this may be overwritten below)
+    my $hash = {
+        id => $self->id,
+        name => $self->main_name,
+    };
+    my $license = $self->license;
+    foreach my $field ( @fields ) {
+        if ( $field eq 'content_types' ) {
+            $hash->{content_types} = join ', ', map { $_->content_type } $self->content_types;
+        }
+        elsif ( $field eq 'subjects' ) {
+            $hash->{subjects} = join ', ', map { $_->subject } $self->subjects;
+        }
+        elsif ( $field eq 'consortia' ) {
+            $hash->{consortia} = defined($self->consortia) ? $self->consortia->consortia : undef;
+        }
+        elsif ( $field eq 'pricing_model' ) {
+            $hash->{pricing_model} = defined($self->pricing_model) ? $self->pricing_model->pricing_model : undef;
+        }
+        elsif ( $field eq 'resource_medium' ) {
+            $hash->{resource_medium} = defined($self->resource_medium) ? $self->resource_medium->resource_medium : undef;
+        }
+        elsif ( $field eq 'resource_type' ) {
+            $hash->{resource_type} = defined($self->resource_type) ? $self->resource_type->resource_type : undef;
+        }
+        elsif ( $field eq 'provider' ) {
+            $hash->{provider} = defined($self->provider) ? $self->provider->provider : undef;
+        }
+        elsif ( $field eq 'group_records' && not_empty_string($self->group_records) ) {
+            my $group_records = $self->get_group_records;
+            if ( ref($group_records) eq 'ARRAY' && scalar(@$group_records) ) {
+                $hash->{group_records} = [];
+                foreach my $group_record (@$group_records) {
+                    push @{$hash->{group_records}}, {
+                        id => $group_record->id,
+                        name => $group_record->main_name,
+                        url => $group_record->url,
+                        description_full => $group_record->description_full,
+                    };
+                }
+            }
+        }
+        else {
+            if ( $self->has_column($field) ) {
+                $hash->{$field} = $self->$field();
+            }
+            else {
+                if ( defined($license) && $license->has_column($field) ) {
+                    $hash->{$field} = $license->$field();
+                }
+            }
+        }
+    }
+
+    return $hash;
+}
+
 sub main_name {
     my ( $self, $new_name ) = @_;
 
