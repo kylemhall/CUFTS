@@ -26,10 +26,13 @@ Catalyst Controller
 sub base : Chained('/site') PathPart('m') CaptureArgs(0) {
     my ( $self, $c ) = @_;
 
+
+    $c->stash->{sandbox} = $c->session->{sandbox};
+    my $box = $c->session->{sandbox} ? 'sandbox' : 'active';
+
     # Set up site specific CSS file if it exists
-    
     my $site_css = '/sites/' . $c->site->id . "/static/css/${box}/crdb_mobile.css";
-                  
+
     if ( -e ($c->config->{root} . $site_css) ) {
         $c->stash->{site_css_file} = $c->uri_for( $site_css );
     }
@@ -38,7 +41,7 @@ sub base : Chained('/site') PathPart('m') CaptureArgs(0) {
 }
 
 
-=head2 browse_index 
+=head2 browse_index
 
 =cut
 
@@ -66,12 +69,12 @@ sub subjects_json : Chained('base') PathPart('subjects') Args(0) {
 
 sub resource_json : Chained('base') PathPart('resource') Args(0) {
     my ( $self, $c ) = @_;
-    
+
     my $resource_id    = $c->request->params->{resource_id};
     my $resource       = $c->model('CUFTS::ERMMain')->search({ id => $resource_id, site => $c->site->id })->first();
     my @display_fields = $c->model('CUFTS::ERMDisplayFields')->search( { site => $c->site->id, staff_view => { '!=' => 'true' } }, { order_by => 'display_order' } )->all;
-    
-    
+
+
     my $resource_hash = $resource->to_hash(\@display_fields);
 
     $c->stash->{json}->{resource} = $resource_hash;
@@ -121,7 +124,7 @@ sub resources_json : Chained('base') PathPart('resources') Args(0) {
         # Default to title sort
         @resources = sort { $a->{sort_name} cmp $b->{sort_name} } @resources;
     }
-    
+
     foreach my $resource (@resources) {
         $resource->{name} = delete $resource->{result_name};
 
@@ -136,14 +139,14 @@ sub resources_json : Chained('base') PathPart('resources') Args(0) {
 
         $resource->{description_brief} = $html_strip->parse( $resource->{description_brief} );
         $html_strip->eof;
-        
+
         # Remove some things we don't need to cut down on data sent.
         foreach my $field ( qw( key sort_name vendor license proxy distinct_erm_main  ) ) {
             delete $resource->{$field};
         }
-        
+
     }
-    
+
     $c->stash->{json}->{resources} = \@resources;
     $c->stash->{current_view}  = 'JSON';
 }
