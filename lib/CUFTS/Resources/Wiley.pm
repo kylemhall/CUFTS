@@ -25,6 +25,7 @@ use base qw(CUFTS::Resources::GenericJournal);
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
 use Data::Dumper;
+use URI::Escape;
 
 use strict;
 
