@@ -103,37 +103,69 @@ sub clean_data {
 }
 
 sub build_linkFulltext {
-    my ($class, $records, $resource, $site, $request) = @_;
+    my ( $class, $records, $resource, $site, $request ) = @_;
 
-    defined($records) && scalar(@$records) > 0 or 
-        return [];
-    defined($resource) or 
-        CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
-    defined($site) or 
-        CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
-    defined($request) or 
-        CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
+    defined($records) && scalar(@$records) > 0
+        or return [];
+    defined($resource)
+        or CUFTS::Exception::App->throw('No resource defined in build_linkFulltext');
+    defined($site)
+        or CUFTS::Exception::App->throw('No site defined in build_linkFulltext');
+    defined($request)
+        or CUFTS::Exception::App->throw('No request defined in build_linkFulltext');
 
-    if ( not_empty_string($request->doi) ) {
-        my $url;
-        $url .= 'http://onlinelibrary.wiley.com/doi/';
-        $url .= uri_escape($request->doi, "^A-Za-z0-9\-_.!~*'()\/");
-        $url .= '/abstract';
+    my @results;
 
-        my $result = new CUFTS::Result($url);
-        $result->record($records->[0]);
+    foreach my $record (@$records) {
+        my $url = $class->_build_openurl( $record, $resource, $request );
+        next if !defined($url);
         
-        return [$result];
-    } else {
-        return [];
+        $url .= "&spage=" . $request->spage;
+        
+        my $result = new CUFTS::Result($url);
+        $result->record($record);
+
+        push @results, $result;
     }
+
+    return \@results;
 }
 
-sub can_getFulltext {
-    my ($class, $request) = @_;
 
-    return 1 if not_empty_string($request->doi);
-    return 0;   
+sub _build_openurl {
+    my ( $class, $record, $resource, $request ) = @_;
+
+    my $url = "http://onlinelibrary.wiley.com/resolve/openurl?genre=article";
+
+    $url .= "&title=" . uri_escape($record->title);
+
+    if ( not_empty_string($record->issn) ) {
+        $url .= "&issn=" . $record->issn;
+    }
+    elsif ( not_empty_string($record->e_issn) ) {
+        $url .= "&issn=" . $record->e_issn;
+    }
+
+    if ( not_empty_string($request->volume) ) {
+        $url .= "&volume=" . $request->volume;
+    }
+
+    if ( not_empty_string($request->issue) ) {
+        $url .= "&issue=" . $request->issue;
+    }
+
+    return $url;
+}
+
+
+sub can_getFulltext {
+    my ( $class, $request ) = @_;
+
+    return 0 if is_empty_string($request->volume);
+    return 0 if is_empty_string($request->issue);
+    return 0 if is_empty_string($request->spage);
+
+    return 1;
 }
 
 
