@@ -19,7 +19,7 @@
    <li><a href="#subjects">Subject</a></li>
   </ul>
  </div>
- <div data-role="footer"><h1>CRDB Mobile</h1></div>
+ [% PROCESS mobile_app_footer.tt %]
 </div>
 
 <div data-role="page" id="az">
@@ -33,7 +33,7 @@
    [% END %]
   </ul>
  </div>
- <div data-role="footer"><h1>CRDB Mobile</h1></div>
+ [% PROCESS mobile_app_footer.tt %]
 </div>
 
 <div data-role="page" id="subjects">
@@ -43,7 +43,7 @@
   <ul data-role="listview">
   </ul>
  </div>
- <div data-role="footer"><h1>CRDB Mobile</h1></div>
+ [% PROCESS mobile_app_footer.tt %]
 </div>
 
 <div data-role="page" id="resources">
@@ -53,7 +53,7 @@
   <ul data-role="listview">
   </ul>
  </div>
- <div data-role="footer"><h1>CRDB Mobile</h1></div>
+ [% PROCESS mobile_app_footer.tt %]
 </div>
 
 <div data-role="page" id="full">
@@ -62,7 +62,7 @@
  <div data-role="content">
   <div id="resource"></div>
  </div>
- <div data-role="footer"><h1>CRDB Mobile</h1></div>
+ [% PROCESS mobile_app_footer.tt %]
 </div>
 
 </body>

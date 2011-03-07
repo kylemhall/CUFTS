@@ -143,6 +143,7 @@ sub menu_crdb : Local {
         login.tt
         main.tt
         menu.tt
+        mobile_app_footer.tt
         mobile_app_header.tt
         mobile_app_js_setup.tt
         mobile_app.tt
