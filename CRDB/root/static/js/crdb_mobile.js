@@ -175,9 +175,10 @@ var CRDB_mobile = {
         $('div#full').live('pagebeforeshow', function(event) {
 
             var page = $(event.currentTarget);
-            var content = page.find('#resource');
+            var container = page.find('#resource');
+            var content = $('<div>');
 
-            content.empty();
+            container.empty();
             var loader = app.createLoader();
             page.append(loader);
 
@@ -193,6 +194,7 @@ var CRDB_mobile = {
                 });
 
                 loader.remove();
+                content.appendTo(container);
                 content.page();  // Process the added fields with JQM so things like buttons get rendered
             });
 
