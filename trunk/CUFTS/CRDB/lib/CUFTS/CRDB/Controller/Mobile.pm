@@ -25,6 +25,15 @@ Catalyst Controller
 
 sub base : Chained('/site') PathPart('m') CaptureArgs(0) {
     my ( $self, $c ) = @_;
+
+    # Set up site specific CSS file if it exists
+    
+    my $site_css =   '/sites/' . $site->id . "/static/css/${box}/crdb_mobile.css";
+                  
+    if ( -e ($c->config->{root} . $site_css) ) {
+        $c->stash->{site_css_file} = $c->uri_for( $site_css );
+    }
+
     $c->stash->{current_view} = 'TTMobile';
 }
 
