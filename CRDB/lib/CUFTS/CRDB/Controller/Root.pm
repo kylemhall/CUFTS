@@ -44,7 +44,7 @@ sub site : Chained('/') PathPart('') CaptureArgs(1) {
 
     # Set up site specific CSS file if it exists
     
-    my $site_css =   '/sites/' . $site->id . "/static/css/${box}/crdb_mobile.css";
+    my $site_css =   '/sites/' . $site->id . "/static/css/${box}/crdb.css";
                   
     if ( -e ($c->config->{root} . $site_css) ) {
         $c->stash->{site_css_file} = $c->uri_for( $site_css );
