@@ -44,7 +44,7 @@ sub title_list_field_map {
     };
 }
 
-sub title_list_skip_lines_count { return 4; }
+sub title_list_skip_lines_count { return 0; }
 
 sub skip_record {
     my ( $class, $record ) = @_;
