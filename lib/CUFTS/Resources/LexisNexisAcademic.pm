@@ -28,6 +28,21 @@ use URI::Escape qw(uri_escape);
 
 use strict;
 
+sub title_list_extra_requires {
+    require CUFTS::Util::CSVParse;
+}
+
+sub title_list_split_row {
+    my ( $class, $row ) = @_;
+
+    my $csv = CUFTS::Util::CSVParse->new();
+    $csv->parse($row)
+        or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
+
+    my @fields = $csv->fields;
+    return \@fields;
+}
+
 sub title_list_fields {
     return [
         qw(
