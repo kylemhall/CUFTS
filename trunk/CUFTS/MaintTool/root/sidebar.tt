@@ -48,7 +48,7 @@
         
     END;
 
-    IF current_account.sites.size > 1 OR current_account.administrator;
+    IF (current_account.sites AND current_account.sites.size > 1) OR current_account.administrator;
         menu.push(['/site/change', 'Change Site']);
     END;
 
