@@ -85,7 +85,7 @@ sub clean_data {
 
     if ( not_empty_string( $record->{ft_start_date} ) ) {
 
-        if ( $record->{ft_start_date} =~ /(Volume\s+\w+)?\s*(Issue\s+\w+)?\s*\(([-,\w+\s*]+)\)/xsm ) {
+        if ( $record->{ft_start_date} =~ /(Volume\s+\w+)?\s*(Issue\s+\w+)?\s*\(([-\/,\w+\s*]+)\)/xsm ) {
             ( $volume, $issue, $date ) = ( $1, $2, $3 );
             $volume =~ s/Volume\s*//;
             $issue =~ s/Issue\s*//;
@@ -111,7 +111,7 @@ sub clean_data {
     }
 
     if ( not_empty_string( $record->{ft_end_date} ) ) {
-        if ( $record->{ft_end_date} =~ /(Volume\s*\w+)?\s*(Issue\s*\w+)?\s*\(([-\w+,\s*]+)\)/xsm ) {
+        if ( $record->{ft_end_date} =~ /(Volume\s*\w+)?\s*(Issue\s*\w+)?\s*\(([-\/\w+,\s*]+)\)/xsm ) {
             ( $volume, $issue, $date ) = ( $1, $2, $3 );
         $volume =~ s/Volume\s*//;
             $issue =~ s/Issue\s*//;
