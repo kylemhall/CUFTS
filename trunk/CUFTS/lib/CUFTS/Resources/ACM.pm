@@ -85,13 +85,13 @@ sub clean_data {
 
     if ( not_empty_string( $record->{ft_start_date} ) ) {
 
-        if ( $record->{ft_start_date} =~ /(Volume\s*\w+)?\s*(Issue\s*\w+)?\s*\(([,\w+\s*]+)\)/xsm ) {
+        if ( $record->{ft_start_date} =~ /(Volume\s+\w+)?\s*(Issue\s+\w+)?\s*\(([-,\w+\s*]+)\)/xsm ) {
             ( $volume, $issue, $date ) = ( $1, $2, $3 );
             $volume =~ s/Volume\s*//;
             $issue =~ s/Issue\s*//;
         }
 
-        if ( $date =~ /([a-zA-Z]+)\s*\d+,\s*(\d+)/ || $date =~ /([a-zA-Z]*)\s*(\d+)/ ) {
+        if ( $date =~ /([a-zA-Z]+)\s*\d+,\s*(\d+)/ || $date =~ /([a-zA-Z]*)\s*(\d+)/ || $date =~ /([a-zA-Z]+).+(\d{4})/ ) {
             my ($month, $year) = ($1, $2);
             $month = get_month($month) || 1;
             $record->{ft_start_date} = sprintf("%04i-%02i-01", $year, $month);
@@ -111,7 +111,7 @@ sub clean_data {
     }
 
     if ( not_empty_string( $record->{ft_end_date} ) ) {
-        if ( $record->{ft_end_date} =~ /(Volume\s*\w+)?\s*(Issue\s*\w+)?\s*\(([\w+,\s*]+)\)/xsm ) {
+        if ( $record->{ft_end_date} =~ /(Volume\s*\w+)?\s*(Issue\s*\w+)?\s*\(([-\w+,\s*]+)\)/xsm ) {
             ( $volume, $issue, $date ) = ( $1, $2, $3 );
         $volume =~ s/Volume\s*//;
             $issue =~ s/Issue\s*//;
