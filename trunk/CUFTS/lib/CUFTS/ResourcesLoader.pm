@@ -75,6 +75,7 @@ BEGIN {
         JournalAuth
         JStage
         JSTOR
+        JSTOR_CSP
         Karger
         KBARTDOI
         Kluwer

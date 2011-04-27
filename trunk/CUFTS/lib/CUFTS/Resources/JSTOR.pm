@@ -54,12 +54,12 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'publication_title'     => 'title',
-        'issn'                  => 'issn',
-        'publication_url'       => 'journal_url',
-        'publisher'             => 'publisher',
-        'coverage_start_date'   => 'ft_start_date',
-        'coverage_end_date'     => 'ft_end_date',
+        'publication_title'             => 'title',
+        'issn'                          => 'issn',
+        'publication_url'               => 'journal_url',
+        'publisher'                     => 'publisher',
+        'archive_coverage_start_date'   => 'ft_start_date',
+        'archive_coverage_end_date'     => 'ft_end_date',
     };
 }
 
@@ -132,21 +132,6 @@ sub clean_data {
 
     }
 
-    if ( not_empty_string($record->{___has_current_available}) && $record->{___has_current_available} =~ /yes/ixsm ) {
-        if ( $record->{___moving_wall} =~ / moving\s+wall: \s* (\d+) /ixsm ) {
-            my $year = (localtime)[5] + 1900;
-            $record->{ft_end_date} = $year - 1 - int($1);
-        }
-        elsif ( $record->{___moving_wall} =~ /(\d{4})/ ) {
-            # Try for a year if it doesn't have a matchable "Moving Wall: ..."
-            $record->{ft_end_date} = $1;
-        }
-        else {
-            # Remove all fulltext info, it's probably a "bad" record
-            delete $record->{ft_start_date};
-            delete $record->{ft_end_date};
-        }
-    } 
 
     if ( $record->{issn} =~ /none/xsmi ) {
         delete $record->{issn};
