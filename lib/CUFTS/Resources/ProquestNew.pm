@@ -36,14 +36,14 @@ sub title_list_fields {
         qw(
             id
             title
-            publisher
             issn
-            cit_start_date
-            cit_end_date
             ft_start_date
             ft_end_date
             embargo_days
+            cit_start_date
+            cit_end_date
             db_identifier
+            publisher
             cjdb_note
         )
     ];
