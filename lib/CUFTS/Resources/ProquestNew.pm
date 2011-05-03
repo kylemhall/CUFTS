@@ -25,7 +25,6 @@ use base qw(CUFTS::Resources::Base::Journals);
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
 
-use Date::Calc qw(Delta_Days Today);
 use URI::Escape qw(uri_escape);
 
 use strict;
@@ -57,28 +56,31 @@ sub title_list_field_map {
         'Full Text (combined) Last'     => 'ft_end_date',
         'Embargo Days'                  => 'embargo_days',
         'Pub ID'                        => 'db_identifier',
+        'Cit/Abs (combined) First'      => 'cit_start_date',
+        'Cit/Abs (combined) Last'       => 'cit_end_date',
     }
 }
 
 
-sub title_list_skip_lines_count { return 2 }
+# sub title_list_skip_lines_count { return 2 }
 
 sub clean_data {
     my ( $class, $record ) = @_;
+    
+    if ( $record->{ft_end_date} =~ /current/i ) {
+        delete $record->{ft_end_date};
+    }
+    if ( $record->{cit_end_date} =~ /current/i ) {
+        delete $record->{cit_end_date};
+    }
 
     $record->{ft_start_date} = get_date( $record->{ft_start_date} );
     $record->{ft_end_date}   = get_date( $record->{ft_end_date} );
 
-    if ( defined($record->{ft_end_date}) && $record->{ft_end_date} =~ /(\d{4})-(\d{2})-(\d{2})/ ) {
-        my ( $year, $month, $day ) = ( $1, $2, $3 );
+    $record->{cit_start_date} = get_date( $record->{cit_start_date} );
+    $record->{cit_end_date}   = get_date( $record->{cit_end_date} );
 
-        if ( Delta_Days( $year, $month, $day, Today() ) < 365 ) {
-            delete $record->{ft_end_date};
-        }
-    }
-    else {
-        delete $record->{ft_end_date};
-    }
+    $record->{publisher} = trim_string($record->{publisher}, '"');
 
     return $class->SUPER::clean_data($record);
 
