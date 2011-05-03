@@ -38,6 +38,8 @@ sub title_list_fields {
             title
             publisher
             issn
+            cit_start_date
+            cit_end_date
             ft_start_date
             ft_end_date
             embargo_days
@@ -67,10 +69,10 @@ sub title_list_field_map {
 sub clean_data {
     my ( $class, $record ) = @_;
     
-    if ( $record->{ft_end_date} =~ /current/i ) {
+    if ( not_empty_string($record->{ft_end_date}) && $record->{ft_end_date} =~ /current/i ) {
         delete $record->{ft_end_date};
     }
-    if ( $record->{cit_end_date} =~ /current/i ) {
+    if ( not_empty_string($record->{cit_end_date}) && $record->{cit_end_date} =~ /current/i ) {
         delete $record->{cit_end_date};
     }
 
