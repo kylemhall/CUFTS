@@ -64,7 +64,7 @@ sub title_list_field_map {
 }
 
 
-# sub title_list_skip_lines_count { return 2 }
+sub title_list_skip_lines_count { return 2 }
 
 sub clean_data {
     my ( $class, $record ) = @_;
