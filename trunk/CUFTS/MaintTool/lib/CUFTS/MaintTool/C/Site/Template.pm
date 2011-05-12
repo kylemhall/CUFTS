@@ -236,7 +236,7 @@ sub handle : Private {
         and die("Bad characters in template name: $template_name");
 
     my $base_dir = get_base_dir($type);
-    my $site_dir = get_site_base_dir($type, $c->stash->{current_site}, 'sandbox');
+    my $site_dir = get_site_base_dir($type, $c->stash->{current_site}, $state);
 
     my $template_contents;
     my $template_file =
