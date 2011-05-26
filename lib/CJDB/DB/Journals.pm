@@ -300,7 +300,25 @@ sub search_distinct_title_by_journal_main {
     my $sth = $class->db_Main()->prepare($sql, {pg_server_prepare => 0});
     my @results = $class->sth_to_objects( $sth, [$site, $title] );
     return \@results;
-}    
+}
+
+sub count_distinct_title_by_journal_main {
+    my ($class, $site, $title) = @_;
+
+    my $sql = qq{
+        SELECT COUNT(*) FROM (
+        SELECT cjdb_journals_titles.journal
+        FROM cjdb_titles
+        JOIN cjdb_journals_titles ON (cjdb_titles.id = cjdb_journals_titles.title)
+        WHERE cjdb_journals_titles.site = ?
+        AND cjdb_titles.search_title LIKE ?
+        GROUP BY cjdb_journals_titles.journal
+        ) AS subsel
+    };
+
+    my @row = $class->db_Main()->selectrow_array( $sql, {}, $site, $title );
+    return $row[0];
+}
 
 sub search_re_distinct_title_by_journal_main {
     my ($class, $site, $title, $offset, $limit) = @_;
