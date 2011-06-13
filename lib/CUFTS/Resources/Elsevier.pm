@@ -258,27 +258,27 @@ sub build_linkJournal {
 
 ## preprocess_file - Strip the BOM
 
-# sub preprocess_file {
-#     my ( $class, $IN ) = @_;
-# 
-#     use File::Temp;
-# 
-#     my ( $fh, $filename ) = File::Temp::tempfile();
-# 
-#     binmode($IN, 'UTF-8');
-# 
-#     my $first_row = <$IN>;
-#     $first_row =~ s/^[^"A-Za-z]+//;
-# 
-#     print $fh $first_row;
-#     while ( my $row = <$IN> ) {
-#         print $fh $row;
-#     }
-# 
-#     close *$IN;
-#     seek *$fh, 0, 0;
-# 
-#     return $fh;
-# }
+sub preprocess_file {
+    my ( $class, $IN ) = @_;
+
+    use File::Temp;
+
+    my ( $fh, $filename ) = File::Temp::tempfile();
+
+    binmode($IN, 'UTF-8');
+
+    my $first_row = <$IN>;
+    $first_row =~ s/^[^"A-Za-z]+//;
+
+    print $fh $first_row;
+    while ( my $row = <$IN> ) {
+        print $fh $row;
+    }
+
+    close *$IN;
+    seek *$fh, 0, 0;
+
+    return $fh;
+}
 
 1;
