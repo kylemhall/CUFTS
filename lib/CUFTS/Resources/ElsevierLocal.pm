@@ -70,8 +70,6 @@ sub preprocess_file {
     my $first_row = <$IN>;
     $first_row =~ s/^[^"A-Za-z]+//;
 
-    print $first_row;
-
     print $fh $first_row;
     while ( my $row = <$IN> ) {
         print $fh $row;
