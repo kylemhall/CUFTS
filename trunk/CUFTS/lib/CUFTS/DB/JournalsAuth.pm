@@ -99,7 +99,7 @@ sub search_by_exact_title_with_no_issns {
 
 	my $dbh = $class->db_Main();
 	my $sth = $dbh->prepare_cached($sql);
-	$sth->execute($title);
+	$sth->execute($dbh->quote($title));
 	
 	my @results = $class->sth_to_objects($sth);	
 
@@ -114,7 +114,7 @@ sub search_by_title_with_no_issns {
 
 	my $dbh = $class->db_Main();
 	my $sth = $dbh->prepare_cached($sql);
-	$sth->execute($title);
+	$sth->execute($dbh->quote($title));
 	
 	my @results = $class->sth_to_objects($sth);	
 
@@ -143,10 +143,23 @@ sub has_fulltext {
     return $result[0];
 }
 
+sub search_by_title {
+    my ( $class, $title ) = @_;
+	
+	my $sql = 'SELECT DISTINCT ON (journals_auth.id) journals_auth.* FROM journals_auth JOIN journals_auth_titles ON (journals_auth_titles.journal_auth = journals_auth.id) WHERE journals_auth_titles.title ILIKE ?';
 
-__PACKAGE__->set_sql('by_title' => qq{
-	SELECT DISTINCT ON (journals_auth.id) journals_auth.* FROM journals_auth JOIN journals_auth_titles ON (journals_auth_titles.journal_auth = journals_auth.id) WHERE journals_auth_titles.title ILIKE ?
-});	
+	my $dbh = $class->db_Main();
+	my $sth = $dbh->prepare_cached($sql);
+	$sth->execute($dbh->quote($title));
+	
+	my @results = $class->sth_to_objects($sth);	
+
+	return @results;
+}
+
+# __PACKAGE__->set_sql('by_title' => qq{
+#   SELECT DISTINCT ON (journals_auth.id) journals_auth.* FROM journals_auth JOIN journals_auth_titles ON (journals_auth_titles.journal_auth = journals_auth.id) WHERE journals_auth_titles.title ILIKE ?
+# });   
 
 sub marc_object {
 	my ($self) = @_;
