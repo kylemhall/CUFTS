@@ -136,12 +136,13 @@ sub get_jr1_report {
             # Stringify, and remove dashes
             $value =~ s/^ (\d{4}) -? (\d{3}[\dxX]) $/$1$2/xsm;
 
-            if ( $type eq 'Online_ISSN' ) {
+            if ( $type eq 'Online_ISSN' && length($value) == 8) {
                 $journal_data->{e_issn} = $value;
             }
-            elsif ( $type eq 'Print_ISSN' ) {
+            elsif ( $type eq 'Print_ISSN' && length($value) == 8 ) {
                 $journal_data->{issn} = $value;
             }
+
         }
 
         # print(Dumper($journal_data));
