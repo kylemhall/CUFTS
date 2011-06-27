@@ -99,7 +99,7 @@ sub search_by_exact_title_with_no_issns {
 
 	my $dbh = $class->db_Main();
 	my $sth = $dbh->prepare_cached($sql);
-	$sth->execute($dbh->quote($title));
+	$sth->execute($title);
 	
 	my @results = $class->sth_to_objects($sth);	
 
@@ -114,7 +114,7 @@ sub search_by_title_with_no_issns {
 
 	my $dbh = $class->db_Main();
 	my $sth = $dbh->prepare_cached($sql);
-	$sth->execute($dbh->quote($title));
+	$sth->execute($title);
 	
 	my @results = $class->sth_to_objects($sth);	
 
@@ -150,7 +150,7 @@ sub search_by_title {
 
 	my $dbh = $class->db_Main();
 	my $sth = $dbh->prepare_cached($sql);
-	$sth->execute($dbh->quote($title));
+	$sth->execute($title);
 	
 	my @results = $class->sth_to_objects($sth);	
 
