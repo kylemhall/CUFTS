@@ -218,7 +218,8 @@ foreach my $record ( values %records ) {
 #             misc_notes => $load_timestamp,
 #         } );
 #         $erm->main_name( $record->{title} );
-        print "* CREATED ERM MAIN: ", $erm->id, "\n";
+#         print "* CREATED ERM MAIN: ", $erm->id, "\n";
+        print "No ERM match: ", $record->{title}, " id: ", $record->{erm_main_id}, "\n";
     }
     else {
         print "* FOUND ERM MAIN: ", $erm->id, "\n";
@@ -345,125 +346,125 @@ sub parse_row {
             
             # V. 19, JULY 95 - JUNE 96
 
-            if ( $payment =~ m# ($month_names_for_regex) \s* (\d{2}) \s* - \s* ($month_names_for_regex) \s* (\d{2}) #ixsm ) {
-                my $start_month = format_month( $1 );
-                my $start_year  = int($2) + ( int($2) > 60 ? 1900 : 2000 );
-                my $end_month   = format_month( $3 );
-                my $end_year    = int($4) + ( int($4) > 60 ? 1900 : 2000 );
-                my $end_day     = get_end_day( $end_month );
-                
-                $payment_record{start_date} = sprintf( "%04i-%02i-01",   $start_year, $start_month );
-                $payment_record{end_date}   = sprintf( "%04i-%02i-%02i", $end_year,   $end_month, $end_day );
-            } 
-            
-            # 74(01/99)-75(12/99)
-            # NOTE: This throws away the end month/year and uses 1 year from the start date.
-            elsif ( $payment =~ m# \( (\d{2}) / (\d{2}) \) .* - .*  \( (\d{2}) / (\d{2}) \) #xsmi ) {
-                my $start_month = $1;
-                my $start_year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
-                my $end_month = $1;
-                my $end_year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
-                $payment_record{start_date} = sprintf( "%04i-%02i-01", $start_year,   $start_month );
-                $payment_record{end_date}   = sprintf( "%04i-%02i-01", $end_year + 1, $end_month );
-            }
-            
-            # sept 1/98 - oct 31/99
-            # Oct1/08-Sep30/09
-            elsif ( $payment =~ m# (\w{3,4}?) \s* (\d{1,2}) \s* / \s* (\d{2}) [-&] (\w{3,4}?) \s* (\d{1,2}) \s* / \s* (\d{2}) #xsm ) {
-                my $start_month = format_month( $1 );
-                my $start_day   = $2;
-                my $start_year  = int($3) + ( int($3) > 60 ? 1900 : 2000 );
-                my $end_month   = format_month( $4 );
-                my $end_day     = $5;
-                my $end_year    = int($6) + ( int($6) > 60 ? 1900 : 2000 );
-                
-                $payment_record{start_date} = sprintf( "%04i-%02i-%02i", $start_year, $start_month, $start_day );
-                $payment_record{end_date}   = sprintf( "%04i-%02i-%02i", $end_year,   $end_month, $end_day );
-            } 
-            # sep/09 - sep/00
-            elsif ( $payment =~ m# (\w{3,4}) / (\d{2}) [-&] (\w{3,4}) / (\d{2}) #xsm ) {
-                my $start_month = format_month( $1 );
-                my $start_year  = int($2) + ( int($2) > 60 ? 1900 : 2000 );
-                my $end_month   = format_month( $3 );
-                my $end_year    = int($4) + ( int($4) > 60 ? 1900 : 2000 );
-                
-                $payment_record{start_date} = sprintf( "%04i-%02i-01", $start_year, $start_month );
-                $payment_record{end_date}   = sprintf( "%04i-%02i-01", $end_year,   $end_month );
-            }
-            # 02/09 - 02/00
-            elsif ( $payment =~ m# (\d{2}) / (\d{2}) [-&] (\d{2}) / (\d{2}) #xsm ) {
-                my $start_month = $1;
-                my $start_year  = int($2) + ( int($2) > 60 ? 1900 : 2000 );
-                my $end_month   = $3;
-                my $end_year    = int($4) + ( int($4) > 60 ? 1900 : 2000 );
-                
-                $payment_record{start_date} = sprintf( "%04i-%02i-01", $start_year, $start_month );
-                $payment_record{end_date}   = sprintf( "%04i-%02i-01", $end_year,   $end_month );
-            }
-            # re:23423
-            elsif ( $payment =~ / re: \s* (o?\d+) /ixsm ) {   # Try for a reference number
-                $payment_record{references} = $1;
-                
-                if ( exists $references{ $payment_record{references} } ) {
-                    $payment_record{start_date} = $references{ $payment_record{references} }->{start_date};
-                    $payment_record{end_date}   = $references{ $payment_record{references} }->{end_date};                 
-                    push @debug, "Found a 're:' reference to: " . $payment_record{references};
-                }
-                else {
-                    if ( my $erm_id = $record{erm_main_id} ) {
-                        # Try to find an existing record with a matching reference number
-                        $erm_id =~ s/^e//;
-                        my $cost = $schema->resultset('ERMCosts')->search( { erm_main => $erm_id, number => $payment_record{references} } )->first;
-                        if ( defined($cost) ) {
-                            $payment_record{start_date} = $cost->period_start;
-                            $payment_record{end_date}   = $cost->period_end;
-                            push @debug, "Found a 're:' reference and matching cost record: " . $payment_record{references} . " ERM id: $erm_id";
-                        }
-                        else {
-                            push @debug, "Found a 're:' reference but no matching cost record: " . $payment_record{references} . " ERM id: $erm_id";
-                        }
-                    }
-                    else {
-                        push @debug, "Found a 're:' reference but no erm_main_id: " . $payment_record{references};
-                    }
-                    
-                    # if ( scalar(@{ $record{payments} }) ) {
-                    #     $payment_record{start_date} = $record{payments}->[ $#{ $record{payments} } ]->{start_date};
-                    #     $payment_record{end_date}   = $record{payments}->[ $#{ $record{payments} } ]->{end_date};
-                    #     push @debug, "Found a 're:' reference but no match, defaulting to previous record";
-                    # }
-                }
-                
-            }
-            
-            #
-            # Fall back to grabbing a single date and assuming a one year purchase period
-            #
-            
-            # 1YR 010196 FRM 01-96
-            elsif ( $payment =~ m# 1YR \s* \d* \s* FRM \s* (\d{2})-(\d{2}) #xsmi ) {
-                my $month = $1;
-                my $year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
-                $payment_record{start_date} = sprintf( "%04i-%02i-01", $year,     $month );
-                $payment_record{end_date}   = sprintf( "%04i-%02i-01", $year + 1, $month );
-            }
-            
-            # 74(01/99)-   ... (truncated due to bad EBSCO data)
-            elsif ( $payment =~ m# \( (\d{2}) / (\d{2}) \) .* - .* #xsmi ) {
-                my $start_month = $1;
-                my $start_year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
-                $payment_record{start_date} = sprintf( "%04i-%02i-01", $start_year,     $start_month );
-                $payment_record{end_date}   = sprintf( "%04i-%02i-01", $start_year + 1, $start_month );
-            }
-            
-            # 1998
-            elsif ( $payment =~ / ((?:19|20)\d{2}) (?!\.) /xsm ) {  # Last ditch for a single year
-                $payment_record{start_date} = sprintf( "%04i-01-01", $1 );
-                $payment_record{end_date}   = sprintf( "%04i-12-31", $1 );
-            }
-            else {
-                push @debug, "* Can't parse: $payment. Attempting to use formatted date fields.";
-            }
+            # if ( $payment =~ m# ($month_names_for_regex) \s* (\d{2}) \s* - \s* ($month_names_for_regex) \s* (\d{2}) #ixsm ) {
+            #     my $start_month = format_month( $1 );
+            #     my $start_year  = int($2) + ( int($2) > 60 ? 1900 : 2000 );
+            #     my $end_month   = format_month( $3 );
+            #     my $end_year    = int($4) + ( int($4) > 60 ? 1900 : 2000 );
+            #     my $end_day     = get_end_day( $end_month );
+            #     
+            #     $payment_record{start_date} = sprintf( "%04i-%02i-01",   $start_year, $start_month );
+            #     $payment_record{end_date}   = sprintf( "%04i-%02i-%02i", $end_year,   $end_month, $end_day );
+            # } 
+            # 
+            # # 74(01/99)-75(12/99)
+            # # NOTE: This throws away the end month/year and uses 1 year from the start date.
+            # elsif ( $payment =~ m# \( (\d{2}) / (\d{2}) \) .* - .*  \( (\d{2}) / (\d{2}) \) #xsmi ) {
+            #     my $start_month = $1;
+            #     my $start_year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
+            #     my $end_month = $1;
+            #     my $end_year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
+            #     $payment_record{start_date} = sprintf( "%04i-%02i-01", $start_year,   $start_month );
+            #     $payment_record{end_date}   = sprintf( "%04i-%02i-01", $end_year + 1, $end_month );
+            # }
+            # 
+            # # sept 1/98 - oct 31/99
+            # # Oct1/08-Sep30/09
+            # elsif ( $payment =~ m# (\w{3,4}?) \s* (\d{1,2}) \s* / \s* (\d{2}) [-&] (\w{3,4}?) \s* (\d{1,2}) \s* / \s* (\d{2}) #xsm ) {
+            #     my $start_month = format_month( $1 );
+            #     my $start_day   = $2;
+            #     my $start_year  = int($3) + ( int($3) > 60 ? 1900 : 2000 );
+            #     my $end_month   = format_month( $4 );
+            #     my $end_day     = $5;
+            #     my $end_year    = int($6) + ( int($6) > 60 ? 1900 : 2000 );
+            #     
+            #     $payment_record{start_date} = sprintf( "%04i-%02i-%02i", $start_year, $start_month, $start_day );
+            #     $payment_record{end_date}   = sprintf( "%04i-%02i-%02i", $end_year,   $end_month, $end_day );
+            # } 
+            # # sep/09 - sep/00
+            # elsif ( $payment =~ m# (\w{3,4}) / (\d{2}) [-&] (\w{3,4}) / (\d{2}) #xsm ) {
+            #     my $start_month = format_month( $1 );
+            #     my $start_year  = int($2) + ( int($2) > 60 ? 1900 : 2000 );
+            #     my $end_month   = format_month( $3 );
+            #     my $end_year    = int($4) + ( int($4) > 60 ? 1900 : 2000 );
+            #     
+            #     $payment_record{start_date} = sprintf( "%04i-%02i-01", $start_year, $start_month );
+            #     $payment_record{end_date}   = sprintf( "%04i-%02i-01", $end_year,   $end_month );
+            # }
+            # # 02/09 - 02/00
+            # elsif ( $payment =~ m# (\d{2}) / (\d{2}) [-&] (\d{2}) / (\d{2}) #xsm ) {
+            #     my $start_month = $1;
+            #     my $start_year  = int($2) + ( int($2) > 60 ? 1900 : 2000 );
+            #     my $end_month   = $3;
+            #     my $end_year    = int($4) + ( int($4) > 60 ? 1900 : 2000 );
+            #     
+            #     $payment_record{start_date} = sprintf( "%04i-%02i-01", $start_year, $start_month );
+            #     $payment_record{end_date}   = sprintf( "%04i-%02i-01", $end_year,   $end_month );
+            # }
+            # # re:23423
+            # elsif ( $payment =~ / re: \s* (o?\d+) /ixsm ) {   # Try for a reference number
+            #     $payment_record{references} = $1;
+            #     
+            #     if ( exists $references{ $payment_record{references} } ) {
+            #         $payment_record{start_date} = $references{ $payment_record{references} }->{start_date};
+            #         $payment_record{end_date}   = $references{ $payment_record{references} }->{end_date};                 
+            #         push @debug, "Found a 're:' reference to: " . $payment_record{references};
+            #     }
+            #     else {
+            #         if ( my $erm_id = $record{erm_main_id} ) {
+            #             # Try to find an existing record with a matching reference number
+            #             $erm_id =~ s/^e//;
+            #             my $cost = $schema->resultset('ERMCosts')->search( { erm_main => $erm_id, number => $payment_record{references} } )->first;
+            #             if ( defined($cost) ) {
+            #                 $payment_record{start_date} = $cost->period_start;
+            #                 $payment_record{end_date}   = $cost->period_end;
+            #                 push @debug, "Found a 're:' reference and matching cost record: " . $payment_record{references} . " ERM id: $erm_id";
+            #             }
+            #             else {
+            #                 push @debug, "Found a 're:' reference but no matching cost record: " . $payment_record{references} . " ERM id: $erm_id";
+            #             }
+            #         }
+            #         else {
+            #             push @debug, "Found a 're:' reference but no erm_main_id: " . $payment_record{references};
+            #         }
+            #         
+            #         # if ( scalar(@{ $record{payments} }) ) {
+            #         #     $payment_record{start_date} = $record{payments}->[ $#{ $record{payments} } ]->{start_date};
+            #         #     $payment_record{end_date}   = $record{payments}->[ $#{ $record{payments} } ]->{end_date};
+            #         #     push @debug, "Found a 're:' reference but no match, defaulting to previous record";
+            #         # }
+            #     }
+            #     
+            # }
+            # 
+            # #
+            # # Fall back to grabbing a single date and assuming a one year purchase period
+            # #
+            # 
+            # # 1YR 010196 FRM 01-96
+            # elsif ( $payment =~ m# 1YR \s* \d* \s* FRM \s* (\d{2})-(\d{2}) #xsmi ) {
+            #     my $month = $1;
+            #     my $year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
+            #     $payment_record{start_date} = sprintf( "%04i-%02i-01", $year,     $month );
+            #     $payment_record{end_date}   = sprintf( "%04i-%02i-01", $year + 1, $month );
+            # }
+            # 
+            # # 74(01/99)-   ... (truncated due to bad EBSCO data)
+            # elsif ( $payment =~ m# \( (\d{2}) / (\d{2}) \) .* - .* #xsmi ) {
+            #     my $start_month = $1;
+            #     my $start_year = int($2) + ( int($2) > 60 ? 1900 : 2000 );
+            #     $payment_record{start_date} = sprintf( "%04i-%02i-01", $start_year,     $start_month );
+            #     $payment_record{end_date}   = sprintf( "%04i-%02i-01", $start_year + 1, $start_month );
+            # }
+            # 
+            # # 1998
+            # elsif ( $payment =~ / ((?:19|20)\d{2}) (?!\.) /xsm ) {  # Last ditch for a single year
+            #     $payment_record{start_date} = sprintf( "%04i-01-01", $1 );
+            #     $payment_record{end_date}   = sprintf( "%04i-12-31", $1 );
+            # }
+            # else {
+            #     push @debug, "* Can't parse: $payment. Attempting to use formatted date fields.";
+            # }
             
             # Fallback to trying the pre-parsed sub_from/to fields
             
@@ -471,20 +472,20 @@ sub parse_row {
                 push @debug, "* Formatted start date: " . $payment_record{sub_from};
                 my $prev_start_date = $payment_record{start_date};
                 my ( @parts ) = split '-', $payment_record{sub_from};
-                if ( defined($parts[0]) && int($parts[0]) ) {
+                if ( not_empty_string($parts[0]) ) {
                     $parts[0] += $parts[0] > 20 ? 1900 : 2000;
                     $payment_record{start_date} = join '-', @parts;
-                    push @debug, "* Using sub_from: $payment_record{start_date} due to bad start_date: $prev_start_date";
+                    push @debug, "* Full start date parsed: $payment_record{start_date}";
                 }
             }
             if ( !defined($payment_record{end_date}) || (defined($payment_record{end_date}) && !ParseDate($payment_record{end_date})) ) {
                 push @debug, "* Formatted end date: " . $payment_record{sub_to};
                 my $prev_end_date = $payment_record{end_date};
                 my ( @parts ) = split '-', $payment_record{sub_to};
-                if ( defined($parts[0]) && int($parts[0]) ) {
+                if ( not_empty_string($parts[0]) ) {
                     $parts[0] += $parts[0] > 20 ? 1900 : 2000;
                     $payment_record{end_date} = join '-', @parts;
-                    push @debug, "* Using sub_to: $payment_record{end_date} due to bad end_date: $prev_end_date";
+                    push @debug, "* Full end date parsed: $payment_record{end_date}";
                 }
             }
 
