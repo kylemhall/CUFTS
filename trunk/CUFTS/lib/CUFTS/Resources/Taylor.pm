@@ -20,7 +20,7 @@
 
 package CUFTS::Resources::Taylor;
 
-use base qw(CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::Base::KBART);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
@@ -50,38 +50,6 @@ sub title_list_fields {
     ];
 }
 
-## title_list_field_map - Hash ref mapping fields from the raw title lists to
-## internal field names
-##
-
-sub title_list_field_map {
-    return {
-        'Journal title'       => 'title',
-        'Paperback ISSN'      => 'issn',
-        'Electronic ISSN'     => 'e_issn',
-        'Earliest Cover Date' => 'ft_start_date',
-        'Latest Cover Date'   => 'ft_end_date',
-        'Earliest Volume'     => 'vol_ft_start',
-        'Earliest Issue'      => 'iss_ft_start',
-        'Latest Volume'       => 'vol_ft_end',
-        'Latest Issue'        => 'iss_ft_end',
-        'URL'                 => 'journal_url',
-    };
-}
-
-sub clean_data {
-    my ( $class, $record ) = @_;
-    
-    my $year = (localtime())[5] + 1900;
-    
-    if ( defined($record->{ft_end_date}) && $record->{ft_end_date} >= ($year - 1) ) {
-        delete $record->{ft_end_date};
-        delete $record->{vol_ft_end};
-        delete $record->{iss_ft_end};
-    }
-
-    return $class->SUPER::clean_data($record);
-}
 
 sub can_getFulltext {
     my ( $class, $request ) = @_;
@@ -123,7 +91,7 @@ sub build_linkFulltext {
 
     foreach my $record (@$records) {
 
-        my $url = 'http://www.informaworld.com/openurl?genre=article';
+        my $url = 'http://www.tandfonline.com/openurl?genre=article';
 
         if ( not_empty_string( $request->doi ) ) {
             $url .= '&doi=' . uri_escape( $request->doi );
@@ -167,7 +135,7 @@ sub build_linkTOC {
 
     foreach my $record (@$records) {
 
-        my $url = 'http://www.informaworld.com/openurl?genre=article';
+        my $url = 'http://www.tandfonline.com/openurl?genre=article';
 
         $url .= '&issn=' . dashed_issn( $record->issn );
 
