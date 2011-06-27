@@ -93,10 +93,12 @@ sub build_linkFulltext {
 
         my $url = 'http://www.tandfonline.com/openurl?genre=article';
 
-        if ( not_empty_string( $request->doi ) ) {
-            $url .= '&doi=' . uri_escape( $request->doi );
-        }
-        else {
+        # DOI Linking not working on new platform (2011-06-27)
+        
+        # if ( not_empty_string( $request->doi ) ) {
+        #     $url .= '&doi=' . uri_escape( $request->doi );
+        # }
+        # else {
 
             $url .= '&issn=' . dashed_issn( $record->issn );
             $url .= '&spage=' . $request->spage;
@@ -108,7 +110,7 @@ sub build_linkFulltext {
                 $url .= '&issue=' . $request->issue;
             }
 
-        }
+        # }
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
