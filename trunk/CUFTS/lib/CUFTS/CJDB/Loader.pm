@@ -549,6 +549,12 @@ sub strip_articles {
 sub get_journals_auth {
     my ( $self, $issns, $title, $record, $no_save ) = @_;
 
+    # Remove backslashes that make Pg think the next character is quoted... may need to do other chars later, too.
+    # Might as well totally strip it from the title, backslashes probably aren't relevant in titles and are 
+    # part of weird MARC coding.
+    my $title_no_bs =~ $title;
+    $title =~ s/\\//g;
+
     my @journals_auths;
 
     if ( scalar(@$issns) ) {
@@ -587,7 +593,7 @@ sub get_journals_auth {
     else {
 
         # Try for strictly title matching
-        
+
         @journals_auths = CUFTS::DB::JournalsAuth->search_by_exact_title_with_no_issns($title);
         if ( !scalar(@journals_auths) ){ 
             @journals_auths = CUFTS::DB::JournalsAuth->search_by_title_with_no_issns($title);
@@ -598,7 +604,7 @@ sub get_journals_auth {
 
         if ( scalar(@journals_auths) > 1 ) {
             print(
-                "Could not find unambiguous main title match for $title -- ",
+                "Could not find unambiguous main title match for $title_no_bs -- ",
                 join( ',', @$issns ),
                 "\n"
             );
