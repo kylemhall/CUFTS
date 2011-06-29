@@ -552,7 +552,7 @@ sub get_journals_auth {
     # Remove backslashes that make Pg think the next character is quoted... may need to do other chars later, too.
     # Might as well totally strip it from the title, backslashes probably aren't relevant in titles and are 
     # part of weird MARC coding.
-    my $title_no_bs =~ $title;
+    my $title_no_bs = $title;
     $title =~ s/\\//g;
 
     my @journals_auths;
@@ -584,7 +584,7 @@ sub get_journals_auth {
                 return $journals_auths[$index]->id;
             }
             else {
-                print( "Could not find unambiguous match for $title -- ", join( ',', @$issns ), "\n" );
+                print( "Could not find unambiguous match for $title_no_bs -- ", join( ',', @$issns ), "\n" );
                 return undef;
             }
 
@@ -604,7 +604,7 @@ sub get_journals_auth {
 
         if ( scalar(@journals_auths) > 1 ) {
             print(
-                "Could not find unambiguous main title match for $title_no_bs -- ",
+                "Could not find unambiguous main title match for $title_no_bs ($title) -- ",
                 join( ',', @$issns ),
                 "\n"
             );
