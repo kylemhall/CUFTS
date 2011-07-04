@@ -625,6 +625,7 @@ sub get_journals_auth {
                 )
             {
                 my $alt_title = $title_arr->[1];
+                $alt_title =~ s/\\//g;  # Strip backslashes which break Pg searches
                 my @temp_journals_auth = CUFTS::DB::JournalsAuth->search_by_title($alt_title);
                 foreach my $temp_journal (@temp_journals_auth) {
                     grep { $_->id == $temp_journal->id } @journals_auths
