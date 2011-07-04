@@ -553,7 +553,7 @@ sub get_journals_auth {
     # Might as well totally strip it from the title, backslashes probably aren't relevant in titles and are 
     # part of weird MARC coding.
     my $title_no_bs = $title;
-    $title_no_bs =~ s/\\//g;
+    $title_no_bs =~ s/\s*\\\s*//g;
 
     my @journals_auths;
 
@@ -566,7 +566,7 @@ sub get_journals_auth {
 
             # Try title ranking
 
-            my $title_ranks = $self->rank_titles( $record, $title, \@journals_auths );
+            my $title_ranks = $self->rank_titles( $record, $title_no_bs, \@journals_auths );
 
             my ( $max, $max_count, $index ) = ( 0, 0, -1 );
             foreach my $x ( 0 .. $#$title_ranks ) {
@@ -594,12 +594,12 @@ sub get_journals_auth {
 
         # Try for strictly title matching
 
-        @journals_auths = CUFTS::DB::JournalsAuth->search_by_exact_title_with_no_issns($title);
+        @journals_auths = CUFTS::DB::JournalsAuth->search_by_exact_title_with_no_issns($title_no_bs);
         if ( !scalar(@journals_auths) ){ 
-            @journals_auths = CUFTS::DB::JournalsAuth->search_by_title_with_no_issns($title);
+            @journals_auths = CUFTS::DB::JournalsAuth->search_by_title_with_no_issns($title_no_bs);
         }
         if ( !scalar(@journals_auths) ){ 
-            @journals_auths = CUFTS::DB::JournalsAuth->search_by_title($title);
+            @journals_auths = CUFTS::DB::JournalsAuth->search_by_title($title_no_bs);
         }
 
         if ( scalar(@journals_auths) > 1 ) {
@@ -649,8 +649,8 @@ sub get_journals_auth {
     
     # Build basic record
 
-    my $journals_auth = CUFTS::DB::JournalsAuth->create( { title => $title } );
-    $journals_auth->add_to_titles( { title => $title, title_count => 1 } );
+    my $journals_auth = CUFTS::DB::JournalsAuth->create( { title => $title_no_bs } );
+    $journals_auth->add_to_titles( { title => $title_no_bs, title_count => 1 } );
 
     foreach my $issn ( uniq(@$issns) ) {
         $journals_auth->add_to_issns( { issn => $issn } );
