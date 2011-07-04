@@ -553,7 +553,7 @@ sub get_journals_auth {
     # Might as well totally strip it from the title, backslashes probably aren't relevant in titles and are 
     # part of weird MARC coding.
     my $title_no_bs = $title;
-    $title =~ s/\\//g;
+    $title_no_bs =~ s/\\//g;
 
     my @journals_auths;
 
