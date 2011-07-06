@@ -591,6 +591,7 @@ sub as_marc {
                        'l', [ 'print_included',                 { label => 'Print included: ', boolean => 1 } ],
                        'm', [ 'local_vendor',                   { label => 'Local vendor number: ' } ],
                        'n', [ 'local_customer',                 { label => 'Local customer number: ' } ],
+                       'o', [ 'simultaneous_users',             { label => 'Simultaneous users: ' } ],
                        'z', [ 'currency',                       { label => 'Currency: ' } ],
         ]
     ];
