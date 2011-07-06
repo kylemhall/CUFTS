@@ -58,11 +58,12 @@ sub title_list_field_map {
         'Publisher Name Full'   => 'publisher',
         'ISSN'                  => 'issn',
         'Embargo(Days)'         => 'embargo_days',
+        'Full Text Start Date'  => 'ft_start_date',
+        'Full Text End Date'    => 'ft_end_date',
     };
 }
 
-sub title_list_split_row {
-    my ( $class, $row ) = @_;
+sub title_list_split_row {    my ( $class, $row ) = @_;
 
     my @fields = split /\|/, $row;
 
@@ -74,7 +75,7 @@ sub title_list_split_row {
 ##                   write a temp file and open it.  In this case, we're just deleting
 ##                   tons of duplicate lines
 
-sub preprocess_file {
+sub _preprocess_file {
     my ( $class, $IN ) = @_;
 
     use File::Temp;
@@ -105,6 +106,10 @@ sub preprocess_file {
             
             print $fh join '|', map { defined($record->{$_}) ? $record->{$_} : ''  } @$headings_array;
             print $fh "\n";
+
+            print join '|', map { defined($record->{$_}) ? $record->{$_} : ''  } @$headings_array;
+            print "\n";
+
         }
     }
 
@@ -119,7 +124,7 @@ sub clean_data {
     my ( $class, $record ) = @_;
 
     ( $record->{cit_start_date}, $record->{cit_end_date} ) = split /\s+-\s+/, $record->{'___Indexing Start/End Date'};
-    ( $record->{ft_start_date},  $record->{ft_end_date} )  = split /\s+-\s+/, $record->{'___Full Text Start/End Date'};
+    # ( $record->{ft_start_date},  $record->{ft_end_date} )  = split /\s+-\s+/, $record->{'___Full Text Start/End Date'};
 
     $record->{cit_start_date} = get_wilson_date( $record->{cit_start_date}, 'start' );
     $record->{cit_end_date}   = get_wilson_date( $record->{cit_end_date},   'end' );
