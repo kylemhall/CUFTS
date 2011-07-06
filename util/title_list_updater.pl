@@ -80,7 +80,7 @@ foreach my $dat_file_name (@dat_files) {
 		_error("Unable to retrieve resource '$resource_id' for title list updating");
 
 	my $account = CUFTS::DB::Accounts->retrieve($account_id) or
-		CUFTS::Exceptin::App->throw("Unable to retrieve account '$account_id' for title list updating");
+		CUFTS::Exception::App->throw("Unable to retrieve account '$account_id' for title list updating");
 
 	my $results = $resource->do_module('load_global_title_list', $resource, "$title_list_dir/$title_list_file_name");
 	
