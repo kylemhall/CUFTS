@@ -64,7 +64,7 @@ sub clean_data {
     $record->{title} = HTML::Entities::decode_entities( $record->{title} );
     
     # An "E" in the ISSN probably indicates it's in scientific notation and really a long ISBN
-    if ( defined($record->{issn}) && ( length($record->{issn}) > 9 || $record->{issn} =~ /E/ ) {
+    if ( defined($record->{issn}) && ( length($record->{issn}) > 9 || $record->{issn} =~ /E/ ) ) {
         return [ 'Skipping monograph with ISBN: ' . $record->{issn} ];
     }
     
