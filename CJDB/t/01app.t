@@ -1,4 +1,10 @@
-use Test::More tests => 2;
-use_ok( Catalyst::Test, 'CUFTS::CJDB' );
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Test::More;
 
-ok( request('/')->is_success );
+use Catalyst::Test 'CUFTS::CJDB';
+
+ok( request('/')->is_success, 'Request should succeed' );
+
+done_testing();

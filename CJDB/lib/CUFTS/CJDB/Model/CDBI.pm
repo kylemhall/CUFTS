@@ -1,7 +1,8 @@
-package CUFTS::CJDB::M::CDBI;
+package CUFTS::CJDB::Model::CDBI;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use base 'Catalyst::Base';
+extends 'Catalyst::Model';
 
 use CUFTS::DB::DBI;
 
@@ -26,26 +27,23 @@ use CJDB::DB::Tags;
 
 =head1 NAME
 
-CUFTS::CJDB::M::CDBI - CDBI CUFTS DB Loader
-
-=head1 SYNOPSIS
-
-Loads all the CUFTS DB modules.
+CUFTS::CJDB::Model::CDBI - Catalyst Model
 
 =head1 DESCRIPTION
 
-Loads all the CUFTS DB modules.
+Catalyst Model.
 
 =head1 AUTHOR
 
-Todd Holbrook
+tholbroo
 
 =head1 LICENSE
 
-This library is free software . You can redistribute it and/or modify 
-it under the same terms as perl itself.
+This library is free software. You can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut
 
-1;
+__PACKAGE__->meta->make_immutable;
 
+1;

@@ -1,12 +1,26 @@
-package CUFTS::CJDB::C::Browse;
+package CUFTS::CJDB::Controller::Browse;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use base 'Catalyst::Base';
-use CUFTS::Util::Simple;
+use String::Util qw( trim hascontent );
+use CUFTS::CJDB::Util;
 
-use Data::Dumper;
 
-sub auto : Private {
+BEGIN {extends 'Catalyst::Controller'; }
+
+=head1 NAME
+
+CUFTS::CJDB::Controller::Browse - Catalyst Controller
+
+=head1 DESCRIPTION
+
+Catalyst Controller.
+
+=head1 METHODS
+
+=cut
+
+sub base :Chained('../site') :PathPart('browse') CaptureArgs(0) {
     my ( $self, $c ) = @_;
 
     $c->stash->{rank_name_sort} = sub {
@@ -14,16 +28,17 @@ sub auto : Private {
         my @new_array = sort { $b->{rank} <=> $a->{rank} or $displays->{ $a->{resource} }->{name} cmp $displays->{ $b->{resource} }->{name} } @$links;
         return \@new_array;
     };
-    
 }
-sub browse : Local {
+
+sub browse :Chained('base') :PathPart('') Args(0) {
     my ($self, $c) = @_;
 
     $c->stash->{template} = 'browse.tt';
 }
 
 
-sub mytags : Local {
+
+sub mytags :Chained('base') :PathPart('mytags') Args() {
     my ($self, $c, @tags) = @_;
 
     # If user is not logged in (clicked logout on this screen), bump them back to /browse
@@ -34,7 +49,7 @@ sub mytags : Local {
 }
 
 
-sub bytags : Local {
+sub bytags :Chained('base') :PathPart('bytags') Args() {
     my ($self, $c, @tags) = @_;
 
     $c->req->params->{search_terms} = \@tags;
@@ -44,7 +59,7 @@ sub bytags : Local {
 }
 
 
-sub journals : Local {
+sub journals :Chained('base') :PathPart('journals') Args(0) {
     my ($self, $c) = @_;
 
     my $site_id = $c->stash->{current_site}->id;
@@ -82,7 +97,7 @@ sub journals : Local {
 
           # Add account to the parameters so that /browse/bytags will search on only that account
 
-          if ( is_empty_string( $c->req->params->{account} ) && defined( $c->stash->{current_account} ) ) {
+          if ( !hascontent( $c->req->params->{account} ) && defined( $c->stash->{current_account} ) ) {
               $c->req->params->{account} = $c->stash->{current_account}->id;
           }
 
@@ -136,7 +151,7 @@ sub journals : Local {
     
 }
 
-sub titles : Local {
+sub titles :Chained('base') :PathPart('titles') Args(0) {
     my ($self, $c) = @_;
 
     my $site_id = $c->stash->{current_site}->id;
@@ -231,7 +246,7 @@ sub titles : Local {
 
 }
 
-sub titles_new : Local {
+sub titles_new :Chained('base') :PathPart('titles_new') Args(0) {
     my ($self, $c) = @_;
 
     my $site_id = $c->stash->{current_site}->id;
@@ -286,7 +301,7 @@ sub journal_object_to_hash {
 }
 
 
-sub subjects : Local {
+sub subjects :Chained('base') :PathPart('subjects') Args(0) {
     my ($self, $c) = @_;
 
     my $site_id = $c->stash->{current_site}->id;
@@ -319,7 +334,7 @@ sub subjects : Local {
     $c->stash->{template} = 'browse_subjects.tt';
 }
 
-sub associations : Local {
+sub associations :Chained('base') :PathPart('associations') Args(0) {
     my ($self, $c) = @_;
 
     my $site_id = $c->stash->{current_site}->id;
@@ -353,7 +368,7 @@ sub associations : Local {
 
 
 
-sub show : Local {
+sub show :Chained('base') :PathPart('show') Args(0) {
     my ($self, $c) = @_;
 
     my $browse_field = $c->req->params->{browse_field};
@@ -383,13 +398,13 @@ sub show : Local {
 }
 
 
-sub ajax_title : Local {
+sub ajax_title :Chained('base') :PathPart('ajax_title') Args(0) {
     my ( $self, $c ) = @_;
 
     my $string = $c->req->params->{search_terms};
     my $response = '';
 
-    if ( not_empty_string($string) ) {
+    if ( hascontent($string) ) {
         my $titles = CJDB::DB::Titles->search_titlelist( $c->stash->{current_site}->id, "$string%" );
         foreach my $title (@$titles) {
             $response .= "<li>$title->[0]</li>\n";
@@ -401,13 +416,13 @@ sub ajax_title : Local {
 }
 
 
-sub ajax_issn : Local {
+sub ajax_issn :Chained('base') :PathPart('ajax_issn') Args(0) {
     my ( $self, $c ) = @_;
 
     my $string = $c->req->params->{search_terms};
     my $response = '';
 
-    if ( not_empty_string($string) ) {
+    if ( hascontent($string) ) {
         $string = uc($string);
         my $issns = CJDB::DB::ISSNs->search_issnlist( $c->stash->{current_site}->id, "$string%" );
         foreach my $issn (@$issns) {
@@ -419,13 +434,13 @@ sub ajax_issn : Local {
     $c->response->content_type('text/html; charset=iso-8859-1');
 }
 
-sub ajax_tag : Local {
+sub ajax_tag :Chained('base') :PathPart('ajax_tag') Args(0) {
     my ( $self, $c ) = @_;
 
     my $string = $c->req->params->{search_terms};
     my $response = '';
 
-    if ( not_empty_string($string) ) {
+    if ( hascontent($string) ) {
         $string = lc($string);
         my $tags;
         if ( defined($c->stash->{current_account}) ) {
@@ -442,14 +457,14 @@ sub ajax_tag : Local {
     $c->response->content_type('text/html; charset=iso-8859-1');
 }
 
-sub selected_journals : Local {
+sub selected_journals :Chained('base') :PathPart('selected_journals') Args(0) {
     my ($self, $c) = @_;
 
     $c->stash->{template} = 'selected_journals.tt';
 }
 
 
-sub lcc : Local {
+sub lcc :Chained('base') :PathPart('lcc') Args(0) {
     my ($self, $c) = @_;
 
     $c->stash->{template} = 'lcc_browse.tt';
@@ -477,5 +492,18 @@ sub min {
 }
 
 
+
+=head1 AUTHOR
+
+tholbroo
+
+=head1 LICENSE
+
+This library is free software. You can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
+__PACKAGE__->meta->make_immutable;
 
 1;

@@ -1,11 +1,11 @@
-package CUFTS::CJDB::V::JSON;
+package CUFTS::CJDB::View::JSON;
 
 use strict;
 use base 'Catalyst::View::JSON';
 
 =head1 NAME
 
-CUFTS::CJDB::V::JSON - Catalyst JSON View
+CUFTS::CJDB::View::JSON - Catalyst JSON View
 
 =head1 SYNOPSIS
 
