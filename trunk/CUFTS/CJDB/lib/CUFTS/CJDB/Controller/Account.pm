@@ -1,36 +1,41 @@
-package CUFTS::CJDB::C::Account;
+package CUFTS::CJDB::Controller::Account;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use base 'Catalyst::Base';
+use String::Util qw( trim hascontent );
 
-use CUFTS::CJDB::Authentication::LDAP;
-use CUFTS::Util::Simple;
+BEGIN {extends 'Catalyst::Controller'; }
 
-sub auto : Private {
-    my ($self, $c) = @_;
+=head1 NAME
 
-    my $forward_to = '/' . $c->session->{prev_action};
-    $c->stash->{forward_to} = $forward_to eq '/' ? '/browse' : $forward_to;
+CUFTS::CJDB::Controller::Account - Catalyst Controller
+
+=head1 DESCRIPTION
+
+Catalyst Controller.
+
+=head1 METHODS
+
+=cut
+
+sub base :Chained('../site') :PathPart('account') :CaptureArgs(0) {
     
-    return 1;
 }
 
-sub logout : Local {
+sub logout :Chained('base') :PathPart('logout') :Args(0) {
     my ($self, $c) = @_;
 
     delete $c->session->{ $c->stash->{current_site}->id }->{current_account_id};
     delete $c->stash->{current_account};
 
-    $c->req->params($c->session->{prev_params});
-    return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
+    return $c->redirect( $c->controller('Browse')->action_for('index') );
 }
 
-
-sub login : Local {
-    my ($self, $c) = @_;
+sub login :Chained('base') :PathPart('login') :Args(0) {
+    my ( $self, $c ) = @_;
 
     if ( $c->req->params->{login} ) {
-        
+
         $c->form({'required' => ['key', 'password'], 'optional' => 'login', 'filters' => ['trim']});
 
         if (defined($c->form->{valid}->{key})) {
@@ -39,7 +44,7 @@ sub login : Local {
             my $site     = $c->stash->{current_site};
             my $account;
 
-            if ( not_empty_string($site->cjdb_authentication_module) ) {
+            if ( hascontent($site->cjdb_authentication_module) ) {
                 # Get our internal record, then check external system for password
 
                 $account = CJDB::DB::Accounts->search( site => $site->id, key => $key)->first;
@@ -81,11 +86,12 @@ sub login : Local {
         }        
     }
 
-    
+
     $c->stash->{template} = 'login.tt';
 }
 
-sub create : Local {
+
+sub create :Chained('base') :PathPart('tags') :Args(0) {
     my ($self, $c) = @_;
 
     if (defined($c->req->params->{cancel})) {
@@ -116,7 +122,7 @@ sub create : Local {
                 return;
             }
 
-            if ( not_empty_string($site->cjdb_authentication_module) ) {
+            if ( hascontent($site->cjdb_authentication_module) ) {
                 my $module = 'CUFTS::CJDB::Authentication::' . $site->cjdb_authentication_module;
                 eval {
                     $level = $module->authenticate($site, $key, $password);
@@ -169,7 +175,7 @@ sub create : Local {
 }
 
 
-sub manage : Local {
+sub manage :Chained('base') :PathPart('manage') :Args(0) {
     my ($self, $c) = @_;
 
     # If the user logged out on this page, go back to /browse
@@ -216,12 +222,26 @@ sub manage : Local {
 }
 
 
-sub tags : Local {
+sub tags :Chained('base') :PathPart('tags') :Args(0) {
     my ($self, $c) = @_;
 
     
     $c->stash->{tags} = CJDB::DB::Tags->get_mytags_list($c->stash->{current_account});
     $c->stash->{template} = 'mytags.tt';
 }
+
+
+=head1 AUTHOR
+
+tholbroo
+
+=head1 LICENSE
+
+This library is free software. You can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
+__PACKAGE__->meta->make_immutable;
 
 1;

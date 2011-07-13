@@ -1,14 +1,33 @@
-package CUFTS::CJDB::C::Journal;
+package CUFTS::CJDB::Controller::Journal;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use base 'Catalyst::Base';
 use CUFTS::Util::Simple;
 use XML::RAI;
 use LWP::Simple;
 
-sub view : Private {
-    my ($self, $c, $journals_auth_id) = @_;
+BEGIN {extends 'Catalyst::Controller'; }
 
+=head1 NAME
+
+CUFTS::CJDB::Controller::Journal - Catalyst Controller
+
+=head1 DESCRIPTION
+
+Catalyst Controller.
+
+=head1 METHODS
+
+=cut
+
+sub base :Chained('../site') :PathPart('journal') :CaptureArgs(0) {
+    
+}
+
+
+sub view :Chained('base') :PathPart('') :Args(1) {
+    my ( $self, $c, $journals_auth_id ) = @_;
+    
     defined($journals_auth_id) or
         die "journal auth id not defined";
     
@@ -85,7 +104,8 @@ sub view : Private {
     $c->stash->{template} = 'journal.tt';
 }
 
-sub rss_proxy : Local {
+
+sub rss_proxy :Chained('base') :PathPart('rss_proxy') :Args(1) {
     my ($self, $c, $journals_auth_id) = @_;
 
     defined($journals_auth_id) or
@@ -127,12 +147,26 @@ sub rss_proxy : Local {
     }
 }
 
-sub manage_tags : Local {
+sub manage_tags :Chained('base') :PathPart('manage_tags') :Args(1) {
     my ($self, $c, $journals_auth_id) = @_;
     
     $c->stash->{'show_manage_tags'} = 1;
     
-    $c->forward('/journal/view', [$journals_auth_id]);
+    $c->forward( $c->controller->action_for('view'), [$journals_auth_id]);
 }
+
+
+=head1 AUTHOR
+
+tholbroo
+
+=head1 LICENSE
+
+This library is free software. You can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
+__PACKAGE__->meta->make_immutable;
 
 1;

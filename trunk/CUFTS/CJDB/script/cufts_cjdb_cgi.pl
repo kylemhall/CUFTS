@@ -1,14 +1,10 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/env perl
 
-BEGIN { $ENV{CATALYST_ENGINE} ||= 'CGI' }
+use lib '../lib';
+use lib '../../lib';
 
-use strict;
-use warnings;
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-use CUFTS::CJDB;
-
-CUFTS::CJDB->run;
+use Catalyst::ScriptRunner;
+Catalyst::ScriptRunner->run('CUFTS::CJDB', 'CGI');
 
 1;
 
@@ -24,14 +20,14 @@ See L<Catalyst::Manual>
 
 Run a Catalyst application as a cgi script.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Sebastian Riedel, C<sri@oook.de>
+Catalyst Contributors, see Catalyst.pm
 
 =head1 COPYRIGHT
 
-
-This library is free software, you can redistribute it and/or modify
+This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+

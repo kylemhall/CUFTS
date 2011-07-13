@@ -1,29 +1,25 @@
-    unless ( eval "use Module::Build::Compat 0.02; 1" ) {
-        print "This module requires Module::Build to install itself.\n";
+#!/usr/bin/env perl
+# IMPORTANT: if you delete this file your app will not work as
+# expected.  You have been warned.
+use inc::Module::Install;
+use Module::Install::Catalyst; # Complain loudly if you don't have
+                               # Catalyst::Devel installed or haven't said
+                               # 'make dist' to create a standalone tarball.
 
-        require ExtUtils::MakeMaker;
-        my $yn =
-          ExtUtils::MakeMaker::prompt( '  Install Module::Build now from CPAN?',            'y' );
+name 'CUFTS-CJDB';
+all_from 'lib/CUFTS/CJDB.pm';
 
-        unless ( $yn =~ /^y/i ) {
-            die " *** Cannot install without Module::Build.  Exiting ...\n";
-        }
+requires 'Catalyst::Runtime' => '5.80032';
+requires 'Catalyst::Plugin::ConfigLoader';
+requires 'Catalyst::Plugin::Static::Simple';
+requires 'Catalyst::Action::RenderView';
+requires 'Moose';
+requires 'namespace::autoclean';
+requires 'Config::General'; # This should reflect the config file format you've chosen
+                 # See Catalyst::Plugin::ConfigLoader for supported formats
+test_requires 'Test::More' => '0.88';
+catalyst;
 
-        require Cwd;
-        require File::Spec;
-        require CPAN;
-
-        # Save this 'cause CPAN will chdir all over the place.
-        my $cwd      = Cwd::cwd();
-        my $makefile = File::Spec->rel2abs($0);
-
-        CPAN::Shell->install('Module::Build::Compat')
-          or die " *** Cannot install without Module::Build.  Exiting ...\n";
-
-        chdir $cwd or die "Cannot chdir() back to $cwd: $!";
-    }
-    eval "use Module::Build::Compat 0.02; 1" or die $@;
-    use lib '_build/lib';
-    Module::Build::Compat->run_build_pl( args => \@ARGV );
-    require Module::Build;
-    Module::Build::Compat->write_makefile( build_class => 'Module::Build' );
+install_script glob('script/*.pl');
+auto_install;
+WriteAll;

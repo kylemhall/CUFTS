@@ -1,281 +1,95 @@
 package CUFTS::CJDB;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use Catalyst qw/Static::Simple Session Session::Store::FastMmap Session::State::Cookie Cache Cache::Store::FastMmap FormValidator FillInForm -Debug/;
-use lib '../lib';
-use CUFTS::Config;
-use CUFTS::CJDB::Util;
-use CUFTS::Util::Simple;
+use Catalyst::Runtime 5.80;
 
-#use CUFTS::DB::LocalResources;
-use CUFTS::Resolve;
+# Set flags and add plugins for the application.
+#
+# Note that ORDERING IS IMPORTANT here as plugins are initialized in order,
+# therefore you almost certainly want to keep ConfigLoader at the head of the
+# list if you're using it.
+#
+#         -Debug: activates the debug mode for very useful log messages
+#   ConfigLoader: will load the configuration from a Config::General file in the
+#                 application's home directory
+# Static::Simple: will serve static files from the application's root
+#                 directory
 
+use Catalyst qw/
+    -Debug
+    ConfigLoader
+    Static::Simple
+    Session
+    Session::Store::FastMmap
+    Session::State::Cookie
+    Cache
+    Cache::Store::FastMmap
+    FormValidator
+    FillInForm
+/;
 
-our $VERSION = '2.00.00';
+extends 'Catalyst';
 
-CUFTS::CJDB->config(
-    name                 => 'CUFTS::CJDB',
-    regex_base           => '',
-    default_max_columns  => 20,
-    default_min_per_page => 50,
-    default_view         => 'TT',
-    'V::TT' => {
-        WRAPPER       => 'layout.tt',
-        COMPILE_DIR   => '/tmp/CUFTS_CJDB_template_cache',
-    },
-    'V::JSON' => {
-        expose_stash => 'json',
-        allow_callback  => 1,
-        callback_param  => 'json_callback',
-    },
-    cache => {
-        backend => {
-            store => 'FastMmap',
-            share_file  => '/tmp/CUFTS_CJDB_cache',
-            cache_size  => '2m',
-            expire_time => '10m',
-        },
-    },
-    session => {
-        expires => 36000,
-        rewrite => 0,
-        storage => '/tmp/CUFTS_CJDB_sessions',
-    },
+our $VERSION = '0.01';
+
+# Configure the application.
+#
+# Note that settings in cufts_cjdb.conf (or other external
+# configuration file that you set up manually) take precedence
+# over this when using ConfigLoader. Thus configuration
+# details given here can function as a default configuration,
+# with an external configuration file acting as an override for
+# local deployment.
+
+__PACKAGE__->config(
+    name => 'CUFTS::CJDB',
+    # Disable deprecated behavior needed by old applications
+    disable_component_resolution_regex_fallback => 1,
 );
 
+# Start the application
+__PACKAGE__->setup();
 
-CUFTS::CJDB->setup;
 
-sub prepare_path {
-    my $c = shift;
+sub uri_for_site {
+    my ( $c, $url, $caps, @rest ) = @_;
 
-    $c->NEXT::prepare_path(@_);
+    my $captures_copy = [];
 
-    my $path = $c->req->path;
+    # use Data::Dumper;
+    # warn( "\nurl: " . Dumper($url) );
+    # warn( "\ncaps: " . Dumper($caps) );
+    # warn( "\nrest: " . Dumper(\@rest) . "\n" );
 
-    # Get site and set site key for loading from database later.
-    # Database load isn't done here because the request might be
-    # for static objects that don't need database setup.
+    die("Attempting to create URI for site when site is not defined.") if !defined( $c->stash->{current_site} );
 
-    my $regex_base = $c->config->{regex_base};
-    if ( $path =~ m{^ ${regex_base} static / }oxsm ) {
-        $c->stash->{url_base} = defined($c->config->{url_base})
-                                ? $c->config->{url_base}
-                                : $c->req->base;
-    }
-    elsif ( $path =~ s{^ ${regex_base} (\w+) / (active|sandbox)? /? }{}oxsm ) {
-        my $site_key      = $c->stash->{current_site_key} = $1;
-        my $template_type = $c->stash->{template_type}    = $2 || 'active';
-        
-        # Get the site from the database based on the site key
-        
-        $c->stash->{current_site} = CUFTS::DB::Sites->search( key => $site_key )->first;
-        if (!defined($c->stash->{current_site})) {
-            die( "Unable to find site matching key: $site_key" );
-        }
-        
-        $c->stash->{additional_template_paths} = [ $c->config->{root} . '/sites/' . $c->stash->{current_site}->id . "/${template_type}" ];
-        
-        $c->req->base->path( $c->req->base->path . "${regex_base}${site_key}" );
-        $c->req->path($path);
-        $c->stash->{url_base} = defined($c->config->{url_base})
-                                ? ($c->config->{url_base} . $site_key)
-                                : $c->req->base;
-                                
-        if ( $template_type ne 'active' ) {
-            $c->stash->{url_base} .= '/' . $template_type;
+    if ( defined($caps) ) {
+        if ( ref($caps) eq 'ARRAY' ) {
+            $captures_copy = [ @$caps ];
+        } else {
+            unshift @rest, $caps;
         }
     }
-    else {
-        die("Site not found in URL");
-    }
 
-    $c->stash->{url_base} =~ s{/$}{};  # Remove trailing slash
-}
+    unshift @$captures_copy, $c->stash->{current_site}->key;
 
-##
-## begin - Handle logins and set up account/site records in the stash
-##
+    # warn( "\nurl: " . Dumper($url) );
+    # warn( "\ncaps: " . Dumper($captures_copy) );
+    # warn( "\nrest: " . Dumper(\@rest) . "\n" );
+    # warn( $c->uri_for( $url, $captures_copy, @rest ) );
 
-sub begin : Private {
-    my ( $self, $c ) = @_;
-
-    # Skip setting up stash information for static items
-
-    return 1 if ( $c->req->{path} =~ /^static/ );
-
-    # Set up basic template vars
-
-    $c->stash->{image_dir} = $c->stash->{url_base} . '/static/images/';
-    $c->stash->{css_dir}   = $c->stash->{url_base} . '/static/css/';
-    $c->stash->{js_dir}    = $c->stash->{url_base} . '/static/js/';
-    $c->stash->{self_url}  = $c->req->{base} . $c->req->{path};
-
-    # Set up site specific CSS file if it exists
-    
-    my $site_css = '/sites/' . $c->stash->{current_site}->id 
-                   . '/static/css/' . $c->stash->{template_type} 
-                   . '/cjdb.css';
-                  
-    if ( -e ($c->config->{root} . $site_css) ) {
-        $c->stash->{site_css_file} = $c->stash->{url_base} . $site_css;
-    }
-
-    # Get the current user for the stash if they have logged in
-
-    if ( defined( $c->session->{ $c->stash->{current_site}->id }->{current_account_id} ) ) {
-        $c->stash->{current_account} = CJDB::DB::Accounts->retrieve( 
-            $c->session->{ $c->stash->{current_site}->id }->{current_account_id} 
-        );
-    }
-
-    # Store previous action/arguments/parameters data
-
-    if ( $c->req->action !~ /^account/ && $c->req->action !~ /ajax/ ) {
-        $c->session->{prev_action}    = $c->req->action;
-        $c->session->{prev_arguments} = $c->req->arguments;
-        $c->session->{prev_params}    = $c->req->params;
-    }
-}
-
-
-sub auto : Private {
-    my ($self, $c) = @_;
-    
-    # Build and store information about CUFTS resources such
-    # as whether they are active, display names, any notes, etc.
-
-    my $site_id = $c->stash->{current_site}->id;
-
-    if ( !($c->stash->{resources_display} = $c->cache->get( "resources_display_${site_id}" ) ) ) {
-        my %resources_display;
-        my $resources_iter = CUFTS::DB::LocalResources->search( { 'site' => $site_id, 'active' => 't' } );
-
-        while (my $resource = $resources_iter->next) {
-            my $resource_id = $resource->id;
-            my $global_resource = $resource->resource;
-
-            $resources_display{$resource_id}->{cjdb_note} = not_empty_string($resource->cjdb_note)
-                                                            ? $resource->cjdb_note
-                                                            : defined($global_resource)
-                                                            ? $global_resource->cjdb_note
-                                                            : '';
-                                                            
-            $resources_display{$resource_id}->{name} = not_empty_string($resource->name) 
-                                                       ? $resource->name
-                                                       : defined($global_resource)
-                                                       ? $global_resource->name 
-                                                       : '';
-                                                       
-            if (!$c->stash->{current_site}->cjdb_display_db_name_only) {
-                my $provider = not_empty_string($resource->provider) 
-                               ? $resource->provider
-                               : defined($global_resource)
-                               ? $global_resource->provider 
-                               : '';
-                $resources_display{$resource_id}->{name} .= " - ${provider}";
-            }
-        }
-        
-        $c->stash->{resources_display} = \%resources_display;
-        $c->cache->set( "resources_display_${site_id}", \%resources_display );
-    }
-    
-    return 1;
-}
-
-
-##
-## end - Forward requests to the TT view for rendering
-##
-
-sub end : Private {
-    my ( $self, $c ) = @_;
-
-    if ( scalar @{ $c->error } ) {
-        $self->_end_error_handling($c);
-    }
-
-    return 1 if $c->response->status =~ /^3\d\d$/;
-    return 1 if $c->response->body;
-
-    unless ( $c->response->content_type ) {
-        $c->response->content_type('text/html; charset=iso-8859-1');
-    }
-
-    $c->response->headers->header( 'Cache-Control' => 'no-cache' );
-    $c->response->headers->header( 'Pragma' => 'no-cache' );
-    $c->response->headers->expires( time  );
-
-    # $c->response->headers->header( 'Cache-Control' => 'private, max-age=5000, pre-check=5000' );
-    # $c->response->headers->header( 'Pragma' => 'no-cache' );
-    # $c->response->headers->expires( time  );
-
-
-    # Catch errors in site templates and handle properly.
-
-    eval { $c->forward('CUFTS::CJDB::V::TT'); };
-    if ( scalar @{ $c->error } ) {
-        $self->_end_error_handling($c);
-    }
-}
-
-sub _end_error_handling {
-    my ( $self, $c ) = @_;
-
-    warn("Rolling back database changes due to error flag.");
-    warn( join("\n",  @{ $c->error }) );
-
-    CUFTS::DB::DBI->dbi_rollback();
-
-    $c->stash(
-        template      => 'fatal_error.tt',
-        fatal_errors  => $c->error,
-    );
-    $c->forward('CUFTS::CJDB::V::TT');
-
-    $c->{error} = [];
-}
-
-sub browse : Local {
-    my ( $self, $c ) = @_;
-
-    $c->forward('/browse/browse');
-}
-
-sub default : Private {
-    my ( $self, $c ) = @_;
-
-    $c->redirect('/browse');
+    return $c->uri_for( $url, $captures_copy, @rest );
 }
 
 sub redirect {
-    my ( $c, $location ) = @_;
-    $location =~ m#^/#
-        or die("Attempting to redirect to relative location: $location");
-
-    if ( $c->stash->{url_base} ) {
-        $location = $c->stash->{url_base} . $location;
-    }
-
-    $c->response->headers->header( 'Cache-Control' => 'no-cache' );
-    $c->response->headers->header( 'Pragma' => 'no-cache' );
-    $c->response->headers->expires( time );
-
-    $c->res->redirect($location);
+    my ( $c, $uri ) = @_;
+    
+    $c->res->redirect( $uri );
+    $c->detach();
 }
 
-##
-## Define base level actions here and forward to controllers when necessary.
-## This keeps everything as Local actions which makes handing the user back
-## to the screen they were on for login/logout possible.
-##
 
-sub journal : Local {
-    my ( $self, $c, $journals_auth_id ) = @_;
-
-    $c->forward( '/journal/view', [$journals_auth_id] );
-}
 
 =head1 NAME
 
@@ -287,16 +101,20 @@ CUFTS::CJDB - Catalyst based application
 
 =head1 DESCRIPTION
 
-Catalyst based application.
+[enter your description here]
+
+=head1 SEE ALSO
+
+L<CUFTS::CJDB::Controller::Root>, L<Catalyst>
 
 =head1 AUTHOR
 
-Catalyst developer
+tholbroo
 
 =head1 LICENSE
 
-This library is free software . You can redistribute it and/or modify
-it under the same terms as perl itself.
+This library is free software. You can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut
 
