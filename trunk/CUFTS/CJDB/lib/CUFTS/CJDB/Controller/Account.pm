@@ -3,6 +3,7 @@ use Moose;
 use namespace::autoclean;
 
 use String::Util qw( trim hascontent );
+use CUFTS::CJDB::Authentication::LDAP;
 
 BEGIN {extends 'Catalyst::Controller'; }
 
