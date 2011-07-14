@@ -174,7 +174,7 @@ sub end : Private {
 
     # Catch errors in site templates and handle properly.
 
-    eval { $c->forward('CUFTS::CJDB::V::TT'); };
+    eval { $c->forward('CUFTS::CJDB::View::TT'); };
     if ( scalar @{ $c->error } ) {
         $self->_end_error_handling($c);
     }
@@ -192,7 +192,7 @@ sub _end_error_handling {
         template      => 'fatal_error.tt',
         fatal_errors  => $c->error,
     );
-    $c->forward('CUFTS::CJDB::V::TT');
+    $c->forward('CUFTS::CJDB::View::TT');
 
     $c->{error} = [];
 }
