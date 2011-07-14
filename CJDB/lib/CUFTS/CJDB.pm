@@ -2,6 +2,8 @@ package CUFTS::CJDB;
 use Moose;
 use namespace::autoclean;
 
+use String::Util qw(hascontent);
+
 use Catalyst::Runtime 5.80;
 
 # Set flags and add plugins for the application.
@@ -87,6 +89,19 @@ sub redirect {
     
     $c->res->redirect( $uri );
     $c->detach();
+}
+
+sub redirect_previous {
+    my ( $c ) = @_;
+
+    my $uri = $c->session->{prev_uri};
+
+    if ( hascontent($uri) ) {
+        $c->redirect($uri);
+    }
+    else {
+        $c->redirect( $c->uri_for_site( $c->controller('Root')->action_for('indexy') ) );
+    }
 }
 
 

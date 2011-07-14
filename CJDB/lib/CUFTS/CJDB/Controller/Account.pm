@@ -29,7 +29,7 @@ sub logout :Chained('base') :PathPart('logout') :Args(0) {
     delete $c->session->{ $c->stash->{current_site}->id }->{current_account_id};
     delete $c->stash->{current_account};
 
-    return $c->redirect( $c->controller('Browse')->action_for('index') );
+    return $c->redirect_previous;
 }
 
 sub login :Chained('base') :PathPart('login') :Args(0) {
@@ -44,6 +44,7 @@ sub login :Chained('base') :PathPart('login') :Args(0) {
             my $password = $c->form->{valid}->{password};
             my $site     = $c->stash->{current_site};
             my $account;
+
 
             if ( hascontent($site->cjdb_authentication_module) ) {
                 # Get our internal record, then check external system for password
@@ -63,7 +64,6 @@ sub login :Chained('base') :PathPart('login') :Args(0) {
             }
             else {
                 # Use internal authentication
-
                 my $crypted_pass = crypt($password, $key);
                 $account = CJDB::DB::Accounts->search( site => $site->id, key => $key, password => $crypted_pass)->first;
             }
@@ -71,11 +71,11 @@ sub login :Chained('base') :PathPart('login') :Args(0) {
             if ( defined($account) ) {
 
                 if ( $account->active ) {
+                    warn('!1!' . $c->session->{prev_uri});
                     $c->stash->{current_account} = $account;
                     $c->session->{ $c->stash->{current_site}->id }->{current_account_id} = $account->id;
 
-                    $c->req->params($c->session->{prev_params});
-                    return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
+                    return $c->redirect_previous;
                 }
                 else {
                     $c->stash->{error} = ['This account has been disabled by library administrators.'];
@@ -92,12 +92,11 @@ sub login :Chained('base') :PathPart('login') :Args(0) {
 }
 
 
-sub create :Chained('base') :PathPart('tags') :Args(0) {
+sub create :Chained('base') :PathPart('create') :Args(0) {
     my ($self, $c) = @_;
 
     if (defined($c->req->params->{cancel})) {
-        $c->req->params($c->session->{prev_params});
-        return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
+        return $c->redirect_previous;
     }
 
     $c->stash->{template} = 'account_create.tt';
@@ -169,8 +168,7 @@ sub create :Chained('base') :PathPart('tags') :Args(0) {
             
             CJDB::DB::DBI->dbi_commit();
 
-            $c->req->params($c->session->{prev_params});
-            return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
+            return $c->redirect_previous;
         }
     } 
 }
@@ -185,8 +183,7 @@ sub manage :Chained('base') :PathPart('manage') :Args(0) {
         return $c->redirect('/browse');
 
     if (defined($c->req->params->{cancel})) {
-        $c->req->params($c->session->{prev_params});
-        return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
+        return $c->redirect_previous;
     }
 
     $c->stash->{template} = 'account_manage.tt';
@@ -216,8 +213,7 @@ sub manage :Chained('base') :PathPart('manage') :Args(0) {
             
             CJDB::DB::DBI->dbi_commit();
 
-            $c->req->params($c->session->{prev_params});
-            return $c->forward($c->stash->{forward_to}, $c->session->{prev_arguments});
+            return $c->redirect_previous;
         }
     } 
 }

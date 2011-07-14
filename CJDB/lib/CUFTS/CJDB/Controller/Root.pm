@@ -58,18 +58,16 @@ sub site :Chained('/') :PathPart('') :CaptureArgs(1) {
     $self->_cache_local_resources($c);
     
     # Store previous action/arguments/parameters data
-    if ( $c->req->action !~ /^account/ && $c->req->action !~ /ajax/ ) {
-        $c->session->{prev_action}    = $c->req->action;
-        $c->session->{prev_arguments} = $c->req->arguments;
-        $c->session->{prev_params}    = $c->req->params;
+    if ( $c->req->action !~ /account/ && $c->req->action !~ /ajax/ ) {
+        $c->session->{prev_uri} = $c->req->uri;
     }
 
     $c->stash->{url_base} = $c->request->base . $site->key;
     $c->stash->{additional_template_paths} = [ $c->config->{root} . '/sites/' . $site->id . "/${box}" ];    
-    $c->stash->{image_dir} = $c->request->{base} . '/static/images/';
-    $c->stash->{css_dir}   = $c->request->{base} . '/static/css/';
-    $c->stash->{js_dir}    = $c->request->{base} . '/static/js/';
-    $c->stash->{self_url}  = $c->request->{base} . $c->request->{path};
+    $c->stash->{image_dir} = $c->request->base . '/static/images/';
+    $c->stash->{css_dir}   = $c->request->base . '/static/css/';
+    $c->stash->{js_dir}    = $c->request->base . '/static/js/';
+    $c->stash->{self_url}  = $c->request->base . $c->request->path;
 }
 
 sub _cache_local_resources {
@@ -135,8 +133,9 @@ sub default :Path {
     $c->response->status(404);
 }
 
-sub favicon : Path('/favicon.ico') {
+sub favicon : Path('favicon.ico') {
     my ( $self, $c ) = @_;
+ 
     $c->response->body('');
     $c->response->status(404);
     $c->detach();
@@ -157,7 +156,7 @@ sub end : Private {
     }
 
     return 1 if $c->response->status =~ /^3\d\d$/;
-    return 1 if $c->response->body;
+    return 1 if defined($c->response->body);
 
     unless ( $c->response->content_type ) {
         $c->response->content_type('text/html; charset=iso-8859-1');
