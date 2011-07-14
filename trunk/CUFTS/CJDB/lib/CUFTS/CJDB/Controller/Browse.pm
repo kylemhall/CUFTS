@@ -234,7 +234,7 @@ sub titles :Chained('base') :PathPart('titles') Args(0) {
 
     $c->stash->{template} = 'browse_journals.tt';
 
-    if ( $c->req->params->{format} eq 'json' ) {
+    if ( defined($c->req->params->{format}) && $c->req->params->{format} eq 'json' ) {
         $c->stash->{json} = {
             total_count     => int($search_details->{count}),
             start_record    => int($start_record),
