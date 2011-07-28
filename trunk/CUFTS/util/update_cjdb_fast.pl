@@ -1022,7 +1022,7 @@ CJDB_RECORD:
                 }
            }
            push @new_issn_fields, $field;
-           $MARC_record->delete_fields($orig_field);
+           $MARC_record->delete_field($orig_field);
        }
        $MARC_record->insert_fields_ordered( @new_issn_fields );
         
