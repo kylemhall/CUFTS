@@ -1000,13 +1000,33 @@ CJDB_RECORD:
         }
         elsif ( defined($cjdb_record->journals_auth->MARC) ) {
             $MARC_record = $cjdb_record->journals_auth->marc_object;
-            $MARC_record->leader('00000nas  22001577a 4500');
+            $MARC_record->leader('00000nai  22001577a 4500');
         }
         else {
             $MARC_record = create_brief_MARC( $logger, $site, $cjdb_record->journals_auth );
         }
 
         next if !defined($MARC_record);
+
+        # Make sure ISSNs are 1234-4321 format
+        
+       my @issn_fields = $MARC_record->field( '022' );
+       my @new_issn_fields;
+       foreach my $orig_field ( @issn_fields ) {
+           my $field = $orig_field->clone();
+           foreach my $subfield ( ('a' .. 'z') ) {
+                if ( my $sf = $field->subfield($subfield) ) {
+                    next unless $sf =~ s/^(\d{4})(\d{3}[\dxX])$/$1-$2/;
+                    $field->delete_subfield( code => $subfield );
+                    $field->add_subfields( $subfield, $sf );
+                }
+           }
+           push @new_issn_fields, $field;
+           $MARC_record->delete_fields($orig_field);
+       }
+       $MARC_record->insert_fields_ordered( @new_issn_fields );
+        
+
 
         # Add holdings statements, skip if no electronic so we don't duplicate print only journals uselessly
 
@@ -1100,7 +1120,7 @@ CJDB_RECORD:
         # Add medium to title fields
 
         if ( hascontent($site_marc_dump_medium_text) ) {
-            foreach my $field_num ( '245', '246' ) {
+            foreach my $field_num ( '245' ) {
                 my @title_fields = $MARC_record->field( $field_num );
                 foreach my $title_field ( @title_fields ) {
                     $title_field->delete_subfield( code => 'h' );
@@ -1118,9 +1138,17 @@ CJDB_RECORD:
                 foreach my $title_field ( @title_fields ) {
                     my @subfields = map { @{ $_ } } $title_field->subfields;  # Flatten subfields
                     my $new_field = MARC::Field->new( $site_marc_dump_duplicate_title_field, $title_field->indicator(1), $title_field->indicator(2), @subfields );
-                    $MARC_record->append_fields( $new_field );
+                    $MARC_record->insert_fields_ordered( $new_field );
                 }
             }
+        }
+        
+        # If there's a 210 field but no 222 field, then copy 245 to 222
+        if ( $MARC_record->field('210') && !$MARC_record->field('222') ) {
+            my $title_field = ($MARC_record->field('245'))[0];
+            my @subfields = map { @{ $_ } } $title_field->subfields;  # Flatten subfields
+            my $new_field = MARC::Field->new( '222', $title_field->indicator(1), $title_field->indicator(2), @subfields );
+            $MARC_record->insert_fields_ordered( $new_field );
         }
 
         # Add CJDB identifier if defined
@@ -1132,7 +1160,7 @@ CJDB_RECORD:
                 $site_marc_dump_cjdb_id_indicator2,
                 $site_marc_dump_cjdb_id_subfield => 'CJDB' . $journals_auth_id
             );
-            $MARC_record->append_fields( $identifier_field );
+            $MARC_record->insert_fields_ordered( $identifier_field );
         }
 
         print MARC_OUTPUT  $MARC_record->as_usmarc();
