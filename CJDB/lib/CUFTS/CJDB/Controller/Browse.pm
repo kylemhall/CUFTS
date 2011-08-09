@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use String::Util qw( trim hascontent );
 use CUFTS::CJDB::Util;
-
+use CUFTS::Util::Simple;
 
 BEGIN {extends 'Catalyst::Controller'; }
 
