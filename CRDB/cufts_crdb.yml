@@ -8,7 +8,7 @@ connect_info:
     - ''
     - AutoCommit: 1
 
-cache:
+Plugin::Cache:
     backend:
         store: FastMmap
         share_file: '/tmp/CUFTS_CRDB_cache'
