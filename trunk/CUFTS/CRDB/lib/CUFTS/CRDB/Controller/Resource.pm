@@ -21,7 +21,7 @@ sub base : Chained('/site') PathPart('resource') CaptureArgs(0) { }
 sub load_resource : Chained('base') PathPart('') CaptureArgs(1) {
     my ( $self, $c, $resource_id ) = @_;
     
-    $c->stash->{erm} = $c->model('CUFTS::ERMMain')->search( id => $resource_id, site => $c->site->id )->first();
+    $c->stash->{erm} = $c->model('CUFTS::ERMMain')->search({ id => $resource_id, site => $c->site->id })->first();
 }
 
 sub goto : Chained('load_resource') PathPart('goto') Args(0) {
