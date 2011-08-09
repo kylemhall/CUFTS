@@ -106,23 +106,23 @@ sub edit_field_subjects : Private {
 
             foreach my $add_subject ( @add_subjects ) {
 
-                my $count = $c->model('CUFTS::ERMSubjects')->search( site => $c->site->id, id => $add_subject )->count();
+                my $count = $c->model('CUFTS::ERMSubjects')->search({ site => $c->site->id, id => $add_subject })->count();
                 if ( $count < 1 ) {
                     die("Attempt to add subject not belonging to this site.");
                 }
 
-                $c->model('CUFTS::ERMSubjectsMain')->find_or_create( erm_main => $c->stash->{erm}->id, subject => $add_subject );
+                $c->model('CUFTS::ERMSubjectsMain')->find_or_create({ erm_main => $c->stash->{erm}->id, subject => $add_subject });
             
             }
 
             foreach my $delete_subject ( @delete_subjects ) {
 
-                my $count = $c->model('CUFTS::ERMSubjects')->search( site => $c->site->id, id => $delete_subject )->count();
+                my $count = $c->model('CUFTS::ERMSubjects')->search({ site => $c->site->id, id => $delete_subject })->count();
                 if ( $count < 1 ) {
                     die("Attempt to delete subject not belonging to this site.");
                 }
 
-                $c->model('CUFTS::ERMSubjectsMain')->search( erm_main => $c->stash->{erm}->id, subject => $delete_subject )->delete_all();
+                $c->model('CUFTS::ERMSubjectsMain')->search({ erm_main => $c->stash->{erm}->id, subject => $delete_subject })->delete_all();
             
             }
 
@@ -165,7 +165,7 @@ sub edit_field_consortia : Private {
         
         my $value = $c->req->params->{$field};
         if ( not_empty_string( $value) ) {
-            my $count = $c->model('CUFTS::ERMConsortia')->search( site => $c->site->id, id => $value )->count();
+            my $count = $c->model('CUFTS::ERMConsortia')->search({ site => $c->site->id, id => $value })->count();
             if ( $count < 1 ) {
                 die("Attempt to update consortia to a value not appropriate for this site: $value");
             }
@@ -185,7 +185,7 @@ sub edit_field_consortia : Private {
     else {
         $c->stash->{field} = $field;
         $c->stash->{value} = $c->stash->{erm}->get_column('consortia');
-        $c->stash->{options} = [ $c->model('CUFTS::ERMConsortia')->search( site => $c->site->id )->all ];
+        $c->stash->{options} = [ $c->model('CUFTS::ERMConsortia')->search({ site => $c->site->id })->all ];
         $c->stash->{display_field} = 'consortia';
         $c->stash->{template} = 'fields/select.tt'
     }
@@ -222,7 +222,7 @@ sub edit_field_content_types : Private {
     else {
         $c->stash->{field} = $field;
         $c->stash->{value} = [ map { $_->id } $c->stash->{erm}->content_types ];
-        $c->stash->{options} = [ $c->model('CUFTS::ERMContentTypes')->search( site => $c->site->id )->all ];
+        $c->stash->{options} = [ $c->model('CUFTS::ERMContentTypes')->search({ site => $c->site->id })->all ];
         $c->stash->{display_field} = 'content_type';
         $c->stash->{template} = 'fields/multiselect.tt'
     }
@@ -238,7 +238,7 @@ sub edit_field_resource_medium : Private {
         
         my $value = $c->req->params->{$field};
         if ( not_empty_string( $value ) ) {
-            my $count = $c->model('CUFTS::ERMResourceMediums')->search( site => $c->site->id, id => $value )->count();
+            my $count = $c->model('CUFTS::ERMResourceMediums')->search({ site => $c->site->id, id => $value })->count();
             if ( $count < 1 ) {
                 die("Attempt to update resource_medium to a value not appropriate for this site: $value");
             }
@@ -258,7 +258,7 @@ sub edit_field_resource_medium : Private {
     else {
         $c->stash->{field} = $field;
         $c->stash->{value} = $c->stash->{erm}->get_column('resource_medium');
-        $c->stash->{options} = [ $c->model('CUFTS::ERMResourceMediums')->search( site => $c->site->id )->all ];
+        $c->stash->{options} = [ $c->model('CUFTS::ERMResourceMediums')->search({ site => $c->site->id })->all ];
         $c->stash->{display_field} = 'resource_medium';
         $c->stash->{template} = 'fields/select.tt'
     }
@@ -273,7 +273,7 @@ sub edit_field_resource_type : Private {
         
         my $value = $c->req->params->{$field};
         if ( not_empty_string( $value) ) {
-            my $count = $c->model('CUFTS::ERMResourceTypes')->search( site => $c->site->id, id => $value )->count();
+            my $count = $c->model('CUFTS::ERMResourceTypes')->search({ site => $c->site->id, id => $value })->count();
             if ( $count < 1 ) {
                 die("Attempt to update resource_type to a value not appropriate for this site: $value");
             }
@@ -293,7 +293,7 @@ sub edit_field_resource_type : Private {
     else {
         $c->stash->{field} = $field;
         $c->stash->{value} = $c->stash->{erm}->get_column('resource_type');
-        $c->stash->{options} = [ $c->model('CUFTS::ERMResourceTypes')->search( site => $c->site->id )->all ];
+        $c->stash->{options} = [ $c->model('CUFTS::ERMResourceTypes')->search({ site => $c->site->id })->all ];
         $c->stash->{display_field} = 'resource_type';
         $c->stash->{template} = 'fields/select.tt'
     }
