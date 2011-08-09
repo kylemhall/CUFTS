@@ -146,7 +146,7 @@ sub journals :Chained('base') :PathPart('journals') Args(0) {
             page_count      => int($search_details->{per_page}),
             journals        => [ map { $self->journal_object_to_hash($c, $_) } @$journals ],
         };
-        $c->forward('V::JSON');
+        $c->forward('View::JSON');
     }
     
 }
@@ -241,7 +241,7 @@ sub titles :Chained('base') :PathPart('titles') Args(0) {
             page_count      => int($search_details->{per_page}),
             journals        => [ map { $self->journal_object_to_hash($c, $_) } @$titles ],
         };
-        $c->forward('V::JSON');
+        $c->forward('View::JSON');
     }
 
 }
@@ -273,7 +273,7 @@ sub titles_new :Chained('base') :PathPart('titles_new') Args(0) {
             page_count      => $per_page,
             journals        => [ map { $self->journal_object_to_hash($c, $_) } @$titles ],
         };
-        return $c->forward('V::JSON');
+        return $c->forward('View::JSON');
     }
     
     my $pager = Data::Page->new();
