@@ -43,9 +43,9 @@ sub mytags :Chained('base') :PathPart('mytags') Args() {
 
     # If user is not logged in (clicked logout on this screen), bump them back to /browse
 
-    return $c->redirect('/browse') if !defined($c->stash->{current_account});
+    return $c->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse') ) ) if !defined($c->stash->{current_account});
 
-    $c->forward('/browse/bytags', \@tags);
+    $c->forward( $c->controller('Browse')->action_for('bytags'), \@tags );
 }
 
 
@@ -55,7 +55,7 @@ sub bytags :Chained('base') :PathPart('bytags') Args() {
     $c->req->params->{search_terms} = \@tags;
     $c->req->params->{browse_field} = 'tag';
 
-    $c->forward('/browse/journals');
+    $c->forward( $c->controller('Browse')->action_for('journals') );
 }
 
 
@@ -376,7 +376,7 @@ sub show :Chained('base') :PathPart('show') Args(0) {
 
     if ( !defined($search_term) || ( !ref($search_term) && $search_term eq '' ) ) {
         $c->stash->{empty_search} = 'Please enter a search term.';
-        return $c->forward('/browse');
+        return $c->forward( $c->controller('Browse')->action_for('browse') );
     }
 
     if ($browse_field eq 'title') {
