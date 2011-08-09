@@ -261,7 +261,6 @@ sub titles_new :Chained('base') :PathPart('titles_new') Args(0) {
         my $tmp_search_term = CUFTS::CJDB::Util::strip_articles($search_term);
         $tmp_search_term = CUFTS::CJDB::Util::strip_title($tmp_search_term);
         $tmp_search_term .= '%';
-        warn($tmp_search_term);
         $count  = CJDB::DB::Journals->count_distinct_title_by_journal_main($site_id, $tmp_search_term); 
         $titles = CJDB::DB::Journals->search_distinct_title_by_journal_main($site_id, $tmp_search_term, (($start_page-1)*$per_page), $per_page);
     }
