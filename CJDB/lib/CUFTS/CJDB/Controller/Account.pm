@@ -180,7 +180,7 @@ sub manage :Chained('base') :PathPart('manage') :Args(0) {
     # If the user logged out on this page, go back to /browse
 
     defined($c->stash->{current_account}) or
-        return $c->redirect('/browse');
+        return $c->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse') ) );
 
     if (defined($c->req->params->{cancel})) {
         return $c->redirect_previous;
