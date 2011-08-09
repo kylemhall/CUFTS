@@ -130,11 +130,11 @@ sub html_facets : Chained('facet_options') PathPart('facets') Args {
 
     if ( exists( $c->stash->{facets}->{subject} ) ) {
         # Rank sort for subjects
-        @records = sort { int($a->rank) <=> int($b->rank) or $a->sort_name cmp $b->sort_name } @records;
+        @records = sort { int($a->rank || 0) <=> int($b->rank || 0) or $a->sort_name cmp $b->sort_name } @records;
         # Put zeros at the end
         my $unranked = 0;
         foreach my $record ( @records ) {
-            last if $record->rank != 0;
+            last if defined($record->rank) && $record->rank != 0;
             $unranked++;
         }
         push @records, splice @records, 0, $unranked;
