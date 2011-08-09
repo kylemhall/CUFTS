@@ -617,19 +617,15 @@ sub edit : Local {
                         my $erm_main_subject_id    = $1;
                         my $erm_main_subject_value = $c->form->{valid}->{$param};
 
-                        warn("subject_main_id: $erm_main_subject_id\nvalue: $erm_main_subject_value\n");
-                    
                         my $erm_subjects_main = CUFTS::DB::ERMSubjectsMain->search({
                             erm_main => $erm_id,   # include for security - don't grab other sites' subjects
                             id => $erm_main_subject_id,
                         })->first();
                     
                         if ( $erm_main_subject_value eq 'delete' ) {
-                            warn("Deleting subject");
                             $erm_subjects_main->delete();
                         }
                         else {
-                            warn("Updating subject");
                             $erm_subjects_main->subject( $erm_main_subject_value );
                             $erm_subjects_main->rank( $c->form->{valid}->{"erm-edit-input-subject-${erm_main_subject_id}-rank"} );
                             $erm_subjects_main->description( $c->form->{valid}->{"erm-edit-input-subject-${erm_main_subject_id}-description"} );
@@ -646,7 +642,6 @@ sub edit : Local {
 
                         if ( $subject_value ne 'delete' ) {
 
-                            warn("Creating new subject");
                             CUFTS::DB::ERMSubjectsMain->create({
                                 erm_main    => $erm_id,
                                 subject     => $subject_value,
