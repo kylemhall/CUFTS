@@ -121,6 +121,15 @@ sub indexy :Chained('site') :PathPart('') Args(0) {
     $c->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse') ) );
 }
 
+sub set_box : Chained('site') PathPart('set_box') Args(1) {
+    my ( $self, $c, $box ) = @_;
+    
+    $c->session->{sandbox} = $box eq 'sandbox' ? 1 : 0;
+    
+    $c->redirect( $c->uri_for_site( $c->controller->action_for('indexy') ) );
+}
+
+
 =head2 default
 
 Standard 404 error page
