@@ -34,7 +34,7 @@ sub save :Chained('base') :PathPart('save') :Args(1) {
     # Exit out now if the cancel button was pushed (no javascript)
 
     if ( $c->req->params->{cancel} ) {
-        return $c->redirect( $c->uri_for( $c->controller('Journal')->action_for('view'), $journals_auth_id ) );
+        return $c->redirect( $c->uri_for_site( $c->controller('Journal')->action_for('view'), $journals_auth_id ) );
     }
 
     $self->_do_add_tags(  $c, $journal );
@@ -42,7 +42,7 @@ sub save :Chained('base') :PathPart('save') :Args(1) {
 
     CJDB::DB::Tags->dbi_commit;
 
-    return $c->redirect( $c->uri_for( $c->controller('Journal')->action_for('view'), $journals_auth_id ) );
+    return $c->redirect( $c->uri_for_site( $c->controller('Journal')->action_for('view'), $journals_auth_id ) );
 }
 
 sub _do_save_tags {
