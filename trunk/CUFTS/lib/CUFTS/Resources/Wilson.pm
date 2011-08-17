@@ -58,8 +58,8 @@ sub title_list_field_map {
         'Publisher Name Full'   => 'publisher',
         'ISSN'                  => 'issn',
         'Embargo(Days)'         => 'embargo_days',
-        'Full Text Start Date'  => 'ft_start_date',
-        'Full Text End Date'    => 'ft_end_date',
+        # 'Full Text Start Date'  => 'ft_start_date',
+        # 'Full Text End Date'    => 'ft_end_date',
     };
 }
 
@@ -124,7 +124,7 @@ sub clean_data {
     my ( $class, $record ) = @_;
 
     ( $record->{cit_start_date}, $record->{cit_end_date} ) = split /\s+-\s+/, $record->{'___Indexing Start/End Date'};
-    # ( $record->{ft_start_date},  $record->{ft_end_date} )  = split /\s+-\s+/, $record->{'___Full Text Start/End Date'};
+    ( $record->{ft_start_date},  $record->{ft_end_date} )  = split /\s+-\s+/, $record->{'___Full Text Start/End Date'};
 
     $record->{cit_start_date} = get_wilson_date( $record->{cit_start_date}, 'start' );
     $record->{cit_end_date}   = get_wilson_date( $record->{cit_end_date},   'end' );
