@@ -121,12 +121,20 @@ sub indexy :Chained('site') :PathPart('') Args(0) {
     $c->redirect( $c->uri_for_site( $c->controller('Browse')->action_for('browse') ) );
 }
 
-sub set_box : Chained('site') PathPart('set_box') Args(1) {
+sub set_box :Chained('site') :PathPart('set_box') :Args(1) {
     my ( $self, $c, $box ) = @_;
     
     $c->session->{sandbox} = $box eq 'sandbox' ? 1 : 0;
     
     $c->redirect( $c->uri_for_site( $c->controller->action_for('indexy') ) );
+}
+
+sub site_files :Chained('site') :PathPart('sites') :Args(3) {
+    my ( $self, $c, @args ) = @_;
+    
+    my $path = $c->config->{root} . '/sites/' . join('/', @args);
+    warn($path);
+    $c->serve_static_file($path);
 }
 
 
