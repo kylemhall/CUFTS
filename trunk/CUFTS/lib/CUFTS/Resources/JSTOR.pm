@@ -44,6 +44,7 @@ sub title_list_fields {
             id
             title
             issn
+            e_issn
             ft_start_date
             ft_end_date
             journal_url
@@ -55,11 +56,12 @@ sub title_list_fields {
 sub title_list_field_map {
     return {
         'publication_title'             => 'title',
-        'issn'                          => 'issn',
-        'publication_url'               => 'journal_url',
-        'publisher'                     => 'publisher',
-        'archive_coverage_start_date'   => 'ft_start_date',
-        'archive_coverage_end_date'     => 'ft_end_date',
+        'print_identifier'              => 'issn',
+        'online_identifier'             => 'e_issn',
+        'title_url'                     => 'journal_url',
+        'publisher_name'                => 'publisher',
+        'date_first_issue_online'       => 'ft_start_date',
+        'date_last_issue_online'        => 'ft_end_date',
     };
 }
 
@@ -85,10 +87,10 @@ sub clean_data {
     );
 
     if ( defined( $record->{ft_start_date} )
-        && $record->{ft_start_date} =~ / (\d{4}) (\d{2})? (\d{2})? /xsm )
+        && $record->{ft_start_date} =~ m{ (\d{2}) / (\d{2}) / (\d{4}) }xsm )
     {
 
-        my ( $year, $month, $day ) = ( $1, $2, $3 );
+        my ( $day, $month, $year ) = ( $1, $2, $3 );
         $record->{ft_start_date} = $year;
 
         if ( defined($month) ) {
@@ -108,10 +110,10 @@ sub clean_data {
     }
 
     if ( defined( $record->{ft_end_date} )
-        && $record->{ft_end_date} =~ / (\d{4}) (\d{2})? (\d{2})? /xsm )
+        && $record->{ft_end_date} =~ m{ (\d{2}) / (\d{2}) / (\d{4}) }xsm )
     {
 
-        my ( $year, $month, $day ) = ( $1, $2, $3 );
+        my ( $day, $month, $year ) = ( $1, $2, $3 );
         $record->{ft_end_date} = $year;
 
         if ( defined($month) ) {
