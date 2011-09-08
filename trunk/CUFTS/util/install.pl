@@ -68,6 +68,7 @@ my @modules = qw(
     Getopt::Long
     HTML::Entities
     HTML::FillInForm
+    HTML::Strip
     JSON::XS
     Log::Log4perl
     List::Compare
