@@ -38,10 +38,41 @@ sub site : Chained('base') PathPart('site') CaptureArgs(1) {
 sub end : ActionClass('RenderView') {
     my ( $self, $c ) = @_;
 
-    if ( !$c->response->content_type ) {
+    if ( scalar @{ $c->error } ) {
+        $self->_end_error_handling($c);
+    }
+
+    return 1 if $c->response->status =~ /^3\d\d$/;
+    return 1 if defined($c->response->body);
+
+    unless ( $c->response->content_type ) {
         $c->response->content_type('text/html; charset=iso-8859-1');
     }
+
+    eval { $c->detach('CUFTS::Resolver::View::TT'); };
+    if ( scalar @{ $c->error } ) {
+        $self->_end_error_handling($c);
+    }
+
 }
+
+sub _end_error_handling {
+    my ( $self, $c ) = @_;
+
+    warn("Rolling back database changes due to error flag.");
+    warn( join("\n",  @{ $c->error }) );
+
+    CUFTS::DB::DBI->dbi_rollback();
+
+    $c->stash(
+        template      => 'fatal_error.tt',
+        fatal_errors  => $c->error,
+    );
+    $c->forward('CUFTS::Resolver::View::TT');
+
+    $c->{error} = [];
+}
+
 
 =back
 
