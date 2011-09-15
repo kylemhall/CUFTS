@@ -38,7 +38,21 @@ var CRDB_mobile = {
            add hooks to avoid that where I can --- */
 
     initApp: function() {
+        var app = this;
         this.initPages();
+        
+        $('#home').one( 'pagecreate', function() {
+            var url = document.URL;
+            var reg = /id=(\d+)/;
+            var match = reg.exec(url);
+
+            if ( match ) {
+                app.saveToSessionStorage({ resource_id: match[1] });
+                $.mobile.changePage( '#full' );
+            }
+        });
+        
+        
     },
     
     initPages: function() {
