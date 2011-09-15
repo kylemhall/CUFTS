@@ -77,7 +77,11 @@ sub build_linkTOC {
         next if is_empty_string( $record->journal_url );
 
         my $url = $record->journal_url;
-        $url .= '/'  . $request->year;
+        if ( $url !~ m{/$} ) {
+            $url .= '/';
+        }
+        
+        $url .= $request->year;
         $url .= '/v' . $request->volume;
         $url .= '/n' . $request->issue;
         $url .= '/index.html';
