@@ -83,7 +83,7 @@ sub facet_options : Chained('site') PathPart('') CaptureArgs(0) {
         
         unless ( $c->stash->{$type} && $c->stash->{"${type}_order"} ) {
 
-            my @records = $c->model($model)->search({ site => $c->site->id }, { order_by => $field } )->all;
+            my @records = $c->model($model)->search( { site => $c->site->id }, { order_by => $field } )->all;
 
             $c->stash->{$type}           = { map { $_->id => $_->$field } @records };
             $c->stash->{"${type}_order"} = [ map { $_->id } @records ];
