@@ -2,7 +2,7 @@
 <html> 
  <head> 
  <title>CRDB Mobile</title> 
- <link rel="stylesheet" href="[% c.uri_for_css('jquery.mobile-1.0b3.min.css') %]" />
+ <link rel="stylesheet" href="[% c.uri_for_css('jquery.mobile-1.0a3.min.css') %]" />
  <link rel="stylesheet" href="[% c.uri_for_css('crdb_mobile.css') %]" />
  [% IF site_css_file %]
   <link rel="StyleSheet" href="[% site_css_file %]" type="text/css" media="screen, print" />
