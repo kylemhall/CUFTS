@@ -29,6 +29,16 @@ use URI::Escape qw(uri_escape);
 
 use strict;
 
+sub local_resource_details {
+    my ($class) = @_;
+    return [
+        @{ $class->SUPER::local_resource_details },
+        qw(
+            auth_name
+        )
+    ];
+}
+
 my $base_url = 'http://openurl.proquest.com/in?';
 
 sub can_getFulltext {
@@ -84,7 +94,7 @@ sub build_linkFulltext {
             }
         }
 
-        if ( !exists( $params{volume} ) && !exists( $params{issue} ) ) {
+        if ( !exists( $params{volume} ) && !exists( $params{issue} ) && is_empty_string( $request->atitle ) ) {
             if ( not_empty_string( $request->day) ) {
                 $params{date} = $request->date;
             }
@@ -101,7 +111,14 @@ sub build_linkFulltext {
             $params{atitle} = uri_escape( $atitle );
         }
 
+
         my $url = $base_url;
+        # Anything in the auth_name field at this point means use the new linking style
+        if ( not_empty_string( $resource->auth_name ) ) {
+            $url = 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2004&res_id=xri:pqm&rft_val_fmt=ori:/fmt:kev:mtx:article&genre=article&';
+            delete $params{service};
+        }
+        
         $url .= join '&', map { $_ . '=' . $params{$_} } keys %params;
 
         my $result = new CUFTS::Result($url);
@@ -193,17 +210,29 @@ sub build_linkJournal {
 
     foreach my $record (@$records) {
         my $url;
-        if ( not_empty_string( $record->db_identifier ) ) {
-            $url = 'http://openurl.proquest.com/openurl?url_ver=Z39.88-2004&res_dat=xri:pqd&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&genre=issue&rft_dat=xri:pqd:PMID=';
-            $url .= $record->db_identifier;
-        }
-        elsif ( not_empty_string( $record->issn ) ) {
-            $url = 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:pqd&rft_val_fmt=ori:fmt:kev:mtx:journal&svc_id=xri:pqil:context=title&issn=';
-            $url .= $record->issn;
+
+        # Anything in the auth_name field at this point means use the new linking style
+        if ( not_empty_string( $resource->auth_name ) ) {
+            if ( not_empty_string( $record->issn ) ) {
+                $url = 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2004&res_id=xri:pqm&rft_val_fmt=ori:/fmt:kev:mtx:journal&genre=journal&issn=' . $record->issn;
+            }
+            else {
+                $url = 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2004&res_id=xri:pqm&rft_val_fmt=ori:/fmt:kev:mtx:journal&genre=journal&title=' . uri_escape( $record->title );
+            }
         }
         else {
-            $url = 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:pqd&rft_val_fmt=ori:fmt:kev:mtx:journal&svc_id=xri:pqil:context=title&title=';
-            $url .= uri_escape( $record->title );
+            if ( not_empty_string( $record->db_identifier ) ) {
+                $url = 'http://openurl.proquest.com/openurl?url_ver=Z39.88-2004&res_dat=xri:pqd&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&genre=issue&rft_dat=xri:pqd:PMID=';
+                $url .= $record->db_identifier;
+            }
+            elsif ( not_empty_string( $record->issn ) ) {
+                $url = 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:pqd&rft_val_fmt=ori:fmt:kev:mtx:journal&svc_id=xri:pqil:context=title&issn=';
+                $url .= $record->issn;
+            }
+            else {
+                $url = 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:pqd&rft_val_fmt=ori:fmt:kev:mtx:journal&svc_id=xri:pqil:context=title&title=';
+                $url .= uri_escape( $record->title );
+            }
         }
 
         my $result = new CUFTS::Result($url);
