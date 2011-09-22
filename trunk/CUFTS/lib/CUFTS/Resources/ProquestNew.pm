@@ -66,6 +66,7 @@ sub title_list_field_map {
 
 sub title_list_skip_lines_count { return 2 }
 
+
 sub clean_data {
     my ( $class, $record ) = @_;
     
@@ -168,7 +169,7 @@ sub build_linkFulltext {
             }
         }
 
-        if ( !exists( $params{volume} ) && !exists( $params{issue} ) ) {
+        if ( !exists( $params{volume} ) && !exists( $params{issue} ) && is_empty_string( $request->atitle ) ) {
             if ( not_empty_string( $request->day) ) {
                 $params{date} = $request->date;
             }
