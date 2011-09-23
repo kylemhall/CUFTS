@@ -78,6 +78,7 @@ BEGIN {
         JSTOR_CSP
         Karger
         KBARTDOI
+        KBARTJournal
         Kluwer
         Lexis_Nexis_AC
         LexisNexisAcademic
