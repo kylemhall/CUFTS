@@ -57,13 +57,15 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'Title'                 => 'title',
-        'ISSN'                  => 'issn',
-        'ISSN/ISBN'             => 'issn',
-        'TITLE'                 => 'title',
-        'URL'                   => 'journal_url',
-        'BIOONE LANDING URL'    => 'journal_url',
-        'Publisher'             => 'publisher',
+        'Title'                     => 'title',
+        'ISSN'                      => 'issn',
+        'ISSN/ISBN'                 => 'issn',
+        'TITLE'                     => 'title',
+        'URL'                       => 'journal_url',
+        'BIOONE LANDING URL'        => 'journal_url',
+        'BioOne URL'                => 'journal_url',
+        'Publisher'                 => 'publisher',
+        'Organization'              => 'publisher',
     };
 }
 
