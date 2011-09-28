@@ -152,7 +152,9 @@ sub build_linkFulltext {
 
     foreach my $record (@$records) {
 
-        my $url = $base_url . '&genre=article';
+        my $url = not_empty_string($resource->base_url) ? $resource->base_url : $base_url;
+        $url .= '&genre=article';
+
         my %params;
 
         # if ( not_empty_string( $record->db_identifier ) ) {
@@ -220,22 +222,27 @@ sub build_linkJournal {
         or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
     my @results;
-    
-    if ( not_empty_string($resource->base_url) ) {
-        $base_url = $resource->base_url;
-    }
+
 
     foreach my $record (@$records) {
-        my $url = $base_url . '&svc_id=xri:pqil:context=title&genre=journal';
-        if ( not_empty_string( $record->db_identifier ) ) {
-            $url .= '&rft_dat=xri:pqd:PMID=' . $record->db_identifier;
-        }
-        elsif ( not_empty_string( $record->issn ) ) {
-            $url .= '&issn=' . $record->issn;
+        my $url;
+        if ( not_empty_string($record->journal_url) ) {
+            $url = $record->journal_url;
         }
         else {
-            $url .= '&jtitle=' . uri_escape( $record->title );
+            $url = not_empty_string($resource->base_url) ? $resource->base_url : $base_url;
+            $url .= '&svc_id=xri:pqil:context=title&genre=journal';
+            if ( not_empty_string( $record->db_identifier ) ) {
+                $url .= '&rft_dat=xri:pqd:PMID=' . $record->db_identifier;
+            }
+            elsif ( not_empty_string( $record->issn ) ) {
+                $url .= '&issn=' . $record->issn;
+            }
+            else {
+                $url .= '&jtitle=' . uri_escape( $record->title );
+            }
         }
+
 
         my $result = new CUFTS::Result($url);
         $result->record($record);
