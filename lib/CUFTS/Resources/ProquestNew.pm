@@ -152,7 +152,7 @@ sub build_linkFulltext {
 
     foreach my $record (@$records) {
 
-        my $url = not_empty_string($resource->base_url) ? $resource->base_url : $base_url;
+        my $url = not_empty_string($resource->url_base) ? $resource->url_base : $base_url;
         $url .= '&genre=article';
 
         my %params;
@@ -230,7 +230,7 @@ sub build_linkJournal {
             $url = $record->journal_url;
         }
         else {
-            $url = not_empty_string($resource->base_url) ? $resource->base_url : $base_url;
+            $url = not_empty_string($resource->url_base) ? $resource->url_base : $base_url;
             $url .= '&svc_id=xri:pqil:context=title&genre=journal';
             if ( not_empty_string( $record->db_identifier ) ) {
                 $url .= '&rft_dat=xri:pqd:PMID=' . $record->db_identifier;
