@@ -31,6 +31,16 @@ use strict;
 
 my $base_url = 'http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2004&res_id=xri:pqm&rft_val_fmt=ori:/fmt:kev:mtx:journal';
 
+sub global_resource_details {
+    my ($class) = @_;
+    return [
+        @{ $class->SUPER::global_resource_details },
+        qw(
+            url_base
+        )
+    ];
+}
+
 sub title_list_fields {
     return [
         qw(
@@ -210,6 +220,10 @@ sub build_linkJournal {
         or CUFTS::Exception::App->throw('No request defined in build_linkJournal');
 
     my @results;
+    
+    if ( not_empty_string($resource->base_url) ) {
+        $base_url = $resource->base_url;
+    }
 
     foreach my $record (@$records) {
         my $url = $base_url . '&svc_id=xri:pqil:context=title&genre=journal';
