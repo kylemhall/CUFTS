@@ -54,6 +54,7 @@ sub title_list_fields {
             cit_end_date
             db_identifier
             publisher
+            journal_url
             cjdb_note
         )
     ];
