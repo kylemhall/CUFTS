@@ -20,7 +20,7 @@
 
 package CUFTS::Resources::JSTOR;
 
-use base qw(CUFTS::Resources::Base::Journals);
+use base qw(CUFTS::Resources::Base::KBART);
 
 use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
@@ -32,12 +32,6 @@ use strict;
 
 my $base_url = 'http://makealink.jstor.org/public-tools/GetURL?';
 
-sub title_list_extra_requires {
-    # require CUFTS::Util::CSVParse;
-    require Text::CSV_XS;
-    require HTML::Entities;
-}
-
 sub title_list_fields {
     return [
         qw(
@@ -47,130 +41,22 @@ sub title_list_fields {
             e_issn
             ft_start_date
             ft_end_date
+            vol_ft_start
+            iss_ft_start
+            vol_ft_end
+            iss_ft_end
             journal_url
             publisher
         )
     ];
 }
 
-sub title_list_field_map {
-    return {
-        'publication_title'             => 'title',
-        'print_identifier'              => 'issn',
-        'online_identifier'             => 'e_issn',
-        'title_url'                     => 'journal_url',
-        'publisher_name'                => 'publisher',
-        'date_first_issue_online'       => 'ft_start_date',
-        'date_last_issue_online'        => 'ft_end_date',
-    };
-}
-
 sub clean_data {
     my ( $class, $record ) = @_;
-
-    my %month_mapping = (
-        '20' => '01',
-        '21' => '01',
-        '22' => '03',
-        '23' => '06',
-        '24' => '09',
-        '25' => '01',
-        '26' => '02',
-        '27' => '06',
-        '28' => '07',
-        '29' => '09',
-        '30' => '10',
-        '31' => '01',
-        '32' => '03',
-        '33' => '06',
-        '34' => '09',
-    );
-
-    if ( defined( $record->{ft_start_date} )
-        && $record->{ft_start_date} =~ m{ (\d{2}) / (\d{2}) / (\d{4}) }xsm )
-    {
-
-        my ( $day, $month, $year ) = ( $1, $2, $3 );
-        $record->{ft_start_date} = $year;
-
-        if ( defined($month) ) {
-
-            if ( $month > 12 ) {
-                $month = $month_mapping{$month};
-            }
-
-            $record->{ft_start_date} .= "-${month}";
-
-            if ( defined($day) ) {
-                $record->{ft_start_date} .= "-$day";
-            }
-
-        }
-
-    }
-
-    if ( defined( $record->{ft_end_date} )
-        && $record->{ft_end_date} =~ m{ (\d{2}) / (\d{2}) / (\d{4}) }xsm )
-    {
-
-        my ( $day, $month, $year ) = ( $1, $2, $3 );
-        $record->{ft_end_date} = $year;
-
-        if ( defined($month) ) {
-
-            if ( $month > 12 ) {
-                $month = int( $month_mapping{$month} ) + 3;
-                $month > 12 and $month = 12;
-                $month = sprintf( "%02i", $month );
-            }
-
-            $record->{ft_end_date} .= "-${month}";
-
-            if ( defined($day) ) {
-                $record->{ft_end_date} .= "-$day";
-            }
-
-        }
-
-    }
-
-
-    if ( $record->{issn} =~ /none/xsmi ) {
-        delete $record->{issn};
-    }
-
-    $record->{title}     = HTML::Entities::decode_entities( $record->{title} );
-    $record->{publisher} = HTML::Entities::decode_entities( $record->{publisher} );
-
-    $record->{title}     = utf8( $record->{title}     )->latin1;
-    $record->{publisher} = utf8( $record->{publisher} )->latin1;
 
     return $class->SUPER::clean_data($record);
 
 }
-
-# sub title_list_split_row {
-#     my ( $class, $row ) = @_;
-# 
-#     my $csv = CUFTS::Util::CSVParse->new();
-#     $csv->parse($row)
-#         or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
-# 
-#     my @fields = $csv->fields;
-#     return \@fields;
-# }
-
-sub title_list_split_row {
-    my ( $class, $row ) = @_;
-    
-    my $csv = Text::CSV_XS->new({ binary => 1, escape_char => '\\' });
-    $csv->parse($row)
-        or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
-
-    my @fields = $csv->fields;
-    return \@fields;
-}
-
 
 # -----------------------------------------------------------------------
 
