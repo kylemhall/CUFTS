@@ -264,6 +264,12 @@ sub titles_new :Chained('base') :PathPart('titles_new') Args(0) {
         $count  = CJDB::DB::Journals->count_distinct_title_by_journal_main($site_id, $tmp_search_term); 
         $titles = CJDB::DB::Journals->search_distinct_title_by_journal_main($site_id, $tmp_search_term, (($start_page-1)*$per_page), $per_page);
     }
+    elsif ($search_type eq 'ft' ) {
+        my $tmp_search_term = CUFTS::CJDB::Util::strip_articles($search_term);
+        $tmp_search_term = CUFTS::CJDB::Util::strip_title($tmp_search_term);
+        $count  = CJDB::DB::Journals->count_distinct_title_by_journal_main_ft($site_id, $tmp_search_term); 
+        $titles = CJDB::DB::Journals->search_distinct_title_by_journal_main_ft($site_id, $tmp_search_term, (($start_page-1)*$per_page), $per_page);
+    }
 
     if ( $c->req->params->{format} eq 'json' ) {
         $c->stash->{json} = {
@@ -370,16 +376,19 @@ sub associations :Chained('base') :PathPart('associations') Args(0) {
 sub show :Chained('base') :PathPart('show') Args(0) {
     my ($self, $c) = @_;
 
-    my $browse_field = $c->req->params->{browse_field};
-
-    my $search_term = $c->req->params->{search_terms};
-
+    my $browse_field  = $c->req->params->{browse_field};
+    my $search_term   = $c->req->params->{search_terms};
+    my $search_type   = $c->req->params->{search_type};
+    
     if ( !defined($search_term) || ( !ref($search_term) && $search_term eq '' ) ) {
         $c->stash->{empty_search} = 'Please enter a search term.';
         return $c->forward( $c->controller('Browse')->action_for('browse') );
     }
 
     if ($browse_field eq 'title') {
+        if ( $search_type eq 'ft' ) {
+            return $c->forward('/browse/titles_new');
+        }
         return $c->forward('/browse/titles');
     } elsif ($browse_field eq 'title_new') {
         return $c->forward('/browse/titles_new');

@@ -516,6 +516,30 @@ ul.paging {
 	margin-bottom: .5em;
 }
 
+/*************************************************
+
+	New pager for numeric paging
+
+**************************************************/
+
+div.pager {
+	background: #EEEEEE;
+	border: 1px #AAAAAA solid;
+	margin-top: .5em;
+	margin-bottom: .5em;
+}
+
+div.pager div.counter {
+    padding: 5px;
+}
+
+div.pager div.pages {
+    border-top: 1px solid #ddd;
+    padding: 5px;
+}
+
+div.pages {
+}
 
 /*************************************************
 

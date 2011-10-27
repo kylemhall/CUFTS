@@ -35,3 +35,5 @@
   [% IF show_unified %][% PROCESS browse_journals_unified_data.tt %][% END %]
  </div>
 [% END %]
+
+[% PROCESS paging_new.tt %]

@@ -3,7 +3,7 @@
     <div class="counter">
         Page [% pager.current_page %] of [% pager.last_page %]. Total results: [% pager.total_entries %]
     </div>
-    <div>
+    <div class="pages">Page: 
        [% IF pager.previous_page %]
            <span><a href="[% c.req.uri_with( page => pager.first_page ) %]">&laquo;</a></span>
            <span><a href="[% c.req.uri_with( page => pager.previous_page ) %]">&lt;</a></span>

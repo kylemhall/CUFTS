@@ -21,6 +21,7 @@
  <option value="exact">[% search_labels.exact %]</option>
  <option value="any">[% search_labels.any %]</option>
  <option value="all">[% search_labels.all %]</option>
+ <option value="ft">[% search_labels.ft %]</option>
 </select>
 <input type="text" name="search_terms" size="30" maxlength="256" /> <input type="submit" name="submit" value="Search" />
 <input type="hidden" name="browse_field" value="title">
