@@ -277,6 +277,7 @@ __PACKAGE__->set_sql('distinct_by_title' => qq{
 
 
 
+# Do a "LIKE" search on the titles and return in alphabetic order
 sub search_distinct_title_by_journal_main {
     my ($class, $site, $title, $offset, $limit) = @_;
 
@@ -302,17 +303,49 @@ sub search_distinct_title_by_journal_main {
     return \@results;
 }
 
-sub count_distinct_title_by_journal_main {
+# Use a fulltext search through the titles and return in relevance order
+sub search_distinct_title_by_journal_main_ft {
+    my ($class, $site, $title, $offset, $limit) = @_;
+
+    $limit  ||= 'ALL';
+    $offset ||= 0;
+
+    my $sql = qq{
+        SELECT cjdb_journals.*, titles_sorted.title AS result_title,
+               ts_rank_cd( to_tsvector('english', search_title), plainto_tsquery('english', 'journal of health service research') ) as rank
+        FROM (
+
+            SELECT DISTINCT ON (cjdb_journals_titles.journal) cjdb_titles.title, cjdb_titles.search_title, cjdb_journals_titles.journal AS journal_id,
+                    ts_rank_cd( to_tsvector('english', search_title), plainto_tsquery('english', ?), 8 ) as rank
+            FROM cjdb_titles
+            JOIN cjdb_journals_titles ON (cjdb_titles.id = cjdb_journals_titles.title)
+            WHERE cjdb_journals_titles.site = ?
+            AND to_tsvector('english', search_title) @@ plainto_tsquery('english', ?)            
+            ORDER BY cjdb_journals_titles.journal, rank DESC, cjdb_journals_titles.main DESC
+
+        ) AS titles_sorted
+        JOIN cjdb_journals ON (cjdb_journals.id = titles_sorted.journal_id)
+        ORDER BY titles_sorted.rank DESC, titles_sorted.search_title
+        LIMIT $limit OFFSET $offset
+    };
+
+    my $sth = $class->db_Main()->prepare($sql, {pg_server_prepare => 0});
+    my @results = $class->sth_to_objects( $sth, [$title, $site, $title] );
+    return \@results;
+}
+
+
+sub count_distinct_title_by_journal_main_ft {
     my ($class, $site, $title) = @_;
 
     my $sql = qq{
         SELECT COUNT(*) FROM (
-        SELECT cjdb_journals_titles.journal
-        FROM cjdb_titles
-        JOIN cjdb_journals_titles ON (cjdb_titles.id = cjdb_journals_titles.title)
-        WHERE cjdb_journals_titles.site = ?
-        AND cjdb_titles.search_title LIKE ?
-        GROUP BY cjdb_journals_titles.journal
+            SELECT cjdb_journals_titles.journal
+            FROM cjdb_titles
+            JOIN cjdb_journals_titles ON (cjdb_titles.id = cjdb_journals_titles.title)
+            WHERE cjdb_journals_titles.site = ?
+            AND to_tsvector('english', search_title) @@ plainto_tsquery('english', ?)            
+            GROUP BY cjdb_journals_titles.journal
         ) AS subsel
     };
 

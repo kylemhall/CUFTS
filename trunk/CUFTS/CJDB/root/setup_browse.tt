@@ -3,6 +3,7 @@
     exact      => 'exact',
     any        => 'any',
     all        => 'all',
+    ft         => 'keyword'
    }
 %]
 [% SET browse_search_types = {
