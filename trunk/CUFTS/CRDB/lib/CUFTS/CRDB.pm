@@ -133,6 +133,11 @@ sub uri_for_image {
     return $c->uri_for( '/static/images/', @_ );
 }
 
+sub uri_for_static {
+    my $c = shift;
+    return $c->uri_for( 'static', @_ );
+}
+
 sub uri_for_facets {
     my ( $c, $add, $remove ) = @_;
 

@@ -193,6 +193,16 @@ sub json_facets : Chained('facet_options') PathPart('facets/json') Args {
         @records = sort { $a->{sort_name} cmp $b->{sort_name} } @records;
     }
     
+    # Find any attached files that may link to images for display.. this is kindof hacky
+    
+    foreach my $record (@records) {
+        my $files = $c->model('CUFTS::ERMFiles')->search({ linked_id => $record->{id}, link_type => 'm', description => { 'ilike' => '%public%' } } );
+        $record->{files} = [];
+        while ( my $file = $files->next ) {
+            push @{ $record->{files} }, { description => $file->description, url => $c->uri_for_static( 'erm_files', 'm', $file->UUID . '.' . $file->ext )->as_string };
+        }
+    }
+    
     $c->stash->{json}->{records} = \@records;
     $c->stash->{current_view}  = 'JSON';
 }
