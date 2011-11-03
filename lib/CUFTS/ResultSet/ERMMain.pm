@@ -12,6 +12,7 @@ my @fast_search_columns = qw(
     key
     vendor
     description_brief
+    description_full
     url
     proxy
     access
