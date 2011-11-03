@@ -135,7 +135,7 @@ sub uri_for_image {
 
 sub uri_for_static {
     my $c = shift;
-    return $c->uri_for( 'static', @_ );
+    return $c->uri_for( '/static', @_ );
 }
 
 sub uri_for_facets {
