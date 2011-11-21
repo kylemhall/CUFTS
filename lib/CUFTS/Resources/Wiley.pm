@@ -154,6 +154,14 @@ sub _build_openurl {
         $url .= "&issue=" . $request->issue;
     }
 
+    if ( not_empty_string($request->doi) ) {
+        $url .= "&id=";
+        if ( $request->doi !~ /^doi:/ ) {
+            $url .= 'doi:'
+        }
+        $url .= uri_escape($request->doi);
+    }
+
     return $url;
 }
 
