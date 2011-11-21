@@ -24,7 +24,7 @@ sub default : Private {
     my ( $self, $c ) = @_;
 
     my @localresources  = CUFTS::DB::LocalResources->search( { site => $c->stash->{current_site}->id, active => 'true' } );
-    my %local_resource_ids = ( map { $_->resource => 1 } @localresources ); 
+    my %local_resource_ids = ( map { $_->resource => 1 } @localresources );
 
     my @globalresources = grep { !$local_resource_ids{$_->id} } CUFTS::DB::Resources->search( { active => 'true' }, { order_by => 'name' } );
 
@@ -52,13 +52,22 @@ JOURNAL:
         next if !$journal->journal_auth;
 
         # Find other journals...
-        
+
         my @other_journals = CUFTS::DB::JournalsActive->search({
             journal_auth            => $journal->journal_auth->id,
             resource                => { '!=' => $resource_id },
             'local_resource.site'   => $site_id,
             'local_resource.active' => 't',
-        }, { order_by => 'title' });
+        });
+
+        push @other_journals, CUFTS::DB::LocalJournals->search({
+            journal_auth                => $journal->journal_auth->id,
+            journal                     => undef,
+            'resource.resource'         => undef,
+            'resource.site'             => $site_id,
+            'resource.active'           => 't',
+            active                      => 't',
+        });
 
         if ( !scalar(@other_journals) ) {
             push @unique, $journal;
@@ -86,14 +95,14 @@ JOURNAL:
 
 sub _overlay_journal {
     my ( $journal ) = @_;
-    
+
     my $global;
     if ( $journal->can('journal') ) {
         $global = $journal->journal;
     }
 
     my %data;
-    
+
     foreach my $column (
         qw(title issn e_issn vol_cit_start vol_cit_end iss_cit_start iss_cit_end vol_ft_start vol_ft_end iss_ft_start iss_ft_end cit_start_date cit_end_date ft_start_date ft_end_date embargo_months embargo_days current_months current_years coverage journal_auth)
     ) {
@@ -110,23 +119,25 @@ sub _analyze_coverage {
     my ( $journal, $others ) = @_;
     
     # Journal has no fulltext, don't bother comparing it against other records
-    return 'no_ft' if !grep { $journal->$_ } qw( ft_start_date ft_end_date embargo_days embargo_months current_months current_years );
+    return 'no_ft' if !grep { $journal->{$_} } qw( ft_start_date ft_end_date embargo_days embargo_months current_months current_years );
 
     # Journal has embargo/current coverage which is difficult to compare, so for now we'll just call it "unknown"
-    return 'unknown' if grep { $journal->$_ } qw( embargo_days embargo_months current_months current_years );
-    
+    return 'unknown' if grep { $journal->{$_} } qw( embargo_days embargo_months current_months current_years );
+
     my $start_date = '';
     my $end_date = '';
-    
-    foreach my $other ( @$others ) {
-        return 'unknown' if grep { $other->$_ } qw( embargo_days embargo_months current_months current_years );
 
-        if ( $other->ft_start_date && ( !$start_date || $other->ft_start_date lt $start_date ) ) {
-            $start_date = $other->ft_start_date;
+    foreach my $other ( @$others ) {
+        my $other_journal_data = _overlay_journal($other);
+
+        return 'unknown' if grep { $other_journal_data->{$_} } qw( embargo_days embargo_months current_months current_years );
+
+        if ( $other_journal_data->{ft_start_date} && ( !$start_date || $other_journal_data->{ft_start_date} lt $start_date ) ) {
+            $start_date = $other_journal_data->{ft_start_date};
         }
 
-        if ( $other->ft_end_date && ( !$end_date || $other->ft_end_date gt $end_date ) ) {
-            $end_date = $other->ft_end_date;
+        if ( $other_journal_data->{ft_end_date} && ( !$end_date || $other_journal_data->{ft_end_date} gt $end_date ) ) {
+            $end_date = $other_journal_data->{ft_end_date};
         }
     }
 
@@ -139,9 +150,9 @@ sub _analyze_coverage {
          || ( !$journal->ft_end_date && $end_date ) ) {
         return 'more';
     }
-    
+
     return 'less';
-    
+
 }
 
 1;
