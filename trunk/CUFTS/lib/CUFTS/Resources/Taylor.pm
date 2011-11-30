@@ -107,7 +107,9 @@ sub build_linkFulltext {
                 $url .= '&volume=' . $request->volume;
             }
             if ( not_empty_string( $request->issue ) ) {
-                $url .= '&issue=' . $request->issue;
+                my $issue = $request->issue;
+                $issue =~ s{/}{-}g; # T&F uses dashes between issues when there's multiples, sometimes we get metadata with slashes though
+                $url .= "&issue=${issue}";
             }
 
         # }
