@@ -1,6 +1,8 @@
 [% browse_type %]
 [% IF browse_type == 'titles' %]
  [% SWITCH search_type %]
+  [% CASE 'ft' %]
+   with keywords:
   [% CASE 'startswith' %]
    beginning with
   [% CASE 'advstartswith' %]
