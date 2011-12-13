@@ -60,7 +60,7 @@ SITE:
         $logger->info('Rebuild started for site: ', $site->name, ' (', $site->key, ')');
         my $start_time = time;
 
-        build_local_journal_auths($site);
+        build_local_journal_auths($logger, $site);
 
         # TODO: Rebuild print records goes here.
 
@@ -825,10 +825,18 @@ sub clear_site {
 
 # Calls an external script to link/build journal auth records for site's local resources
 sub build_local_journal_auths {
+    my $logger = shift;
     my $site = shift;
     my $site_id = $site->id;
     # No catch here, building journal auths should not be fatal.
-    eval { `perl util/build_journals_auth.pl --site_id=${site_id} --local`; };
+    $logger->info('Starting local journal_auth building.');
+    eval { `/usr/local/bin/perl util/build_journals_auth.pl --site_id=${site_id} --local`; };
+    if ( $@ ) {
+        $logger->warn('Error building local journal_auth links: ' . $@);
+    }
+    else {
+        $logger->info('Finished local journal_auth building.');
+    }
 }
 
 
