@@ -256,15 +256,16 @@ sub load_cufts_links {
 
     foreach my $local_resource (@local_resources) {
         $resource_count++;
-        $logger->info("Processing resource: $resource_count/", scalar(@local_resources), ': ', $resource->name);
-        
+
         # Skip deactivated global resources
         if ( defined($local_resource->resource) && !$local_resource->resource->active ) {
-            $logger->info('Skipping deactivated resource');
+            $logger->info("Skipping resource: $resource_count/", scalar(@local_resources), ': ', $local_resource->resource->name);
             next;
         }
-
+        
         my $resource = CUFTS::Resolve->overlay_global_resource_data($local_resource);
+        $logger->info("Processing resource: $resource_count/", scalar(@local_resources), ': ', $resource->name);
+
         if ( !defined( $resource->module ) ) {
             $logger->info('Skipping resource with no defined module');
             next;
