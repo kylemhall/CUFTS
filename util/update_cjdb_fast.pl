@@ -17,6 +17,7 @@ use CUFTS::DB::DBI;
 
 use CUFTS::CJDB::Loader::MARC::JournalsAuth;
 use CUFTS::CJDB::Util;
+use CUFTS::JournalsAuth;
 use CUFTS::Resolve;
 
 use Net::SMTP;
@@ -828,15 +829,22 @@ sub build_local_journal_auths {
     my $logger = shift;
     my $site = shift;
     my $site_id = $site->id;
-    # No catch here, building journal auths should not be fatal.
+
+    my %options = (
+        local => 1
+    );
+    
     $logger->info('Starting local journal_auth building.');
-    eval { `/usr/local/bin/perl util/build_journals_auth.pl --site_id=${site_id} --local`; };
-    if ( $@ ) {
+    eval {
+        my $timestamp = CUFTS::DB::DBI->get_now();
+        my $stats = CUFTS::JournalsAuth::load_journals( 'local', $timestamp, $site_id, \%options );
+        CUFTS::DB::DBI->dbi_commit();
+        # display_stats($stats);
+    };
+    if ($@) {
         $logger->warn('Error building local journal_auth links: ' . $@);
     }
-    else {
         $logger->info('Finished local journal_auth building.');
-    }
 }
 
 
