@@ -34,6 +34,7 @@ sub menu_cjdb : Local {
         browse_form.tt
         browse_form_alt.tt
         browse_journals.tt
+        browse_journals_new.tt
         browse_journals_unified_data.tt
         browse_search_description.tt
         browse_subjects.tt
@@ -62,6 +63,7 @@ sub menu_cjdb : Local {
         page_header.tt
         page_title.tt
         paging.tt
+        paging_new.tt
         selected_journals.tt
         selected_journals_data.tt
         setup_browse.tt
