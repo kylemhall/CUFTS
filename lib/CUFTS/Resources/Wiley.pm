@@ -140,10 +140,10 @@ sub _build_openurl {
     $url .= "&title=" . uri_escape($record->title);
 
     if ( not_empty_string($record->issn) ) {
-        $url .= "&issn=" . $record->issn;
+        $url .= "&issn=" . dashed_issn($record->issn);
     }
     elsif ( not_empty_string($record->e_issn) ) {
-        $url .= "&issn=" . $record->e_issn;
+        $url .= "&issn=" . dashed_issn($record->e_issn);
     }
 
     if ( not_empty_string($request->volume) ) {
