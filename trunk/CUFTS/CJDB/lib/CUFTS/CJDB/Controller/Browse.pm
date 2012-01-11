@@ -25,7 +25,12 @@ sub base :Chained('../site') :PathPart('browse') CaptureArgs(0) {
 
     $c->stash->{rank_name_sort} = sub {
         my ( $links, $displays ) = @_;
-        my @new_array = sort { int( $b->{rank} || 0 ) <=> int( $a->{rank} || 0 ) or $displays->{ $a->{resource} }->{name} cmp $displays->{ $b->{resource} }->{name} } @$links;
+        my @new_array = sort { 
+               int( $b->{rank} || 0 ) <=> int( $a->{rank} || 0 ) 
+            or $displays->{ $a->{resource} }->{name} cmp $displays->{ $b->{resource} }->{name}
+            or ( $a->print_coverage || '' ) cmp ( $b->print_coverage || '' )
+            or ( $a->fulltext_coverage || '' ) cmp ( $b->fulltext_coverage || '' )
+        } @$links;
         return \@new_array;
     };
 }
