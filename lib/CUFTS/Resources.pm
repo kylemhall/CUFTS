@@ -1067,7 +1067,7 @@ sub prepend_proxy {
             } elsif ( not_empty_string($site->proxy_WAM) ) {
                 my $url = $result->url;
                 my $wam = $site->proxy_WAM;
-                $url =~ s{ http:// ([^/]+) /? }{http://0-$1.$wam/}xsm;
+                $url =~ s{ (https?):// ([^/]+) /? }{$1://0-$2.$wam/}xsm;
                 $result->url($url);
             }
         }
