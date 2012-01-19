@@ -305,7 +305,9 @@ sub clean_data_dates {
         next unless assert_ne( $record->{$field} );
 
         if ( $record->{$field} =~ /^(\d{4})-?(\d{2})$/ ) {
-            $record->{$field} = "$1-$2-01";
+            my $year = $1;
+            my $month = $2 eq '00' ? '01' : $2;
+            $record->{$field} = "${year}-${month}-01";
         }
         elsif ( $record->{$field} =~ /^(\d{4})$/ ) {
             $record->{$field} = "$1-01-01";
@@ -317,7 +319,9 @@ sub clean_data_dates {
         next unless assert_ne( $record->{$field} );
 
         if ( $record->{$field} =~ /^(\d{4})-?(\d{2})$/ ) {
-            $record->{$field} = "$1-$2-" . $end[ $2 - 1 ];
+            my $year = $1;
+            my $month = $2 eq '00' ? '01' : $2;
+            $record->{$field} = "${year}-${month}-" . $end[ int($month) - 1 ];
         }
         elsif ( $record->{$field} =~ /^(\d{4})$/ ) {
             $record->{$field} = "$1-12-31";
