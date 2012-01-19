@@ -304,7 +304,7 @@ sub clean_data_dates {
         next unless $field =~ /start_date$/;
         next unless assert_ne( $record->{$field} );
 
-        if ( $record->{$field} =~ /^(\d{4})-(\d{2})$/ ) {
+        if ( $record->{$field} =~ /^(\d{4})-?(\d{2})$/ ) {
             $record->{$field} = "$1-$2-01";
         }
         elsif ( $record->{$field} =~ /^(\d{4})$/ ) {
@@ -316,7 +316,7 @@ sub clean_data_dates {
         next unless $field =~ /end_date$/;
         next unless assert_ne( $record->{$field} );
 
-        if ( $record->{$field} =~ /^(\d{4})-(\d{2})$/ ) {
+        if ( $record->{$field} =~ /^(\d{4})-?(\d{2})$/ ) {
             $record->{$field} = "$1-$2-" . $end[ $2 - 1 ];
         }
         elsif ( $record->{$field} =~ /^(\d{4})$/ ) {
