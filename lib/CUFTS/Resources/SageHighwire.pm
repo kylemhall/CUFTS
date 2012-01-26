@@ -77,7 +77,12 @@ sub clean_data {
     $record->{title} =~ s/ \xAE $//xsm;  # Remove trailing (r)
 
     $record->{ft_start_date} = sprintf( '%4i-%02i', ($record->{'___First Year'} || $record->{'___FirstYear'} ), ( $record->{'___First Month'} || $record->{'___FirstMonth'} ) );
-    $record->{ft_end_date}   = sprintf( '%4i-%02i', ( $record->{'___Latest Year'} || $record->{'___LastYear'} ), ( $record->{'___Latest Month'} || $record->{'___LastMonth'} )  );
+    my $latest_year  = $record->{'___Latest Year'} || $record->{'___LastYear'};
+    my $latest_month = $record->{'___Latest Month'} || $record->{'___LastMonth'};
+
+    if ( not_empty_string($latest_year) && not_empty_string($latest_month) ) {
+        $record->{ft_end_date}   = sprintf( '%4i-%02i', ( $record->{'___Latest Year'} || $record->{'___LastYear'} ), ( $record->{'___Latest Month'} || $record->{'___LastMonth'} )  );
+    }
 
     my $errs = $class->SUPER::clean_data($record);
 
