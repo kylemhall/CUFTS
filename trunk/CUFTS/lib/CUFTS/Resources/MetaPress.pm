@@ -137,11 +137,12 @@ sub clean_data {
 
     if ( defined( $record->{title} ) ) {
         $record->{title} =~ s/\([^\)]+?\)$//;
-        # $record->{title} = utf8( $record->{title} )->latin1;
+        $record->{title} = utf8( $record->{title} )->latin1;
     }
 
     if ( defined( $record->{'publisher'} ) ) {
-        # $record->{'publisher'} = ( utf8( $record->{'publisher'} ) )->latin1;
+        $record->{publisher} = trim_string( $record->{publisher}, '"' );
+        $record->{publisher} = utf8($record->{'publisher'})->latin1;
     }
 
     sub parse_date {
