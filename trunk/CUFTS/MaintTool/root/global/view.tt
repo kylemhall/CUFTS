@@ -49,7 +49,7 @@
 
 <tr><td>
 <table class="wide-outlined">
-<tr><td class="heading">site</td><td class="heading">auto activated</td></tr>
+<tr><td class="heading">site</td><td class="heading">auto activated</td><td class="heading">id</td></tr>
 [% FOREACH active IN activated %]
  <tr>
      <td class="field[% loop.count % 2 %]">[% active.0 | html %]</td>
