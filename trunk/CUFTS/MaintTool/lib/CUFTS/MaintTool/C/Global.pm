@@ -125,7 +125,7 @@ sub view : Local {
     foreach my $local_resource ( $c->stash->{resource}->local_resources ) {
         next if !$local_resource->active;
         my $site = $local_resource->site;
-        push @activated, [ $site->name, $local_resource->auto_activate ];
+        push @activated, [ $site->name, $local_resource->auto_activate, $local_resource->id ];
     }
 
     @activated = sort { lc($a->[0]) cmp lc($b->[0]) } @activated;
