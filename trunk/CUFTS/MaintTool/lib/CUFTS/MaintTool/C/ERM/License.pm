@@ -5,6 +5,7 @@ use base 'Catalyst::Base';
 
 use CUFTS::DB::ERMLicense;
 use CUFTS::DB::ERMFiles;
+use CUFTS::Util::Simple;
 
 my $form_validate = {
     required => [
@@ -111,22 +112,56 @@ sub default : Private {
 sub find_json : Local {
     my ( $self, $c ) = @_;
     
-    my @records;
+    my @valid_bool_params = qw(
+        allows_remote_access
+        allows_proxy_access
+        allows_commercial_use
+        allows_walkins
+        allows_ill
+        allows_ereserves
+        allows_coursepacks
+        allows_distance_ed
+        allows_downloads
+        allows_prints
+        allows_emails
+        allows_archiving
+    );
+
+    my $params = $c->req->params;
+    my $options = {
+        order_by => 'LOWER(key)',
+    };
+    my ( $offset, $rows );
+    
+
+    if ( defined($params->{start}) || defined($params->{limit}) ) {
+        $options->{offset} = $params->{start} || 0;
+        $options->{rows}   = $params->{limit} || 25;
+    }
+    
     my $search = { site => $c->stash->{current_site}->id };
 
     if ( my $key = $c->req->params->{key} ) {
         $search->{key} = { ilike => "$key\%" };
     }
+    
+    foreach my $param ( keys %$params ) {
+        next if !grep { $param eq $_ } @valid_bool_params;
+        my $value = $params->{$param};
+        next if is_empty_string($value);
+        $search->{$param} = $value;
+    }
 
-    @records = CUFTS::DB::ERMLicense->search( $search, { order_by => 'LOWER(key)' } );
-
-    $c->stash->{json}->{rowcount} = scalar(@records);
+    my @records = CUFTS::DB::ERMLicense->search( $search, $options );
+    $c->stash->{json}->{rowcount} = CUFTS::DB::ERMLicense->count( $search );
 
     # TODO: Move this to the DB module later.
     $c->stash->{json}->{results}  = [ map { { id => $_->id, key => $_->key } } @records ];
 
     $c->forward('V::JSON');
 }
+
+
 
 
 sub create : Local {
