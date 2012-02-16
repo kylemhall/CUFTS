@@ -142,6 +142,9 @@ sub find_json : Local {
     my $search = { site => $c->stash->{current_site}->id };
 
     if ( my $key = $c->req->params->{key} ) {
+        $search->{key} = { ilike => "\%$key\%" };
+    }
+    elsif ( my $key = $c->req->params->{key_start} ) {
         $search->{key} = { ilike => "$key\%" };
     }
     

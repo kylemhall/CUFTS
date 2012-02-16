@@ -276,7 +276,7 @@ Ext.onReady( function() {
                                 displayField: 'key',
                                 valueField: 'id',
                                 mode: 'remote',
-                                queryParam: 'key',
+                                queryParam: 'key_start',
                                 minChars: 1,
                                 forceSelection: true,
                                 queryDelay: 250,
