@@ -125,6 +125,7 @@ sub find_json : Local {
         allows_prints
         allows_emails
         allows_archiving
+        perpetual_access
     );
 
     my $params = $c->req->params;
@@ -142,10 +143,24 @@ sub find_json : Local {
     my $search = { site => $c->stash->{current_site}->id };
 
     if ( my $key = $c->req->params->{key} ) {
+        $key =~ s/(%_\?)/\\$1/gsx;
         $search->{key} = { ilike => "\%$key\%" };
     }
-    elsif ( my $key = $c->req->params->{key_start} ) {
-        $search->{key} = { ilike => "$key\%" };
+    elsif ( my $key_start = $c->req->params->{key_start} ) {
+        $key_start =~ s/(%_\?)/\\$1/gsx;
+        $search->{key} = { ilike => "$key_start\%" };
+    }
+    
+    if ( my $filter = $c->req->params->{filter} ) {
+        $filter =~ s/(%_\?)/\\$1/gsx;
+        $search->{'-or'} = {
+            'key'                    => { ilike => "\%$filter\%" },
+            'ill_notes'              => { ilike => "\%$filter\%" },
+            'ereserves_notes'        => { ilike => "\%$filter\%" },
+            'coursepack_notes'       => { ilike => "\%$filter\%" },
+            'archiving_notes'        => { ilike => "\%$filter\%" },
+            'perpetual_access_notes' => { ilike => "\%$filter\%" },
+        }
     }
     
     foreach my $param ( keys %$params ) {
