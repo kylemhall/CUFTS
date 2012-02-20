@@ -86,12 +86,20 @@ Ext.onReady( function() {
                         border: false,
                         items: [
                             {
+                                name: 'filter',
+                                fieldLabel: 'Filter',
+                                value: hash_state.params['filter'],
+                                xtype: 'textfield',
+                                anchor: '95%'
+                            },
+                            {
                                 name: 'key',
                                 fieldLabel: 'Key',
                                 value: hash_state.params['key'],
                                 xtype: 'textfield',
                                 anchor: '95%'
                             }
+                            
                         ]
                     },
                     {
@@ -113,17 +121,23 @@ Ext.onReady( function() {
                                 listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['allows_ill'],
                                 anchor: '95%'
-                            }
-                        ]
-                    },
-                    {
-                        layout: 'form',
-                        columnWidth: .33,
-                        labelWidth: 120,
-                        border: false,
-                        items: [
+                            },
                             {
-                                fieldLabel: 'Allows eReserves?',
+                                fieldLabel: 'Allows Walk-ins?',
+                                xtype: 'combo',
+                                hiddenName: 'allows_walkins',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['allows_walkins'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Allows e-reserves?',
                                 xtype: 'combo',
                                 hiddenName: 'allows_ereserves',
                                 store: combo_stores.boolean_type,
@@ -134,6 +148,70 @@ Ext.onReady( function() {
                                 editable: false,
                                 listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['allows_ereserves'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Allows course packs?',
+                                xtype: 'combo',
+                                hiddenName: 'allows_coursepacks',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['allows_coursepacks'],
+                                anchor: '95%'
+                            }
+                        ]
+                    },
+                    {
+                        layout: 'form',
+                        columnWidth: .33,
+                        labelWidth: 120,
+                        border: false,
+                        items: [
+                            {
+                                fieldLabel: 'Allows distance ed?',
+                                xtype: 'combo',
+                                hiddenName: 'allows_distance_ed',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['allows_distance_ed'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Allows archiving?',
+                                xtype: 'combo',
+                                hiddenName: 'allows_archiving',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['allows_archiving'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Perpetual access?',
+                                xtype: 'combo',
+                                hiddenName: 'perpetual_access',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['perpetual_access'],
                                 anchor: '95%'
                             }
                         ]
