@@ -324,12 +324,13 @@ sub selected_marc : Local {
     
     my @erm_records = CUFTS::DB::ERMMain->search( { site => $c->stash->{current_site}->id, id => { '-in' => $c->session->{selected_erm_main} } } );
     
+    my $url_base = $CUFTS::Config::CRDB_URL . $c->stash->{current_site}->key . '/resource/';
     foreach my $erm_record ( @erm_records ) {
         if ( $c->req->params->{file} ) {
-            $MARC_dump .= $erm_record->as_marc()->as_usmarc();
+            $MARC_dump .= $erm_record->as_marc( $url_base )->as_usmarc();
         }
         else {
-            $MARC_dump .= $erm_record->as_marc()->as_formatted();
+            $MARC_dump .= $erm_record->as_marc( $url_base )->as_formatted();
             $MARC_dump .= "\n----------------------------------------------\n";
         }
 
