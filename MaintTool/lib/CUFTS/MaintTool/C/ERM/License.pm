@@ -293,10 +293,14 @@ sub edit : Local {
 
     $c->stash->{license_files} = [ CUFTS::DB::ERMFiles->search({ linked_id => $erm_id, link_type => 'l' }) ];
 
-    $c->stash->{erm}       = $erm;
-    $c->stash->{erm_id}    = $erm_id;
-    $c->stash->{template}  = 'erm/license/edit.tt';
+    $c->stash->{erm}        = $erm;
+    $c->stash->{mains}      = [ sort { lc($a->key) cmp lc($b->key) } $erm->mains ];
+    $c->stash->{erm_id}     = $erm_id;
+    $c->stash->{template}   = 'erm/license/edit.tt';
     push @{$c->stash->{load_css}}, 'tabs.css';
+
+    use Data::Dumper;
+    warn(Dumper($c->stash->{mains}));
 
     $c->stash->{javascript_validate} = [ $c->convert_form_validate( 'license-form', $form_validate, 'erm-edit-input-' ) ];
 }
