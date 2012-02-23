@@ -20,6 +20,7 @@ $( function() {
  <li><a href="#page-terms"><span>Terms</span></a></li>
  <li><a href="#page-contacts"><span>Contacts</span></a></li>
  <li><a href="#page-files"><span>Files</span></a></li>
+ <li><a href="#page-links"><span>ERM Links</span></a></li>
 </ul>
 
 <form method="post" name="license-form" id="license-form">
@@ -569,6 +570,21 @@ $( function() {
 
 </form>
 
+</div>
+
+
+<div id="page-links" class="tabs-nav-page">
+
+<fieldset>
+
+<legend>ERM Links</legend>
+<div style="padding: 5px;">
+[% FOREACH main IN mains %]
+<a href="[% url("$url_base/erm/main/edit/" _ main.id ) %]">[% main.key | html %]</a><br />
+[% END %]
+</div>
+
+</fieldset>
 </div>
 
 </div> <!-- tab-container -->
