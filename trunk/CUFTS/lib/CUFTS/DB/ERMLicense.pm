@@ -74,4 +74,6 @@ __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 
 __PACKAGE__->sequence('erm_license_id_seq');
 
+__PACKAGE__->has_many( 'mains' => 'CUFTS::DB::ERMMain' );
+
 1;
