@@ -562,7 +562,7 @@ sub as_marc {
         '246' => [ {}, 'a', [ 'internal_name' ] ],
         '260' => [ {}, 'a', [ 'publisher' ] ],
         '500' => [ {}, 'a', [ 'description_brief' ] ],
-        '856' => [ {}, 'a', [ 'id', { prepend_url => 1 } ] ],
+        '856' => [ { indicators => [4,0] }, 'u', [ 'id', { prepend_url => 1 } ] ],
         '960' => [ {}, 'a', [ '', { timestamp => 1, label => 'Date of file creation: ' } ],
                        'b', [ 'cost', { label => 'Cost: ' } ],
                        'c', [ 'local_fund', { label => 'Local fund number: ' } ],
