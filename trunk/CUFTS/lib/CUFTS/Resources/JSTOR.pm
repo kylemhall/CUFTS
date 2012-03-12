@@ -96,10 +96,10 @@ sub build_linkFulltext {
         # http://links.jstor.org/sici?sici=00267902%281970%2954:8%3A8%3C562%3E2.3.TX
         
         my $volume = $request->volume;
-        $volume =~ s/^supp\s*//i;
+        $volume =~ s/^suppl?\s*//i;
 
         my $issue = $request->issue;
-        $issue =~ s/^supp\s*//i;
+        $issue =~ s/^suppl?\s*//i;
         
         my $sici = $record->issn;
         
