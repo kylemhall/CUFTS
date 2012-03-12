@@ -30,7 +30,7 @@ use CUFTS::Util::Simple;
 
 use Date::Calc;
 
-use CUFTS::Exceptions qw(assert_ne);
+use CUFTS::Exceptions;
 use SQL::Abstract;
 
 ##
@@ -302,7 +302,7 @@ sub clean_data_dates {
 
     foreach my $field ( keys %$record ) {
         next unless $field =~ /start_date$/;
-        next unless assert_ne( $record->{$field} );
+        next unless not_empty_string( $record->{$field} );
 
         if ( $record->{$field} =~ /^(\d{4})-?(\d{2})$/ ) {
             my $year = $1;
@@ -316,7 +316,7 @@ sub clean_data_dates {
 
     foreach my $field ( keys %$record ) {
         next unless $field =~ /end_date$/;
-        next unless assert_ne( $record->{$field} );
+        next unless not_empty_string( $record->{$field} );
 
         if ( $record->{$field} =~ /^(\d{4})-?(\d{2})$/ ) {
             my $year = $1;
@@ -471,8 +471,8 @@ sub can_getFulltext {
 
     if (   defined( $request->genre )
         && ( $request->genre eq 'article' || $request->genre eq 'journal' )
-        && ( assert_ne( $request->issn ) || assert_ne( $request->title ) )
-        || assert_ne( $request->eissn ) )
+        && ( not_empty_string( $request->issn ) || not_empty_string( $request->title ) )
+        || not_empty_string( $request->eissn ) )
     {
         return 1;
     }
@@ -486,8 +486,8 @@ sub can_getTOC {
 
     if (   defined( $request->genre )
         && ( $request->genre eq 'article' || $request->genre eq 'journal' )
-        && ( assert_ne( $request->issn ) || assert_ne( $request->title ) )
-        || assert_ne( $request->eissn ) )
+        && ( not_empty_string( $request->issn ) || not_empty_string( $request->title ) )
+        || not_empty_string( $request->eissn ) )
     {
         return 1;
     }
@@ -502,8 +502,8 @@ sub can_getJournal {
 
     if (   defined( $request->genre )
         && ( $request->genre eq 'article' || $request->genre eq 'journal' )
-        && ( assert_ne( $request->issn ) || assert_ne( $request->title ) )
-        || assert_ne( $request->eissn ) )
+        && ( not_empty_string( $request->issn ) || not_empty_string( $request->title ) )
+        || not_empty_string( $request->eissn ) )
     {
         return 1;
     }
@@ -674,7 +674,7 @@ sub _search_active {
         }
         $search_terms{'-nest'} = \@issn_search;
     }
-    elsif ( assert_ne( $request->title ) ) {
+    elsif ( not_empty_string( $request->title ) ) {
         if ( scalar($request->journal_auths) ) {
             $search_terms{'-nest'} = [ '-or', 
                 { 'title' => { 'ilike' => $request->title } },
@@ -751,13 +751,13 @@ sub filter_fulltext {
 sub has_fulltext {
     my ( $class, $record, $resource, $site, $request ) = @_;
 
-       assert_ne( $record->ft_start_date )
-    or assert_ne( $record->ft_end_date )
-    or assert_ne( $record->vol_ft_start )
-    or assert_ne( $record->vol_ft_end )
-    or assert_ne( $record->iss_ft_start )
-    or assert_ne( $record->iss_ft_end )
-    or assert_ne( $record->coverage )
+       not_empty_string( $record->ft_start_date )
+    or not_empty_string( $record->ft_end_date )
+    or not_empty_string( $record->vol_ft_start )
+    or not_empty_string( $record->vol_ft_end )
+    or not_empty_string( $record->iss_ft_start )
+    or not_empty_string( $record->iss_ft_end )
+    or not_empty_string( $record->coverage )
     or return 0;
 
     return 1;
@@ -766,39 +766,51 @@ sub has_fulltext {
 sub check_fulltext_vol_iss {
     my ( $class, $record, $resource, $site, $request ) = @_;
 
+    return 1 if is_empty_string( $request->volume ) || $request->volume !~ /^\s*\d+\s*$/;
+    my $volume = int($request->volume);
+
+    warn('1');
+
     # requested volume is after end volume
 
     return 0
-        if assert_ne( $request->volume )
-        && assert_ne( $record->vol_ft_end )
-        && int( $request->volume ) > int( $record->vol_ft_end );
+        if not_empty_string( $record->vol_ft_end )
+        && $volume > int( $record->vol_ft_end );
+
+        warn('2');
 
     # requested volume is before start volume
 
     return 0
-        if assert_ne( $request->volume )
-        && assert_ne( $record->vol_ft_start )
-        && int( $request->volume ) < int( $record->vol_ft_start );
+        if not_empty_string( $record->vol_ft_start )
+        && $volume < int( $record->vol_ft_start );
+
+        warn('3');
 
     # requested issue matches start volume and is before start issue
 
+    return 1 if is_empty_string( $request->issue ) || $request->issue !~ /^\s*\d+\s*$/;
+    my $issue = int($request->issue);
+
+    warn('4');
+
     return 0
-        if assert_ne( $request->volume )
-        && assert_ne( $record->vol_ft_start )
-        && assert_ne( $request->issue )
-        && assert_ne( $record->iss_ft_start )
-        && int( $request->volume ) == int( $record->vol_ft_start )
-        && int( $request->issue ) < int( $record->iss_ft_start );
+        if not_empty_string( $record->vol_ft_start )
+        && not_empty_string( $record->iss_ft_start )
+        && $volume == int( $record->vol_ft_start )
+        && $issue < int( $record->iss_ft_start );
 
     # requested issue matches end volume and is after end issue
 
+    warn('5');
+
     return 0
-        if assert_ne( $request->volume )
-        && assert_ne( $record->vol_ft_end )
-        && assert_ne( $request->issue )
-        && assert_ne( $record->iss_ft_end )
-        && int( $request->volume ) == int( $record->vol_ft_end )
-        && int( $request->issue ) > int( $record->iss_ft_end );
+        if not_empty_string( $record->vol_ft_end )
+        && not_empty_string( $record->iss_ft_end )
+        && $volume == int( $record->vol_ft_end )
+        && $issue > int( $record->iss_ft_end );
+
+    warn('6');
 
     return 1;
 }
@@ -856,8 +868,8 @@ sub _check_date_range {
 # $start must be in YYYY-MM-DD format
 sub _check_start_date {
     my ( $class, $year, $month, $day, $start ) = @_;
-    return 1 unless assert_ne($start);
-    return 1 unless assert_ne($year);
+    return 1 unless not_empty_string($start);
+    return 1 unless not_empty_string($year);
 
     if ( $start =~ /^(\d{4})-(\d{2})-(\d{2})/ ) {
         my $start_stamp = int( $1 . $2 . $3 );
@@ -867,14 +879,14 @@ sub _check_start_date {
             $wanted_stamp .= $1;
         }
 
-        if ( assert_ne($month) && $month =~ /(\d{2})/ ) {
+        if ( not_empty_string($month) && $month =~ /(\d{2})/ ) {
             $wanted_stamp .= sprintf( "%02i", int($1) );
         }
         else {
             $wanted_stamp .= '13';    # above 12
         }
 
-        if ( assert_ne($day) && $day =~ /(\d{2})/ ) {
+        if ( not_empty_string($day) && $day =~ /(\d{2})/ ) {
             $wanted_stamp .= sprintf( "%02i", int($1) );
         }
         else {
@@ -895,8 +907,8 @@ sub _check_start_date {
 # $end must be in YYYY-MM-DD format
 sub _check_end_date {
     my ( $class, $year, $month, $day, $end ) = @_;
-    return 1 unless assert_ne($end);
-    return 1 unless assert_ne($year);
+    return 1 unless not_empty_string($end);
+    return 1 unless not_empty_string($year);
 
     if ( $end =~ /^(\d{4})-(\d{2})-(\d{2})/ ) {
         my $end_stamp = int( $1 . $2 . $3 );
@@ -906,14 +918,14 @@ sub _check_end_date {
             $wanted_stamp .= $1;
         }
 
-        if ( assert_ne($month) && $month =~ /(\d{2})/ ) {
+        if ( not_empty_string($month) && $month =~ /(\d{2})/ ) {
             $wanted_stamp .= sprintf( "%02i", int($1) );
         }
         else {
             $wanted_stamp .= '00';    # below 01
         }
 
-        if ( assert_ne($day) && $day =~ /(\d{2})/ ) {
+        if ( not_empty_string($day) && $day =~ /(\d{2})/ ) {
             $wanted_stamp .= sprintf( "%02i", int($1) );
         }
         else {
@@ -944,7 +956,7 @@ sub _check_embargo {
         $embargo_days
             = defined($embargo_days) ? ( 0 - int($embargo_days) ) : 0;
 
-        if ( assert_ne($embargo_months) ) {
+        if ( not_empty_string($embargo_months) ) {
             my ( $e_year, $e_month, $e_day )
                 = Date::Calc::Add_Delta_YMD( Date::Calc::Today, 0, $embargo_months, $embargo_days );
 
@@ -965,7 +977,7 @@ sub _check_current_months {
 
         $current_months = 0 - int($current_months);
 
-        if ( assert_ne($current_months) ) {
+        if ( not_empty_string($current_months) ) {
             my ( $e_year, $e_month, $e_day )
                 = Date::Calc::Add_Delta_YMD( Date::Calc::Today, 0, $current_months, 0 );
 
@@ -986,7 +998,7 @@ sub _check_current_years {
 
         $current_years = 0 - int($current_years);
 
-        if ( assert_ne($current_years) ) {
+        if ( not_empty_string($current_years) ) {
             my ( $e_year, $e_month, $e_day )
                 = Date::Calc::Add_Delta_YMD( Date::Calc::Today, $current_years, 0, 0 );
 
