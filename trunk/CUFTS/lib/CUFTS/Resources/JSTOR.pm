@@ -95,12 +95,18 @@ sub build_linkFulltext {
         # http://makealink.jstor.org/public-tools/GetURL?volume=54&issue=8&date=19701201&journal_title=00267902&page=562
         # http://links.jstor.org/sici?sici=00267902%281970%2954:8%3A8%3C562%3E2.3.TX
         
+        my $volume = $request->volume;
+        $volume =~ s/^supp\s*//i;
+
+        my $issue = $request->issue;
+        $issue =~ s/^supp\s*//i;
+        
         my $sici = $record->issn;
         
         $sici .= '(' . $request->year . $request->month . ')';
-        $sici .= $request->volume;
-        if ( defined( $request->issue ) && !grep { $_ eq $record->issn } @skip_issue_in_sici ) {
-            $sici .= ':' . $request->issue;
+        $sici .= $volume;
+        if ( not_empty_string( $issue ) && !grep { $_ eq $record->issn } @skip_issue_in_sici ) {
+            $sici .= ':' . $issue;
         }
         $sici .= '<' . $request->spage . '>';
         $sici .= '2.3.TX';  # ??
