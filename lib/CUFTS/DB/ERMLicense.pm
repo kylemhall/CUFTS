@@ -76,4 +76,17 @@ __PACKAGE__->sequence('erm_license_id_seq');
 
 __PACKAGE__->has_many( 'mains' => 'CUFTS::DB::ERMMain' );
 
+sub to_hash {
+    my ( $self ) = @_;
+
+    my %hash;
+    foreach my $column ( __PACKAGE__->columns ) {
+        next if !defined($self->$column);
+        $hash{$column} = $self->$column();
+    }
+
+    return \%hash;
+}
+
+
 1;
