@@ -38,7 +38,18 @@ Ext.onReady( function() {
             'key'
         ]
     });
-    
+
+    var selected_store = new Ext.data.JsonStore({
+        url: '[% url("$url_base/erm/license/selected_json") %]',
+        method: 'GET',
+        root: 'results',
+        totalProperty: 'rowcount',
+        fields: [
+            'id',
+            'key'
+        ]
+    });
+
     var combo_stores = {};
     combo_stores.boolean_type = new Ext.data.SimpleStore({
         fields: [ 'id', 'display' ],
@@ -50,10 +61,24 @@ Ext.onReady( function() {
         columns: [
            { header: 'key', dataIndex: 'key', width: 450 }
         ],
-        sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+        sm: new Ext.grid.RowSelectionModel({singleSelect:false}),
         title: 'Search Results',
         width: 900,
         height: 610,
+        tbar: new Ext.Toolbar({
+            items: [
+                new Ext.Button({
+                    iconCls: 'add-button',
+                    text: 'Add to Selected',
+                    handler: addSelected
+                }),
+                new Ext.Button({
+                    iconCls: 'add-button',
+                    text: 'Add All Results to Selected',
+                    handler: addAllSelected
+                })
+            ]
+        }),
         bbar: new Ext.ux.AdvancedPagingToolbar({
             pageSize: 25,
             displayInfo: true,
@@ -264,6 +289,56 @@ Ext.onReady( function() {
         width: 900
     })
     
+    var selected_grid = new Ext.grid.GridPanel({
+        title: 'Currently Selected Records',
+        width: 900,
+        height: 300,
+        frame: false,
+        store: selected_store,
+        tbar: new Ext.Toolbar({
+            items: [
+                new Ext.Button({
+                    text: 'Remove',
+                    iconCls: 'delete-button',
+                    handler: removeSelected
+                }),
+                new Ext.Button({
+                    text: 'Clear',
+                    iconCls: 'delete-button',
+                    handler: clearSelected
+                }),
+                new Ext.Button({
+                    text: 'Export',
+                    menu: {
+                        items: [
+                            {
+                                text: 'JSON',
+                                handler: exportSelectedJSON
+                            },
+                            {
+                                text: 'CSV',
+                                handler: exportSelectedCSV
+                            },
+                            {
+                                text: 'HTML',
+                                handler: exportSelectedHTML
+                            }
+                        ]
+                    }
+                })
+                
+            ]
+        }),
+        columns: [
+            { header: 'name', dataIndex: 'key', width: 450 }
+        ],
+        listeners: {
+            'rowdblclick': function(grid, rowIndex, e) {
+                var erm_id = grid.getStore().getAt(rowIndex).get('id');
+                window.location = '[% url("$url_base/erm/license/edit/") %]' + erm_id;
+            }
+        }
+    });    
     
     function search_action() {
         var params = find_form.getForm().getValues();
@@ -282,18 +357,196 @@ Ext.onReady( function() {
         } );
     }
 
-
     find_panel.render('erm-main-find-form');
     results_grid.render('erm-main-results');
+    selected_grid.render('erm-main-selected');
     
+    function addSelected() {
+        var selections = results_grid.getSelectionModel().getSelections();
+        var ids = new Array();
+        Ext.each( selections, function(item) { ids.push(item.get('id') ) } );
+        Ext.Ajax.request({
+            url: '[% url("$url_base/erm/license/selected_add") %]',
+            success: function(response) {
+                if ( response.status == 200 ) {
+                    var results = Ext.decode( response.responseText );
+                    selected_store.loadData(results);
+                }
+            },
+            params: { ids: ids }
+        });
+    }
+
+    function addAllSelected() {
+        var params = find_form.getForm().getValues();
+        Ext.Ajax.request({
+            url: '[% url("$url_base/erm/license/selected_add_all") %]',
+            success: function(response) {
+                if ( response.status == 200 ) {
+                    var results = Ext.decode( response.responseText );
+                    selected_store.loadData(results);
+                }
+            },
+            params: params
+        });
+    }
     
+    function removeSelected() {
+        var selections = selected_grid.getSelectionModel().getSelections();
+        var ids = new Array();
+        Ext.each( selections, function(item) { ids.push(item.get('id') ) } );
+        Ext.Ajax.request({
+            url: '[% url("$url_base/erm/license/selected_remove") %]',
+            success: function(response) {
+                if ( response.status == 200 ) {
+                    var results = Ext.decode( response.responseText );
+                    selected_store.loadData(results);
+                }
+            },
+            params: { ids: ids }
+        });
+    }
+
+    function clearSelected() {
+        Ext.Ajax.request({
+            url: '[% url("$url_base/erm/license/selected_clear") %]',
+            success: function(response) {
+                if ( response.status == 200 ) {
+                    var results = Ext.decode( response.responseText );
+                    selected_store.loadData(results);
+                }
+            }
+        });
+    }
+    
+    function exportSelectedJSON() {
+        if (selected_store.getCount()) {
+            window.location = '[% url("$url_base/erm/license/selected_export/json") %]';
+        }
+        else {
+            Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')
+        }
+    }
+    
+    function exportSelectedCSV() {
+        if (selected_store.getCount()) {
+            window.location = '[% url("$url_base/erm/license/selected_export/csv") %]';
+        }
+        else {
+            Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')
+        }
+    }
+
+    function exportSelectedHTML() {
+        if (selected_store.getCount()) {
+            window.location = '[% url("$url_base/erm/license/selected_export/html") %]';
+        }
+        else {
+            Ext.MessageBox.alert('Error', 'You must have at least one currently selected record to use this function.')
+        }
+    }
+
     // Restore state
     
     results_store.baseParams = hash_state.params;
     var paging = { start: 0, limit: 25 };
     Ext.apply( paging, hash_state.paging );
     results_store.load( { params: paging } );
+
+    selected_store.load();
+
 });
+
+/* Area edit modal panel, used to change an area's name */
+
+CertinetOffice.Inspection.AreaEditWindow = function( instance_config ) {
+
+    this.form_panel = new Ext.form.FormPanel({
+        bodyStyle: 'padding: 5px;',
+        baseCls: '',  // No background
+        width: 500,
+        height: 80,
+        defaults: {
+            xtype: 'textfield',
+            width: 200
+        },
+        items: [
+            {
+                fieldLabel: 'Area',
+                name: 'area'
+            }
+        ],
+        buttons: [
+            {
+                text: 'Save',
+                handler: this.saveForm,
+                scope: this
+            }
+        ]
+
+    });
+
+    var config = {
+        title: 'Area',
+        modal: true,
+        width: 510,
+        height: 130,
+        closeAction: 'hide',
+        draggable: false,
+        resizable: false,
+        items: [ this.form_panel ],
+        listeners: {
+            // hide: this.hideWindow,
+            // show: this.showWindow,
+            scope: this
+        }
+    };
+
+    Ext.apply( config, instance_config );
+    CertinetOffice.Inspection.AreaEditWindow.superclass.constructor.call(this, config);
+
+}
+
+Ext.extend( CertinetOffice.Inspection.AreaEditWindow, Ext.Window, {
+
+    getForm: function() {
+        return this.form_panel.getForm();
+    },
+
+    loadRecord: function(record) {
+        this.area_id        = record.get('id');
+        this.current_record = record;
+        this.getForm().loadRecord(record);
+    },
+
+    saveForm: function() {
+        var new_area_string = this.form_panel.findField('area').getValue();
+        if ( new_area_string.length < 1 ) {
+            return;
+        }
+
+        Ext.Ajax.request({
+            waitMsg: 'Saving Area...',
+            url: CertinetOffice.config.URLs.RESTInspectionAreas.replace('AAA', this.inspection_record.id),
+            method: 'PUT',
+            params: { area: new_area_string, area_id: this.area_id },
+            success: function( response ) {
+                var store = this.store;
+                if ( CertinetOffice.app.ajax_check_response( response ) ) {
+                    // var reader = new CertinetOffice.readers.PlacesInspectionAreas();  // Should pull this from store, really
+                    // var parsed = reader.read( response );
+                    this.stores.inspection_areas.getById( this.area_id ).set( 'area', new_area_string );
+                    this.stores.inspection_areas.commitChanges();
+                    this.stores.inspection_areas.sort('area');
+                }
+            },
+            failure: CertinetOffice.app.ajax_server_failure,
+            scope: this
+        });
+    }
+} );
+
+
 
 </script>
 
