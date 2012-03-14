@@ -6,6 +6,7 @@ use base 'Catalyst::Base';
 use CUFTS::DB::ERMLicense;
 use CUFTS::DB::ERMFiles;
 use CUFTS::Util::Simple;
+use List::MoreUtils;
 
 my $form_validate = {
     required => [
@@ -100,6 +101,7 @@ sub default : Private {
     }
 
     my @records = CUFTS::DB::ERMLicense->search( site => $c->stash->{current_site}->id, { order_by => 'LOWER(key)' } );
+
     $c->stash->{records} = \@records;
     $c->stash->{template} = "erm/license/find.tt";
 
@@ -299,9 +301,6 @@ sub edit : Local {
     $c->stash->{template}   = 'erm/license/edit.tt';
     push @{$c->stash->{load_css}}, 'tabs.css';
 
-    use Data::Dumper;
-    warn(Dumper($c->stash->{mains}));
-
     $c->stash->{javascript_validate} = [ $c->convert_form_validate( 'license-form', $form_validate, 'erm-edit-input-' ) ];
 }
 
@@ -395,6 +394,187 @@ sub delete_file : Local {
     CUFTS::DB::ERMMain->dbi_commit();
     
     $c->redirect("/erm/license/edit/$erm_id");
+}
+
+# Handle selected records for the ExtJS search interface
+
+sub selected_json : Local {
+    my ( $self, $c ) = @_;
+    
+    my @json_resources;
+    my $current_site_id = $c->stash->{current_site}->id;
+
+    if ( $c->session->{selected_erm_licence} && scalar( @{$c->session->{selected_erm_licence}} ) ) {
+        my @resources = CUFTS::DB::ERMLicense->search(
+            {
+                id => { '-in' => $c->session->{selected_erm_licence} },
+                site => $current_site_id,
+            },
+            {
+                order_by => 'key'
+            }
+        );
+        
+        foreach my $resource ( @resources ) {
+            if ( defined($resource) ) {
+                push @json_resources, {
+                    id                => $resource->id,
+                    key               => $resource->key,
+                };
+            }
+        }
+    }
+    
+    $c->stash->{json}->{rowcount} = scalar(@json_resources);
+    $c->stash->{json}->{results}  = \@json_resources;
+    
+    $c->forward('V::JSON');
+}
+
+
+sub selected_add : Local {
+    my ( $self, $c ) = @_;
+
+    if ( !$c->session->{selected_erm_licence} ) {
+        $c->session->{selected_erm_licence} = [];
+    }
+    my $new = $c->req->params->{ids};
+    if ( ref($new) ne 'ARRAY' ) {
+        $new = [$new];
+    }
+    @{$c->session->{selected_erm_licence}} = List::MoreUtils::uniq( ( @{$c->session->{selected_erm_licence}}, @$new ) );
+
+    $c->forward('selected_json');
+}
+
+sub selected_add_all : Local {
+    my ( $self, $c ) = @_;
+    
+    $self->_find($c);
+    $c->session->{selected_erm_licence} = [ List::MoreUtils::uniq( ( @{$c->session->{selected_erm_licence}}, map { $_->{id} } @{$c->stash->{json}->{results}} ) ) ];
+
+    $c->forward('selected_json');
+}
+
+sub selected_remove : Local {
+    my ( $self, $c ) = @_;
+
+    if ( !$c->session->{selected_erm_licence} ) {
+        $c->session->{selected_erm_licence} = [];
+    }
+    my $delete = $c->req->params->{ids};
+    if ( ref($delete) ne 'ARRAY' ) {
+        $delete = [$delete];
+    }
+    my %to_delete = map { $_ => 1 } @$delete;
+    @{$c->session->{selected_erm_licence}} = grep { not exists( $to_delete{$_} ) } @{$c->session->{selected_erm_licence}};
+    
+    $c->forward('selected_json');
+}
+
+sub selected_clear : Local {
+    my ( $self, $c ) = @_;
+    $c->session->{selected_erm_licence} = [];
+    $c->forward('selected_json');
+}
+
+
+sub selected_export : Local {
+    my ( $self, $c, $format ) = @_;
+
+    $c->stash->{format} = $format;
+
+    $c->form({ optional => [ qw( do_export columns ) ] });
+
+    if ( !$c->request->params->{do_export} || !$c->request->params->{columns} ) {
+        $c->stash->{template} = 'erm/license/export_columns.tt';
+        return;
+    }
+
+    if ( !$c->session->{selected_erm_licence} ) {
+        $c->session->{selected_erm_licence} = [];
+    }
+
+    my @erm_records = CUFTS::DB::ERMLicense->search( { site => $c->stash->{current_site}->id, id => { '-in' => $c->session->{selected_erm_licence} } }, { order_by => 'id' } );
+    my @flattened_records = map { $_->to_hash } @erm_records;
+
+    my @columns = qw(
+        id
+        key
+        full_on_campus_access
+        full_on_campus_notes
+        allows_remote_access
+        allows_proxy_access
+        allows_commercial_use
+        allows_walkins
+        allows_ill
+        ill_notes
+        allows_ereserves
+        ereserves_notes
+        allows_coursepacks
+        coursepack_notes
+        allows_distance_ed
+        allows_downloads
+        allows_prints
+        allows_emails
+        emails_notes
+        allows_archiving
+        archiving_notes
+        own_data
+        citation_requirements
+        requires_print
+        requires_print_plus
+        additional_requirements
+        allowable_downtime
+        online_terms
+        user_restrictions
+        terms_notes
+        termination_requirements
+        perpetual_access
+        perpetual_access_notes
+
+        contact_name
+        contact_role
+        contact_address
+        contact_phone
+        contact_fax
+        contact_email
+        contact_notes
+    );
+
+    my $submitted_columns = $c->request->params->{columns};
+    if ( !ref($submitted_columns) eq 'ARRAY' ) {
+        $submitted_columns = [$submitted_columns];
+    }
+    my %submitted_columns;
+    foreach my $sc (@$submitted_columns) {
+        $submitted_columns{$sc} = 1;
+    }
+
+    @columns = grep { $submitted_columns{$_} } @columns;
+
+    if ( $format eq 'json' ) {
+
+        my @cleaned_records;
+        foreach my $record (@flattened_records) {
+            push @cleaned_records, {  map { ($_, $record->{$_}) } @columns };
+        }
+
+        $c->stash->{json} = \@cleaned_records;
+        $c->forward('V::JSON');
+    }
+    elsif ( $format eq 'csv' ) {
+        $c->stash->{csv}->{data} = [ \@columns ];
+        foreach my $record ( @flattened_records ) {
+            push @{$c->stash->{csv}->{data}}, [ map { $record->{$_} } @columns ];
+        }
+        $c->forward('V::CSV');
+    }
+    else {
+        $c->stash->{columns}  = \@columns;
+        $c->stash->{records}  = \@flattened_records;
+        $c->stash->{template} = 'erm/license/export_html.tt';
+    }
 }
 
 
