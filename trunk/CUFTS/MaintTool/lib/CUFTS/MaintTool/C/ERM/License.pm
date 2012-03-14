@@ -112,6 +112,29 @@ sub default : Private {
 #             combo box lookups, but could be expanded out to cover other uses.
 
 sub find_json : Local {
+    my ( $self, $c )  = @_;
+
+    my $query = $c->req->parameters;
+    foreach my $key ( keys( %$query ) ) {
+        my $value = $query->{$key};
+        if ( is_empty_string($value) ) {
+            delete $query->{$key};
+        }
+    }
+    
+    $query->{site} = $c->stash->{current_site}->id;
+
+    my $URI = URI->new();
+    $URI->query_form( $query );
+    $c->session->{last_erm_license_find_query} = $URI->query;
+
+    $self->_find($c);
+
+    $c->forward('V::JSON');
+}
+
+
+sub _find : Local {
     my ( $self, $c ) = @_;
     
     my @valid_bool_params = qw(
@@ -177,8 +200,6 @@ sub find_json : Local {
 
     # TODO: Move this to the DB module later.
     $c->stash->{json}->{results}  = [ map { { id => $_->id, key => $_->key } } @records ];
-
-    $c->forward('V::JSON');
 }
 
 
@@ -411,7 +432,7 @@ sub selected_json : Local {
                 site => $current_site_id,
             },
             {
-                order_by => 'key'
+                order_by => 'LOWER(key)'
             }
         );
         
@@ -495,7 +516,7 @@ sub selected_export : Local {
         $c->session->{selected_erm_licence} = [];
     }
 
-    my @erm_records = CUFTS::DB::ERMLicense->search( { site => $c->stash->{current_site}->id, id => { '-in' => $c->session->{selected_erm_licence} } }, { order_by => 'id' } );
+    my @erm_records = CUFTS::DB::ERMLicense->search( { site => $c->stash->{current_site}->id, id => { '-in' => $c->session->{selected_erm_licence} } }, { order_by => 'LOWER(key)' } );
     my @flattened_records = map { $_->to_hash } @erm_records;
 
     my @columns = qw(
