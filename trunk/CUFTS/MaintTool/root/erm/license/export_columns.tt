@@ -2,6 +2,16 @@
 
 <form action="[% url("$url_base/erm/license/selected_export/$format") %]" method="post">
 
+Export Format: <select name="format">
+    <option value="html">HTML</option>
+    <option value="csv">CSV</option>
+    <option value="json">JSON</option>
+</select>
+<br /><br />
+<table class="grid" style="width: 30em; margin-bottom: 10px;">
+ <tr><td class="heading"><input class="toggleall" type="checkbox" name="ignore" value=""> toggle all</td></tr>
+</table>
+
 <table class="grid" style="width: 30em; margin-bottom: 10px;">
  <tr><td class="heading"><input class="toggle" type="checkbox" name="ignore" value=""> toggle group</td></tr>
  <tr><td><input type="checkbox" name="columns" value="id"> id</td></tr>
@@ -78,5 +88,16 @@ $(document).ready( function(){
             return false;
         }
     );
+
+    $('input.toggleall').bind( 'change',
+        function() {
+            var checkbox = $(':checkbox').each(
+                function(i,cb) { $(cb).attr('checked', !$(cb).attr('checked')) }
+            );
+            $(this).attr('checked', !$(this).attr('checked'))
+            return false;
+        }
+    );
+
 });
 </script>
