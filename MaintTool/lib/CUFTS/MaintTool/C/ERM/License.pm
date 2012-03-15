@@ -501,13 +501,11 @@ sub selected_clear : Local {
 
 
 sub selected_export : Local {
-    my ( $self, $c, $format ) = @_;
+    my ( $self, $c ) = @_;
 
-    $c->stash->{format} = $format;
+    $c->form({ optional => [ qw( format do_export columns ) ] });
 
-    $c->form({ optional => [ qw( do_export columns ) ] });
-
-    if ( !$c->request->params->{do_export} || !$c->request->params->{columns} ) {
+    if ( !$c->request->params->{do_export} || !$c->request->params->{columns} || !$c->request->params->{format} ) {
         $c->stash->{template} = 'erm/license/export_columns.tt';
         return;
     }
@@ -515,6 +513,8 @@ sub selected_export : Local {
     if ( !$c->session->{selected_erm_licence} ) {
         $c->session->{selected_erm_licence} = [];
     }
+    
+    my $format = $c->stash->{format} = $c->request->params->{format};
 
     my @erm_records = CUFTS::DB::ERMLicense->search( { site => $c->stash->{current_site}->id, id => { '-in' => $c->session->{selected_erm_licence} } }, { order_by => 'LOWER(key)' } );
     my @flattened_records = map { $_->to_hash } @erm_records;
