@@ -95,7 +95,7 @@ Ext.onReady( function() {
         ],
         sm: new Ext.grid.RowSelectionModel({singleSelect:false}),
         title: 'Search Results',
-        width: 900,
+        width: 1000,
         height: 300,
         tbar: new Ext.Toolbar({
             items: [
@@ -186,7 +186,7 @@ Ext.onReady( function() {
                 items: [
                     {
                         layout: 'form',
-                        columnWidth: .33,
+                        columnWidth: .30,
                         labelWidth: 120,
                         border: false,
                         items: [
@@ -236,7 +236,7 @@ Ext.onReady( function() {
                     },
                     {
                         layout: 'form',
-                        columnWidth: .33,
+                        columnWidth: .30,
                         labelWidth: 120,
                         border: false,
                         items: [
@@ -283,6 +283,7 @@ Ext.onReady( function() {
                                 triggerAction: 'all',
                                 listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['license'],
+                                listWidth: 300,
                                 anchor: '95%'
                             },
                             {
@@ -300,6 +301,7 @@ Ext.onReady( function() {
                                 triggerAction: 'all',
                                 listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
                                 value: hash_state.params['provider'],
+                                listWidth: 300,
                                 anchor: '95%'
                             },
                             {
@@ -320,8 +322,11 @@ Ext.onReady( function() {
                     },
                     {
                         layout: 'form',
-                        columnWidth: .33,
+                        columnWidth: .20,
                         labelWidth: 120,
+                        defaults: {
+                            listWidth: 200
+                        },
                         border: false,
                         items: [
                             {
@@ -396,6 +401,85 @@ Ext.onReady( function() {
                                 anchor: '95%'
                             }
                         ]
+                    },
+                    {
+                        layout: 'form',
+                        columnWidth: .20,
+                        labelWidth: 120,
+                        border: false,
+                        items: [
+                            {
+                                fieldLabel: 'Allows ILL?',
+                                xtype: 'combo',
+                                hiddenName: 'license.allows_ill',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['license.allows_ill'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Allows Walkins?',
+                                xtype: 'combo',
+                                hiddenName: 'license.allows_walkins',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['license.allows_walkins'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Allows e-reserves?',
+                                xtype: 'combo',
+                                hiddenName: 'license.allows_ereserves',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['license.allows_ereserves'],
+                                anchor: '95%'
+                                
+                            },
+                            {
+                                fieldLabel: 'Allows Coursepacks?',
+                                xtype: 'combo',
+                                hiddenName: 'license.allows_coursepacks',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['license.allows_coursepacks'],
+                                anchor: '95%'
+                            },
+                            {
+                                fieldLabel: 'Perpetual Access?',
+                                xtype: 'combo',
+                                hiddenName: 'license.perpetual_access',
+                                store: combo_stores.boolean_type,
+                                valueField: 'id',
+                                displayField: 'display',
+                                mode: 'local',
+                                triggerAction: 'all',
+                                editable: false,
+                                listeners: { 'select': Ext.ux.utils.handleEmptyCombo },
+                                value: hash_state.params['license.perpetual_access'],
+                                anchor: '95%'
+                            }
+                        ]
                     }
                 ]
             }
@@ -442,7 +526,7 @@ Ext.onReady( function() {
             ]
         }),
         items: [ find_form ],
-        width: 900
+        width: 1000
     })
     
     
@@ -465,7 +549,7 @@ Ext.onReady( function() {
     
     var selected_grid = new Ext.grid.GridPanel({
         title: 'Currently Selected Records',
-        width: 900,
+        width: 1000,
         height: 300,
         frame: false,
         store: selected_store,
