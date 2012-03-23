@@ -119,7 +119,7 @@ Ext.onReady( function() {
                             },
                             {
                                 name: 'key',
-                                fieldLabel: 'Key',
+                                fieldLabel: 'Resource Identifier',
                                 value: hash_state.params['key'],
                                 xtype: 'textfield',
                                 anchor: '95%'
