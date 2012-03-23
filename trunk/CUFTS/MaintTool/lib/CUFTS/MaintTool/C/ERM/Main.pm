@@ -417,7 +417,7 @@ sub find_json : Local {
 sub _find {
     my ( $self, $c )  = @_;
     
-    my @valid_params = qw(
+    my @valid_params = ( qw(
         consortia
         content_medium
         content_type
@@ -434,6 +434,14 @@ sub _find {
         subject
         subscription_status
         vendor
+        ),
+        'license.allows_ill',
+        'license.allows_ereserves',
+        'license.allows_coursepacks',
+        'license.allows_walkins',
+        'license.allows_distance_ed',
+        'license.allows_archiving',
+        'license.perpetual_access',
     );
 
     my $params = $c->req->params;

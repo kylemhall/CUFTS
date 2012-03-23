@@ -347,6 +347,7 @@ sub facet_search {
     foreach my $field ( keys %$fields ) {
 
         my $handler = "_facet_search_$field";
+        $handler =~ tr/\./_/;
         if ( $class->can($handler) ) {
             $class->$handler( $field, $fields->{$field}, $config, \$sql );
         }
@@ -441,6 +442,7 @@ sub facet_count {
     foreach my $field ( keys %$fields ) {
 
         my $handler = "_facet_search_$field";
+        $handler =~ tr/\./_/;
         if ( $class->can($handler) ) {
             $class->$handler( $field, $fields->{$field}, $config, \$sql );
         }
@@ -450,23 +452,36 @@ sub facet_count {
         }
 
     }
-    
+
     my $SQLAbstract = SQL::Abstract->new;
     my ( $where, @bind ) = $SQLAbstract->where( $config->{search} );
 
     # Untaint $where
     $where =~ /(.*)/s or die;
     $where = $1;
-    
+
     $sql =~ s/%WHERE%/$where/e;
     $sql =~ s/%JOINS%/join( ' ', values( %{ $config->{joins} } ) )/e;
-
-   # warn($sql);
-   # warn(Dumper(\@bind));
 
     my $sth = $class->db_Main()->prepare( $sql, {pg_server_prepare => 1} );
     $sth->execute( @bind );
     return ( $sth->fetchrow_array )[0];
+}
+
+sub _facet_search_license_allows_ill           { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_ereserves     { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_coursepacks   { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_walkins       { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_distance_ed   { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_archiving     { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_perpetual_access     { __facet_search_license_generic_boolean(@_); }
+
+sub __facet_search_license_generic_boolean {
+    my ( $class, $field, $data, $config, $sql ) = @_;
+
+    $config->{joins}->{license} = ' JOIN erm_license ON ( erm_license.id = erm_main.license )';
+    $field =~ s/^.+\.(\w+)$/erm_license.$1/;
+    $config->{search}->{$field} = $data ? 1 : 0;
 }
 
 
