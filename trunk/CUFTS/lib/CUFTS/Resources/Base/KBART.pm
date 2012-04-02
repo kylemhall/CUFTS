@@ -48,6 +48,12 @@ sub title_list_field_map {
 sub clean_data {
     my ( $class, $record ) = @_;
 
+	# Skip records where the ISSN looks like it's actually an ISBN
+	if ( $record->{issn} =~ /^[-\dxX]{10,20}$/ || $record->{e_issn} =~ /^[-\dxX]{10,20}$/  ) {
+		return ['Skipping record that appears to have an ISBN: ' . $record->{issn} . ', ' . $record->{e_issn} ];
+	}
+
+	# Convert KBART embargo shorthands to months and days
     my $embargo = $record->{___embargo_info};
     if ( not_empty_string($embargo) && $embargo =~ /^(\w)(\d+)(\w)$/ ) {
         my ( $type, $amount, $period ) = ( $1, $2, $3 );
