@@ -26,6 +26,6 @@
 </form>
 <form method="post" action="[% url("$url_base/local/titles/view/l$local_resource.id") %]">
 <input type="submit" name="cancel" value="cancel" />
-<input type="hidden" name="paging_page" value="[% paging_page %]" />
+<input type="hidden" name="page" value="[% paging_page %]" />
 </form>
 </div>
