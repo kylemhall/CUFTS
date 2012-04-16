@@ -162,11 +162,27 @@ sub _facet_search_content_type {
     $config->{search}->{'content_types_main.content_type'} = $data;
 }
 
+# Sigh. I kindof screwed myself by creating a virutal "keyword" field that searched across a lot of other fields.
+# Anyway, this is another virtual one to do a search just across just name fields and exact keyword table matches.
+
+sub _facet_search_name_exact_keyword {
+    my ( $class, $field, $data, $config ) = @_;
+
+    $config->{joins}->{keywords} = undef;
+    $config->{search}->{'-nest'} = [
+    	'names.search_name'    => { '~'  => '[[:<:]]' . CUFTS::Schema::ERMNames->strip_name( $data ) },
+    	'keywords.keyword'     => { '~'  => CUFTS::Schema::ERMKeywords->strip_keyword( $data ) },
+	];
+    $config->{main_name_only} = 0;
+}
+
+# Virtual field name to search across a variety of tables
 
 sub _facet_search_keyword {
     my ( $class, $field, $data, $config ) = @_;
 
     $config->{joins}->{subjects_main} = 'subject';
+    $config->{joins}->{keywords} = undef;
 
     my $escaped = $data;
     # $escaped =~ s/([^\w])/'\x' . unpack('H*', $1) /gsemx;
@@ -181,6 +197,7 @@ sub _facet_search_keyword {
             'me.vendor'            => { '~*' => $escaped },
             'me.publisher'         => { '~*' => $escaped },
             'names.search_name'    => { '~'  => '[[:<:]]' . CUFTS::Schema::ERMNames->strip_name( $data ) },
+ 	        'keywords.keyword'     => { '~'  => CUFTS::Schema::ERMKeywords->strip_keyword( $data ) },
     ];
     $config->{main_name_only} = 0;
 }
