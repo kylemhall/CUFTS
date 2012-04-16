@@ -697,8 +697,43 @@ sub edit : Local {
                         }
 
                     }
-                
-                }
+                    elsif ( $param =~ /^erm-edit-input-keywords-(\d+)$/ ) {
+
+                        # Modify or delete an alternate name
+
+                        my $erm_keywords_id    = $1;
+                        my $erm_keywords_value = $c->form->{valid}->{$param};
+                        
+                        my $erm_keyword = CUFTS::DB::ERMKeywords->search({
+                            erm_main => $erm_id,
+                            id       => $erm_keywords_id,
+                        })->first();
+                        
+                        if ( not_empty_string( $erm_keywords_value ) ) {
+                            $erm_keyword->keyword( $erm_keywords_value );
+                            $erm_keyword->update();
+                        }
+                        else {
+                            $erm_keyword->delete();
+                        }
+                        
+                    }
+                    elsif ( $param =~ /^erm-edit-input-keywords-add-keyword-\d+$/ ) {
+
+                        # Add a new alternate name
+                        
+                        my $keyword_value = $c->form->{valid}->{$param};
+                        if ( not_empty_string($keyword_value) ) {
+
+                            CUFTS::DB::ERMKeywords->create({
+                                keyword     => $keyword_value,
+                                erm_main 	=> $erm_id,
+                            });
+
+                        }
+
+                    }                
+				}
             };
             
             if ($@) {

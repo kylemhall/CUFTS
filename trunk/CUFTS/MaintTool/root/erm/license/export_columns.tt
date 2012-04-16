@@ -1,6 +1,6 @@
 <h2>ERM License fields to export</h2>
 
-<form action="[% url("$url_base/erm/license/selected_export/$format") %]" method="post">
+<form action="[% url("$url_base/erm/license/selected_export/") %]" method="post">
 
 Export Format: <select name="format">
     <option value="html">HTML</option>
