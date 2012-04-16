@@ -7,6 +7,7 @@ $( function() {
 
 var new_subjects_count = 0;
 var new_names_count    = 0;
+var new_keywords_count = 0;
 
 $( function() {
 
@@ -66,7 +67,7 @@ $( function() {
         new_name.parent('fieldset:not(.nostripe)').find('div.field').removeClass('alt').filter(':odd').addClass('alt');
     });
     
-/* Visibly disable a name if it is going to be deleted */
+    /* Visibly disable a name if it is going to be deleted */
 
     $('#page-general input.altname').livequery( 'blur', function(event) {
         if ( $(this).val() == '' ) {
@@ -76,6 +77,41 @@ $( function() {
             $(this).parent().parent().removeClass('to_delete');
         }
     });
+
+
+    /* Create new keyword entries on demand */
+
+    $('#erm-edit-input-keywords-addbutton').bind( 'click', function(event) {
+        event.preventDefault();
+
+        var new_keyword = $('#keywords-add-keyword-factory').clone();
+        new_keyword.attr( 'id', "keywords-add-" + new_keywords_count );
+        var input    = new_keyword.find('input');
+        var input_id = input.attr( 'name' ) + new_keywords_count;
+        
+        input.attr( 'id', input_id ).attr( 'name', input_id );
+        new_keyword.find('label').attr( 'for', input_id );
+
+        new_keywords_count = new_keywords_count + 1;
+        
+        $('#erm-edit-input-keywords-addbutton').parents('fieldset').append( new_keyword );
+        new_keyword.addClass('field').show();
+        
+        new_keyword.parent('fieldset:not(.nostripe)').find('div.field').removeClass('alt').filter(':odd').addClass('alt');
+    });
+    
+    /* Visibly disable a keyword if it is going to be deleted */
+
+    $('#page-general input.altkeyword').livequery( 'blur', function(event) {
+        if ( $(this).val() == '' ) {
+            $(this).parent().parent().addClass('to_delete');
+        }
+        else {
+            $(this).parent().parent().removeClass('to_delete');
+        }
+    });
+
+
 
 });
 
@@ -731,6 +767,35 @@ $( function() {
  </div>
  <div class="help">
   Information on any print equivalents to this resource.
+ </div>
+</div>
+
+</fieldset>
+
+<fieldset>
+
+<legend>Indexed Terms</legend>
+<div><a id="erm-edit-input-keywords-addbutton" href="[% url("$url_base/erm/edit/add_keyword/1979") %]"><img src="[% image_dir %]/icons/plus.png" style="width: 20px; height: 20px;" alt="add new indexed term" /> New indexed term</a></div>
+
+[% FOREACH keyword IN erm.keywords %]
+ <div class="field" style="padding: 5px 0px;">
+  <div class="data">
+   <label for="erm-edit-keywords_[% loop.count %]">index term</label>
+   <input id= "erm-edit-keywords_[% loop.count %]" type="text" class="altname" name="erm-edit-input-keywords-[% keyword.id %]" value="[% keyword.keyword | html %]"/>
+  </div>
+  <div class="help">
+   Change an indexed term for the resource here. These are used for searching but are not displayed to the public.
+  </div>
+ </div>
+[% END %]
+
+<div id="keywords-add-keyword-factory" style="padding: 5px 0px; display: none">
+ <div class="data">
+  <label>keyword</label>
+  <input type="text" class="altname" name="erm-edit-input-keywords-add-keyword-" value="" />
+ </div>
+ <div class="help">
+  Add any indexed terms for the resource here. These are used for searching but are not displayed to the public.
  </div>
 </div>
 

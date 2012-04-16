@@ -783,6 +783,7 @@ __PACKAGE__->belongs_to(
 );
 
 __PACKAGE__->has_many( 'names' => 'CUFTS::Schema::ERMNames', 'erm_main' );
+__PACKAGE__->has_many( 'keywords' => 'CUFTS::Schema::ERMKeywords', 'erm_main' );
 __PACKAGE__->has_many( 'uses' => 'CUFTS::Schema::ERMUses', 'erm_main' );
 
 __PACKAGE__->has_many(

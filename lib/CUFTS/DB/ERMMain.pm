@@ -173,6 +173,7 @@ __PACKAGE__->has_many('subjects', ['CUFTS::DB::ERMSubjectsMain' => 'subject'], '
 __PACKAGE__->has_many('subjectsmain' => 'CUFTS::DB::ERMSubjectsMain');
 __PACKAGE__->has_many('content_types', ['CUFTS::DB::ERMContentTypesMain' => 'content_type'], 'erm_main');
 __PACKAGE__->has_many( 'names' => 'CUFTS::DB::ERMNames'  );
+__PACKAGE__->has_many( 'keywords' => 'CUFTS::DB::ERMKeywords'  );
 __PACKAGE__->has_a( 'license', 'CUFTS::DB::ERMLicense' );
 __PACKAGE__->has_a( 'provider', 'CUFTS::DB::ERMProviders' );
 __PACKAGE__->has_many( 'costs' => 'CUFTS::DB::ERMCosts' );
@@ -523,6 +524,10 @@ my ( $class, $field, $data, $config, $sql ) = @_;
     if ( !exists( $config->{joins}->{consortia} ) ) {
         $config->{joins}->{consortia} = ' LEFT JOIN erm_consortia ON ( erm_main.consortia = erm_consortia.id )';
     }
+
+    if ( !exists( $config->{joins}->{keywords} ) ) {
+        $config->{joins}->{keywords} = ' LEFT JOIN erm_keywords ON ( erm_main.id = erm_keywords.erm_main )';
+    }
     
     my $escaped = $data;
     $escaped =~ s/([^\w])/'\x' . unpack('H*', $1) /gsemx;
@@ -537,6 +542,7 @@ my ( $class, $field, $data, $config, $sql ) = @_;
        'erm_main.publisher'         => { '~*' => $escaped },
        'erm_main.internal_name'     => { '~*' => $escaped },
        'erm_names.search_name'      => { '~'  => CUFTS::DB::ERMNames->strip_name( $data ) },
+       'erm_keywords.keyword'       => { '~'  => CUFTS::DB::ERMKeywords->strip_keyword( $data ) },
     ];
 }
 
