@@ -30,13 +30,13 @@ use strict;
 my $output_dir = '/tmp/global_export' ;
 
 my %options;
-GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_keys=s', 'prev_days=i', 'output_dir=s' );
+GetOptions( \%options, 'site_key=s', 'site_id=i', 'timestamp=s', 'resource_keys=s', 'prev_days=i', 'output_dir=s', 'exact=s' );
 
-my $prev_days = $options{prev_days};
+my $prev_days        = $options{prev_days};
 my $force_output_dir = $options{output_dir};
-my $after_timestamp = $options{timestamp};
-my $resource_keys = $options{resource_keys};
-my $exact_timestamp;
+my $after_timestamp  = $options{timestamp};
+my $resource_keys    = $options{resource_keys};
+my $exact_timestamp  = $options{exact};
 
 # Try to find a business week day at least $prev_days in the past
 
@@ -60,6 +60,15 @@ elsif ( defined($after_timestamp) ) {
         die("Timestamp does not match YYYY-MM-DD format: $after_timestamp");
     }
     
+}
+elsif ( defined($exact_timestamp) ) {
+    if ( $exact_timestamp =~ / (\d{4}) - (\d{2}) - (\d{2}) /xsm ) {
+        $exact_timestamp = "$1$2$3";
+        print "Checking for title updates on: $exact_timestamp\n";
+    }
+    else {
+        die("Timestamp does not match YYYY-MM-DD format: $exact_timestamp");
+    }
 }
 
 my @resource_keys;
@@ -135,7 +144,7 @@ RESOURCE:
                 print "Updated on exact timestamp date.\n";
             }
             else {
-                print "Not updated after timestamp check date: $scanned\n";
+                print "Not updated within timestamp range: $scanned\n";
                 next RESOURCE;
             }
 
