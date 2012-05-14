@@ -3,6 +3,5 @@ CREATE TABLE erm_sushi (
     site            INTEGER NOT NULL,
     name            VARCHAR(255) NOT NULL,
     requestor       VARCHAR(255),
-    service_url     VARCHAR(255),
-    interval_months INTEGER
+    service_url     VARCHAR(255)
 );

@@ -9,6 +9,7 @@ CREATE TABLE erm_counter_sources (
     next_run_date   DATE,
     run_start_date  DATE,
     run_end_date    DATE,
+    interval_months INTEGER,
     
     last_run_timestamp TIMESTAMP
 );
