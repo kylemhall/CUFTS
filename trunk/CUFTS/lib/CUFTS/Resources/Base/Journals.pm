@@ -769,15 +769,11 @@ sub check_fulltext_vol_iss {
     return 1 if is_empty_string( $request->volume ) || $request->volume !~ /^\s*\d+\s*$/;
     my $volume = int($request->volume);
 
-    warn('1');
-
     # requested volume is after end volume
 
     return 0
         if not_empty_string( $record->vol_ft_end )
         && $volume > int( $record->vol_ft_end );
-
-        warn('2');
 
     # requested volume is before start volume
 
@@ -785,14 +781,10 @@ sub check_fulltext_vol_iss {
         if not_empty_string( $record->vol_ft_start )
         && $volume < int( $record->vol_ft_start );
 
-        warn('3');
-
     # requested issue matches start volume and is before start issue
 
     return 1 if is_empty_string( $request->issue ) || $request->issue !~ /^\s*\d+\s*$/;
     my $issue = int($request->issue);
-
-    warn('4');
 
     return 0
         if not_empty_string( $record->vol_ft_start )
@@ -802,15 +794,11 @@ sub check_fulltext_vol_iss {
 
     # requested issue matches end volume and is after end issue
 
-    warn('5');
-
     return 0
         if not_empty_string( $record->vol_ft_end )
         && not_empty_string( $record->iss_ft_end )
         && $volume == int( $record->vol_ft_end )
         && $issue > int( $record->iss_ft_end );
-
-    warn('6');
 
     return 1;
 }
