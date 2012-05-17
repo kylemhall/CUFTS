@@ -49,6 +49,9 @@ sub change : Local {
 		@site_list = $c->stash->{current_account}->sites;
 	}
 
+	# Filter out sites athat are not active
+	@site_list = grep { $_->active } @site_list;
+
 	if ($c->form->valid->{'change_site'}) {
 
 		# Change the site if this is a submission.  Check to make sure the user
