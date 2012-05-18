@@ -103,6 +103,7 @@ foreach my $dat_file_name (@dat_files) {
     		}
     		$smtp->datasend("\n");
     		$smtp->datasend('Resource: ' . $resource->name . "\n");
+    		$smtp->datasend('Provider: ' . $resource->provider . "\n");
     		$smtp->datasend('Processed: ' . $results->{'processed_count'} . "\n");
     		$smtp->datasend('Errors: ' . $results->{'error_count'} . "\n");
     		$smtp->datasend('New: ' . $results->{'new_count'} . "\n");
@@ -136,7 +137,8 @@ foreach my $dat_file_name (@dat_files) {
 		_error("Unable to move title list dat file to completed directory: $!: '$title_list_dir/$dat_file_name $title_list_dir/completed/$dat_file_name'");
 
 	print 'Resource: ' . $resource->name . "\n";
-	print 'Processed: ' . $results->{'processed_count'} . "\n";
+	print 'Provider: ' . $resource->provider . "\n";
+        print 'Processed: ' . $results->{'processed_count'} . "\n";
 	print 'Errors: ' . $results->{'error_count'} . "\n";
 	print 'New: ' . $results->{'new_count'} . "\n";
 	print 'Modified: ' . $results->{'modified_count'} . "\n";
