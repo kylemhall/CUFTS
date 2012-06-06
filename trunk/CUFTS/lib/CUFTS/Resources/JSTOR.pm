@@ -26,6 +26,7 @@ use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
 use URI::Escape qw(uri_escape);
 use Unicode::String qw(utf8);
+use String::Util qw(hascontent);
 
 use strict;
 
@@ -49,6 +50,14 @@ sub title_list_fields {
             publisher
         )
     ];
+}
+
+sub title_list_read_row {
+    my ($class, $IN) = @_;
+    my $text = <$IN>;
+    return undef if !hascontent($text);
+    my $text2 = '' . utf8($text)->latin1;
+    return $text2;
 }
 
 sub clean_data {
