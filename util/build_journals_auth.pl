@@ -77,7 +77,7 @@ sub show_report {
     }
 }
 
-sub get_site_id($options) {
+sub get_site_id {
     my ( $options ) = @_;
     
     return $options->{site_id} if defined($options->{site_id});
