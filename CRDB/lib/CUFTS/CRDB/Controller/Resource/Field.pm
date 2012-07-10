@@ -26,6 +26,7 @@ my %handler_map = (
     resource_medium     => 'resource_medium',
     resource_type       => 'resource_type',
     subjects            => 'subjects',
+    pricing_model       => 'pricing_model',
 );
 
 my %data_type_handler_map = (
@@ -263,6 +264,42 @@ sub edit_field_resource_medium : Private {
         $c->stash->{template} = 'fields/select.tt'
     }
 }
+
+sub edit_field_pricing_model : Private {
+    my ( $self, $c, $field ) = @_;
+
+    if ( $c->req->params->{update_value} ) {
+
+        # Add in validation here
+        
+        my $value = $c->req->params->{$field};
+        if ( not_empty_string( $value ) ) {
+            my $count = $c->model('CUFTS::ERMPricingModels')->search({ site => $c->site->id, id => $value })->count();
+            if ( $count < 1 ) {
+                die("Attempt to update pricing_model to a value not appropriate for this site: $value");
+            }
+        }
+        else {
+            $value = undef;
+        }
+
+        $c->model('CUFTS')->schema->txn_do( sub {
+            $c->stash->{erm}->pricing_model( $value );
+            $c->stash->{erm}->update();
+        } );
+        
+        $c->stash->{display_field_name} = $field;
+        $c->stash->{template} = 'display_field.tt'
+    }
+    else {
+        $c->stash->{field} = $field;
+        $c->stash->{value} = $c->stash->{erm}->get_column('pricing_model');
+        $c->stash->{options} = [ $c->model('CUFTS::ERMPricingModels')->search({ site => $c->site->id })->all ];
+        $c->stash->{display_field} = 'pricing_model';
+        $c->stash->{template} = 'fields/select.tt'
+    }
+}
+
 
 sub edit_field_resource_type : Private {
     my ( $self, $c, $field ) = @_;

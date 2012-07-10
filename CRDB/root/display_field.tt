@@ -23,6 +23,8 @@
   [% INCLUDE render_field field_name="resource_medium", field_data=HTML.escape( erm.resource_medium.resource_medium ) %]
  [% CASE 'consortia' %]
   [% INCLUDE render_field field_name="consortia", field_data=HTML.escape( erm.consortia.consortia ) %]
+ [% CASE 'pricing_model' %]
+  [% INCLUDE render_field field_name="pricing_model", field_data=HTML.escape( erm.pricing_model.pricing_model ) %]
  [% CASE 'content_types' %]
   [% INCLUDE render_field field_name="content_types", field_data=HTML.escape( erm.content_types.force_list.sort('content_type').map_join('content_type', ', ') ) %]
  [% CASE 'url' %]
