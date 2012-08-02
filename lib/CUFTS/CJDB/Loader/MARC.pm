@@ -490,4 +490,6 @@ sub encode_to_latin1 {
     return CUFTS::CJDB::Util::marc8_to_latin1(@_);
 }
 
+sub modify_marc_dump_record {}
+
 1;
