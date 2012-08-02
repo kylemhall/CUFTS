@@ -1188,6 +1188,8 @@ CJDB_RECORD:
             $MARC_record->insert_fields_ordered( $identifier_field );
         }
 
+        $loader->modify_marc_dump_record( $MARC_record );
+
         print MARC_OUTPUT  $MARC_record->as_usmarc();
         print ASCII_OUTPUT $MARC_record->as_formatted(), "\n\n";
     }
