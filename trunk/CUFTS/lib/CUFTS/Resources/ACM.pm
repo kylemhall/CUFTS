@@ -29,22 +29,20 @@ use Data::Dumper;
 use strict;
 
 sub title_list_fields {
-    return [
-        qw(
-            id
-            title
+    return [ qw(
+        id
+        title
         abbreviation
-            issn
+        issn
         e_issn
-            ft_start_date
-            vol_ft_start
-            iss_ft_start
-            ft_end_date
-            vol_ft_end
+        ft_start_date
+        ft_end_date
+        vol_ft_start
+        vol_ft_end
+        iss_ft_start
         iss_ft_end
         journal_url
-        )
-    ];
+    ) ];
 }
 
 sub resource_details_help {
@@ -87,8 +85,8 @@ sub clean_data {
 
         if ( $record->{ft_start_date} =~ /(Volume\s+\w+)?\s*(Issue\s+\w+)?\s*\((.+)\)/xsm ) {
             ( $volume, $issue, $date ) = ( $1, $2, $3 );
-            $volume =~ s/Volume\s*//;
-            $issue =~ s/Issue\s*//;
+            $volume =~ s/Volume\s*// if not_empty_string($volume);
+            $issue =~ s/Issue\s*// if not_empty_string($issue);
         }
 
         if ( $date =~ /([a-zA-Z]+)\s*\d+,\s*(\d+)/ || $date =~ /([a-zA-Z]*)\s*(\d+)/ || $date =~ /([a-zA-Z]+).+(\d{4})/ ) {
@@ -113,8 +111,8 @@ sub clean_data {
     if ( not_empty_string( $record->{ft_end_date} ) ) {
         if ( $record->{ft_end_date} =~ /(Volume\s*\w+)?\s*(Issue\s*\w+)?\s*\((.+)\)/xsm ) {
             ( $volume, $issue, $date ) = ( $1, $2, $3 );
-        $volume =~ s/Volume\s*//;
-            $issue =~ s/Issue\s*//;
+            $volume =~ s/Volume\s*// if not_empty_string($volume);
+            $issue =~ s/Issue\s*// if not_empty_string($issue);
         }
 
         if ( $date =~ /(\w+)\s*(\d+)/ || $date =~ /(\w+)\s*\d+,\s*(\d+)/ ) {
