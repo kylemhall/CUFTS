@@ -52,40 +52,23 @@ sub title_list_fields {
     ];
 }
 
-sub title_list_extra_requires {
-    require CUFTS::Util::CSVParse;
-}
-
-sub title_list_split_row {
-    my ( $class, $row ) = @_;
-
-    my $csv = CUFTS::Util::CSVParse->new();
-
-    $row = trim_string($row);
-
-    $csv->parse($row)
-        or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
-
-    my @fields = $csv->fields;
-    return \@fields;
-}
-
+sub title_list_skip_lines_count { return 2; }
 
 sub title_list_field_map {
     return {
-        'TITLE'           => 'title',
-        'PRINT ISSN'      => 'issn',
-        'ELECTRONIC ISSN' => 'e_issn',
+        'Title'           => 'title',
+        'Print ISSN'      => 'issn',
+        'Electronic ISSN' => 'e_issn',
         'URL'             => 'journal_url',
-        'PUBLISHER'       => 'publisher',
+        'Publisher'       => 'publisher',
     };
 }
 
 sub clean_data {
     my ( $class, $record ) = @_;
 
-    my $start = $record->{'___FIRST ISSUE ONLINE'};
-    my $end   = $record->{'___FINAL ISSUE ONLINE'};
+    my $start = $record->{'___First Issue in MUSE'};
+    my $end   = $record->{'___Final Issue in MUSE'};
 
     # Some ISSNs are dirty and have extra spaces in them for some reason
 
