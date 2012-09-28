@@ -52,8 +52,6 @@ sub title_list_fields {
     ];
 }
 
-sub title_list_skip_lines_count { return 2; }
-
 sub title_list_field_map {
     return {
         'Title'           => 'title',
