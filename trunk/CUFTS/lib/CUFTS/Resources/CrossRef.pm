@@ -134,9 +134,6 @@ sub get_records {
         CUFTS::DB::SearchCache->dbi_commit;
     }
 
-    use Data::Dumper;
-    warn(Dumper($cache_data->result));
-
     my $doc = XML::LibXML->load_xml( string => $cache_data->result );
     my $xpc = XML::LibXML::XPathContext->new( $doc->documentElement() );
     $xpc->registerNs('cr', 'http://www.crossref.org/qrschema/2.0');
