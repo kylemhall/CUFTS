@@ -94,8 +94,8 @@ sub get_records {
         if ( hascontent($request->spage) ) {
             $cache_query .= '&spage=' . uri_escape($request->spage);
         }
-        if ( hascontent($request->date) ) {
-            $cache_query .= '&date=' . uri_escape($request->date);
+        if ( hascontent($year) ) {
+            $cache_query .= '&date=' . uri_escape($year);
         }
     }
     else {
@@ -133,6 +133,9 @@ sub get_records {
         );
         CUFTS::DB::SearchCache->dbi_commit;
     }
+
+    use Data::Dumper;
+    warn(Dumper($cache_data->result));
 
     my $doc = XML::LibXML->load_xml( string => $cache_data->result );
     my $xpc = XML::LibXML::XPathContext->new( $doc->documentElement() );
