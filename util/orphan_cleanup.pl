@@ -41,10 +41,10 @@ else {
         fix_journal_links();
     }
     if ( $options{orphaned_titles} ) {
-        orphaned_issns();
+        orphaned_titles();
     }
     if ( $options{orphaned_issns} ) {
-        orphaned_titles();
+        orphaned_issns();
     }
 }
 
