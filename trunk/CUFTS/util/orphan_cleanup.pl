@@ -14,6 +14,9 @@ use CUFTS::DB::JournalsAuth;
 use CJDB::DB::Journals;
 use CJDB::DB::Tags;
 
+use CUFTS::DB::ERMMain;
+use CUFTS::DB::ERMCounterTitles;
+
 use Getopt::Long;
 use Log::Log4perl qw(:easy);
 
@@ -65,6 +68,12 @@ sub unlinked_journal_auth {
         next if $count;
 
         $count = CJDB::DB::Tags->count_search({ journals_auth => $ja_id });
+        next if $count;
+
+        $count = CUFTS::DB::ERMMain->count_search({ journal_auth => $ja_id });
+        next if $count;
+
+        $count = CUFTS::DB::ERMCounterTitles->count_search({ journal_auth => $ja_id });
         next if $count;
 
         if ( $options{save} ) {
