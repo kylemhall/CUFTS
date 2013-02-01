@@ -66,7 +66,7 @@ sub get_records {
         }
 
         # Include that first match as journal_auths match, it will likely come up from the augmentations above, but there are a few rare cases where this works better.
-        $request->journal_auths( \@ja_match );
+        $request->journal_auths( [ $ja_match[0]->id ] );
 
     }
     elsif ( not_empty_string($request->title) ) {
