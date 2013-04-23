@@ -1,3 +1,5 @@
+[% USE url %]
+
 [% IF error %]
  There was an error while attempting to delete the ERM resource: [% error %].
 [% ELSE %]
@@ -9,7 +11,7 @@
  
      <div id="erm-delete-linked-list">
       This ERM main record is linked to [% erm_links_resources.size + erm_links_journals.size %] resources and journals.  Do you really want to delete it?
-      <form method="post">
+      <form method="post" action="[% url("$url_base/erm/main/delete/") %]">
        <input type="hidden" name="erm_main_id" value="[% erm_main.id %]" />
        <input type="submit" name="confirm" value="yes" />
        <input type="submit" name="cancel" value="no" />
