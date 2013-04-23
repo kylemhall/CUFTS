@@ -816,7 +816,7 @@ sub delete : Local {
         })->first;
         
         my @erm_links = CUFTS::DB::ERMMainLink->search({
-            erm_main => $erm_main->id
+            erm_main => $erm_main->id,
         });
 
         my ( @erm_links_resources, @erm_links_journals );
