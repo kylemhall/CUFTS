@@ -176,7 +176,7 @@ __PACKAGE__->has_a('resource_type', 'CUFTS::DB::ERMResourceTypes');
 __PACKAGE__->has_many('subjects', ['CUFTS::DB::ERMSubjectsMain' => 'subject'], 'erm_main');
 __PACKAGE__->has_many('subjectsmain' => 'CUFTS::DB::ERMSubjectsMain');
 __PACKAGE__->has_many('content_types', ['CUFTS::DB::ERMContentTypesMain' => 'content_type'], 'erm_main');
-__PACKAGE__->has_many('content_types_main', ['CUFTS::DB::ERMContentTypesMain' => 'content_type'], 'erm_main');
+__PACKAGE__->has_many('content_types_main' => 'CUFTS::DB::ERMContentTypesMain' );
 __PACKAGE__->has_many( 'names' => 'CUFTS::DB::ERMNames'  );
 __PACKAGE__->has_many( 'keywords' => 'CUFTS::DB::ERMKeywords'  );
 __PACKAGE__->has_a( 'license', 'CUFTS::DB::ERMLicense' );
@@ -274,7 +274,7 @@ sub clone {
 
     foreach my $content_type ( $self->content_types_main ) {
         CUFTS::DB::ERMContentTypesMain->insert({
-            content_type  => $content_type->content_type,
+            content_type  => $content_type->content_type->id,
             erm_main      => $clone_id,
         });
     }
