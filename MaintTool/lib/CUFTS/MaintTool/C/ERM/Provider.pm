@@ -184,6 +184,55 @@ sub edit : Local {
     $c->stash->{javascript_validate} = [ $c->convert_form_validate( 'provider-form', $form_validate, 'erm-edit-input-' ) ];
 }
 
+sub clone : Local {
+    my ( $self, $c ) = @_;
+    
+    $c->form({
+        required => [ qw( erm_provider_id ) ],
+        optional => [ qw( confirm cancel delete clone ) ],
+    });
+    
+    unless ( $c->form->has_missing || $c->form->has_invalid || $c->form->has_unknown ) {
+    
+        if ( $c->form->{valid}->{cancel} ) {
+            return $c->redirect('/erm/provider/edit/' . $c->form->{valid}->{erm_provider_id} );
+        }
+    
+        my $erm_provider = CUFTS::DB::ERMProviders->search({
+            site => $c->stash->{current_site}->id,
+            id   => $c->form->{valid}->{erm_provider_id},
+        })->first;
+
+        if ( defined($erm_provider) ) {
+
+            $c->stash->{erm_provider} = $erm_provider;
+            if ( $c->form->{valid}->{confirm} ) {
+
+                my $clone;
+                eval {
+                    $clone = $erm_provider->clone();
+                };
+                
+                if ($@) {
+                    my $err = $@;
+                    CUFTS::DB::DBI->dbi_rollback;
+                    die($err);
+                }
+            
+                CUFTS::DB::ERMProviders->dbi_commit();
+                return $c->redirect('/erm/provider/edit/' . $clone->id );
+            }
+        }
+        else {
+            $c->stash->{error} = "Unable to locate ERM record: " . $c->form->{valid}->{erm_provider_id};
+        }
+
+    }
+
+    $c->stash->{template} = 'erm/provider/clone.tt';
+}
+
+
 sub delete : Local {
     my ( $self, $c ) = @_;
     
