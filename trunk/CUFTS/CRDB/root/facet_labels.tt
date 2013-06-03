@@ -9,15 +9,12 @@
     resource_type   => "Resource Type",
     resource_medium => "Resource Medium",
     subject         => "Subject",
+    license_allows_walkins => "Allows Walkins",
 } %]
 
 <script type="text/javascript">
 var facet_labels = new Object();
-facet_labels["content_type"]    = "[% facet_labels.content_type %]";
-facet_labels["keyword"]         = "[% facet_labels.keyword %]";
-facet_labels["name"]            = "[% facet_labels.name %]";
-facet_labels["open_access"]     = "[% facet_labels.open_access %]";
-facet_labels["resource_type"]   = "[% facet_labels.resource_type %]";
-facet_labels["resource_medium"] = "[% facet_labels.resource_medium %]";
-facet_labels["subject"]         = "[% facet_labels.subject %]";
+[% FOREACH field IN facet_labels.key %]
+ facet_labels["[% $field %]"]    = "[% facet_labels.$field %]";
+[% END %]
 </script>
