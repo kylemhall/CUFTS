@@ -125,6 +125,23 @@ sub facet_search {
 
 }
 
+
+sub _facet_search_license_allows_ill           { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_ereserves     { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_coursepacks   { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_walkins       { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_distance_ed   { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_allows_archiving     { __facet_search_license_generic_boolean(@_); }
+sub _facet_search_license_perpetual_access     { __facet_search_license_generic_boolean(@_); }
+
+sub __facet_search_license_generic_boolean {
+    my ( $class, $field, $data, $config, $sql ) = @_;
+
+    $field =~ s/^license_(\w+)$/license.$1/;
+
+    $config->{search}->{$field} = $data ? 1 : 0;
+}
+
 sub _facet_search_subject {
     my ( $class, $field, $data, $config ) = @_;
 
