@@ -14,6 +14,7 @@ my @fast_search_columns = qw(
     description_brief
     description_full
     url
+    open_access
     proxy
     access
     alert
