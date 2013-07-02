@@ -3,7 +3,7 @@ package CUFTS::Schema::JournalsAuth;
 use strict;
 use base qw/DBIx::Class::Core/;
 
-__PACKAGE__->load_components(qw/ Timestamp /);
+__PACKAGE__->load_components(qw/ TimeStamp /);
 __PACKAGE__->table('journals_auth');
 __PACKAGE__->add_columns(
     id => {
