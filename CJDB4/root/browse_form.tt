@@ -2,7 +2,7 @@
 
 <div id="browse-form-full" class="tabbable hidden-phone">
   <ul class="nav nav-tabs" id="browse-form-tabs">
-    <li [% browse_form_tab == 'title'       ? 'class="active"' : '' %]><a href="#title" data-toggle="tab">Title</a></li>
+    <li [% (browse_form_tab == 'title' || !browse_form_tab.defined) ? 'class="active"' : '' %]><a href="#title" data-toggle="tab">Title</a></li>
     <li [% browse_form_tab == 'subject'     ? 'class="active"' : '' %]><a href="#subject" data-toggle="tab">Subject</a></li>
     <li [% browse_form_tab == 'association' ? 'class="active"' : '' %]><a href="#association" data-toggle="tab">Association</a></li>
     <li [% browse_form_tab == 'tag'         ? 'class="active"' : '' %]><a href="#tag" data-toggle="tab">Tag</a></li>
