@@ -423,7 +423,6 @@ sub _find {
     
     my @valid_params = ( qw(
         consortia
-        content_medium
         content_type
         keyword
         license
@@ -435,6 +434,7 @@ sub _find {
         publisher
         print_included
         resource_type
+        resource_medium
         subject
         subscription_status
         vendor
