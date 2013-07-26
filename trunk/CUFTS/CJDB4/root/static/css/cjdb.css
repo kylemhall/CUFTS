@@ -167,7 +167,12 @@ ul.breadcrumb {
 
 #journal #links h4 {
 	margin-bottom: 5px;
-	font-size: 16px;
+	font-size: 18px;
+	margin-top: 15px;
+}
+
+#journal #links .journal-link-name {
+	font-style: italic;
 }
 
 #journal .coverage {
