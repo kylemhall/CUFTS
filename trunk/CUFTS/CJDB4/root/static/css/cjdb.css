@@ -83,6 +83,14 @@ ul.breadcrumb {
 	margin: 10px;
 }
 
+#browse-form-mobile form {
+	margin: 0;
+}
+
+#browse-form-mobile input.search-query {
+	position: relative;
+}
+
 /* List sites */
 
 #list-sites ul {
