@@ -13,7 +13,7 @@
   [%- SET count = count + 1 -%]
 
    <li>
-      <h4>[% PROCESS journal_coverages.tt %] from [%- PROCESS journals_link_name.tt -%]</h4>
+      <h4>[% PROCESS journal_coverages.tt %] from <span class="journal-link-name">[%- PROCESS journals_link_name.tt -%]</span></h4>
       <div class="links-details">
         <dl class="dl-horizontal">
 
