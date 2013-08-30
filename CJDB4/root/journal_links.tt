@@ -2,7 +2,7 @@
   <!-- <h3>Availability</h3> -->
   <ul>
  [%- SET count = 0 -%]
- [%- FOREACH link IN rank_name_sort( journal.display_links, resources_display ) -%]
+ [%- FOREACH link IN links -%]
 
   [%- SET resource = undef -%]
   [%- IF link.link_type > 0 -%]
