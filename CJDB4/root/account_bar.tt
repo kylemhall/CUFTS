@@ -5,6 +5,6 @@
  <a href="[% c.uri_for_site( c.controller('Account').action_for('manage') ) | html %]">manage</a> |
  <a href="[% c.uri_for_site( c.controller('Account').action_for('logout') ) | html %]">logout</a>
 [% ELSE %]
- <a href="[% c.uri_for_site( c.controller('Account').action_for('login') ) | html %]">login</a></div>
+ <a href="[% c.uri_for_site( c.controller('Account').action_for('login') ) | html %]">login</a>
 [% END %]
 </div>
