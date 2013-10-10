@@ -4,7 +4,7 @@
     <h3>[% c.loc('Subjects') | html %]</h3>
     <ul>
     [% WHILE ( subject = journal_subjects.next ) %]
-      <li><a href="[% c.uri_for_site( c.controller('Browse').action_for('bylink'), [ 'subject', subject.id ] ) | html %]">[% subject.subject | html %]</a></li>
+      <li><a href="[% c.uri_for_site( c.controller('Browse').action_for('bylink'), 'subject', subject.id ) | html %]">[% subject.subject | html %]</a></li>
     [% END %]
     </ul>
   </div> <!-- subjects -->
