@@ -25,6 +25,7 @@ use Catalyst qw/
     Session::State::Cookie
     Cache
     Cache::Store::FastMmap
+    I18N
 /;
 
 extends 'Catalyst';
