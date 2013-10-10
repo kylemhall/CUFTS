@@ -15,7 +15,7 @@
     [% END %]
     <a href="[% c.uri_for_site( c.controller('Browse').action_for('titles'), { browse_field =>'title', t => 'startswith', q => relation.title } ) | html %]">[% relation.title | html %]</a>
     [% IF relation.issn %]
-     (<a href="[% url("$url_base/browse/journals", browse_field='issn',search_terms=relation.issn) %]">[% relation.issn.substr(0,4) %]-[% relation.issn.substr(4,4) %]</a>)
+     (<a href="[% c.uri_for_site( c.controller('Browse').action_for('issns'), { q => relation.issn } ) | html %]">[% relation.issn.substr(0,4) %]-[% relation.issn.substr(4,4) %]</a>)
     [%- END -%]
    </li>
     [% END %]

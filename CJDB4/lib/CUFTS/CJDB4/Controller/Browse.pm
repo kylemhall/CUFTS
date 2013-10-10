@@ -152,6 +152,9 @@ sub subjects :Chained('base') :PathPart('subjects') :Args(0) {
     if ( $search_type eq 'startswith' ) {
         $cleaned_search_term .= '%';
     }
+    elsif ( $search_type eq 'equals' ) {
+        # Legitimately do nothing - this is for documentation.
+    }
     else {
         $cleaned_search_term = '%' . $cleaned_search_term . '%';
     }
