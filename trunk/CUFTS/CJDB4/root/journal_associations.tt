@@ -4,7 +4,7 @@
  	 <h3>[% c.loc('Associations') | html %]</h3>
   <ul>
     [% WHILE ( association = journal_associations.next ) %]
-      <li><a href="">[% association.association | html %]</a></li>
+      <li><a href="[% c.uri_for_site( c.controller('Browse').action_for('bylink'), [ 'association', association.id ] ) | html %]">[% association.association | html %]</a></li>
     [% END %]
    </ul>
  </div> <!-- associations -->
