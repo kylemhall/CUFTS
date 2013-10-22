@@ -290,6 +290,10 @@ ol.browse-resources li.placeholder:before {
     height: 5.5em;
 }
 
+.field-editing form {
+    margin-bottom: 0;
+}
+
 /* Icon overrides */
 
 .icon-ok {
