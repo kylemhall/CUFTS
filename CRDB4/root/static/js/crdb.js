@@ -206,22 +206,20 @@ $().ready( function() {
 
                hide_nodata_fields();
 
-               $('#resource').prepend( $('<div />').addClass('alert alert-success results').text('Updated field data.') );
+                $('#resource .results').remove();
+                $('#resource').prepend( $('<div />').addClass('alert alert-success results').text('Updated field data.') );
 
            }
         });
 
     });
 
-
     hide_nodata_fields();
-
 
 });
 
 var CRDB = {};
 CRDB.show_nodata_fields = 0;
-
 
 function toggle_nodata_fields( ) {
     CRDB.show_nodata_fields = !CRDB.show_nodata_fields;
@@ -260,49 +258,4 @@ function validate_field( field ) {
         }
     }
 
-}
-
-function delete_subject( subject_id ) {
-    CRDB.to_delete[ subject_id ] = 1;
-    CRDB.to_add[ subject_id ] = 0;
-
-    $('#edit-subjects-add').addOption( subject_id, CRDB.all_subjects[subject_id], false ).sortOptions();
-    $('div#edit-all-subjects-' + subject_id).hide();
-
-    update_subject_fields();
-
-    return false;
-}
-
-function add_subject() {
-    var subject_id = $('#edit-subjects-add').find("option:selected")[0].value;
-
-    CRDB.to_delete[ subject_id ] = 0;
-    CRDB.to_add[ subject_id ] = 1;
-
-    $('#edit-subjects-add').removeOption( subject_id, false );
-    $('div#edit-all-subjects-' + subject_id).show();
-
-    update_subject_fields();
-
-    return false;
-}
-
-function update_subject_fields() {
-    var key;
-    var array = new Array();
-    for (key in CRDB.to_add) {
-        if ( CRDB.to_add[key] ) {
-            array.push(key)
-        }
-    }
-    $('#edit-subjects-add-field').val( array.join(',') );
-
-    array = new Array();
-    for (key in CRDB.to_delete) {
-        if ( CRDB.to_delete[key] ) {
-            array.push(key)
-        }
-    }
-    $('#edit-subjects-delete-field').val( array.join(',') );
 }

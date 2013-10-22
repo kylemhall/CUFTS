@@ -8,14 +8,14 @@
 <div id="edit-all-subjects">
  [% FOREACH subject IN all_subjects %]
   [% SET subject_id = subject.id %]
-  <div id="edit-all-subjects-[% subject.id %]" [% IF !current_subjects_ids.$subject_id %]style="display: none;"[% END %]><a onClick="return delete_subject([% subject.id %]);" href="#"><img src="[% c.uri_for_image('delete.png') %]" style="border: none"/></a><span style="padding-bottom: 6px;">[% subject.subject %]</span></div>
+  <div id="edit-all-subjects-[% subject.id %]" [% IF !current_subjects_ids.$subject_id %]style="display: none;"[% END %]><a class="edit-delete-subject" href="#" data-subject_id="[% subject.id %]"><i class="icon-remove-sign"></i></a> <span>[% subject.subject | html %]</span></div>
  [% END %]
 </div>
 
 <div style="margin-top: 5px;">
  <select id="edit-subjects-add" name="_add_subject_list">
   [% FOREACH subject IN other_subjects %]
-   <option value="[% subject.id %]">[% subject.subject %]</option>
+   <option value="[% subject.id %]">[% subject.subject | html  %]</option>
   [% END %]
  </select> <input type="submit" value="add" name="add" onClick="return add_subject();" />
  <form><input id="edit-subjects-delete-field" type="hidden" name="delete_subjects" value="" /><input id="edit-subjects-add-field" type="hidden" name="add_subjects" value="" /></form>
