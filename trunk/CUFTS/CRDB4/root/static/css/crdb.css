@@ -18,7 +18,6 @@ h1 {
 
 h2 {
     font-size: 16px;
-    line-height: 20px;
 }
 
 header {
@@ -406,6 +405,7 @@ dl#resource-fields {
     #browse>h2 {
         clear: both;
         margin: 3px 5px;
+        line-height: 20px;
     }
 
     #browse>ol {
