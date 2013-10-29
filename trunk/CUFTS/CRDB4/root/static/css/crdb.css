@@ -83,6 +83,10 @@ ul.breadcrumb {
 #main .main-box {
 }
 
+#main>h2 {
+    line-height: 20px;
+}
+
 /* Browse form */
 
 #browse-form  {
@@ -405,7 +409,6 @@ dl#resource-fields {
     #browse>h2 {
         clear: both;
         margin: 3px 5px;
-        line-height: 20px;
     }
 
     #browse>ol {
