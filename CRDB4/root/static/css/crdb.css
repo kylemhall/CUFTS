@@ -255,8 +255,12 @@ ol.browse-resources, ol.browse-resources li {
     padding-right: 20px;
 }
 
-#browse .browse-field-description {
+#browse .browse-field-description, #browse .browse-field-alert {
     margin: 5px 0;
+}
+
+#browse .browse-field-alert {
+    color: red;
 }
 
 #browse #links ul {
@@ -337,6 +341,10 @@ dl#resource-fields {
 
 #resource-fields dt.no-label {
     display: none;
+}
+
+#resource-alert-data {
+    color: red;
 }
 
 /* Field Editing */
