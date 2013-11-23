@@ -384,6 +384,14 @@ dl#resource-fields {
         margin-left: 275px;
         width: auto;
     }
+
+    #resource .dl-horizontal dt {
+        width: 200px;
+    }
+
+    #resource .dl-horizontal dd {
+        margin-left: 220px;
+    }
 }
 
 @media (max-width: 767px) {
