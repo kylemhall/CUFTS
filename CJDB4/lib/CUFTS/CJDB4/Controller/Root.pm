@@ -31,6 +31,12 @@ Base chain for capturing and loading site from URL
 sub site :Chained('/') :PathPart('') :CaptureArgs(1) {
     my ($self, $c, $site_key) = @_;
 
+    if ( $site_key =~ /^(.+)!sandbox$/ ) {
+        $site_key = $1;
+        $c->stash->{sandbox} = 1;
+    }
+    my $box = $c->stash->{sandbox} ? 'sandbox' : 'active';
+
     my $site = $c->model('CUFTS::Sites')->find({ key => $site_key });
     if ( !defined($site) ) {
         die("Unrecognized site key: $site_key");
@@ -39,11 +45,8 @@ sub site :Chained('/') :PathPart('') :CaptureArgs(1) {
 
     $self->_cache_local_resources($c);
 
-    $c->stash->{sandbox} = $c->session->{sandbox};
-    my $box = $c->session->{sandbox} ? 'sandbox' : 'active';
-
     # Set up site specific CSS file if it exists
-    my $site_css = '/sites/' . $site->id . "/static/${box}/css/cjdb.css";
+    my $site_css = '/sites/' . $site->id . "/static/css/${box}/cjdb.css";
     if ( -e ($c->config->{root} . $site_css) ) {
         $c->stash->{site_css_uri} = $c->uri_for( $site_css );
     }
