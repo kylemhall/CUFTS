@@ -239,7 +239,7 @@ function toggle_nodata_fields() {
 }
 
 function hide_nodata_fields() {
-    $('.no-data').each( function(i) {
+    jQuery('.no-data').each( function(i) {
         this.style.display = CRDB.show_nodata_fields ? 'block' : 'none';
     });
 }
