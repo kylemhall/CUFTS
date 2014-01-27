@@ -424,6 +424,7 @@ sub _find {
     my @valid_params = ( qw(
         consortia
         content_type
+        contract_end
         keyword
         license
         name
@@ -461,7 +462,12 @@ sub _find {
         next if !grep { $param eq $_ } @valid_params;
         my $value = $params->{$param};
         next if is_empty_string($value);
-        $search->{$param} = $value;
+        if ( $param eq 'contract_end' ) {
+            $search->{$param} = { '<=' => $value };
+        }
+        else {
+            $search->{$param} = $value;
+        }
     }
     
     my $count   = CUFTS::DB::ERMMain->facet_count(  $c->stash->{current_site}->id, $search );
