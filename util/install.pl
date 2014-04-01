@@ -9,7 +9,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -20,8 +20,6 @@
 ## Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 use lib qw(lib);
-
-## This script could use some testing and cleanup.
 
 use strict;
 
@@ -63,6 +61,11 @@ my @modules = qw(
     Date::Calc
     DateTime
     DateTime::Format::ISO8601
+    DBIx::Class
+    DBIx::Class::EncodedColumn
+    DBIx::Class::Helpers
+    DBIx::Class::InflateColumn::DateTime
+    DBIx::Class::TimeStamp
     Exception::Class
     Exception::Class::DBI
     Getopt::Long
@@ -96,14 +99,19 @@ my @modules = qw(
     XML::RAI
 );
 
-my @optional_modules = qw(Apache::DBI);
+my @optional_modules = qw();
 
 if (grep {$_ eq '-m'} @ARGV) {
 	check_modules(@modules);
 	optional_modules(@optional_modules);
 	print "\n\n";
-
 	exit;
+}
+
+if (grep {$_ eq '-i'} @ARGV) {
+    install_modules(@modules);
+    print "\n\n";
+    exit;
 }
 
 
@@ -141,7 +149,7 @@ if ($no_psql) {
 	my $input = $term->readline('[y/N]: ');
 	exit unless $input =~ /^\s*y/i;
 }
-	
+
 print "Finished preliminary checks.\n\n";
 
 ##
@@ -219,7 +227,7 @@ GET_USERNAME:
 		if (!defined($uid)) {
 			print "* That user was not found in the password file. Enter another user or\nCtrl-C to exit.\n";
 			goto GET_USERNAME;
-		}		
+		}
 
 		set_owner($uid, -1, @write_to_directories);
 	}
@@ -265,7 +273,7 @@ if ($no_psql) {
 			if (db_exists($config)) {
 				print "A database already exists with the name '$config->{'CUFTS_DB'}'. Do you want to drop\nthis database before continuing with installation?\nIf you do not drop the database, installation will continue without database modifications.\n\n** WARNING: dropping the database will lose any content currently stored! **\n\nDrop database?\n";
 				my $input = $term->readline("[y/N]: ");
-		
+
 				if ($input =~ /^\s*y/i) {
 					drop_databases($config);
 				} else {
@@ -291,7 +299,7 @@ if ($no_psql) {
 			##
 			## Create tables
 			##
-		
+
 			print "Creating CUFTS database tables and seeding database. Ignore the NOTICE: lines.\nYou may be asked for the password again.\n";
 			$result = `cat sql/CUFTS/*.sql sql/CUFTS/views/*.sql sql/CJDB/*.sql sql/CUFTS/init/*.sql | psql -q --username=$config->{'CUFTS_USER'} $pw $config->{'CUFTS_DB'}`;
 			if ($result =~ /ERROR/) {
@@ -314,8 +322,16 @@ if ($no_psql) {
 	}
 }
 
-check_modules(@modules);
+my $missing = check_modules(@modules);
 optional_modules(@optional_modules);
+
+if ( $missing ) {
+    print "Some modules were not found, do you want to install them from CPAN?";
+    my $input = $term->readline('[Y/n]: ');
+    unless ($input =~ /^\s*n/i) {
+        install_modules();
+    }
+}
 
 print "\n\nDONE!\n\n";
 
@@ -345,7 +361,7 @@ sub check_DBI {
 	print "DBI installed... ";
 	my $dbi = 0;
 	my $dbd = 0;
-	
+
 	eval { require DBI; };
 	if ($@) {
 		print "no.\n";
@@ -379,12 +395,12 @@ sub check_psql {
 	my $psql_check = `psql --help`;
 	if ($psql_check =~ /PostgreSQL/) {
 		$psql = 1;
-	} 	
+	}
 
 	$psql_check = `createdb --help`;
 	if ($psql_check =~ /PostgreSQL/) {
 		$psql = 1;
-	} 	
+	}
 
 	print $psql ? "yes.\n" : "no.\n";
 
@@ -401,7 +417,7 @@ sub check_psql {
 
 sub verify_cwd {
 	my $cwd = shift;
-	
+
 	my @files = qw(
 		util/install.pl
 		lib/CUFTS/Resources.pm
@@ -438,19 +454,19 @@ sub copy_files {
 }
 
 ##
-## write_config_file - Creates a new BasicConfig file based on a template. This 
+## write_config_file - Creates a new BasicConfig file based on a template. This
 ## will overwrite the existing config file, but a backup copy is made.
 ##
 
 sub write_config_file {
 	my ($file, $config) = @_;
-	
+
 	-e $file and
 		`cp '$file' ${file}.backup`;
 
 	open CONFIG, ">$file"  or
 		die "Unable to open configuration file for writing: $!";
-	
+
 	print CONFIG <<EOF;
 ## CUFTS::BasicConfig
 ##
@@ -490,10 +506,10 @@ EOF
 	close CONFIG;
 
 }
-	
+
 sub get_existing_config {
 	my ($config) = @_;
-	
+
 	eval { require CUFTS::BasicConfig };
 	unless ($@) {
 		$config->{'CUFTS_DB'}         = $CUFTS::Config::CUFTS_DB || 'CUFTS';
@@ -506,11 +522,11 @@ sub get_existing_config {
 
 sub get_new_config {
 	my ($config) = @_;
-	
+
 	print "CUFTS Database name: $config->{'CUFTS_DB'}\n";
 	my $input_cufts_db = $term->readline("[$config->{'CUFTS_DB'}]: ");
 	defined($input_cufts_db) && $input_cufts_db ne '' and
-		$config->{'CUFTS_DB'} = $input_cufts_db; 
+		$config->{'CUFTS_DB'} = $input_cufts_db;
 
 	print "CUFTS Database user: $config->{'CUFTS_USER'}\n";
 	if ($config->{'CUFTS_USER'} eq 'root') {
@@ -538,12 +554,12 @@ sub get_new_config {
 	print "\n";
 }
 
-	
+
 sub db_exists {
 	my ($config) = @_;
 
 	print "Trying DBI connection...";
-		
+
 	my $dbh = DBI->connect("dbi:Pg:dbname=$config->{'CUFTS_DB'}", $config->{'CUFTS_USER'}, $config->{'CUFTS_PASSWORD'}, {'PrintError' => 0});
 	if (defined($dbh)) {
 		print " found.\n";
@@ -557,10 +573,10 @@ sub db_exists {
 		if ($DBI::errstr =~ /user\s+".*?"\s+does\s+not\s+exist/i) {
 			die("The user you entered does not exist in the database. Please add the user before attempting to install,\nor skip the automated database installation.\n");
 		}
-		
+
 		die("Unexpected DBI error connecting to database: $DBI::errstr\n");
 	}
-}	
+}
 
 
 sub drop_databases {
@@ -582,7 +598,7 @@ sub show_notes {
 	print "* CUFTS needs to write to a few directories as the web server for session\ntracking, logs, etc. If you are not running as root, you will have to\nchown these directories manually, or allow the installation script to\nmake them world writable.\n\n";
 	print "If you need to set up PostgreSQL or DBI, or switch to root, you can exit now.\n";
 	print "Continue with installation?\n";
-	
+
 	my $input = $term->readline("[Y/n]: ");
 	if ($input =~ /^\s*n/i) {
 		return 0;
@@ -616,26 +632,26 @@ sub set_owner {
 			print "failed.\n";
 		}
 	}
-	print "\n";	
+	print "\n";
 }
 
 
 sub setup_web_apps {
 	my ($config) = @_;
-	
+
 	print "\nDo you want to configure the web applications?\n";
 	return if $term->readline('[Y/n]: ') =~ /^\s*n/i;
-	
+
 	create_apache_config_block($config);
 }
 
 
 sub create_apache_config_block {
 	my ($config, $directory) = @_;
-	
+
 	print "\nDo you have access to update your web server's config file?\n";
 	my $input = $term->readline('[Y/n]: ');
-	
+
 	if ($input =~ /^\s*n/i) {
 		create_apache_config_no($config, $directory);
 	} else {
@@ -654,14 +670,14 @@ sub create_apache_config_block {
 		}
 	}
 }
-			
+
 
 sub create_apache_config_modperl2 {
 	my ($config, $directory) = @_;
-	
+
 	open CONF, ">$config->{'CUFTS_BASE_DIR'}/util/httpd.conf" or
 		die("Unable to open util/httpd.conf file for writing: $!");
-		
+
 	print CONF <<EOF;
 
     PerlRequire $config->{'CUFTS_BASE_DIR'}/util/startup.pl
@@ -695,10 +711,10 @@ EOF
 
 sub create_apache_config_modperl1 {
 	my ($config, $directory) = @_;
-	
+
 	open CONF, ">$config->{'CUFTS_BASE_DIR'}/util/httpd.conf" or
 		die("Unable to open util/httpd.conf file for writing: $!");
-		
+
 	print CONF <<EOF;
 
     PerlRequire $config->{'CUFTS_BASE_DIR'}/util/startup.pl
@@ -729,14 +745,14 @@ EOF
 
 	print "\nhttpd.conf file created. Copy the following line into your\nApache config file:\n\nInclude $config->{'CUFTS_BASE_DIR'}/util/httpd.conf\n\nIf you do NOT have Apache::DBI installed, you should comment out\nthe 'use Apache::DBI' line from $config->{'CUFTS_BASE_DIR'}/util/startup.pl\n\n";
 }
-	
-		
+
+
 sub create_apache_config_no {
 	my ($config, $directory) = @_;
 
 	print "\nIf you do not have access to the Apache config file,\nyou will have to run the web applications as CGIs.  This setup\nis NOT recommended and as such no support is included here.\nInformation about running Catalyst (which CUFTS uses as a web\nframework) through CGI can be found at the Catalyst web site.\n";
-}	
-	
+}
+
 
 
 ##
@@ -763,6 +779,8 @@ sub check_modules {
 	} else {
 		print "You're missing some modules. Please use CPAN to install them.\nYou can use $0 -m to check for the modules again.\n";
 	}
+
+    return $missing;
 }
 
 sub optional_modules {
@@ -780,20 +798,46 @@ sub optional_modules {
 			$missing++;
 		}
 	}
+
+    return $missing;
 }
-	
-	
+
 
 sub check_module {
 	my ($module) = @_;
 
 	$module =~ s#::#/#g;
 	$module .= '.pm';
-	
+
 	eval { require $module };
 	return $@ =~ /Can't\slocate/ ? 0 : 1;
 }
 
+
+sub install_modules {
+    my (@modules) = @_;
+
+    use CPAN;
+
+    # CPAN::HandleConfig->load;
+    # CPAN::Shell::setup_output;
+    # CPAN::Index->reload;
+
+    print "\nCUFTS will install missing Perl modules it needs to work...\n";
+
+    foreach my $module (sort @modules) {
+        print "Checking for module $module... ";
+        if (check_module($module)) {
+            print "found.\n";
+        }
+        else {
+            print "not found, attempting install.\n";
+            CPAN::Shell->install($module);
+        }
+    }
+
+    print "Done installing modules";
+}
 
 1;
 
