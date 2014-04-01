@@ -142,6 +142,11 @@ sub site_files :Chained('site') :PathPart('sites') :Args() {
     my ( $self, $c, @args ) = @_;
 
     my $path = $c->config->{root} . '/sites/' . join('/', @args);
+    if ( !-e $path ) {
+        $c->stash->{error} = $c->loc('Unable to find file: ') . $path;
+        return $c->forward('default');
+    }
+
     $c->serve_static_file($path);
 }
 
@@ -149,15 +154,13 @@ sub site_files :Chained('site') :PathPart('sites') :Args() {
 
 =head2 default
 
-
-
 Standard 404 error page
 
 =cut
 
 sub default :Path {
     my ( $self, $c ) = @_;
-    $c->response->body( 'Page not found' );
+    $c->response->body( $c->stash->{error} || 'Page not found' );
     $c->response->status(404);
 }
 
