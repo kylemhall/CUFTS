@@ -42,8 +42,14 @@ my @modules = qw(
     Biblio::COUNTER
     Business::ISSN
     Catalyst
+    Catalyst::Devel
+    Catalyst::Runtime
+    Catalyst::Plugin::Cache::Store::FastMmap
+    Catalyst::Plugin::ConfigLoader
     Catalyst::Plugin::FillInForm
     Catalyst::Plugin::FormValidator
+    Catalyst::Plugin::I18N
+    Catalyst::Plugin::Static::Simple
     Catalyst::Plugin::Session::Store::FastMmap
     Catalyst::Plugin::Session::State::Cookie
     Catalyst::View::Download::CSV
@@ -85,6 +91,7 @@ my @modules = qw(
     Net::LDAPS
     Net::SMTP
     Perl6::Export::Attrs
+    Set::Object
     SQL::Abstract
     String::Approx
     String::Util
@@ -98,6 +105,7 @@ my @modules = qw(
     URI::Escape
     URI::OpenURL
     XML::DOM
+    XML::LibXML
     XML::Parser::Lite::Tree
     XML::RAI
 );
