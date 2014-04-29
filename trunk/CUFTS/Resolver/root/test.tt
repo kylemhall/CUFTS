@@ -11,14 +11,14 @@
 [%- SET display_templates = [ ['main', 'human'], ['xml', 'XML'], ['opensearch', 'OpenSearch'], ] -%]
 [%- SET genres = [ 'article', 'book', 'bookitem', 'journal' ] -%]
 <div id="test">
-	<form name="testform" action="[% url_base %]/test/do" method="post">
+	<form name="testform" action="[% c.uri_for( c.controller('Test').action_for('do') ) | html %]" method="post">
 		<label for="_site">site</label>
 		<select name="_site" id="_site">
 			[% FOREACH site IN sites %]
 				<option value="[% site.key %]" [% 'SELECTED' IF site.key == current_site_key %]>[% site.name %] ([% site.key %])</option>
 			[% END %]
 		</select><br />
-		
+
 		<label for="_template">template</label>
 		<select name="_template" id="_template">
 			[% FOREACH display_template IN display_templates %]
@@ -32,7 +32,7 @@
 				<option value="[% genre %]">[% genre %]</option>
 			[% END %]
 		</select><br />
-		
+
 		<label for="atitle">article title</label>
 		<input type="text" name="atitle" id="atitle" size="50" maxlength="256"/><br />
 
@@ -50,15 +50,15 @@
 
 		<div class="labels"><label for="pages" class="col1">pages</label> / <label for="spage" class="col2">start</label> / <label for="pages" class="col3">end</label></div>
 		<input type="text" name="pages" id="pages" class="col1" size="10" maxlength="9" /> / <input type="text" name="spage" id="spage" class="col2" size="10" maxlength="9" /> / <input type="text" name="epage" id="epage" class="col3" size="10" maxlength="16" /> <br />
-		
+
 		<label for="doi">DOI</label>
 		<input type="text" name="doi" id="doi" /><br />
 
 		<label for="doi">PMID</label>
 		<input type="text" name="pmid" id="pmid" /><br />
-		
+
 		<input type="submit" name="_submit" value="submit" class="submit"/>
-		
+
 		<hr />
 
 		[% SET tests = [] %]
@@ -66,7 +66,7 @@
 		[% FOREACH test IN tests %]
 			<input type="submit" value="fillin" onClick="[%- INCLUDE create_test_js test = test -%] return false;" />[% PROCESS describe_test %]<br />
 		[% END %]
-		
+
 	</form>
 </div>
 </body>
@@ -87,7 +87,7 @@
 		[%- IF key == 'genre' -%]
 			[%- FOREACH genre IN genres -%]
 				[%- IF genre == test.$key -%]
-document.forms['testform'].genre.options[[% loop.index %]].selected = 1; 
+document.forms['testform'].genre.options[[% loop.index %]].selected = 1;
 					[%- LAST -%]
 				[%- END -%]
 			[%- END -%]
