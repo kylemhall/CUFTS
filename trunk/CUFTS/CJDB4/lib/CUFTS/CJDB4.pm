@@ -3,6 +3,7 @@ use Moose;
 use namespace::autoclean;
 
 use Catalyst::Runtime 5.80;
+use CUFTS::Config;
 
 # Set flags and add plugins for the application.
 #
@@ -60,6 +61,16 @@ __PACKAGE__->config(
     # Disable deprecated behavior needed by old applications
     disable_component_resolution_regex_fallback => 1,
     enable_catalyst_header => 1, # Send X-Catalyst header
+
+    # Default database connection from Config
+    'Model::CUFTS' => {
+        connect_info => {
+            dsn      => $CUFTS::Config::CUFTS_DB_STRING,
+            user     => $CUFTS::Config::CUFTS_USER,
+            password => $CUFTS::Config::CUFTS_PASSWORD,
+            auto_savepoint => 1
+        }
+    },
 );
 
 # Start the application
