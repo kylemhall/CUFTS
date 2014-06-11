@@ -65,6 +65,7 @@ BEGIN {
         GenericJournalDOI
         GenericPrintJournal
         Google::GoogleSearch
+        GeoScienceWorld
         Hein
         Highwire
         HighwireFree
