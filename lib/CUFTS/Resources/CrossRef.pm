@@ -104,10 +104,10 @@ sub get_records {
 
     # Check the cache
 
-    my $cache_data = $schema->resultset('SearchCache')->search(
+    my $cache_data = $schema->resultset('SearchCache')->search({
         type    => 'crossref',
-        'query' => $cache_query,
-    )->first;
+        query => $cache_query,
+    })->first;
 
     if ( !defined($cache_data) ) {
 
