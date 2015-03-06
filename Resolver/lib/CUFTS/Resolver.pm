@@ -23,14 +23,17 @@ use Catalyst qw/
     -Debug
     ConfigLoader
     Static::Simple
+    I18N
 /;
 
 
 extends 'Catalyst';
 
 has 'site' => (
-	is => 'rw',
-	isa => 'Object',
+    is        => 'rw',
+    isa       => 'Object',
+    clearer   => 'clear_site',
+    predicate => 'has_site',
 );
 
 our $VERSION = '0.01';
@@ -49,6 +52,7 @@ __PACKAGE__->config(
     # Disable deprecated behavior needed by old applications
     disable_component_resolution_regex_fallback => 1,
     enable_catalyst_header => 1, # Send X-Catalyst header
+
     # Default database connection from Config
     'Model::CUFTS' => {
         connect_info => {
@@ -114,7 +118,6 @@ sub uri_for_static {
 
     return $c->uri_for( '/static/' . $path );
 }
-
 
 
 

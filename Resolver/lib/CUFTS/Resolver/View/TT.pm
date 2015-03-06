@@ -3,6 +3,11 @@ package CUFTS::Resolver::View::TT;
 use strict;
 use base 'Catalyst::View::TT';
 
+__PACKAGE__->config(
+    TEMPLATE_EXTENSION => '.tt',
+    render_die => 1,
+);
+
 =head1 NAME
 
 CUFTS::Resolver::V::TT - TT View Component

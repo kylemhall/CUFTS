@@ -16,16 +16,37 @@ sub base : Chained('/') PathPart('') CaptureArgs(0) {
     my ($self, $c) = @_;
 
     $c->stash->{extra_js}  = [];
+    $c->stash->{extra_css} = [];
 }
 
 sub site : Chained('base') PathPart('site') CaptureArgs(1) {
     my ($self, $c, $site_key) = @_;
+
+    if ( $site_key =~ /^(.+)!sandbox$/ ) {
+        $site_key = $1;
+        $c->stash->{sandbox} = 1;
+    }
+    my $box = $c->stash->{sandbox} ? 'sandbox' : 'active';
 
     my $site = $c->model('CUFTS::Sites')->find({ key => $site_key });
     if ( !defined($site) ) {
         die("Unrecognized site key: $site_key");
     }
     $c->site( $site );
+
+    # Set up site specific CSS file if it exists
+    my $site_css = '/sites/' . $site->id . "/static/css/${box}/crdb.css";
+    if ( -e ($c->config->{root} . $site_css) ) {
+        $c->stash->{site_css_uri} = $c->uri_for( $site_css );
+    }
+
+    $c->stash->{extra_js}    = [];
+    $c->stash->{extra_css}   = [];
+    $c->stash->{breadcrumbs} = [];
+
+    $c->stash->{additional_template_paths} = [ $c->config->{root} . '/sites/' . $site->id . "/${box}" ];
+
+    push @{$c->stash->{breadcrumbs}}, [ $c->uri_for_site( $c->controller('Root')->action_for('site_index') ), $c->loc('Electronic Resources') ];
 }
 
 sub end : ActionClass('RenderView') {

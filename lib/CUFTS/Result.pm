@@ -24,6 +24,11 @@ has 'site' => (
     is  => 'rw',
 );
 
+has 'extra_data' => (
+    isa => 'Ref',
+    is  => 'rw',
+);
+
 
 ##
 ## If there's only a scalar passed in, then treat it as the url field.

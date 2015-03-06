@@ -521,6 +521,10 @@ sub can_getDatabase {
 sub get_records {
     my ( $class, $schema, $resource, $site, $request ) = @_;
 
+    if ( $request->genre ne 'journal' && $request->genre ne 'article' ) {
+        return [];
+    }
+
     my $active = $class->_search_active( $schema, $resource, $site, $request );
 
     # Do date range check, embargo, etc...
