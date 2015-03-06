@@ -1,3 +1,4 @@
+[% IF no_wrapper == 1 %][%- content -%][% RETURN %][% END %]
 <!DOCTYPE html>
 <html lang="en">
 [%#- PROCESS site_setup.tt -%]
