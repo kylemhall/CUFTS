@@ -311,7 +311,7 @@ sub parse_openurl_0 {
         if ($field eq 'id') {
             # Move id fields into seperate fields
 
-            my ($subfield, $value) = split ':', $value;
+            my ($subfield, $value) = split( ':', $value, 2 );
             if ( grep {$_ eq $subfield} qw( doi oai pmid bibcode ) ) {
                 $request->$subfield($value);
             }
