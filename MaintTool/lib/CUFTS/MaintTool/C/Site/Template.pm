@@ -4,8 +4,13 @@ use strict;
 use base 'Catalyst::Base';
 
 my @valid_states = ( 'active', 'sandbox' );
-my @valid_types  = ( 'crdb_css', 'cjdb_css', 'cjdb_template', 'crdb_template',
-                     'crdb4_css', 'cjdb4_css', 'cjdb4_template', 'crdb4_template', );
+my @valid_types  = (
+                        'cjdb_css', 'cjdb_template',
+                        'crdb_css', 'crdb_template',
+                        'cjdb4_css', 'cjdb4_template',
+                        'crdb4_css', 'crdb4_template',
+                        'resolver_css', 'resolver_template'
+                    );
 
 my $form_validate = {
     optional => [ 'submit', 'cancel', 'template_contents' ],
@@ -403,6 +408,76 @@ sub menu_crdb4 : Local {
 }
 
 
+sub menu_resolver : Local {
+    my ( $self, $c ) = @_;
+
+    my $site = $c->stash->{current_site};
+
+    ##
+    ## Get Resolver template files, active, and sandbox lists
+    ##
+
+    my @resolver_template_list = qw(
+        errors.tt
+        layout.tt
+        main.tt
+        main_request.tt
+        main_resolve.tt
+        page_footer.tt
+        page_header.tt
+        page_title.tt
+    );
+
+    my $resolver_active_dir  = get_site_base_dir('resolver_template', $site, '/active');
+    my $resolver_sandbox_dir = get_site_base_dir('resolver_template', $site, '/sandbox');
+
+    opendir ACTIVE, $resolver_active_dir
+    or die('Unable to open resolver site active template directory for reading');
+    my @resolver_active_templates = grep !/^\./, readdir ACTIVE;
+    closedir ACTIVE;
+
+    opendir SANDBOX, $resolver_sandbox_dir
+    or die('Unable to open resolver site sandbox template directory for reading');
+    my @resolver_sandbox_templates = grep !/^\./, readdir SANDBOX;
+    closedir SANDBOX;
+
+    ##
+    ## Get CSS files, active and sandbox lists
+    ##
+
+    my @resolver_css_list        = qw( resolver.css );
+    my $resolver_active_css_dir  = get_site_base_dir( 'resolver_css', $site, 'active'  );
+    my $resolver_sandbox_css_dir = get_site_base_dir( 'resolver_css', $site, 'sandbox' );
+
+    opendir ACTIVE, $resolver_active_css_dir
+    or die('Unable to open resolver site active CSS directory for reading');
+    my @resolver_active_css = grep !/^\./, readdir ACTIVE;
+    closedir ACTIVE;
+
+    opendir SANDBOX, $resolver_sandbox_css_dir
+    or die('Unable to open resolver site sandbox CSS directory for reading');
+    my @resolver_sandbox_css = grep !/^\./, readdir SANDBOX;
+    closedir SANDBOX;
+
+    $c->stash->{resolver_url} = $CUFTS::Config::RESOLVER_URL;
+
+    $c->stash->{active_templates}   = \@resolver_active_templates;
+    $c->stash->{sandbox_templates}  = \@resolver_sandbox_templates;
+    $c->stash->{templates}          = \@resolver_template_list;
+
+    $c->stash->{csses}         = \@resolver_css_list;
+    $c->stash->{active_csses}  = \@resolver_active_css;
+    $c->stash->{sandbox_csses} = \@resolver_sandbox_css;
+
+
+    $c->stash->{active_url}  = $CUFTS::Config::RESOLVER_URL . $site->key . '/';
+    $c->stash->{sandbox_url} = $CUFTS::Config::RESOLVER_URL . $site->key . '!sandbox/';
+
+    $c->stash->{header_section} = 'Resolver Templates';
+
+    $c->stash->{type} = 'resolver';
+    $c->stash->{template} = 'site/template/menu.tt';
+}
 
 
 sub view : Local {
@@ -565,6 +640,9 @@ sub get_base_dir {
 
         crdb4_css           => $CUFTS::Config::CRDB4_CSS_DIR,
         crdb4_template      => $CUFTS::Config::CRDB4_TEMPLATE_DIR,
+
+        resolver_css        => $CUFTS::Config::RESOLVER_CSS_DIR,
+        resolver_template   => $CUFTS::Config::RESOLVER_TEMPLATE_DIR,
     );
 
     return $dir_map{$type};
@@ -587,6 +665,9 @@ sub get_site_base_dir {
 
         crdb4_css           => [ $CUFTS::Config::CRDB4_SITE_CSS_DIR, $site->id, 'static', 'css' ],
         crdb4_template      => [ $CUFTS::Config::CRDB4_SITE_TEMPLATE_DIR, $site->id ],
+
+        resolver_css        => [ $CUFTS::Config::RESOLVER_SITE_CSS_DIR, $site->id, 'static', 'css' ],
+        resolver_template   => [ $CUFTS::Config::RESOLVER_SITE_TEMPLATE_DIR, $site->id ],
     );
 
     my $path;
