@@ -87,6 +87,7 @@ BEGIN {
         MetaPress
         Micromedia_CNS
         Micromedia
+        MonographsParallel
         Muse
         NRC
         OCLC

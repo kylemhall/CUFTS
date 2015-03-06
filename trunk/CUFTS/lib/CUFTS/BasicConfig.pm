@@ -20,9 +20,9 @@ use vars qw(
 	$CUFTS_MAIL_FROM
 );
 
-$CUFTS_BASE_DIR = '/opt/devel/CUFTS';
+$CUFTS_BASE_DIR = '/opt/devel/CUFTS3';
 
-$CUFTS_DB = 'CUFTS3';
+$CUFTS_DB = 'CUFTS34';
 $CUFTS_USER = 'tholbroo';
 $CUFTS_PASSWORD = '';
 

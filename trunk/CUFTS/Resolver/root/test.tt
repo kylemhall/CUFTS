@@ -1,76 +1,136 @@
-<html>
-<head>
-	<title>CUFTS resolver test</title>
-	<link rel="StyleSheet" href="[% c.uri_for_static('css/test.css') %]" type="text/css" media="screen, print" />
-	<script src="[% c.uri_for_static('js/test.js') %]" type="text/javascript"></script>
-	<script src="[% c.uri_for_static('js/jquery.js') %]" type="text/javascript"></script>
-</head>
+[% extra_js.push( c.uri_for_static('js/test.js') ) %]
+[% extra_css.push( c.uri_for_static('css/test.css') ) %]
 
-<body>
-[% INCLUDE main_header.tt %]
 [%- SET display_templates = [ ['main', 'human'], ['xml', 'XML'], ['opensearch', 'OpenSearch'], ] -%]
 [%- SET genres = [ 'article', 'book', 'bookitem', 'journal' ] -%]
+
 <div id="test">
-	<form name="testform" action="[% c.uri_for( c.controller('Test').action_for('do') ) | html %]" method="post">
-		<label for="_site">site</label>
-		<select name="_site" id="_site">
-			[% FOREACH site IN sites %]
-				<option value="[% site.key %]" [% 'SELECTED' IF site.key == current_site_key %]>[% site.name %] ([% site.key %])</option>
-			[% END %]
-		</select><br />
 
-		<label for="_template">template</label>
-		<select name="_template" id="_template">
-			[% FOREACH display_template IN display_templates %]
-				<option value="[% display_template.0 %]">[% display_template.1 %]</option>
-			[% END %]
-		</select><br />
+	<form name="testform" class="form-horizontal" action="[% c.uri_for( c.controller('Test').action_for('do') ) | html %]" method="post">
 
-		<label for="genre">genre</label>
-		<select name="genre" id="genre">
-			[% FOREACH genre IN genres %]
-				<option value="[% genre %]">[% genre %]</option>
-			[% END %]
-		</select><br />
+		<div class="control-group">
+			<label class="control-label" for="_site">site</label>
+			<div class="controls">
+				<select class="span4" name="_site" id="_site">
+					[% FOREACH site IN sites %]
+						<option value="[% site.key | html %]" [% 'SELECTED' IF site.key == current_site_key %]>[% site.name | html %] ([% site.key | html %])</option>
+					[% END %]
+				</select>
+			</div>
+		</div>
 
-		<label for="atitle">article title</label>
-		<input type="text" name="atitle" id="atitle" size="50" maxlength="256"/><br />
+		<div class="control-group">
+			<label class="control-label" for="_template">template</label>
+			<div class="controls">
+				<select class="span2" name="_template" id="_template">
+					[% FOREACH display_template IN display_templates %]
+						<option value="[% display_template.0 | html %]">[% display_template.1 | html %]</option>
+					[% END %]
+				</select>
+			</div>
+		</div>
 
-		<label for="title">source/title</label>
-		<input type="text" name="title" id="title" size="50" maxlength="256"/><br />
 
-		<div class="labels"><label for="aulast" class="col1">author (last</label>, <label for="aufirst" class="col2">first</label>)</div>
-		<input type="text" name="aulast" id="aulast" />, <input type="text" name="aufirst" id="aufirst" /><br />
+		<div class="control-group">
+			<label class="control-label" for="genre">genre</label>
+			<div class="controls">
+				<select class="span2" name="genre" id="genre">
+					[% FOREACH genre IN genres %]
+						<option value="[% genre | html %]">[% genre %]</option>
+					[% END %]
+				</select>
+			</div>
+		</div>
 
-		<div class="labels"><label for="issn" class="col1">ISSN</label> / <label for="eissn" class="col2">eISSN</label> / <label for="isbn" class="col3">ISBN</label></div>
-		<input type="text" name="issn" id="issn" class="col1" size="10" maxlength="9" /> / <input type="text" name="eissn" id="eissn" class="col2" size="10" maxlength="9" /> / <input type="text" name="isbn" id="isbn" class="col3" size="10" maxlength="16" /> <br />
+		<div class="control-group">
+			<label class="control-label" for="atitle">article title</label>
+			<div class="controls">
+				<input type="text" name="atitle" id="atitle" size="50" maxlength="256"/>
+			</div>
+		</div>
 
-		<div class="labels"><label for="volume" class="col1">volume</label> / <label for="issue" class="col2">issue</label> / <label for="date" class="col3">date</label></div>
-		<input type="text" name="volume" id="volume" class="col1" size="10" maxlength="9" /> / <input type="text" name="issue" id="issue" class="col2" size="10" maxlength="9" /> / <input type="text" name="date" id="date" class="col3" size="10" maxlength="16" /> <br />
+		<div class="control-group">
+			<label class="control-label" for="title">source/title</label>
+			<div class="controls">
+				<input class="span4" type="text" name="title" id="title" maxlength="256"/>
+			</div>
+		</div>
 
-		<div class="labels"><label for="pages" class="col1">pages</label> / <label for="spage" class="col2">start</label> / <label for="pages" class="col3">end</label></div>
-		<input type="text" name="pages" id="pages" class="col1" size="10" maxlength="9" /> / <input type="text" name="spage" id="spage" class="col2" size="10" maxlength="9" /> / <input type="text" name="epage" id="epage" class="col3" size="10" maxlength="16" /> <br />
+		<div class="control-group">
+			<div class="labels-row control-label">
+				<label for="aulast">author (last, </label><label for="aufirst">first)</label>
+			</div>
+			<div class="controls controls-row">
+				<input type="text" name="aulast" id="aulast" />, <input type="text" name="aufirst" id="aufirst" />
+			</div>
+		</div>
 
-		<label for="doi">DOI</label>
-		<input type="text" name="doi" id="doi" /><br />
+		<div class="control-group">
+			<div class="labels-row control-label">
+				<label for="issn">ISSN</label> / <label for="eissn">eISSN</label> / <label for="isbn">ISBN</label>
+			</div>
+			<div class="controls controls-row">
+				<input style="width: 6em;" type="text" name="issn" id="issn" maxlength="9" /> /
+				<input style="width: 6em;" type="text" name="eissn" id="eissn" maxlength="9" /> /
+				<input style="width: 12em;" type="text" name="isbn" id="isbn" maxlength="16" />
+			</div>
+		</div>
 
-		<label for="doi">PMID</label>
-		<input type="text" name="pmid" id="pmid" /><br />
+		<div class="control-group">
+			<div class="labels-row control-label">
+				<label for="volume">volume</label> / <label for="issue">issue</label> / <label for="date">date</label>
+			</div>
+			<div class="controls controls-row">
+				<input style="width: 5em;" type="text" name="volume" id="volume" maxlength="9" /> /
+				<input style="width: 5em;" type="text" name="issue" id="issue" maxlength="9" /> /
+				<input style="width: 5em;" type="text" name="date" id="date" maxlength="16" /> <br />
+			</div>
+		</div>
 
-		<input type="submit" name="_submit" value="submit" class="submit"/>
+		<div class="control-group">
+			<div class="labels-row control-label">
+				<label for="pages">pages</label> / <label for="spage">spage</label> / <label for="epage">epage</label>
+			</div>
+			<div class="controls controls-row">
+				<input style="width: 5em;" type="text" name="pages" id="pages" maxlength="6" /> /
+				<input style="width: 5em;" type="text" name="spage" id="spage" maxlength="6" /> /
+				<input style="width: 5em;" type="text" name="epage" id="epage" maxlength="6" /> <br />
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label class="control-label" for="doi">DOI</label>
+			<div class="controls">
+				<input type="text" name="doi" id="doi" size="50" maxlength="256"/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label class="control-label" for="pmid">pmid</label>
+			<div class="controls">
+				<input type="text" name="pmid" id="pmid" size="50" maxlength="256"/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<div class="controls">
+				<input type="submit" name="_submit" value="submit" class="btn"/>
+			</div>
+		</div>
+
 
 		<hr />
 
 		[% SET tests = [] %]
 		[% PROCESS test_data.tt %]
 		[% FOREACH test IN tests %]
-			<input type="submit" value="fillin" onClick="[%- INCLUDE create_test_js test = test -%] return false;" />[% PROCESS describe_test %]<br />
+			<button class="btn" type="submit" onClick="[%- INCLUDE create_test_js test = test -%] return false;">fill in</button> [% PROCESS describe_test %]<br />
 		[% END %]
 
 	</form>
 </div>
-</body>
-</html>
+
+
 [% BLOCK describe_test -%]
 	[% SET descriptions = [] -%]
 	[% FOREACH field IN ['atitle', 'title', 'issn', 'date', 'volume', 'issue', 'spage', 'pages', '_resources'] %]

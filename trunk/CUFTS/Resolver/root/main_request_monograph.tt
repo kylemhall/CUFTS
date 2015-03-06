@@ -1,0 +1,31 @@
+[%- SET isbn = request.isbn -%]
+
+<div id="request">
+ <dl class="dl-horizontal">
+
+  <dt>[% c.loc('title') | html %]</dt>
+  <dd>[% request.title || request.stitle | html %][% IF isbn %] [[% PROCESS dashed_isbn | html %]][% END %]
+   <br />
+
+   [% IF request.pages %]
+    [% c.loc('pages') | html %]: [% request.pages | html %]
+   [% ELSIF request.spage && request.epage %]
+    [% c.loc('pages') | html %]: [% request.spage | html %]-[% request.epage | html %]
+   [% ELSIF request.spage %]
+    [% c.loc('start page') | html %]: [% request.spage | html %]
+   [% END %]
+   [% IF request.date %][% c.loc('date') | html %]: [% request.date | html %][% END %]
+  </dd>
+
+</dl>
+</div>
+
+[% BLOCK dashed_isbn %]
+ [% IF isbn.length == 13 %]
+  [% isbn.substr(3,0,'-').substr(5,0,'-').substr(9,0,'-').substr(-1,0,'-') | html %]
+ [% ELSIF isbn.length == 10 %]
+  [% isbn.substr(1,0,'-').substr(5,0,'-').substr(-1,0,'-') | html %]
+ [% ELSE %]
+  [% isbn | html %]
+ [% END %]
+[% END %]
