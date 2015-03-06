@@ -100,6 +100,7 @@ my @modules = qw(
     String::Util
     Template
     Template::Plugin::JSON
+    Template::Plugin::JSON::Escape
     Template::Plugin::Number::Format
     Term::ReadLine
     Test::DBIx::Class
