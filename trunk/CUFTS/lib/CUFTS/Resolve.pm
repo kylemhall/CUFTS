@@ -364,7 +364,7 @@ sub overlay_global_resource_data {
                     : undef;
 
         # Flatten simple objetcs
-        $value = $value->type if $column eq 'resource_type';
+        $value = $value->type if defined($value) && $column eq 'resource_type';
 
         $resource->$column($value);
     }
