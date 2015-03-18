@@ -44,9 +44,14 @@ sub openurl : Chained('base') PathPart('openurl') Args() {
     # resolve the request
     my $results = $resolver->resolve( $sites, $request );
 
-    $c->stash->{results}  = $results;
-    $c->stash->{request}  = $request;
-    $c->stash->{template} = $template ? "${template}.tt" : 'main.tt';
+    my $request_id = sprintf('%x-%x-%x', time, $$, int rand 0x10000);  # Request IDs are session dependent, so we don't have to be too unique here
+
+    $c->session->{requests}->{$request_id} = $request;
+
+    $c->stash->{request_id} = $request_id;
+    $c->stash->{results}    = $results;
+    $c->stash->{request}    = $request;
+    $c->stash->{template}   = $template ? "${template}.tt" : 'resolve.tt';
 }
 
 =back

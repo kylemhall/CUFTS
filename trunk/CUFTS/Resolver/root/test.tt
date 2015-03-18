@@ -1,7 +1,7 @@
 [% extra_js.push( c.uri_for_static('js/test.js') ) %]
 [% extra_css.push( c.uri_for_static('css/test.css') ) %]
 
-[%- SET display_templates = [ ['main', 'human'], ['xml', 'XML'], ['opensearch', 'OpenSearch'], ] -%]
+[%- SET display_templates = [ ['resolve', 'human'], ['xml', 'XML'], ['opensearch', 'OpenSearch'], ] -%]
 [%- SET genres = [ 'article', 'book', 'bookitem', 'journal' ] -%]
 
 <div id="test">

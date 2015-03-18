@@ -27,7 +27,7 @@ $(document).ready( function() {
             resource_data.monograph_searches_total += 1;
 
             var location_td = $('<td>').addClass('location').text(search_data.name);
-            var holdings_td = $('<td>').addClass('holdings').html( $('<span>Searching</span> <i class="spinner"></i>') );
+            var holdings_td = $('<td>').addClass('holdings').html( $('<dl class="dl-horizontal"><dt>Status</dt><dd><span>Searching</span> <i class="spinner"></i></dd></dl>') );
 
             holdings_table.append( $('<tr>').attr('id', search_data_id).append( location_td ).append( holdings_td ) );
 
@@ -48,39 +48,60 @@ $(document).ready( function() {
             if ( data.total_results == 0 ) {
                 holdings_block.text( 'No holdings found.' );
             }
-            else if ( data.total_results > 1 ) {
+            else if ( data.total_results > 2 ) {
                 holdings_block.text( 'Too many matching results found: ' + data.total_results );
             }
             else {
-                var dl = $('<dl/>').addClass('dl-horizontal');
+                holdings_block.empty();
+                for ( var results_index = 0; results_index < data.results.length; results_index++ ) {
+                    var result = data.results[results_index];
 
-                dl.append(
-                    $('<dt/>').text( 'Title' ),
-                    $('<dd/>').text( data.results[0].title )
-                );
+                    var dl = $('<dl/>').addClass('dl-horizontal');
 
-                dl.append(
-                    $('<dt/>').text( 'ISBN' ),
-                    $('<dd/>').text( data.results[0].isbn )
-                );
+                    if ( result.title ) {
+                        dl.append(
+                            $('<dt/>').text( 'Title' ),
+                            $('<dd/>').text( result.title )
+                        );
+                    }
 
-                dl.append(
-                    $('<dt/>').text( 'Call Number' ),
-                    $('<dd/>').text( data.results[0].call_number )
-                );
+                    if ( result.isbn ) {
+                        dl.append(
+                            $('<dt/>').text( 'ISBN' ),
+                            $('<dd/>').text( result.isbn )
+                        );
+                    }
 
+                    if ( result.call_number ) {
+                        dl.append(
+                            $('<dt/>').text( 'Call Number' ),
+                            $('<dd/>').text( result.call_number )
+                        );
+                    }
 
-                // var availability_dd = $('<dd />');
-                // for ( var index = 0; index < data.results[0].availability; ++index ) {
-                //
-                // }
-                if ( jQuery.isArray(data.results[0].availability) ) {
-                    dl.append( $('<dt/>').text( 'Availability' ) );
-                    dl.append( $('<dd/>').html( data.results[0].availability.join('<br/>') ) );
+                    if ( result.fulltext ) {
+                        dl.append(
+                            $('<dt/>').text( 'Fulltext' ),
+                            $('<dd/>').append(
+                                $('<a/>').attr('href', result.url ).text('Available online')
+                            )
+                        );
+                    }
+
+                    if ( jQuery.isArray(result.availability) ) {
+                        dl.append( $('<dt/>').text( 'Print' ) );
+                        for ( var avail_index = 0; avail_index < result.availability.length; ++avail_index ) {
+                            var avail = result.availability[avail_index];
+                            dl.append(
+                                $('<dd/>').append(
+                                    $('<a/>').attr('href', avail.url ).text(avail.holdings)
+                                )
+                            );
+                        }
+                    }
+
+                    holdings_block.append(dl);
                 }
-
-                holdings_block.empty().append(dl);
-
             }
         }
     }
