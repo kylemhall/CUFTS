@@ -25,6 +25,9 @@ use CUFTS::Exceptions;
 use CUFTS::Util::Simple;
 use CUFTS::Result;
 
+use String::Util qw(trim hascontent);
+use URI::Escape qw(uri_escape);
+
 use strict;
 
 sub services {
@@ -47,23 +50,36 @@ sub search_getHoldings {
 sub build_linkHoldings {
     my ( $class, $schema, $records, $resource, $site, $request ) = @_;
 
-    my $url = 'http://api.lib.sfu.ca/';
+    my %test_site_map = (
+        BVAS => 'Simon Fraser University',
+        ALU  => 'University of Alberta',
+    );
+
+    my $title = $request->title;
+    my $isbn  = $request->isbn;
+
+    my @results;
+    foreach my $test_site ( 'BVAS', 'ALU' ) {
+        my $api_url = "http://api.lib.sfu.ca/holdings_search/search?site=$test_site";
+        if ( hascontent($title) ) {
+            $api_url .= '&title=' . uri_escape($title);
+        }
+        if ( hascontent($isbn) ) {
+            $api_url .= '&isbn=' . uri_escape($isbn);
+        }
+
+        push @results, {
+            id   => $test_site,
+            name => $test_site_map{$test_site},
+            url  => $api_url,
+        }
+    }
+
     my $result = new CUFTS::Result(
         {
-            url => $url,
+            # url => $url,
             extra_data => {
-                targets => [
-                    {
-                        'id'   => 'BVAS',
-                        'name' => 'Simon Fraser University',
-                        'url'  => 'http://api.lib.sfu.ca/holdings_search/search',
-                    },
-                    {
-                        'id'   => 'ALU',
-                        'name' => 'University of Alberta',
-                        'url'  => 'http://api.lib.sfu.ca/holdings_search/search',
-                    },
-                ],
+                targets => \@results,
             },
         }
     );
