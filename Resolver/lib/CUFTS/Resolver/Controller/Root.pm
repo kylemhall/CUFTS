@@ -49,6 +49,14 @@ sub site : Chained('base') PathPart('site') CaptureArgs(1) {
     push @{$c->stash->{breadcrumbs}}, [ $c->uri_for_site( $c->controller('Root')->action_for('site_index') ), $c->loc('Electronic Resources') ];
 }
 
+sub error : Chained('site') PathPart('error') Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash(
+        template      => 'fatal_error.tt',
+        fatal_errors  => $c->error,
+    );
+}
+
 sub end : ActionClass('RenderView') {
     my ( $self, $c ) = @_;
 

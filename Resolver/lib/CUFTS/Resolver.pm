@@ -23,6 +23,9 @@ use Catalyst qw/
     -Debug
     ConfigLoader
     Static::Simple
+    Session
+    Session::Store::File
+    Session::State::Cookie
     I18N
 /;
 

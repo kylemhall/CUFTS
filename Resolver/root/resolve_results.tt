@@ -42,6 +42,11 @@
   </ul>
   </div>
  [% END %]
+
+ <div>
+  <a href="[% c.uri_for_site( c.controller('DocumentDelivery').action_for('authenticate'), [ request_id ] ) %]">Request item</a>
+ </div>
+
 </div>
 
 [% BLOCK show_result %]
