@@ -88,7 +88,7 @@ $(document).ready( function() {
                         );
                     }
 
-                    if ( jQuery.isArray(result.availability) ) {
+                    if ( jQuery.isArray(result.availability) && result.availability.length ) {
                         dl.append( $('<dt/>').text( 'Print' ) );
                         for ( var avail_index = 0; avail_index < result.availability.length; ++avail_index ) {
                             var avail = result.availability[avail_index];
