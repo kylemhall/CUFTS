@@ -107,14 +107,14 @@ foreach my $filename ( @ARGV ) {
                 if ( scalar @$records == 1 ) {
                     my $record = $records->[0];
                     if ( defined $record->ft_start_date ) {
-                        $row->{'Custom Date From'} = $record->ft_start_date;
+                        $row->{'Custom Date From'} = $record->ft_start_date->ymd;
                     }
                     if ( defined $record->ft_end_date ) {
-                        $row->{'Custom Date To'} = $record->ft_end_date;
+                        $row->{'Custom Date To'} = $record->ft_end_date->ymd;
                     }
                 }
                 elsif ( scalar @$records > 1 ) {
-                    $logger->warn('Matched multiple records for ' . $row->title);
+                    $logger->warn('Matched multiple records for ' . $row->{Title});
                 }
             }
 
@@ -127,7 +127,7 @@ foreach my $filename ( @ARGV ) {
     close $in_fh;
     close $out_fh;
 
-    $logger->info("Finished processing. Found $count journals tracked.");
+    $logger->info("Finished processing " . $resource->name . ". Found $count journals tracked.");
 }
 
 
@@ -144,23 +144,22 @@ sub row_string {
 sub get_resource_from_db_code {
     my ( $schema, $db_code, $site ) = @_;
 
-    my $local_resource = $schema->resultset('LocalResources')->search(
+    my $local_resources_rs = $schema->resultset('LocalResources')->search(
         {
-            site => $site->id,
-            -or => {
-                'me.proquest_identifier'       => $db_code,
+            'site'      => $site->id,
+            'me.active' => 't',
+            -or => [
+                'me.proquest_identifier'  => $db_code,
                 'resource.proquest_identifier' => $db_code,
-            }
+            ],                
         },
         {
-            join => [ 'resource' ]
+            join => 'resource',
         }
-    )->first;
-
-    if ( defined $local_resource ) {
-        return CUFTS::Resolve->overlay_global_resource_data($local_resource);
+    );
+    if ( $local_resources_rs->count == 1 ) {
+        return CUFTS::Resolve->overlay_global_resource_data($local_resources_rs->first);
     }
-
 
     return undef;
 }
@@ -184,111 +183,6 @@ sub get_cufts_records {
     return $records;
 }
 
-# sub load_site {
-#     my ($site) = @_;
-
-#     my $fh = new IO::File "> /tmp/summon.txt";
-#     if ( !defined($fh) ) {
-#         die( "Unable to create file for output.\n" );
-#     }
-
-#     my $site_id = $site->id;
-
-#     my $lj_iter = CUFTS::DB::LocalJournals->search({
-#         'active'          => 't',
-#         'resource.active' => 't',
-#         'resource.site'   => $site_id,
-#     },
-#     );
-#     my %jas;
-#     my $count;
-#     while ( my $lj = $lj_iter->next ) {
-
-#         my $gj = $lj->journal;
-#         my $ft_start_date  = defined($lj->ft_start_date)  ? $lj->ft_start_date  : defined($gj) ? $gj->ft_start_date  : undef;
-#         my $ft_end_date    = defined($lj->ft_end_date)    ? $lj->ft_end_date    : defined($gj) ? $gj->ft_end_date    : undef;
-#         my $embargo_days   = defined($lj->embargo_days)   ? $lj->embargo_days   : defined($gj) ? $gj->embargo_days   : undef;
-#         my $embargo_months = defined($lj->embargo_months) ? $lj->embargo_months : defined($gj) ? $gj->embargo_months : undef;
-#         my $ja_id          = defined($lj->journal_auth)   ? $lj->journal_auth   : defined($gj) ? $gj->journal_auth   : undef;
-
-#         next if !defined($ja_id);
-
-#         next if    is_empty_string($ft_start_date  )
-#                 && is_empty_string($ft_end_date    )
-#                 && is_empty_string($embargo_days   )
-#                 && is_empty_string($embargo_months );
-
-#         if ( !defined($ft_start_date) ) {
-#             $jas{$ja_id}->{start} = undef;
-#         }
-#         elsif ( !defined($jas{$ja_id}->{start}) || $ft_start_date lt $jas{$ja_id}->{start} ) {
-#             $jas{$ja_id}->{start} = $ft_start_date;
-#         }
-
-#         if ( !defined($ft_end_date) || $ft_end_date eq '2038-12-31' ) {
-#             $jas{$ja_id}->{end} = undef;
-#         }
-#         elsif ( !defined($jas{$ja_id}->{end}) || $ft_end_date gt $jas{$ja_id}->{end} ) {
-#             $jas{$ja_id}->{end} = $ft_end_date;
-#         }
-
-#         if ( not_empty_string($embargo_months) ) {
-#             $embargo_days = $embargo_months * 30;
-#         }
-#         if ( not_empty_string($embargo_days) ) {
-#             if ( !defined($jas{$ja_id}->{embargo}) || $embargo_days < $jas{$ja_id}->{embargo} ) {
-#                 $jas{$ja_id}->{embargo} = $embargo_days;
-#             }
-#         } else {
-#             $jas{$ja_id}->{embargo} = 0;
-#         }
-
-#     }
-
-#     $csv->print($fh, [
-#         "Title (Required)",
-#         "Default URL",
-#         "Publisher",
-#         "Public Note",
-#         "Display Public Note",
-#         "Location Note",
-#         "Display Location Note",
-#         "ISSN",
-#         "Coverage Date From",
-#         "Coverage Date To",
-#         "Language ID",
-#         "Alphabetization",
-#     ]);
-
-#     foreach my $ja_id ( keys %jas ) {
-#         my $journal_auth = CUFTS::DB::JournalsAuth->retrieve($ja_id);
-#         next if !defined($journal_auth);
-
-#         my $title = $journal_auth->title;
-
-#         my @issns = $journal_auth->issns;
-#         my $issn = scalar(@issns) ? $issns[0] : undef;
-
-#         $csv->print( $fh, [
-#             $title,
-#             "http://cufts2.lib.sfu.ca/CJDB/BVAS/$ja_id",
-#             undef,
-#             undef,
-#             undef,
-#             undef,
-#             undef,
-#             (scalar(@issns) ? $issns[0]->issn : undef),
-#             $jas{$ja_id}->{start},
-#             $jas{$ja_id}->{end},
-#             undef,
-#             undef,
-#         ]);
-#     }
-
-
-#     $fh->close();
-
-# }
 
 
 sub usage {
