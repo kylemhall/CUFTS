@@ -75,7 +75,10 @@ foreach my $filename ( @ARGV ) {
     }
     $logger->info("Loaded resource: " . $resource->name);
 
-    open my $out_fh, ">:encoding(utf8)", "$filename.processed";
+    my $out_filename = $filename;
+    $out_filename =~ s/\.txt$/.processed.txt/;
+
+    open my $out_fh, ">:encoding(utf8)", $out_filename;
     while ( my $row = $csv_in->getline($in_fh) ) {
         if ( $row->[0] !~ /\(\*/ ) {
             $csv_in->column_names($row);
@@ -98,7 +101,7 @@ foreach my $filename ( @ARGV ) {
                 foreach my $record (@$records) {
                     $logger->info("With:    ", join(', ', $record->title, $record->issn, $record->e_issn, (defined $record->ft_start_date ? $record->ft_start_date->ymd : ''), (defined $record->ft_end_date ? $record->ft_end_date->ymd : '') ) );
                 }
-                $row->{Status} = 'Tracked';
+                $row->{Status} = 'Subscribed';
                 $count++;
 
                 if ( scalar @$records == 1 ) {
