@@ -3,19 +3,38 @@
 <div id="request">
  <dl class="dl-horizontal">
 
-  <dt>[% c.loc('title') | html %]</dt>
-  <dd>[% request.title || request.stitle | html %][% IF isbn %] [[% PROCESS dashed_isbn | html %]][% END %]
-   <br />
+  <dt>[% c.loc('Title') | html %]</dt>
+  <dd>[% request.title || request.stitle || c.loc('Unknown') | html %]</dd>
 
-   [% IF request.pages %]
-    [% c.loc('pages') | html %]: [% request.pages | html %]
-   [% ELSIF request.spage && request.epage %]
-    [% c.loc('pages') | html %]: [% request.spage | html %]-[% request.epage | html %]
-   [% ELSIF request.spage %]
-    [% c.loc('start page') | html %]: [% request.spage | html %]
-   [% END %]
-   [% IF request.date %][% c.loc('date') | html %]: [% request.date | html %][% END %]
-  </dd>
+  [% IF request.au || request.aulast %]
+   <dt>[% c.loc('Author') | html %]</dt>
+   <dd>[% request.au || request.aulast | html %]</dd>
+  [% END %]
+
+  [% IF isbn %]
+   <dt>[% c.loc('ISBN') | html %]</dt>
+   <dd>[% PROCESS dashed_isbn | html %]</dd>
+  [% END %]
+
+  [% IF request.pages %]
+   <dt>[% c.loc('Pages') | html %]</dt>
+   <dd>[% request.pages | html %]</dd>
+  [% END %]
+
+  [% IF request.spage %]
+   <dt>[% c.loc('Pages') | html %]</dt>
+   <dd>[% request.spage | html %] - [% request.epage | html %]</dd>
+  [% END %]
+
+  [% IF request.date %]
+   <dt>[% c.loc('Date') | html %]</dt>
+   <dd>[% request.date | html %]</dd>
+  [% END %]
+
+  [% IF request.pub %]
+   <dt>[% c.loc('Publisher') | html %]</dt>
+   <dd>[% request.pub | html %]</dd>
+  [% END %]
 
 </dl>
 </div>
