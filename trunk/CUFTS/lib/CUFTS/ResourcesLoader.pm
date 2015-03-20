@@ -112,6 +112,7 @@ BEGIN {
         Wiley
         WileyBackfile
         Wilson
+        xISBN
     );
 
     # ElsevierEurope
