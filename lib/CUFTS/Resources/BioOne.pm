@@ -62,6 +62,7 @@ sub title_list_field_map {
     return {
         'Title'                     => 'title',
         'ISSN'                      => 'issn',
+        'E-ISSN'                    => 'e_issn',
         'ISSN/ISBN'                 => 'issn',
         'TITLE'                     => 'title',
         'URL'                       => 'journal_url',
