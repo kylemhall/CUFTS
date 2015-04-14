@@ -99,6 +99,7 @@ sub title_list_field_map {
         'FULLTEXT_START' => 'ft_start_date',
         'FULLTEXT_END'   => 'ft_end_date',
         'DB_IDENTIFIER'  => 'db_identifier',
+        'DB_Identifier'  => 'db_identifier',
         'URLBASE'        => 'journal_url',
         'PUBLISHER'      => 'publisher',
     };
