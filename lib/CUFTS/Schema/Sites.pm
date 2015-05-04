@@ -271,7 +271,7 @@ sub active_local_resources {
 }
 
 sub active_local_journals {
-    return shift->local_journals({ 'local_resource.active' => 't', 'local_journals.active' => 't' })->search(@_);
+    return shift->local_journals({ 'local_resource.active' => 't', 'me.active' => 't' })->search(@_);
 }
 
 sub local_journals {
