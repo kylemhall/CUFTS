@@ -1212,6 +1212,10 @@ GLOBAL_JOURNAL:
 
     }
 
+    @unique       = sort { $a->{title} cmp $b->{title} } @unique;
+    @more_current = sort { $a->{title} cmp $b->{title} } @more_current;
+    @others       = sort { $a->{title} cmp $b->{title} } @others;
+
     return {
         unique                 => \@unique,
         more_current           => \@more_current,
