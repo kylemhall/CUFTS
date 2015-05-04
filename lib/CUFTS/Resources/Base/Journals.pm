@@ -213,6 +213,18 @@ sub local_to_global_field {
     return 'journal';
 }
 
+sub fulltext_fields {
+    return [ qw(
+        ft_start_date
+        ft_end_date
+        embargo_days
+        embargo_months
+        current_months
+        current_years
+        coverage
+    ) ];
+}
+
 # Field validation. FormValidtor style validation usable by UIs to validate before saving to database
 
 sub validate_hash {
@@ -678,12 +690,12 @@ sub _search_active {
     elsif ( hascontent( $request->title ) ) {
         if ( defined $request->journal_auths && scalar @{$request->journal_auths} ) {
             $search_terms{'-or'} = [
-                { title        => { 'ilike' => $request->title } },
+                { title        => { 'ilike' => strip_wide_chars($request->title) } },
                 { journal_auth => { '-in'   => $request->journal_auths } }
             ];
         }
         else {
-            $search_terms{title} = { 'ilike' => $request->title };
+            $search_terms{title} = { 'ilike' => strip_wide_chars($request->title) };
         }
     }
     else {
@@ -744,16 +756,11 @@ sub filter_fulltext {
 sub has_fulltext {
     my ( $class, $record, $resource, $site, $request ) = @_;
 
-       hascontent( $record->ft_start_date )
-    or hascontent( $record->ft_end_date )
-    or hascontent( $record->vol_ft_start )
-    or hascontent( $record->vol_ft_end )
-    or hascontent( $record->iss_ft_start )
-    or hascontent( $record->iss_ft_end )
-    or hascontent( $record->coverage )
-    or return 0;
+    foreach my $field ( @{ $class->fulltext_fields } ) {
+        return 1 if hascontent($record->$field);
+    }
 
-    return 1;
+    return 0;
 }
 
 sub check_fulltext_vol_iss {
@@ -1108,6 +1115,144 @@ sub fast_overlay_global_title_data {
 }
 
 
+# Compares this resource against other resources for a site. Returns a hash
+# with { unique => [...], unkown => [...], less => [...], more => [...] }.
+# Resource is the global resource to check against.
+
+sub compare_against_existing {
+    my ( $class, $schema, $resource, $site, $logger ) = @_;
+
+    # TODO: This should probably support local journal lists too
+    my $global_journals_rs = $resource->global_journals;
+
+    my ( @unique, @more_current, @others );
+
+CHECK_JOURNAL:
+    while ( my $check_journal = $global_journals_rs->next() ) {
+        my $journal_auth_id = $check_journal->get_column('journal_auth');
+        next CHECK_JOURNAL if !$journal_auth_id;
+
+        if ( $logger ) {
+            $logger->info('Checking journal: ' . $check_journal->title);
+        }
+
+        if ( !$class->has_fulltext($check_journal) ) {
+            $logger->info(' Journal does not have fulltext data.');
+            next CHECK_JOURNAL;
+        }
+
+        # This is split into two queries because an "OR" on the journal_auth field is extremely slow for
+        # some reason.
+        my $matching_local_journals_rs = $site->active_local_journals->search({ 'me.journal_auth' => $journal_auth_id, 'me.resource' => undef });
+        my $local_count = $matching_local_journals_rs->count;
+        if ( $logger ) {
+            $logger->info(' Local matches: ' . $local_count);
+        }
+
+        my $matching_global_journals_rs = $site->active_local_journals->search( { 'global_journal.journal_auth' => $journal_auth_id, 'global_journal.resource' => { '!=' => $resource->id } }, { join => [ 'global_journal' ] } );
+        my $global_count = $matching_global_journals_rs->count;
+        if ( $logger ) {
+            $logger->info(' Global matches: ' . $global_count);
+        }
+
+
+        # Shortcut out early if we know there's definitely no other journals
+        if ( !$local_count && !$global_count ) {
+            $logger->info(' No other journals, list as unique');
+
+            push @unique, $class->_simplify_journal_to_ft($check_journal);
+            next CHECK_JOURNAL;
+        }
+
+
+        my $check_journal_is_current = !hascontent($check_journal->ft_end_date) && hascontent($check_journal->ft_start_date);
+        my $others_with_fulltext = 0;
+        my $others_with_current = 0;
+
+        if ( $local_count ) {
+LOCAL_JOURNAL:
+            while ( my $journal = $matching_local_journals_rs->next ) {
+                next LOCAL_JOURNAL if !$class->has_fulltext($journal);
+
+                # If the check journal isn't current
+                if ( !hascontent($journal->ft_end_date) && hascontent($journal->ft_start_date) ) {
+                    $others_with_current++;
+                }
+                else {
+                    $others_with_fulltext++;
+                }
+            }
+        }
+        if ( $global_count ) {
+GLOBAL_JOURNAL:
+            while ( my $journal = $matching_global_journals_rs->next ) {
+                my $overlay_journal = $class->fast_overlay_global_title_data($journal, $journal->global_journal);
+                next GLOBAL_JOURNAL if !$class->has_fulltext($overlay_journal);
+
+                # If the check journal isn't current
+                if ( !hascontent($overlay_journal->ft_end_date) && hascontent($overlay_journal->ft_start_date) ) {
+                    $others_with_current++;
+                }
+                else {
+                    $others_with_fulltext++;
+                }
+            }
+        }
+
+        if ( $others_with_current ) {
+            $logger->info(' Other records exist, and are current or this journal is not current.');
+            push @others, $class->_simplify_journal_to_ft($check_journal);
+        }
+        elsif ( $others_with_fulltext && $check_journal_is_current ) {
+            $logger->info(' Other records exist, but this journal is current.');
+            push @more_current, $class->_simplify_journal_to_ft($check_journal);
+        }
+        else {
+            $logger->info(' Other records exist, but don\'t have fulltext. List as unique.');
+            push @unique, $class->_simplify_journal_to_ft($check_journal);
+        }
+
+    }
+
+    return {
+        unique                 => \@unique,
+        more_current           => \@more_current,
+        others                 => \@others,
+        unique_printable       => $class->_simplify_journals_printable(\@unique),
+        more_current_printable => $class->_simplify_journals_printable(\@more_current),
+        others_printable       => $class->_simplify_journals_printable(\@others),
+    };
+}
+
+sub _simplify_journals_printable {
+    my ( $class, $journals_array ) = @_;
+    my @results;
+    foreach my $journal (@$journals_array) {
+        push @results, [ map { $journal->{$_} } ( 'title', @{$class->fulltext_fields} ) ];
+    }
+    return \@results;
+}
+
+sub _simplify_journal_to_ft {
+    my ( $class, $journal ) = @_;
+
+    my $record = {
+        title => $journal->title,
+        issn => $journal->issn || $journal->e_issn,
+    };
+    foreach my $field ( @{ $class->fulltext_fields } ) {
+        if ( hascontent($journal->$field) ) {
+            if ( ref $journal->$field && $journal->$field->can('ymd') ) {
+                $record->{$field} = $journal->$field->ymd;
+            }
+            else {
+                $record->{$field} = $journal->$field;
+            }
+        }
+    }
+
+    return $record;
+}
 
 ##
 ## CJDB specific code
