@@ -1165,7 +1165,6 @@ CHECK_JOURNAL:
         }
 
 
-        my $check_journal_is_current = !hascontent($check_journal->ft_end_date) && hascontent($check_journal->ft_start_date);
         my $others_with_fulltext = 0;
         my $others_with_current = 0;
 
@@ -1174,8 +1173,7 @@ LOCAL_JOURNAL:
             while ( my $journal = $matching_local_journals_rs->next ) {
                 next LOCAL_JOURNAL if !$class->has_fulltext($journal);
 
-                # If the check journal isn't current
-                if ( !hascontent($journal->ft_end_date) && hascontent($journal->ft_start_date) ) {
+                if ( $class->_journal_is_current($journal) ) {
                     $others_with_current++;
                 }
                 else {
@@ -1183,21 +1181,14 @@ LOCAL_JOURNAL:
                 }
             }
         }
+
         if ( $global_count ) {
 GLOBAL_JOURNAL:
             while ( my $journal = $matching_global_journals_rs->next ) {
                 my $overlay_journal = $class->fast_overlay_global_title_data($journal, $journal->global_journal);
                 next GLOBAL_JOURNAL if !$class->has_fulltext($overlay_journal);
 
-                # If the check journal isn't current
-                if (    !hascontent($overlay_journal->ft_end_date)
-                     && !hascontent($overlay_journal->embargo_days)
-                     && !hascontent($overlay_journal->embargo_months)
-                     && (
-                           hascontent($overlay_journal->ft_start_date)
-                        || hascontent($overlay_journal->embargo_days)
-                        || hascontent($overlay_journal->embargo_months)
-                     ) ) {
+                if ( $class->_journal_is_current($journal) ) {
                     $others_with_current++;
                 }
                 else {
@@ -1210,7 +1201,7 @@ GLOBAL_JOURNAL:
             $logger->info(' Other records exist, and are current or this journal is not current.');
             push @others, $class->_simplify_journal_to_ft($check_journal);
         }
-        elsif ( $others_with_fulltext && $check_journal_is_current ) {
+        elsif ( $others_with_fulltext && $class->_journal_is_current($check_journal) ) {
             $logger->info(' Other records exist, but this journal is current.');
             push @more_current, $class->_simplify_journal_to_ft($check_journal);
         }
@@ -1229,6 +1220,15 @@ GLOBAL_JOURNAL:
         more_current_printable => $class->_simplify_journals_printable(\@more_current),
         others_printable       => $class->_simplify_journals_printable(\@others),
     };
+}
+
+sub _journal_is_current {
+    my ( $class, $journal ) = @_;
+
+    return !hascontent($journal->ft_end_date)
+        && !hascontent($journal->embargo_days)
+        && !hascontent($journal->embargo_months)
+        &&  hascontent($journal->ft_start_date);
 }
 
 sub _simplify_journals_printable {
