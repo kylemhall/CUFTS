@@ -1190,7 +1190,14 @@ GLOBAL_JOURNAL:
                 next GLOBAL_JOURNAL if !$class->has_fulltext($overlay_journal);
 
                 # If the check journal isn't current
-                if ( !hascontent($overlay_journal->ft_end_date) && hascontent($overlay_journal->ft_start_date) ) {
+                if (    !hascontent($overlay_journal->ft_end_date)
+                     && !hascontent($overlay_journal->embargo_days)
+                     && !hascontent($overlay_journal->embargo_months)
+                     && (
+                           hascontent($overlay_journal->ft_start_date)
+                        || hascontent($overlay_journal->embargo_days)
+                        || hascontent($overlay_journal->embargo_months)
+                     ) ) {
                     $others_with_current++;
                 }
                 else {
