@@ -1184,12 +1184,12 @@ LOCAL_JOURNAL:
                 }
 
                 if ( $class->_journal_is_current($journal) ) {
-                    $logger->info(' Journal from ' . $journal->get_column('resource') . ' is current. Skipping other journals.');
+                    $logger->info(' Journal from local resource ' . $journal->get_column('resource') . ' is current. Skipping other journals.');
                     $others_with_current++;
                     goto PROCESS_JOURNAL;
                 }
                 else {
-                    $logger->info(' Journal from ' . $journal->get_column('resource') . ' has fulltext but is not current.');
+                    $logger->info(' Journal from local resource ' . $journal->get_column('resource') . ' has fulltext but is not current.');
                     $others_with_fulltext++;
                 }
             }
@@ -1205,13 +1205,13 @@ GLOBAL_JOURNAL:
                     next GLOBAL_JOURNAL;
                 }
 
-                if ( $class->_journal_is_current($journal) ) {
-                    $logger->info(' Journal from ' . $journal->global_journal->get_column('resource') . ' is current. Skipping other journals.');
+                if ( $class->_journal_is_current($overlay_journal) ) {
+                    $logger->info(' Journal from global resource ' . $journal->global_journal->get_column('resource') . ' is current. Skipping other journals.');
                     $others_with_current++;
                     goto PROCESS_JOURNAL;
                 }
                 else {
-                    $logger->info(' Journal from ' . $journal->global_journal->get_column('resource') . ' has fulltext but is not current.');
+                    $logger->info(' Journal from global resource ' . $journal->global_journal->get_column('resource') . ' has fulltext but is not current.');
                     $others_with_fulltext++;
                 }
             }
