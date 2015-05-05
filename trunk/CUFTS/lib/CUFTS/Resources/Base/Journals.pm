@@ -1168,6 +1168,12 @@ CHECK_JOURNAL:
         my $others_with_fulltext = 0;
         my $others_with_current = 0;
 
+        # NOTE: There's an optimization here to jump out early if we have found a
+        # "others_with_current" value. This overrides all the other possible results
+        # for the journal at this point, so we don't need to examine others. Take out
+        # the "goto PROCESS_JOURNAL" lines below if we want to do more thorough processing.
+
+
         if ( $local_count ) {
 LOCAL_JOURNAL:
             while ( my $journal = $matching_local_journals_rs->next ) {
@@ -1175,6 +1181,7 @@ LOCAL_JOURNAL:
 
                 if ( $class->_journal_is_current($journal) ) {
                     $others_with_current++;
+                    goto PROCESS_JOURNAL;
                 }
                 else {
                     $others_with_fulltext++;
@@ -1190,6 +1197,7 @@ GLOBAL_JOURNAL:
 
                 if ( $class->_journal_is_current($journal) ) {
                     $others_with_current++;
+                    goto PROCESS_JOURNAL;
                 }
                 else {
                     $others_with_fulltext++;
@@ -1197,6 +1205,7 @@ GLOBAL_JOURNAL:
             }
         }
 
+PROCESS_JOURNAL:
         if ( $others_with_current ) {
             $logger->info(' Other records exist, and are current or this journal is not current.');
             push @others, $class->_simplify_journal_to_ft($check_journal);
