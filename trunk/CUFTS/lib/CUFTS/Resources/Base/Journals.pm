@@ -1129,11 +1129,12 @@ sub compare_against_existing {
 
 CHECK_JOURNAL:
     while ( my $check_journal = $global_journals_rs->next() ) {
-        my $journal_auth_id = $check_journal->get_column('journal_auth');
-        next CHECK_JOURNAL if !$journal_auth_id;
+        $logger->info('Checking journal: ' . $check_journal->title);
 
-        if ( $logger ) {
-            $logger->info('Checking journal: ' . $check_journal->title);
+        my $journal_auth_id = $check_journal->get_column('journal_auth');
+        if ( !$journal_auth_id ) {
+            $logger->info(' No journal auth value. Skipping journal');
+            next CHECK_JOURNAL;
         }
 
         if ( !$class->has_fulltext($check_journal) ) {
@@ -1177,13 +1178,18 @@ CHECK_JOURNAL:
         if ( $local_count ) {
 LOCAL_JOURNAL:
             while ( my $journal = $matching_local_journals_rs->next ) {
-                next LOCAL_JOURNAL if !$class->has_fulltext($journal);
+                if ( !$class->has_fulltext($journal) ) {
+                    $logger->info(' No fulltext in journal from ' . $journal->get_column('resource') );
+                    next LOCAL_JOURNAL;
+                }
 
                 if ( $class->_journal_is_current($journal) ) {
+                    $logger->info(' Journal from ' . $journal->get_column('resource') . ' is current. Skipping other journals.');
                     $others_with_current++;
                     goto PROCESS_JOURNAL;
                 }
                 else {
+                    $logger->info(' Journal from ' . $journal->get_column('resource') . ' has fulltext but is not current.');
                     $others_with_fulltext++;
                 }
             }
@@ -1193,13 +1199,19 @@ LOCAL_JOURNAL:
 GLOBAL_JOURNAL:
             while ( my $journal = $matching_global_journals_rs->next ) {
                 my $overlay_journal = $class->fast_overlay_global_title_data($journal, $journal->global_journal);
-                next GLOBAL_JOURNAL if !$class->has_fulltext($overlay_journal);
+
+                if ( !$class->has_fulltext($overlay_journal) ) {
+                    $logger->info(' No fulltext in journal from ' . $journal->global_journal->get_column('resource') );
+                    next GLOBAL_JOURNAL;
+                }
 
                 if ( $class->_journal_is_current($journal) ) {
+                    $logger->info(' Journal from ' . $journal->global_journal->get_column('resource') . ' is current. Skipping other journals.');
                     $others_with_current++;
                     goto PROCESS_JOURNAL;
                 }
                 else {
+                    $logger->info(' Journal from ' . $journal->global_journal->get_column('resource') . ' has fulltext but is not current.');
                     $others_with_fulltext++;
                 }
             }
