@@ -99,6 +99,14 @@ sub set_default_dates :Export( :DEFAULT ) {
 }
 
 
+# Use this on portions of CUFTS that are dealing with UTF8 data when they need to downgrade to something printable
+sub strip_wide_chars :Export( :DEFAULT ) {
+    my $string = shift;
+    return undef if !defined $string;
+    $string =~ s/[^[:ascii:]]+//g;
+    return $string;
+}
+
 
 ##
 ## Converts latin-1 characters with diacritics to their base character.  When we switch to UTF-8, this should
