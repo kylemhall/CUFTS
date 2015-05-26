@@ -1030,6 +1030,10 @@ CJDB_RECORD:
 
         next CJDB_RECORD if !defined $MARC_record;
 
+        # Add 006 and 007 fields
+        $MARC_record->insert_fields_ordered( MARC::Field->new( '006', '', '', 'm     o  d' ) );
+        $MARC_record->insert_fields_ordered( MARC::Field->new( '007', '', '', 'cr' ) );
+
         # Make sure ISSNs are 1234-4321 format
 
         my @issn_fields = $MARC_record->field( '022' );
