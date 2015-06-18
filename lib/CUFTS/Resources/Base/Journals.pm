@@ -281,6 +281,13 @@ sub clean_data {
 
     my @errors;
 
+    foreach my $field ( ( 'issn', 'e_issn' ) ) {
+        if ( $record->{$field} =~ m{ (unknown|n/?a) }ixsm ) {
+            delete $record->{$field};
+        }
+    }
+
+
     # Validate ISSN
 
     if ( hascontent( $record->{issn} ) ) {
