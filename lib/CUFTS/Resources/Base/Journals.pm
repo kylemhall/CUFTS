@@ -1225,13 +1225,19 @@ GLOBAL_JOURNAL:
         }
 
 PROCESS_JOURNAL:
-        if ( $others_with_current ) {
-            $logger->info(' Other records exist, and are current or this journal is not current.');
+        if ( $others_with_current  ) {
+            $logger->info(' Other records exist, and are current.');
             push @others, $class->_simplify_journal_to_ft($check_journal);
         }
-        elsif ( $others_with_fulltext && $class->_journal_is_current($check_journal) ) {
-            $logger->info(' Other records exist, but this journal is current.');
-            push @more_current, $class->_simplify_journal_to_ft($check_journal);
+        elsif ( $others_with_fulltext ) {
+            if ( $class->_journal_is_current($check_journal) ) {
+                $logger->info(' Other records exist, but this journal is current.');
+                push @more_current, $class->_simplify_journal_to_ft($check_journal);
+            }
+            else {
+                $logger->info(' Other records exist and this journal is not current.');
+                push @others, $class->_simplify_journal_to_ft($check_journal);
+            }
         }
         else {
             $logger->info(' Other records exist, but don\'t have fulltext. List as unique.');
