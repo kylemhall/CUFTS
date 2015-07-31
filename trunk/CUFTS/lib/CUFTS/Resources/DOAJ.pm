@@ -44,6 +44,7 @@ sub title_list_fields {
             id
             title
             issn
+            e_issn
             ft_start_date
             journal_url
             publisher
@@ -57,11 +58,12 @@ sub title_list_fields {
 
 sub title_list_field_map {
     return {
-        'Title'      => 'title',
-        'ISSN'       => 'issn',
-        'Start Year' => 'ft_start_date',
-        'Identifier' => 'journal_url',
-        'Publisher'  => 'publisher',
+        'Journal title'                                                   => 'title',
+        'Journal ISSN (print version)'                                    => 'issn',
+        'Journal EISSN (online version)'                                  => 'e_issn',
+        'First calendar year journal provided online Open Access content' => 'ft_start_date',
+        'Journal URL'                                                     => 'journal_url',
+        'Publisher'                                                       => 'publisher',
     };
 }
 
@@ -94,10 +96,7 @@ sub clean_data {
         return [ 'UTF8 conversion removed all latin-1 characters from title, skipping record.'];
     }
 
-    $record->{publisher} = ( utf8( $record->{'publisher'} ) )->latin1;
-
-    $record->{issn} =~ /d\d+/
-        and delete $record->{issn};
+    $record->{publisher} = ( utf8( $record->{publisher} ) )->latin1;
 
     return $class->SUPER::clean_data($record);
 }
