@@ -31,67 +31,6 @@ sub services {
     return [ qw( fulltext journal database ) ];
 }
 
-sub title_list_fields {
-    return [
-        qw(
-            id
-            title
-            issn
-            e_issn
-            cit_start_date
-            cit_end_date
-            ft_start_date
-            ft_end_date
-            vol_ft_start
-            vol_ft_end
-            iss_ft_start
-            iss_ft_end
-            embargo_months
-            embargo_days
-            coverage
-            publisher
-            journal_url
-            cjdb_note
-            local_note
-            journal_auth
-        )
-    ];
-}
-
-sub overridable_resource_details {
-    return undef;
-}
-
-sub title_list_field_map {
-    return {
-        title          => 'title',
-        issn           => 'issn',
-        e_issn         => 'e_issn',
-        fulltext_start => 'ft_start_date',
-        fulltext_end   => 'ft_end_date',
-        ft_start_date  => 'ft_start_date',
-        ft_end_date    => 'ft_end_date',
-        citation_start => 'cit_start_date',
-        citation_end   => 'cit_end_date',
-        cit_start_date => 'cit_start_date',
-        cit_end_date   => 'cit_end_date',
-        embargo_months => 'embargo_months',
-        embargo_days   => 'embargo_days',
-        journal_url    => 'journal_url',
-        cjdb_note      => 'cjdb_note',
-        local_note     => 'local_note',
-        vol_ft_start   => 'vol_ft_start',
-        vol_ft_end     => 'vol_ft_end',
-        iss_ft_start   => 'iss_ft_start',
-        iss_ft_end     => 'iss_ft_end',
-        vol_cit_start  => 'vol_cit_start',
-        vol_cit_end    => 'vol_cit_end',
-        iss_cit_start  => 'iss_cit_start',
-        iss_cit_end    => 'iss_cit_end',
-        publisher      => 'publisher',
-    };
-}
-
 sub can_getTOC {
     return 0;
 }
