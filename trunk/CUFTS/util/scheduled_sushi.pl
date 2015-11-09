@@ -68,6 +68,7 @@ while ( my $site = $sites_rs->next ) {
                 $logger->info( 'Error processing SUSHI request, run date was not updated.' );
                 if ( ref($result) eq 'ARRAY' ) {
                     $site_message .= 'Failed to download COUNTER report from ' . $source->name . ': ' . join("\n", @$result);
+                    $site_message .= "\n\n";
                 }
             }
 
