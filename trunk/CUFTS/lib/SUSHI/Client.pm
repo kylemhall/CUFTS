@@ -319,6 +319,14 @@ sub get_db1_report {
     my $journal_report = $report->get_Report;
 
     if ( !$journal_report || !defined($journal_report->attr ) ) {
+
+        # Try to extract some kind of meaningful message if we're getting XML back
+
+        if ( $result =~ /<Message>(.+)</Message>/ixsm ) {
+            $logger->error("Unable to retrieve report details through get_Report. Error message may be: $1");
+            return [ "Could not get report details from SUSHI response. Error message may be: $1" ];
+        }
+
         $logger->error("Unable to retrieve report details through get_Report.");
         return [ 'Could not get report details from SUSHI response.' ];
     }
