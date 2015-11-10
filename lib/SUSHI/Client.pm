@@ -322,7 +322,7 @@ sub get_db1_report {
 
         # Try to extract some kind of meaningful message if we're getting XML back
 
-        if ( $result =~ /<Message>(.+)</Message>/ixsm ) {
+        if ( $result =~ /<Message>(.+)<\/Message>/ixsm ) {
             $logger->error("Unable to retrieve report details through get_Report. Error message may be: $1");
             return [ "Could not get report details from SUSHI response. Error message may be: $1" ];
         }
