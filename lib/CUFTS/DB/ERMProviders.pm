@@ -8,7 +8,7 @@
 ## the terms of the GNU General Public License as published by the Free
 ## Software Foundation; either version 2 of the License, or (at your option)
 ## any later version.
-## 
+##
 ## CUFTS is distributed in the hope that it will be useful, but WITHOUT ANY
 ## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -38,7 +38,7 @@ __PACKAGE__->columns(All => qw(
     admin_password
     admin_url
     support_url
-    
+
     stats_available
     stats_url
     stats_frequency
@@ -50,13 +50,13 @@ __PACKAGE__->columns(All => qw(
 
     provider_contact
     provider_notes
-    
+
     support_email
     support_phone
     knowledgebase
     customer_number
 
-));                                        
+));
 __PACKAGE__->columns(Essential => __PACKAGE__->columns);
 
 __PACKAGE__->sequence('erm_providers_id_seq');
@@ -66,7 +66,7 @@ sub clone {
 
     my %hash;
     foreach my $column ( __PACKAGE__->columns ) {
-        next if !defined($self->$column) or $column eq 'id';        
+        next if !defined($self->$column) or $column eq 'id';
         $hash{$column} = $self->$column;
     }
 
@@ -80,4 +80,15 @@ sub clone {
     return CUFTS::DB::ERMProviders->retrieve( $clone->id );
 }
 
+sub to_hash {
+    my ( $self ) = @_;
+
+    my %hash;
+    foreach my $column ( __PACKAGE__->columns ) {
+        next if !defined($self->$column);
+        $hash{$column} = $self->$column();
+    }
+
+    return \%hash;
+}
 1;
