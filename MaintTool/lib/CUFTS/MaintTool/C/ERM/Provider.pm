@@ -75,7 +75,7 @@ sub default : Private {
     return 1;
 }
 
-# find_json - Gets a list of license keys and ids starting with the passed in key.  This is used for ExtJS
+# find_json - Gets a list of provider keys and ids starting with the passed in key.  This is used for ExtJS
 #             combo box lookups, but could be expanded out to cover other uses.
 
 sub find_json : Local {
@@ -441,7 +441,7 @@ sub selected_export : Local {
     $c->form({ optional => [ qw( format do_export columns ) ] });
 
     if ( !$c->request->params->{do_export} || !$c->request->params->{columns} || !$c->request->params->{format} ) {
-        $c->stash->{template} = 'erm/license/export_columns.tt';
+        $c->stash->{template} = 'erm/provider/export_columns.tt';
         return;
     }
 
@@ -510,7 +510,7 @@ sub selected_export : Local {
     else {
         $c->stash->{columns}  = \@columns;
         $c->stash->{records}  = \@flattened_records;
-        $c->stash->{template} = 'erm/license/export_html.tt';
+        $c->stash->{template} = 'erm/provider/export_html.tt';
     }
 }
 
