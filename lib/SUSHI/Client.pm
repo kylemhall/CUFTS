@@ -5,6 +5,7 @@ use strict;
 use CUFTS::Util::Simple;
 use SUSHI::SUSHIInterfaces::SushiService::SushiServicePort;
 use SUSHI::SUSHIElements::ReportRequest;
+use SUSHI::Deserializer::XSD;
 use Data::Dumper;
 use DateTime;
 
@@ -36,6 +37,7 @@ sub get_jr1_report {
 
     my $service = SUSHI::SUSHIInterfaces::SushiService::SushiServicePort->new({
         proxy => $url,
+        deserializer => SUSHI::Deserializer::XSD->new({ strict => 0 }),
         deserializer_args => { strict => 0 },
     });
 
@@ -101,7 +103,7 @@ sub get_jr1_report {
         my $message;
         eval { $message = $result->get_Exception->get_Message; };
         if ( $message ) {
-            $logger->error( 'get_Report on $result was not defineds: ' . substr($message, 0, 2048 ) );
+            $logger->error( 'get_Report on $result was not defined: ' . substr($message, 0, 2048 ) );
         }
         else {
             $logger->error( 'get_Report on $result was not defined. Result was: ' . Dumper($result) );
