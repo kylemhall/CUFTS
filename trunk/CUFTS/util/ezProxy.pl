@@ -15,6 +15,8 @@ use CUFTS::Util::Simple;
 
 use URI;
 
+my $filter = $ARGV[0];
+
 my $schema = CUFTS::Config::get_schema();
 
 my $journals_rs = $schema->resultset('CJDBJournals')->search({ site => 1 });
@@ -30,6 +32,10 @@ while ( my $journal = $journals_rs->next ) {
 
         # Skip already proxied
         next if $url !~ s{^http://proxy\.lib\.sfu\.ca/login\?url=}{};
+
+        if ( $filter ) {
+            next unless $url =~ /$filter/;
+        }
 
         # Add "http://" if it's not there
         if ($url !~ /^https?:/) {
