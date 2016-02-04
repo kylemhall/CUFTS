@@ -61,10 +61,13 @@ sub clean_data {
     #     }
     # }
 
-	# Skip records where the ISSN looks like it's actually an ISBN
-	if ( (hascontent($record->{issn}) && $record->{issn} =~ /^[-\dxX]{10,20}$/) || (hascontent($record->{e_issn}) && $record->{e_issn} =~ /^[-\dxX]{10,20}$/)  ) {
-		return ['Skipping record that appears to have an ISBN: ' . $record->{issn} . ', ' . $record->{e_issn} ];
-	}
+    # Skip records where the ISSN looks like it's actually an ISBN
+    if ( (hascontent($record->{issn}) && $record->{issn} =~ /^[-\dxX]{10,20}$/) ) {
+        return ['Skipping record that appears to have an ISBN: ' . $record->{issn} ];
+    }
+    if ( (hascontent($record->{e_issn}) && $record->{e_issn} =~ /^[-\dxX]{10,20}$/) ) {
+        return ['Skipping record that appears to have an ISBN: ' . $record->{e_issn} ];
+    }
 
 	# Convert KBART embargo shorthands to months and days
     my $embargo = $record->{___embargo_info};
