@@ -75,6 +75,7 @@ sub get_jr1_report {
     }
 
     my $request = SUSHI::SUSHIElements::ReportRequest->new( $request_data );
+
     $request->attr->set_Created( DateTime->now->iso8601 );
     $request->get_ReportDefinition->attr->set_Name( 'JR1' );
     $request->get_ReportDefinition->attr->set_Release( $source->version || 3 );
@@ -321,14 +322,16 @@ sub get_db1_report {
     my $journal_report = $report->get_Report;
 
     if ( !$journal_report || !defined($journal_report->attr ) ) {
+        # Try to get a useful error by re-requesting with outputxml on. This stops processing but lets us look
+        # at the result as a string.
 
-        # Try to extract some kind of meaningful message if we're getting XML back
+        $service->outputxml(1);
+        $result = $service->GetReport($request);
 
         if ( $result =~ /<Message>(.+)<\/Message>/ixsm ) {
             $logger->error("Unable to retrieve report details through get_Report. Error message may be: $1");
             return [ "Could not get report details from SUSHI response. Error message may be: $1" ];
         }
-
         $logger->error("Unable to retrieve report details through get_Report.");
         return [ 'Could not get report details from SUSHI response.' ];
     }
