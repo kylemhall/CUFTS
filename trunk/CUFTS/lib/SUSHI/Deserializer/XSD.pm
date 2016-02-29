@@ -41,11 +41,16 @@ sub deserialize {
         if not $parser_of{ ${ $self } };
     $parser_of{ ${ $self } }->class_resolver( $class_resolver_of{ ${ $self } } );
 
-    $content =~ s{^.+?<soap}{<soap}xsm;
+    # warn( substr( $content, 0, 200 ) );
+
+    $content =~ s{^.+?<soap:Env}{<soap:Env}xsm;
     $content =~ s{^<\?xml version="1.0" *\?>}{};  # XML::Parser::Expat apparently doesn't like this.
+
+    # warn( substr( $content, 0, 200 ) );
 
     eval { $parser_of{ ${ $self } }->parse_string( $content ) };
     if ($@) {
+        warn($@);
         return $self->generate_fault({
             code => 'SOAP-ENV:Server',
             role => 'urn:localhost',
@@ -53,6 +58,7 @@ sub deserialize {
                 . "Message was: \n$content"
         });
     }
+
     return ( $parser_of{ ${ $self } }->get_data(), $parser_of{ ${ $self } }->get_header() );
 }
 
