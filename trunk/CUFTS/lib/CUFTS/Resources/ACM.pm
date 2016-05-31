@@ -87,6 +87,14 @@ sub clean_data {
             $volume =~ s/Volume\s*// if not_empty_string($volume);
             $issue =~ s/Issue\s*// if not_empty_string($issue);
 
+            if ( $date =~ /(\d{2})-(\d{2})-(\d{2})/ ) {
+                my ( $day, $month, $year ) = ($1, $2, $3);
+                if ( $year < 1000 ) {
+                    $year += $year < 50 ? 2000 : 1900;
+                }
+                $date = "$month $year";
+            }
+
             if ( $date =~ /([a-zA-Z]+)\s*\d+,\s*(\d+)/ || $date =~ /([a-zA-Z]+)\s*(\d+)/ || $date =~ /([a-zA-Z]+).+(\d{4})/ || $date =~ /()((?:19|20)\d{2})/ ) {
                 my ($month, $year) = ($1, $2);
                 $month = get_month($month, 'start') || 1;
@@ -112,6 +120,14 @@ sub clean_data {
             ( $volume, $issue, $date ) = ( $1, $2, $3 );
             $volume =~ s/Volume\s*// if not_empty_string($volume);
             $issue =~ s/Issue\s*// if not_empty_string($issue);
+
+            if ( $date =~ /(\d{2})-(\d{2})-(\d{2})/ ) {
+                my ( $day, $month, $year ) = ($1, $2, $3);
+                if ( $year < 1000 ) {
+                    $year += $year < 50 ? 2000 : 1900;
+                }
+                $date = "$month $year";
+            }
 
             if ( $date =~ /(\w+)\s*((?:19|20)\d{2})/ || $date =~ /(\w+)\s*\d+,\s*((?:19|20)\d{2})/ || $date =~ /()((?:19|20)\d{2})/ ) {
                 my ($month, $year) = ($1, $2);
@@ -145,6 +161,10 @@ sub clean_data {
 
     sub get_month {
         my ( $month, $period ) = @_;
+
+        if ( $month =~ /^\d+$/ ) {
+            return int($month);
+        }
 
         if    ( $month =~ /^Jan/i ) { return 1 }
         elsif ( $month =~ /^Feb/i ) { return 2 }
