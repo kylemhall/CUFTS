@@ -794,6 +794,8 @@ sub edit : Local {
 
         }
     }
+    $c->stash->{crdb_base} = $CUFTS::Config::CRDB_URL . $c->stash->{current_site}->key . '/resource/';
+    $c->stash->{maint_base} = $c->stash->{url_base} . '/erm/main/edit/';
 
     $c->stash->{license_record} = $erm->license;
     $c->stash->{provider_record} = $erm->provider;

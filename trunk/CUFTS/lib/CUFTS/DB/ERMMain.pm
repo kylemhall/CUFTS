@@ -633,7 +633,7 @@ sub _facet_search_vendor {
 
 
 sub as_marc {
-    my ( $self, $url_base ) = @_;
+    my ( $self, $crdb_base, $maint_base ) = @_;
 
     my $default_subfield_join = '; ';
 
@@ -650,7 +650,7 @@ sub as_marc {
         '246' => [ {}, 'a', [ 'internal_name' ] ],
         '260' => [ {}, 'a', [ 'publisher' ] ],
         '500' => [ {}, 'a', [ 'description_brief' ] ],
-        '856' => [ { indicators => [4,0] }, 'u', [ 'id', { prepend_url => 1 } ] ],
+        '856' => [ { indicators => [4,0] }, 'u', [ 'id', { prepend => $crdb_base } ] ],
         '960' => [ {}, 'a', [ '', { timestamp => 1, label => 'Date of file creation: ' } ],
                        'b', [ 'cost', { label => 'Cost: ' } ],
                        'c', [ 'local_fund', { label => 'Local fund number: ' } ],
@@ -680,6 +680,7 @@ sub as_marc {
                        'm', [ 'local_vendor',                   { label => 'Local vendor number: ' } ],
                        'n', [ 'local_customer',                 { label => 'Local customer number: ' } ],
                        'o', [ 'simultaneous_users',             { label => 'Simultaneous users: ' } ],
+                       'p', [ 'id',                             { prepend => $maint_base  } ],
                        'z', [ 'currency',                       { label => 'Currency: ' } ],
         ]
     ];
@@ -710,9 +711,9 @@ sub as_marc {
                 my @subfield_conf = @$subfield_conf;  # Clone so we can splice off items but still use it for repeating fields
                 while ( my ( $erm_field, $content_conf ) = splice( @subfield_conf, 0, 2 ) ) {
 
-                    my $label      = $content_conf->{label}   || '';
-                    my $prepend    = $content_conf->{prepend} || ( $content_conf->{prepend_url} ? $url_base : '' );
-                    my $append     = $content_conf->{append}  || '';
+                    my $label   = $content_conf->{label}   || '';
+                    my $prepend = $content_conf->{prepend} || '';
+                    my $append  = $content_conf->{append}  || '';
 
                     my $value = $extra_conf->{repeats}     ? ( $erm_field ? $current_value->$erm_field() : $current_value )
                               : $content_conf->{timestamp} ? DateTime->now()->ymd
