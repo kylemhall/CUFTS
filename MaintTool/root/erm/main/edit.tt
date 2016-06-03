@@ -22,15 +22,15 @@ $( function() {
         new_subject.find('select[@name=erm-edit-input-subject-add-subject-]').attr( 'name', 'erm-edit-input-subject-add-subject-' + new_subjects_count );
         new_subject.find('input[@name=erm-edit-input-subject-add-rank-]').attr( 'name', 'erm-edit-input-subject-add-rank-' + new_subjects_count );
         new_subject.find('textarea[@name=erm-edit-input-subject-add-description-]').attr( 'name', 'erm-edit-input-subject-add-description-' + new_subjects_count );
-        
+
         new_subjects_count = new_subjects_count + 1;
 
         $('#erm-edit-input-subject-addbutton').parent().parent().before( new_subject );
-    
+
         new_subject.show();
         new_subject.parent('fieldset:not(.nostripe)').find('div.field').removeClass('alt').filter(':odd').addClass('alt');
     });
-    
+
 /* Visibly disable a subject if it is going to be deleted */
 
     $('#page-subjects select.subject').livequery( 'change', function(event) {
@@ -55,18 +55,18 @@ $( function() {
         new_name.attr( 'id', "names-add-" + new_names_count );
         var input    = new_name.find('input');
         var input_id = input.attr( 'name' ) + new_names_count;
-        
+
         input.attr( 'id', input_id ).attr( 'name', input_id );
         new_name.find('label').attr( 'for', input_id );
 
         new_names_count = new_names_count + 1;
-        
+
         $('#erm-edit-input-names-addbutton').parent().parent().after( new_name );
         new_name.addClass('field').show();
-        
+
         new_name.parent('fieldset:not(.nostripe)').find('div.field').removeClass('alt').filter(':odd').addClass('alt');
     });
-    
+
     /* Visibly disable a name if it is going to be deleted */
 
     $('#page-general input.altname').livequery( 'blur', function(event) {
@@ -88,18 +88,18 @@ $( function() {
         new_keyword.attr( 'id', "keywords-add-" + new_keywords_count );
         var input    = new_keyword.find('input');
         var input_id = input.attr( 'name' ) + new_keywords_count;
-        
+
         input.attr( 'id', input_id ).attr( 'name', input_id );
         new_keyword.find('label').attr( 'for', input_id );
 
         new_keywords_count = new_keywords_count + 1;
-        
+
         $('#erm-edit-input-keywords-addbutton').parents('fieldset').append( new_keyword );
         new_keyword.addClass('field').show();
-        
+
         new_keyword.parent('fieldset:not(.nostripe)').find('div.field').removeClass('alt').filter(':odd').addClass('alt');
     });
-    
+
     /* Visibly disable a keyword if it is going to be deleted */
 
     $('#page-general input.altkeyword').livequery( 'blur', function(event) {
@@ -791,7 +791,7 @@ $( function() {
 </div>
 
 <fieldset>
-    
+
 <legend>Costs</legend>
 
 <div class="field">
@@ -826,7 +826,7 @@ $( function() {
   </select>
  </div>
  <div class="help">
-  Currency code for invoice 
+  Currency code for invoice
  </div>
 </div>
 
@@ -942,7 +942,7 @@ $( function() {
 </fieldset>
 
 <fieldset>
-    
+
 <legend>Dates</legend>
 
 <div class="field">
@@ -1175,7 +1175,7 @@ $( function() {
 </fieldset>
 
 <fieldset>
-    
+
 <legend>Consortia</legend>
 
 <div class="field">
@@ -1211,7 +1211,7 @@ $( function() {
 
 
 <fieldset>
-    
+
 <legend>Miscellaneous</legend>
 
 <div class="field">
@@ -1251,7 +1251,7 @@ $( function() {
 </div>
 
 <fieldset>
-    
+
 <legend>Statistics</legend>
 
 <div class="field">
@@ -1378,7 +1378,7 @@ $( function() {
 </div>
 
 <fieldset>
-    
+
 <legend>Admin</legend>
 
 <div class="field">
@@ -1786,7 +1786,7 @@ $( function() {
       <a id="erm-edit-input-subject-addbutton" href="[% url("$url_base/erm/edit/add_subject/$erm.id") %]">Add</a>
      </div>
     </div>
-    
+
     <div id="subject-add-subject-factory" class="field" style="padding: 5px 0px; display: none">
      <div class="data">
        <select name="erm-edit-input-subject-add-subject-" class="subject" />
@@ -1808,7 +1808,7 @@ $( function() {
     <div class="padding: 1em 0px;">
      <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
     </div>
-    
+
 </div>
 
 <div id="page-links" class="tabs-nav-page">
@@ -1850,7 +1850,7 @@ $( function() {
     <div style="padding: 1em 0px;">
      <input type="submit" name="submit" value="submit"> <input type="reset" name="reset" value="reset">
     </div>
-    
+
 </div>
 
 </form>
@@ -1858,12 +1858,12 @@ $( function() {
 <div id="page-marc" class="tabs-nav-page">
 
 <div style="margin-bottom: 1em; border: 1px solid #aaa; background: #f6f6f6; padding: 3px; margin: 2px 2px 1em 2px;">
- <pre><code>[% erm.as_marc.as_formatted %]</code></pre>
+ <pre><code>[% erm.as_marc(crdb_base, maint_base).as_formatted %]</code></pre>
 </div>
 
 <a target="_blank" href="[% url("$url_base/erm/marc/$erm.id") %]">download as MARC file</a>
 
-    
+
 </div>
 
 
@@ -1913,4 +1913,3 @@ $( function() {
 </div>
 
 </div> <!-- tab-container -->
-
