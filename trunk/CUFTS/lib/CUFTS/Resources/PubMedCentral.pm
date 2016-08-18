@@ -42,6 +42,10 @@ sub title_list_split_row {
     my ( $class, $row ) = @_;
 
     my $csv = Text::CSV->new();
+
+    # Super hack to get rid of a weird (R) character. Should be replaced with something stripping high characters properly.
+    $row =~ s/PsychOpen(..)\sLeibniz/PsychOpen Leibniz/;
+
     $csv->parse($row)
         or CUFTS::Exception::App->throw('Error parsing CSV line: ' . $csv->error_input() );
 
