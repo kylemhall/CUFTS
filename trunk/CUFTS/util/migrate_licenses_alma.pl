@@ -59,6 +59,15 @@ while ( my $license = $licenses_rs->next() ) {
 
   my @terms;
 
+  if ( defined $license->allows_downloads ) {
+    push @terms, create_term( 'DIGCOPY', $license->allows_downloads ? 'PERMITTED' : 'PROHIBITED' );
+  }
+
+  if ( defined $license->allows_prints ) {
+    push @terms, create_term( 'PRINTCOPY', $license->allows_prints ? 'PERMITTED' : 'PROHIBITED' );
+  }
+
+
   if ( defined $license->allows_coursepacks ) {
     push @terms, create_term( 'COURSEPACKPRINT', $license->allows_coursepacks ? 'PERMITTED' : 'PROHIBITED' );
     push @terms, create_term( 'COURSEPACKELEC', $license->allows_coursepacks ? 'PERMITTED' : 'PROHIBITED' );
@@ -79,6 +88,8 @@ while ( my $license = $licenses_rs->next() ) {
   }
 
   if ( defined $license->allows_ill ) {
+    push @terms, create_term( 'ILLPRINTFAX', $license->allows_ill ? 'PERMITTED' : 'PROHIBITED' );
+    push @terms, create_term( 'ILLSET', $license->allows_ill ? 'PERMITTED' : 'PROHIBITED' );
     push @terms, create_term( 'ILLELEC', $license->allows_ill ? 'PERMITTED' : 'PROHIBITED' );
   }
   if ( defined $license->ill_notes ) {
@@ -92,11 +103,19 @@ while ( my $license = $licenses_rs->next() ) {
     push @terms, create_term( 'WALKIN', $license->allows_walkins ? 'PERMITTED' : 'PROHIBITED' );
   }
 
-  if ( defined $license->citation_requirements ) {
-    push @terms, create_term( 'CITREQD', $license->citation_requirements );
+  if ( defined $license->perpetual_access ) {
+    push @terms, create_term( 'PERPETUAL', $license->perpetual_access ? 'YES' : 'NO' );
+  }
+  if ( defined $license->perpetual_access_notes ) {
+    push @terms, create_term( 'PERPETUALN', $license->perpetual_access_notes );
   }
 
-
+  if ( defined $license->perpetual_access ) {
+    push @terms, create_term( 'ARCHIVE', $license->allows_archiving ? 'YES' : 'NO' );
+  }
+  if ( defined $license->perpetual_access_notes ) {
+    push @terms, create_term( 'ARCHIVEN', $license->archiving_notes );
+  }
 
   $data->{term_list}->{term} = \@terms;
 
