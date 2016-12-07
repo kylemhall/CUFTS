@@ -8,17 +8,22 @@ use CUFTS::Config;
 use CUFTS::Schema;
 use CUFTS::Util::Simple;
 
+use String::Util qw(hascontent);
+
 my $xml_schema = XML::Compile::Schema->new('data/ERM_license.xsd');
 
 my $db_schema = CUFTS::Config->get_schema();
 
+my $dir = "/tmp/licenses";
 
 my $licenses_rs = $db_schema->resultset('ERMLicense')->search({ site => 1 }, { order_by => 'id' });
 
-$licenses_rs = $licenses_rs->search({}, { rows => 1 });
+#$licenses_rs = $licenses_rs->search({ id => { '-in' => [ 1006, 1270 ] }});
 
 while ( my $license = $licenses_rs->next() ) {
-  print $license->id . ' ' . $license->key, "\n";
+  my $id = $license->id;
+
+  print $id . ' ' . $license->key, "\n";
 
   my $data = { # all of license_details, term_list, note_list,
     license_details => {
@@ -38,22 +43,6 @@ while ( my $license = $licenses_rs->next() ) {
       type => "LICENSE",
     },
 
-    # is a x0:note_list
-    # is optional
-    note_list =>
-    { # sequence of note
-
-      # is a x0:note
-      # occurs 1 <= # <= unbounded times
-      note =>
-      [ { # all of ownered_entity, content
-
-          # is a x0:ownered_entity
-          # complex structure shown above
-          ownered_entity => {},
-
-          # is a xs:string
-          content => "example", }, ], },
   };
 
 
@@ -72,7 +61,7 @@ while ( my $license = $licenses_rs->next() ) {
     push @terms, create_term( 'COURSEPACKPRINT', $license->allows_coursepacks ? 'PERMITTED' : 'PROHIBITED' );
     push @terms, create_term( 'COURSEPACKELEC', $license->allows_coursepacks ? 'PERMITTED' : 'PROHIBITED' );
   }
-  if ( defined $license->coursepack_notes ) {
+  if ( hascontent($license->coursepack_notes) ) {
     push @terms, create_term( 'COURSEPACKN', $license->coursepack_notes );
   }
 
@@ -83,7 +72,7 @@ while ( my $license = $licenses_rs->next() ) {
   if ( defined $license->allows_ereserves ) {
     push @terms, create_term( 'COURSERES', $license->allows_ereserves ? 'PERMITTED' : 'PROHIBITED' );
   }
-  if ( defined $license->ereserves_notes ) {
+  if ( hascontent($license->ereserves_notes) ) {
     push @terms, create_term( 'COURSERESNOTE', $license->ereserves_notes );
   }
 
@@ -92,7 +81,7 @@ while ( my $license = $licenses_rs->next() ) {
     push @terms, create_term( 'ILLSET', $license->allows_ill ? 'PERMITTED' : 'PROHIBITED' );
     push @terms, create_term( 'ILLELEC', $license->allows_ill ? 'PERMITTED' : 'PROHIBITED' );
   }
-  if ( defined $license->ill_notes ) {
+  if ( hascontent($license->ill_notes) ) {
     push @terms, create_term( 'ILLN', $license->ill_notes );
   }
 
@@ -106,14 +95,14 @@ while ( my $license = $licenses_rs->next() ) {
   if ( defined $license->perpetual_access ) {
     push @terms, create_term( 'PERPETUAL', $license->perpetual_access ? 'YES' : 'NO' );
   }
-  if ( defined $license->perpetual_access_notes ) {
+  if ( hascontent($license->perpetual_access_notes) ) {
     push @terms, create_term( 'PERPETUALN', $license->perpetual_access_notes );
   }
 
-  if ( defined $license->perpetual_access ) {
+  if ( defined $license->allows_archiving ) {
     push @terms, create_term( 'ARCHIVE', $license->allows_archiving ? 'YES' : 'NO' );
   }
-  if ( defined $license->perpetual_access_notes ) {
+  if ( hascontent($license->archiving_notes) ) {
     push @terms, create_term( 'ARCHIVEN', $license->archiving_notes );
   }
 
@@ -125,7 +114,9 @@ while ( my $license = $licenses_rs->next() ) {
 
   $doc->setDocumentElement($xml);
 
-  print $doc->toString(1);
+  open( my $fh, ">", "$dir/$id.xml" );
+  print $fh $doc->toString(1);
+  close($fh);
 }
 
 sub create_term {
