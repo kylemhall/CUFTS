@@ -193,7 +193,7 @@ RESOURCE:
 
         my $titles_rs = $resource->do_module('global_rs', $schema)->search({ resource => $resource->id });
         while ( my $title = $titles_rs->next ) {
-            print OUTPUT join "\t", map { $title->$_ } @$columns;
+            print OUTPUT join "\t", map { my $display_method = $_ . '_display'; $title->can($display_method) ? $title->$display_method : $title->$_ } @$columns;
             print OUTPUT "\n";
         }
 
